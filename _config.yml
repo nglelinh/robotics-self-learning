@@ -3,7 +3,7 @@ title:               "Build & Program Robots: From Embedded Systems to ROS 2 and
 description:         "Bilingual self-learning course: electronics & component ID, embedded firmware, robot assembly, ROS 2 Jazzy, simulation/micro-ROS, and modern robot learning literacy."
 url:                 https://nglelinh.github.io
 baseurl:             '/robotics-self-learning'
-imgurl:              https://nglelinh.github.io/robotics-self-learning/img
+imgurl:              /robotics-self-learning/img
 paginate:            5
 permalink:           pretty
 
