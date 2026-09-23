@@ -17,6 +17,15 @@ Created for this course as labeled educational figures:
 - `pcb_mcu_anatomy.png`
 - `resistor_color_code.png`
 - `sensor_package_id.png`
+- `debounce_timeline.png`
+- `firmware_state_machine.png`
+- `gpio_pullup_button.png`
+- `led_series_resistor.png`
+- `power_order.png`
+- `power_rails_3v3.png`
+- `pwm_duty_cycle.png`
+- `solder_joint_compare.png`
+- `tracks_mcu_ros.png`
 
 ## Wikimedia Commons photos (`img/wikimedia/`)
 
