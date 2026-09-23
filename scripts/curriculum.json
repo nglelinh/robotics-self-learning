@@ -1,0 +1,590 @@
+{
+  "00": {
+    "title_en": "Introduction, Tracks, Kits & Safety",
+    "title_vi": "Giới thiệu, lộ trình, bộ kit & an toàn",
+    "lessons": [
+      [
+        "welcome_and_outcomes",
+        "Welcome, outcomes, and how to study",
+        "Chào mừng, mục tiêu và cách học",
+        "required"
+      ],
+      [
+        "learning_tracks_budget",
+        "Learning tracks: budget MCU vs ROS path",
+        "Hai lộ trình: MCU tiết kiệm vs ROS",
+        "required"
+      ],
+      [
+        "safety_mindset_lab",
+        "Safety mindset for robot labs",
+        "Tư duy an toàn trong lab robot",
+        "required"
+      ],
+      [
+        "kit_catalog_tooling",
+        "Lab kit catalog: tools and bench equipment",
+        "Danh mục kit lab: dụng cụ và thiết bị bàn",
+        "required"
+      ],
+      [
+        "bom_and_shopping",
+        "Bill of materials and shopping strategy",
+        "BOM và chiến lược mua linh kiện",
+        "required"
+      ],
+      [
+        "workspace_toolchain_preview",
+        "Workspace, tools, and toolchain preview",
+        "Không gian làm việc và toolchain",
+        "required"
+      ],
+      [
+        "ch00_lab_checklist",
+        "Chapter 00 lab checklist: bench ready",
+        "Checklist lab chương 00: sẵn sàng bàn làm việc",
+        "required"
+      ]
+    ]
+  },
+  "01": {
+    "title_en": "Electronics, Component ID & Lab Safety",
+    "title_vi": "Điện tử, nhận diện linh kiện & an toàn lab",
+    "lessons": [
+      [
+        "voltage_current_ohm",
+        "Voltage, current, power, and Ohm's law",
+        "Điện áp, dòng, công suất và định luật Ohm",
+        "required"
+      ],
+      [
+        "breadboard_meter",
+        "Breadboards, multimeters, and probing",
+        "Breadboard, đồng hồ vạn năng và đo",
+        "required"
+      ],
+      [
+        "resistor_color_smd",
+        "Resistor ID: THT color bands and SMD codes",
+        "Nhận diện điện trở: màu THT và mã SMD",
+        "required"
+      ],
+      [
+        "cap_diode_led_id",
+        "Capacitors, diodes, and LEDs identification",
+        "Nhận diện tụ, diode và LED",
+        "required"
+      ],
+      [
+        "transistor_mosfet_ic_id",
+        "Transistors, MOSFETs, regulators, and IC packages",
+        "Transistor, MOSFET, ổn áp và package IC",
+        "required"
+      ],
+      [
+        "connectors_drivers_boards",
+        "Connectors, motor drivers, and MCU board ID",
+        "Connector, driver motor và nhận diện board MCU",
+        "required"
+      ],
+      [
+        "datasheet_pinouts",
+        "Reading datasheets and pinouts",
+        "Đọc datasheet và sơ đồ chân",
+        "required"
+      ],
+      [
+        "soldering_basics",
+        "Soldering basics for robot harnesses",
+        "Hàn cơ bản cho dây robot",
+        "required"
+      ],
+      [
+        "esd_polarity_brownout",
+        "ESD, polarity, fuses, and brownouts",
+        "ESD, cực tính, cầu chì và sụt áp",
+        "required"
+      ],
+      [
+        "component_id_lab",
+        "Lab: continuity, ohmmeter ID, and lookalikes",
+        "Lab: thông mạch, đo ohm và linh kiện dễ nhầm",
+        "required"
+      ],
+      [
+        "ch01_lab_checklist",
+        "Chapter 01 lab checklist",
+        "Checklist lab chương 01",
+        "required"
+      ]
+    ]
+  },
+  "02": {
+    "title_en": "Microcontrollers: Arduino, ESP32, Pico",
+    "title_vi": "Vi điều khiển: Arduino, ESP32, Pico",
+    "lessons": [
+      [
+        "mcu_landscape",
+        "MCU landscape for hobby robots",
+        "Bản đồ MCU cho robot hobby",
+        "required"
+      ],
+      [
+        "esp32_platformio",
+        "Arduino IDE / PlatformIO for ESP32",
+        "Arduino IDE / PlatformIO với ESP32",
+        "required"
+      ],
+      [
+        "pico_micropython",
+        "Raspberry Pi Pico & MicroPython setup",
+        "Pico và cài đặt MicroPython",
+        "required"
+      ],
+      [
+        "blink_serial_hello",
+        "Lab: first blink, serial, and hello robot",
+        "Lab: blink, serial và hello robot",
+        "required"
+      ],
+      [
+        "pinouts_power_rails",
+        "Pinouts, levels, and board power rails",
+        "Pinout, mức logic và nguồn board",
+        "required"
+      ],
+      [
+        "ch02_lab_checklist",
+        "Chapter 02 lab checklist",
+        "Checklist lab chương 02",
+        "required"
+      ]
+    ]
+  },
+  "03": {
+    "title_en": "Embedded Programming Patterns for Robots",
+    "title_vi": "Mẫu lập trình nhúng cho robot",
+    "lessons": [
+      [
+        "cpp_vs_micropython",
+        "C++ vs MicroPython for robots",
+        "C++ vs MicroPython cho robot",
+        "required"
+      ],
+      [
+        "gpio_patterns",
+        "Lab: GPIO digital I/O patterns",
+        "Lab: mẫu GPIO digital I/O",
+        "required"
+      ],
+      [
+        "pwm_timers",
+        "PWM, timers, and motor drive signals",
+        "PWM, timer và tín hiệu motor",
+        "required"
+      ],
+      [
+        "interrupts_debounce",
+        "Interrupts, debouncing, and ISRs",
+        "Ngắt, chống dội và ISR",
+        "required"
+      ],
+      [
+        "state_machines_fw",
+        "State machines for robot firmware",
+        "Máy trạng thái trong firmware",
+        "required"
+      ],
+      [
+        "ch03_lab_checklist",
+        "Chapter 03 lab checklist",
+        "Checklist lab chương 03",
+        "required"
+      ]
+    ]
+  },
+  "04": {
+    "title_en": "Sensors & Sensor Package Identification",
+    "title_vi": "Cảm biến & nhận diện module cảm biến",
+    "lessons": [
+      [
+        "bus_interfaces",
+        "Sensor interfaces: I2C, SPI, UART",
+        "Giao diện cảm biến: I2C, SPI, UART",
+        "required"
+      ],
+      [
+        "sensor_package_id",
+        "Sensor package ID: HC-SR04, ToF, IMU, IR, encoders, cameras",
+        "Nhận diện module: HC-SR04, ToF, IMU, IR, encoder, camera",
+        "required"
+      ],
+      [
+        "encoders_counts",
+        "Encoders and raw odometry counts",
+        "Encoder và đếm odometry thô",
+        "required"
+      ],
+      [
+        "imu_basics",
+        "IMU: accelerometer, gyro, fusion intro",
+        "IMU: gia tốc, gyro, fusion",
+        "required"
+      ],
+      [
+        "ultrasonic_tof",
+        "Lab: ultrasonic and Time-of-Flight ranging",
+        "Lab: siêu âm và đo khoảng cách ToF",
+        "required"
+      ],
+      [
+        "cameras_robots",
+        "Cameras for robots: USB, CSI, bandwidth",
+        "Camera cho robot: USB, CSI, băng thông",
+        "required"
+      ],
+      [
+        "ch04_lab_checklist",
+        "Chapter 04 lab checklist",
+        "Checklist lab chương 04",
+        "required"
+      ]
+    ]
+  },
+  "05": {
+    "title_en": "Actuators, Drivers & Identification",
+    "title_vi": "Cơ cấu chấp hành, driver & nhận diện",
+    "lessons": [
+      [
+        "dc_hbridge",
+        "DC motors and H-bridges",
+        "Motor DC và cầu H",
+        "required"
+      ],
+      [
+        "driver_board_id",
+        "Motor driver board ID: L298N, TB6612, DRV8833",
+        "Nhận diện driver: L298N, TB6612, DRV8833",
+        "required"
+      ],
+      [
+        "servos_pwm",
+        "Hobby servos, PWM, and torque limits",
+        "Servo hobby, PWM và mô-men",
+        "required"
+      ],
+      [
+        "steppers_intro",
+        "Steppers and microstepping intuition",
+        "Stepper và microstep",
+        "required"
+      ],
+      [
+        "current_thermal",
+        "Current limits, stalls, and thermal care",
+        "Giới hạn dòng, stall và nhiệt",
+        "required"
+      ],
+      [
+        "closed_loop_intro",
+        "Lab: closed-loop intro sense → compute → act",
+        "Lab: vòng kín cảm nhận → tính → tác động",
+        "required"
+      ],
+      [
+        "ch05_lab_checklist",
+        "Chapter 05 lab checklist",
+        "Checklist lab chương 05",
+        "required"
+      ]
+    ]
+  },
+  "06": {
+    "title_en": "Mechanical Mechanisms, Assembly & CAD-lite",
+    "title_vi": "Cơ cấu cơ khí, lắp ráp & CAD nhẹ",
+    "lessons": [
+      [
+        "chassis_anatomy",
+        "Differential-drive chassis anatomy",
+        "Giải phẫu khung robot vi sai",
+        "required"
+      ],
+      [
+        "fasteners_bearings_shafts",
+        "Fasteners, bearings, shafts, and couplings",
+        "Ốc vít, bạc đạn, trục và khớp nối",
+        "required"
+      ],
+      [
+        "gear_trains_ratios",
+        "Gears: spur, worm, planetary, ratio, backlash",
+        "Bánh răng: trụ, worm, hành tinh, tỉ số, backlash",
+        "required"
+      ],
+      [
+        "linkages_belts_cams",
+        "Linkages, cams, belts, and rack-and-pinion",
+        "Cơ cấu thanh, cam, đai và bánh răng-thanh răng",
+        "required"
+      ],
+      [
+        "wheels_casters_diff",
+        "Wheels, casters, and diff-drive mechanism diagrams",
+        "Bánh xe, caster và sơ đồ cơ cấu vi sai",
+        "required"
+      ],
+      [
+        "materials_print_laser",
+        "Chassis materials: 3D-print vs laser-cut",
+        "Vật liệu khung: in 3D vs cắt laser",
+        "required"
+      ],
+      [
+        "mech_failure_modes",
+        "Mechanical failure modes and strain relief",
+        "Hỏng hóc cơ khí và chống kéo dây",
+        "required"
+      ],
+      [
+        "mechanisms_lab",
+        "Lab: gear ratio measurement and assembly checklist",
+        "Lab: đo tỉ số truyền và checklist lắp",
+        "required"
+      ],
+      [
+        "ch06_lab_checklist",
+        "Chapter 06 lab checklist",
+        "Checklist lab chương 06",
+        "required"
+      ]
+    ]
+  },
+  "07": {
+    "title_en": "Capstone A: Diff-Drive + Teleop Firmware",
+    "title_vi": "Capstone A: Robot vi sai + firmware teleop",
+    "lessons": [
+      [
+        "assemble_power",
+        "Assemble chassis, motors, and power",
+        "Lắp khung, motor và nguồn",
+        "required"
+      ],
+      [
+        "driver_bringup",
+        "Lab: motor driver bring-up and spin test",
+        "Lab: bring-up driver và test quay",
+        "required"
+      ],
+      [
+        "teleop_protocol",
+        "Teleop over serial: protocol design",
+        "Teleop serial: thiết kế giao thức",
+        "required"
+      ],
+      [
+        "teleop_firmware",
+        "Firmware teleop loop (no ROS yet)",
+        "Vòng teleop firmware (chưa ROS)",
+        "required"
+      ],
+      [
+        "field_acceptance",
+        "Field test, debug log, and acceptance",
+        "Test thực địa, log và nghiệm thu",
+        "required"
+      ],
+      [
+        "ch07_lab_checklist",
+        "Chapter 07 capstone checklist",
+        "Checklist capstone chương 07",
+        "required"
+      ]
+    ]
+  },
+  "08": {
+    "title_en": "Communications & Control Loops",
+    "title_vi": "Truyền thông & vòng điều khiển",
+    "lessons": [
+      [
+        "serial_protocols",
+        "Serial protocols beyond println",
+        "Giao thức serial ngoài println",
+        "required"
+      ],
+      [
+        "wifi_mqtt",
+        "Lab: Wi-Fi and MQTT on ESP32",
+        "Lab: Wi-Fi và MQTT trên ESP32",
+        "required"
+      ],
+      [
+        "pid_tuning",
+        "PID intuition and tuning practice",
+        "Trực giác PID và chỉnh tham số",
+        "required"
+      ],
+      [
+        "diff_kinematics",
+        "Differential-drive kinematics",
+        "Động học robot dẫn động vi sai",
+        "required"
+      ],
+      [
+        "loop_timing",
+        "Control-loop timing and jitter",
+        "Timing vòng điều khiển và jitter",
+        "required"
+      ]
+    ]
+  },
+  "09": {
+    "title_en": "ROS 2 Jazzy Foundations",
+    "title_vi": "Nền tảng ROS 2 Jazzy",
+    "lessons": [
+      [
+        "jazzy_install_ws",
+        "Install ROS 2 Jazzy and a workspace",
+        "Cài ROS 2 Jazzy và workspace",
+        "required"
+      ],
+      [
+        "nodes_topics",
+        "Nodes, topics, and messages",
+        "Node, topic và message",
+        "required"
+      ],
+      [
+        "services_actions",
+        "Services and actions",
+        "Service và action",
+        "required"
+      ],
+      [
+        "launch_params_qos",
+        "Launch files, parameters, and QoS",
+        "Launch, parameter và QoS",
+        "required"
+      ],
+      [
+        "tf2_frames",
+        "TF2 and coordinate frames",
+        "TF2 và hệ tọa độ",
+        "required"
+      ],
+      [
+        "urdf_basics",
+        "URDF / xacro robot model basics",
+        "URDF / xacro cơ bản",
+        "required"
+      ]
+    ]
+  },
+  "10": {
+    "title_en": "Simulation & micro-ROS",
+    "title_vi": "Mô phỏng & micro-ROS",
+    "lessons": [
+      [
+        "gazebo_harmonic",
+        "Gazebo Harmonic intro and spawn",
+        "Giới thiệu Gazebo Harmonic",
+        "required"
+      ],
+      [
+        "urdf_sim_bringup",
+        "URDF bring-up in simulation",
+        "Bring-up URDF trong mô phỏng",
+        "required"
+      ],
+      [
+        "microros_mcu",
+        "micro-ROS on MCU (ESP32/Pico)",
+        "micro-ROS trên MCU",
+        "required"
+      ],
+      [
+        "bridge_capstone",
+        "Bridging Capstone A firmware to ROS 2",
+        "Nối Capstone A với ROS 2",
+        "required"
+      ],
+      [
+        "sim_to_real",
+        "Sim-to-real checklist",
+        "Checklist sim-to-real",
+        "required"
+      ]
+    ]
+  },
+  "11": {
+    "title_en": "Autonomy & Perception Intro",
+    "title_vi": "Tự hành & nhận thức mở đầu",
+    "lessons": [
+      [
+        "slam_overview",
+        "SLAM overview for beginners",
+        "Tổng quan SLAM cho người mới",
+        "required"
+      ],
+      [
+        "nav2_tour",
+        "Nav2 stack tour",
+        "Tour stack Nav2",
+        "required"
+      ],
+      [
+        "vision_pipeline",
+        "Basic vision pipeline for robots",
+        "Pipeline thị giác cơ bản",
+        "required"
+      ],
+      [
+        "bt_peek",
+        "Behavior trees peek (Nav2 BT)",
+        "Nhìn nhanh Behavior Tree",
+        "optional"
+      ],
+      [
+        "moveit_peek",
+        "MoveIt 2 optional peek",
+        "Nhìn nhanh MoveIt 2",
+        "optional"
+      ]
+    ]
+  },
+  "12": {
+    "title_en": "Modern Robot Learning & Next Paths",
+    "title_vi": "Robot learning hiện đại & hướng đi tiếp",
+    "lessons": [
+      [
+        "lerobot_intro",
+        "LeRobot / Hugging Face robotics intro",
+        "Giới thiệu LeRobot / HF robotics",
+        "required"
+      ],
+      [
+        "imitation_act",
+        "Imitation learning and ACT overview",
+        "Học bắt chước và tổng quan ACT",
+        "required"
+      ],
+      [
+        "diffusion_policy",
+        "Diffusion Policy intuition",
+        "Trực giác Diffusion Policy",
+        "required"
+      ],
+      [
+        "vla_overview",
+        "Vision-Language-Action models overview",
+        "Tổng quan Vision-Language-Action",
+        "required"
+      ],
+      [
+        "next_paths_refs",
+        "Curated next paths and full references",
+        "Lộ trình tiếp theo và tài liệu",
+        "required"
+      ]
+    ]
+  }
+}

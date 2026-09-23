@@ -1,0 +1,52 @@
+# Setup
+title:               "Build & Program Robots: From Embedded Systems to ROS 2 and Robot Learning"
+description:         "Bilingual self-learning course: electronics & component ID, embedded firmware, robot assembly, ROS 2 Jazzy, simulation/micro-ROS, and modern robot learning literacy."
+url:                 https://nglelinh.github.io
+baseurl:             '/robotics-self-learning'
+imgurl:              https://nglelinh.github.io/robotics-self-learning/img
+paginate:            5
+permalink:           pretty
+
+languages:           ["en", "vi"]
+default_lang:        "en"
+exclude_from_localization: ["javascript", "images", "css", "public", "img"]
+parallel_localization: true
+
+t:
+  en:
+    title: "Build & Program Robots: From Embedded Systems to ROS 2 and Robot Learning"
+    description: "From bench components and diff-drive firmware to ROS 2 Jazzy, Gazebo Harmonic, micro-ROS, and LeRobot-era learning literacy."
+    home: "Home"
+    chapters: "Chapters"
+    language: "Language"
+    switch_language: "Switch to Vietnamese"
+    required: "Required"
+    optional: "Optional"
+  vi:
+    title: "Lắp ráp & lập trình robot: Từ hệ thống nhúng đến ROS 2 và Robot Learning"
+    description: "Từ linh kiện bàn và firmware robot vi sai đến ROS 2 Jazzy, Gazebo Harmonic, micro-ROS và robot learning hiện đại."
+    home: "Trang chủ"
+    chapters: "Các chương"
+    language: "Ngôn ngữ"
+    switch_language: "Chuyển sang tiếng Anh"
+    required: "Bắt buộc"
+    optional: "Tùy chọn"
+
+author:
+  name:              Nguyen Le Linh
+  email:             nglelinh@gmail.com
+
+plugins:
+  - jekyll-paginate
+  - jekyll-feed
+
+plugins_dir: _plugins
+
+collections:
+  posts:
+    output: true
+    permalink: /:categories/:title/
+
+version:             0.1.0
+markdown: kramdown
+google_analytics_id: ""
