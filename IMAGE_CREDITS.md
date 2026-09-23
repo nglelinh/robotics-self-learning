@@ -24,9 +24,18 @@ Created for this course as labeled educational figures:
 - `resistor_color_code.png`
 - `sense_compute_act.png` — closed loop and teleop act path (Ch. 05, 07)
 - `sensor_package_id.png`
+- `debounce_timeline.png`
+- `firmware_state_machine.png`
+- `gpio_pullup_button.png`
+- `led_series_resistor.png`
+- `power_order.png`
+- `power_rails_3v3.png`
+- `pwm_duty_cycle.png`
 - `servo_pwm.png` — 1–2 ms pulse inside a 20 ms frame (Ch. 05)
+- `solder_joint_compare.png`
 - `stall_current.png` — current versus speed (Ch. 05, 07)
 - `teleop_states.png` — idle, run, and timeout stop (Ch. 07)
+- `tracks_mcu_ros.png`
 
 ## Wikimedia Commons photos (`img/wikimedia/`)
 
