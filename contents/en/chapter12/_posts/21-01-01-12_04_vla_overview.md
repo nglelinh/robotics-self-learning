@@ -11,50 +11,98 @@ lesson_type: required
 draft: false
 ---
 
-Estimated time: **~60 minutes**.
+Estimated time: **~75 minutes**. You will read two systems carefully enough to fill a table, and you will leave the other three as names you can return to. No checkpoint is loaded.
 
 ## Learning objectives
 
-1. Explain the lesson ideas in your own words.
-2. Complete lab/ID tasks if present.
-3. Connect this lesson to Capstone A or ROS path.
-4. Note two failure modes.
-5. Save further-reading links.
+You will define a vision-language-action model as a map from an image plus a text instruction to an action on a particular robot. You will place RT-1, RT-2, Open X-Embodiment, OpenVLA, and pi0 on that map: what each one reads, what it writes, and whether those writes are `Twist` or joint targets for the Capstone. You will state the embodiment gap in one concrete way, and you will keep the motor timeout above any sentence a person types. The lab table's "train at home" cell for RT-2 is an honest no.
 
-## 60-minute plan
+## Prerequisites
 
-| Min | Activity |
-|----:|----------|
-| 0–5 | Objectives + figures |
-| 5–25 | Core reading / math |
-| 25–45 | Lab or ID practice |
-| 45–55 | Exercises |
-| 55–60 | Notes + links |
+You can read a project page. Lessons 12-01 through 12-03 gave you dataset keys, a chunk, and a reason not to average two demonstrations. Chapter 09's `cmd_vel` is still `linear.x` in m/s and `angular.z` in rad/s. Chapter 11's camera, if you have one, is a sensor on your base, not a wrist camera on a parallel gripper. A GPU-less laptop is the expected machine.
 
-## Core ideas
+## Why this sits on the path
 
-Read RT-1 / Open-X style VLA systems—do not train from scratch as homework.
+Jazzy, Nav2, and the bridge made it possible to type a goal and watch a diff-drive track a path. The papers in this lesson type a goal in natural language and expect a network to emit the motor command. That is a real research line, and it is easy to misread as "the robot now understands sentences, so the firmware can retire." It cannot. A checkpoint is a function from the cameras and the action vector of the robots that generated its data. RT-1's mobile manipulator, a gripper in Open X-Embodiment, and the Capstone do not share that vector. Language does not repair the mismatch. This lesson is how you read the claim without pointing the claim at your wheels.
 
+## Concepts
 
+A vision-language-action model, a VLA, takes pixels and a string and returns an action. The string is an instruction: "pick up the apple," "move to the door." The action is whatever the training robot executed, tokenized or continuous. The promise, when it works, is that you can ask for a task in words instead of only in a joystick log. The limit, which the figure prints in red, is that another lab's gripper is a different robot. Embodiment is part of the model. Swap the body and the same weights are a confident function aimed at the wrong motors.
 
-## Learning literacy
+**RT-1** (Robotics Transformer, Brohan et al.) is trained on demonstrations from the authors' mobile manipulators. Read [the project page](https://robotics-transformer1.github.io/) and [arXiv:2212.06817](https://arxiv.org/abs/2212.06817). Input is a camera image plus a text instruction. Output is a discretized vector for that platform: arm, base, and gripper. Their base channel is not `geometry_msgs/Twist` on your graph. You can read the page. You cannot drop the behavior onto the Capstone.
 
-Datasets, embodiment gaps, and safety matter as much as model names. Prefer official LeRobot docs and papers’ project pages over viral demos.
+**RT-2** ([arXiv:2307.15818](https://arxiv.org/abs/2307.15818)) co-fine-tunes a vision-language model so robot actions are more tokens in the same stream. A phrase the robot never practiced can steer a skill it did practice, because the language side already knows the words. The fine-tune is a data-center job. "Understands language" is incomplete unless the next sentence names whose arms produced the action tokens.
 
-<!--exp-->
-## Practice prompt
+**Open X-Embodiment** ([project page](https://robotics-transformer-x.github.io/)) pools many labs and many robots, and trains RT-X models on that pool. A wrist camera, a parallel gripper, and a two-wheel base still contribute different images and different action vectors. A shared column name does not share the physics. Your problem is $$v$$ and $$\omega$$ under a forward camera, with a 300 ms timeout. A pile of other robots is not a brain for the base you left out.
 
-Teach-back: explain “Vision-Language-Action models overview” to a friend in 3 minutes, then list what hardware you’d put on the desk to demonstrate it.
+**OpenVLA** ([arXiv:2406.09246](https://arxiv.org/abs/2406.09246), [project page](https://openvla.github.io/)) publishes weights: image and instruction in, discretized arm-style actions out, trained on Open X-Embodiment data. Open weights mean a prepared machine can load a file. They do not mean a GPU-less laptop can train a multi-billion-parameter network, or run it at 50 Hz between serial frames. The action is an arm's motion plus a gripper, not `linear.x` and `angular.z`.
+
+**pi0** is the flow-matching end of the same idea. Read the [Physical Intelligence blog](https://www.physicalintelligence.company/blog/pi0). Images and language go in. Continuous actions come out, generated by a flow, a cousin of the denoiser in the previous lesson. The robots on the page are theirs. If the wording has shifted, quote what you see, and write that those robots are not the Capstone.
+
+A language command is not an E-stop. The string "stop" is another token. The network may still emit a small forward action. The 300 ms timeout does not parse English. It only notices that serial frames stopped. A live policy that keeps publishing resets the timer, just as a bad ACT chunk did. A typed stop is safe only after your code writes zero PWM, a zero `Twist`, or a hardware cutoff. Wheels-up remains the rule the first time a new node publishes.
+
+## The figure
+
+![Image and language go through weights to an action]({{ site.imgurl }}/generated/ch12_vla.png)
+
+Four boxes: image, language, VLA weights, action. The arrows are the forward pass of the idea, not a ROS graph. The red line is the correction: another lab's gripper is a different robot, and embodiment is part of the model. The footer lists RT-1, RT-2, Open X-Embodiment, OpenVLA, and pi0, with the instruction to read them and not retrain them. Your lab obeys the footer. Two rows of a table are the deliverable, not a fine-tune.
+
+## Worked reading example
+
+Fill RT-1 yourself before you fill anyone else, using the project page if a cell here drifts. This row is the standard the lab is graded against: specific inputs, an action space that names a body, and a laptop cell that does not pretend.
+
+| System | Inputs | Action space | `Twist` on your graph, or joint targets? | Laptop tonight? |
+| --- | --- | --- | --- | --- |
+| RT-1 | RGB image from their robot's camera, plus a text instruction | Discretized vector for their mobile manipulator: arm, base, gripper | Base motion lives inside their vector. It is not your `cmd_vel`. Not your joint targets either | Read the page: yes. Train: no. Run their inference stack on a GPU-less laptop: no |
+
+One number makes the embodiment concrete. Your bridge accepts two floats per tick. An RT-1-style action packs arm, base, and gripper into one discretized command for a platform with those joints. Even if two of the discrete bins are "base forward" and "base yaw," the bin edges were chosen for their robot, their camera height, and their wheelbase. Mapping bin 7 onto $$v = 0.2$$ m/s is a new controller you would have to design and test wheels-up. It is not a property of the checkpoint. The checkpoint has never seen your `observation.images.cam` or your 300 ms timeout.
+
+RT-2's laptop cell, so the expected answer is visible before you copy it: training RT-2 at home is no. Co-fine-tuning the vision-language backbones those papers start from is not a classroom machine. Reading [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) is the whole assignment if you pick that column.
+
+## Lab
+
+Pick **two** systems from this list: RT-2, Open X-Embodiment, OpenVLA, pi0. Do not pick RT-1; that row is the worked example. Open the pages, not a weight file.
+
+- RT-2: [arXiv:2307.15818](https://arxiv.org/abs/2307.15818)
+- Open X-Embodiment: [robotics-transformer-x.github.io](https://robotics-transformer-x.github.io/)
+- OpenVLA: [arXiv:2406.09246](https://arxiv.org/abs/2406.09246) and [openvla.github.io](https://openvla.github.io/)
+- pi0: [physicalintelligence.company/blog/pi0](https://www.physicalintelligence.company/blog/pi0)
+
+Copy the table header into `lab-notes.md` and add your two rows.
+
+| System | Inputs | Action space | `Twist` on your graph, or joint targets? | Laptop tonight? |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+|  |  |  |  |  |
+
+**Expected.** Two filled rows. Inputs mention image and text where the page does. The action-space cell names a body that is not the Capstone, or explicitly says the page's robots are not yours. The Twist cell is no for your `cmd_vel`, even when the other robot has wheels. If one of the two rows is RT-2, the laptop cell says no to training at home, in those words or plainer. A cell that says "maybe with Colab" is a no you have not finished writing. This course does not assign a hosted training run either.
+
+**Failure modes**
+
+| What the table says | What is wrong |
+| --- | --- |
+| "Publishes `Twist`" because RT-1 has a mobile base | Their base channel is not your topic, your units, or your wheel separation |
+| "Open weights, so I can train it tonight" on the OpenVLA row | Open weights let you read a file name. They do not shrink a multi-billion-parameter training job onto a GPU-less laptop, and inference at control rate is a no on that machine too |
+| "Open X-Embodiment includes many robots, so the Capstone is covered" | Coverage would require your sensors and your action vector in the data, in quantity. A slogan on a project page is not that |
+| "The instruction was stop, so the timeout does not matter" | The timeout never sees the string. It sees serial frames. A policy that keeps publishing keeps the motors enabled |
+| Any row whose last cell is yes for training | Rewrite it. Reading is yes. Training these systems at home is no |
+
+## Shopping
+
+No purchase supports this lesson. Do not buy a gripper, a Jetson-class board, or a second computer because a VLA demo had more cameras than you do. The optional camera from Chapter 11 is already the imaging discussion for this course. A camera on the Capstone still does not turn the base into the robot inside RT-1 or OpenVLA.
 
 ## Exercises
 
-1. Five-bullet summary.
-2. Do (or dry-run) the lab; paste results.
-3. Sketch one diagram from memory.
-4. List two mistakes to avoid.
-5. Date an entry in `lab-notes.md`.
+1. Your table includes RT-2. Write the laptop cell in a full sentence. Guidance: training at home is no. You may quote the abstract.
+2. OpenVLA's weights are public. Why is that not "runs on the laptop that flashed the ESP32"? Guidance: a multi-billion-parameter network, no GPU, and a command due every 20 ms. Loading a file is not that loop.
+3. A classmate maps a gripper's "open" bit onto $$\omega$$. What does the Capstone do the first time the policy opens the gripper? Guidance: it yaws. Lesson 12-01's card would have refused the alias by naming units.
+4. The operator types "stop" and the policy keeps publishing $$v = 0.15$$ every 20 ms. Does the 300 ms watchdog fire? Guidance: no. You need a zero serial frame or the hardware cutoff. The string is not on that wire.
+5. Name one input Open X-Embodiment cannot invent for you. Guidance: the pose of your forward camera, your wheel separation, or an action vector that is only $$(v, \omega)$$.
 
 ## Further reading
 
-- [rt1](https://robotics-transformer1.github.io/)
-- [openx](https://robotics-transformer-x.github.io/)
+- [RT-1 project page](https://robotics-transformer1.github.io/) and [RT-1 paper](https://arxiv.org/abs/2212.06817).
+- [RT-2](https://arxiv.org/abs/2307.15818).
+- [Open X-Embodiment](https://robotics-transformer-x.github.io/).
+- [OpenVLA](https://arxiv.org/abs/2406.09246) and the [project page](https://openvla.github.io/).
+- [pi0, Physical Intelligence](https://www.physicalintelligence.company/blog/pi0).

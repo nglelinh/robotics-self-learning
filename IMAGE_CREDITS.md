@@ -6,16 +6,23 @@ Created for this course as labeled educational figures:
 
 - `belt_pulley.png`
 - `breadboard_anatomy.png`
+- `bus_i2c_spi_uart.png` — I2C, SPI, and UART wiring contracts (Ch. 04)
 - `capacitor_polarity.png`
+- `chassis_measures.png` — track width, rolling radius, caster (Ch. 06–07)
 - `component_lookalikes.png`
 - `diff_drive_kinematics.png`
+- `encoder_quadrature.png` — quadrature channels A and B (Ch. 04)
 - `four_bar_linkage.png`
 - `gear_train_ratio.png`
 - `hbridge_concept.png`
+- `imu_axes.png` — body axes for accelerometer and gyro (Ch. 04)
 - `kit_catalog_overview.png`
 - `ohms_law_triangle.png`
 - `pcb_mcu_anatomy.png`
+- `power_tree.png` — battery, fuse, driver, buck (Ch. 07)
+- `range_echo_tof.png` — ultrasonic echo versus ToF (Ch. 04)
 - `resistor_color_code.png`
+- `sense_compute_act.png` — closed loop and teleop act path (Ch. 05, 07)
 - `sensor_package_id.png`
 - `debounce_timeline.png`
 - `firmware_state_machine.png`
@@ -24,7 +31,10 @@ Created for this course as labeled educational figures:
 - `power_order.png`
 - `power_rails_3v3.png`
 - `pwm_duty_cycle.png`
+- `servo_pwm.png` — 1–2 ms pulse inside a 20 ms frame (Ch. 05)
 - `solder_joint_compare.png`
+- `stall_current.png` — current versus speed (Ch. 05, 07)
+- `teleop_states.png` — idle, run, and timeout stop (Ch. 07)
 - `tracks_mcu_ros.png`
 
 ## Wikimedia Commons photos (`img/wikimedia/`)
