@@ -198,9 +198,13 @@ Không motor, không VM, không pin. LED là "động cơ đang được phép."
 
 Nếu LED bật ngay khi sketch vừa khởi động, `apply` không bị chặn bởi TELEOP, hoặc `setup` đã ghi một duty và vòng lặp không ghi lại. Lỗi đó là chủ đề của checklist chương.
 
-## Video tham khảo thực tế
 
-Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi.
+## Video tham khảo
+
+- **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Trạng thái, sự kiện, chuyển. Đúng ba thứ firmware teleop sau này sẽ có: chờ, chạy, lỗi.
+- [Finite State Machines: The Embedded Trick That Changes Everything](https://www.youtube.com/watch?v=CbNXEyYL_f8) — AsabreTech, tiếng Anh. Cùng máy trạng thái, nhìn từ phía người viết firmware nhúng.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Sinh viên đang lập trình robot thông minh](https://www.facebook.com/reel/1381152347317660). Chú thích: sinh viên Cơ điện tử, Khoa Kỹ thuật và Công nghệ ICTU, đang lập trình robot. Đối chiếu với bài: chương trình robot là các trạng thái và sự kiện, không phải một vòng `loop` không tên.
 - [Lập trình robot cho Robocon Bắc Ninh 2026](https://www.facebook.com/reel/2015462409114750). Chú thích: sinh viên đang lập trình robot cho Robocon Bắc Ninh 2026. Cuộc thi cũng là một máy trạng thái: chờ, chạy, dừng, lỗi.

@@ -128,6 +128,10 @@ Nghiệm thu hay trượt vì thiếu dây buộc, đế mỏi, hoặc cầu ch�
 - [Lazada holder 18650](https://www.lazada.vn/catalog/?q=holder%2018650%202S)
 - [Thế Giới IC cầu chì](https://www.thegioiic.com/search?q=cau%20chi)
 
+## Video tham khảo
+
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Xe đi thẳng khi hai bánh cùng tốc, quay khi hai bánh lệch. Đó là thứ buổi nghiệm thu phải thấy.
+
 ## Bài tập
 
 1. Pack nghỉ $$8{,}20~\mathrm{V}$$, lúc cả hai motor chạy $$6{,}90~\mathrm{V}$$ ở khoảng $$0{,}60~\mathrm{A}$$. Ước lượng $$R$$. Nguồn ấy đạt, hay là sụt phải dừng?

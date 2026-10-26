@@ -80,6 +80,10 @@ Mở `lab-notes.md`. Tạo một mục ghi ngày và “cổng chương 02.” V
 
 Chương đạt khi cả sáu ô ĐẠT, có câu bánh nhấc lên, không có motor nối. Lượt khô là toolchain, câu quyết định, và thẻ chân canh từ ảnh, với ba ô đo ghi rõ đang chờ. Không có trạng thái thứ ba tên là “gần đủ.”
 
+## Video tham khảo
+
+- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Checklist chỉ đạt khi LED nhấp từ chương trình bạn nạp, không phải từ mạch có sẵn.
+
 ## Bài tập
 
 Dùng sổ giả này. Nó không phải một lần đạt.

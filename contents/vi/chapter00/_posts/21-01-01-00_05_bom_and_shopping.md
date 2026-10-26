@@ -289,6 +289,11 @@ Một tổng giải thích được trong một phút, dòng driver có phương
 
 **An toàn.** Mối nguy của bài này là cell lithium, không phải file bảng tính. Sạc ở chỗ bạn nhìn thấy cell. Đừng chập đế pin. Đừng nối VM vào chân 5 V hoặc 3,3 V của ESP32 để "thử pin".
 
+## Video tham khảo
+
+- **Xem trước:** [PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS](https://www.youtube.com/watch?v=RsZBxfpcLu8) — Aleksandar Haber PhD, tiếng Anh. Một xe vi sai giá thấp và những món người dựng thực sự mua. Đối chiếu với BOM của khóa, đừng chép giá trong video.
+- [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Đọc một trang linh kiện như đọc datasheet: điện áp, dòng, và thứ listing không ghi.
+
 ## Bài tập
 
 1. Cụm 2S đang ở 8,0 V. L298N rơi 2,2 V, đường TB6612 rơi 0,4 V. Động cơ TT nhận bao nhiêu vôn trong mỗi trường hợp? Mức nào nằm giữa vùng dễ chịu của listing 3–9 V?

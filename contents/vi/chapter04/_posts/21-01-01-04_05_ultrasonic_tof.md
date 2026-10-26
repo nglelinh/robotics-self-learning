@@ -135,6 +135,11 @@ Module siêu âm là món Capstone A không nên khởi hành khi thiếu. Board
 - [Lazada: cảm biến siêu âm](https://www.lazada.vn/catalog/?q=cam%20bien%20sieu%20am%20HC-SR04)
 - [Thế Giới IC: HC-SR04](https://www.thegioiic.com/search?q=HC-SR04)
 
+## Video tham khảo
+
+- **Xem trước:** [Using the HC-SR04 Ultrasonic Distance Sensor with Arduino - Everything you need to know!](https://www.youtube.com/watch?v=6F1B_N6LuKw) — DroneBot Workshop, tiếng Anh. HC-SR04: xung echo đổi thành khoảng cách. Video dài; dừng ở cách tính từ thời gian bay của âm.
+- [VL53l0x: Time-of-Flight Distance Sensor (ESP32 + Arduino series)](https://www.youtube.com/watch?v=SWBI6_rxmT8) — Simply Explained, tiếng Anh. VL53L0X đo thời gian bay của ánh sáng, ra số trên I2C, không có chân echo.
+
 ## Bài tập
 
 1. ECHO cao trong 5,8 ms. Tìm $$d$$ theo mét và theo centimét, với $$343~\mathrm{m/s}$$.
@@ -152,4 +157,4 @@ Module siêu âm là món Capstone A không nên khởi hành khi thiếu. Board
 - [Datasheet HC-SR04 (bản SparkFun)](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — độ rộng TRIG, echo, và nguồn 5 V.
 - [Datasheet ST VL53L0X](https://www.st.com/resource/en/datasheet/vl53l0x.pdf) — đo bằng milimét, góc nhìn, và địa chỉ.
 - [Mạch Pololu VL53L0X](https://www.pololu.com/product/2490) — XSHUT và mức logic, vẫn hữu ích khi bạn mua breakout khác.
-- [`sensor_msgs/Range`](https://docs.ros.org/en/humble/p/sensor_msgs/msg/Range.html) — message Chương 09 sẽ xuất từ bảng lab này.
+- [`sensor_msgs/Range`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/Range.html) — message Chương 09 sẽ xuất từ bảng lab này.

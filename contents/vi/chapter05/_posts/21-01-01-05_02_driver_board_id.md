@@ -122,6 +122,11 @@ Mua con chip bạn nhận diện được, không mua tấm đỏ đầu tiên t
 - Lazada: [TB6612](https://www.lazada.vn/catalog/?q=TB6612), [DRV8833](https://www.lazada.vn/catalog/?q=DRV8833)
 - Thế Giới IC: [TB6612](https://www.thegioiic.com/search?q=TB6612), [DRV8833](https://www.thegioiic.com/search?q=DRV8833)
 
+## Video tham khảo
+
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. TB6612 và L298N trên cùng một video. Nhìn chân logic và chân VM trước khi mua.
+- [What is an H-Bridge?](https://www.youtube.com/watch?v=3N_4VpzmKY0) — CircuitBread, tiếng Anh. Cầu H bên trong cả hai module. Tên module đổi, sơ đồ bốn công tắc không đổi.
+
 ## Bài tập
 
 1. Module của bạn có tản nhiệt bắt vít và jumper 5 V. Nguồn motor là pack 3S ở 12,6 V. Bạn làm gì với jumper, và ESP32 lấy nguồn từ đâu?

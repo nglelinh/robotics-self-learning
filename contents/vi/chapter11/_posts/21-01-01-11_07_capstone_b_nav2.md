@@ -100,6 +100,11 @@ Sổ sim có mười dòng echo hoặc một đoạn rút gọn trong đó có s
 | `cmd_vel` không về 0 | Teleop còn publish. Tắt node đó |
 | Controller báo footprint | Bình thường với goal sát tường. Đưa goal ra chỗ trống trước khi sửa params |
 
+## Video tham khảo
+
+- **Xem trước:** [Making robot navigation easy with Nav2 and ROS!](https://www.youtube.com/watch?v=jkoGkAd0GYk) — Articulated Robotics, tiếng Anh. Gửi một goal và xem robot bám đường trong mô phỏng trước. Lab bài này làm sim rồi mới tới xe.
+- [ROS2 Nav2 - Generate a Map with slam_toolbox](https://www.youtube.com/watch?v=hMTxb8Y2cxI) — Robotics Back-End, tiếng Anh. Không có bản đồ thì Nav2 không có chỗ đi. Xem lại bước lưu map nếu goal đứng im.
+
 ## Bài tập
 
 1. Vì sao lab cấm chạy AMCL trong lúc `online_async` đang chạy?

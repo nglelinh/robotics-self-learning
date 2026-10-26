@@ -94,6 +94,11 @@ Một bạn khác, Lan, đã chạy Ubuntu 24.04 trên laptop của mình. Lan �
 
 Minh phác sụt áp Darlington để lựa driver không phải sở thích nhãn. Ở 7,4 V với khoảng 2 V rơi, motor thấy 5,4 V. Sụt MOSFET khoảng 0,3 V còn 7,1 V. Anh viết "TB6612FNG, không L298N" trong câu lộ trình. Cả hai người kết thúc mục bằng câu từ chối LiDAR. Không ai mở bảng tính thứ hai. Bài 00-05 là giỏ hàng.
 
+## Video tham khảo
+
+- **Xem trước:** [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Đối chiếu ba board với hai lộ trình của bài: MCU trước, máy chạy ROS sau.
+- [ROS 2 Series #1 | Giới thiệu sơ lược về ROS | TeslaEdison](https://www.youtube.com/watch?v=_vovUjZM6os) — TeslaEdison, tiếng Việt. Một giới thiệu ROS 2 bằng tiếng Việt. Giữ tên distro trong video khỏi trộn với Jazzy của khóa.
+
 ## Bài tập
 
 1. Laptop của bạn là Windows, trần 1.800.000 ₫, và bạn muốn robot chạy trong tháng này. Lộ trình nào, MCU nào nếu bạn quan tâm Wi-Fi sau, và driver nào? Ubuntu tuần này bạn làm gì?

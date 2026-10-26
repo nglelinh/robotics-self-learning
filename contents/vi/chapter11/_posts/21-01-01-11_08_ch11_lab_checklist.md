@@ -57,6 +57,10 @@ Cong tat pin khi ha banh: co / chua ha
 | Bản đồ quay khi xe đi thẳng | Dấu encoder hoặc trái/phải |
 | Goal xong mà bánh thật không dừng | `cmd_vel` còn publisher khác, hoặc watchdog firmware |
 
+## Video tham khảo
+
+- **Xem trước:** [Making robot navigation easy with Nav2 and ROS!](https://www.youtube.com/watch?v=jkoGkAd0GYk) — Articulated Robotics, tiếng Anh. Checklist chương hỏi một đường trong sim. Video Nav2 là hình của đường đó.
+
 ## Bài tập
 
 1. Cửa nào đạt nếu bạn chỉ có ảnh TurtleBot3 và một câu hoãn lidar ghi ngày?

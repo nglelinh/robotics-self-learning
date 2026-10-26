@@ -112,6 +112,11 @@ Các trang tìm:
 
 Giá dịch chuyển. Một giắc rơi ra là việc hàn của Chương 01, không phải việc của phần mềm.
 
+## Video tham khảo
+
+- **Xem trước:** [How to measure Gear Backlash and Center Distance](https://www.youtube.com/watch?v=8fYwUV6QV8c) — Evolvent Design, tiếng Anh. Đo backlash giữa hai bánh răng. Khe này thành góc chết khi encoder đã đếm mà bánh chưa đi.
+- [What is Bearing? Types of Bearings and How they Work?](https://www.youtube.com/watch?v=8q25EUszBSI) — The Engineers Post, tiếng Anh. Bạc đạn hỏng và trục lệch. Nhìn kiểu hỏng trước khi siết lại cho chặt hơn.
+
 ## Bài tập
 
 1. Robot bò tới trên sàn trong khi số đếm encoder chạy rất nhanh. Gọi tên dạng hỏng và phép kiểm bằng tay.

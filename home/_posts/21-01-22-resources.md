@@ -53,6 +53,24 @@ Mở trang, đối chiếu ảnh và thông số, rồi tự điền giá. Đã 
 
 Đối chiếu hóa học pin trên tem với sạc. LiFePO4 không sạc bằng hồ sơ 4,20 V/cell của Li-ion.
 
+## Video theo chương
+
+Mỗi chương một video nên xem trước. Tiêu đề và kênh lấy từ oEmbed ngày 26 tháng 10 năm 2026. Các bài trong chương có thêm một đến ba video ở mục Video tham khảo.
+
+- Chương 00: [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade. Giới thiệu ROS 2 trước khi chọn lộ trình.
+- Chương 01: [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset. Định luật Ôm, nền của chương điện.
+- Chương 02: [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart. Nạp chương trình nhấp LED cho ESP32, tiếng Việt.
+- Chương 03: [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB. Máy trạng thái, hình của firmware chương 03.
+- Chương 04: [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs. UART, I2C, SPI trên một video.
+- Chương 05: [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop. TB6612 cạnh L298N, đúng bài nhận driver.
+- Chương 06: [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics. Vi sai và odometry, khung của chương cơ khí.
+- Chương 07: [BMS (Battery Management System) || DIY or Buy || Properly protecting Li-Ion/Li-Po Battery Packs](https://www.youtube.com/watch?v=rT-1gvkFj60) — GreatScott!. BMS và pack lithium trước khi lắp xe.
+- Chương 08: [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas. PID, bài chỉnh số của chương.
+- Chương 09: [The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6](https://www.youtube.com/watch?v=QyvHhY4Y_Y8) — Articulated Robotics. Cây TF2, cửa sang chương mô phỏng.
+- Chương 10: [Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues](https://www.youtube.com/watch?v=dY8JxldcuqA) — Aleksandar Haber PhD. Gazebo Harmonic trong môi trường Jazzy.
+- Chương 11: [Making robot navigation easy with Nav2 and ROS!](https://www.youtube.com/watch?v=jkoGkAd0GYk) — Articulated Robotics. Nav2, tour rồi lab Capstone B.
+- Chương 12: [How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)](https://www.youtube.com/watch?v=7tGT8hqRSAo) — Brogan M. Pratt. LeRobot và tay SO-101.
+
 ## Video Việt Nam: Chinbi Robot (ICTU)
 
 Hoàng Quân, giảng viên Cơ điện tử ICTU, đăng các Facebook Reel ngắn của dự án robot bốn chân Chinbi. Trang dự án ghi trong chú thích là [chinbi.com](https://chinbi.com), đã mở được tháng 10 năm 2026. Cột ngày trong danh sách nguồn để trống, nên trang này không ghi ngày đăng. Mỗi dòng dưới đây là một reel đã đưa vào một bài. Câu xem-cái-gì nằm trong bài đó, và chỉ bám chú thích.

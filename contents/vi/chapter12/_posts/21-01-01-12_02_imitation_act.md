@@ -106,6 +106,11 @@ Mở trang abstract: [Zhao và cộng sự, arXiv:2304.13705](https://arxiv.org/
 | Bạn chép độ dài chunk từ một file config ngẫu nhiên và bỏ phép chia | Lab là hệ quả tính bằng giây, trên tần số điều khiển của bạn. Một $$k$$ không đơn vị không cho biết đế đi được bao xa |
 | Ghi chú coi ALOHA là món mua tiếp theo | ALOHA là giàn thu dữ liệu của bài báo. Robot của khóa học này vẫn là Capstone |
 
+## Video tham khảo
+
+- **Xem trước:** [ALOHA and ACT: LeRobot Research Presentation #1 by Alexander Soare](https://www.youtube.com/watch?v=ft73x0LfGpM) — Hugging Face, tiếng Anh. ACT và ALOHA, đúng bài báo bài này đọc. Alexander Soare trình bày trên kênh Hugging Face.
+- [Core Concepts: Imitation Learning](https://www.youtube.com/watch?v=GDmhrAHxgQE) — Sanjiban Choudhury, tiếng Anh. Vì sao bắt chước một demonstration không phải trung bình mọi demonstration. Nền của chunk ACT.
+
 ## Bài tập
 
 1. Viết behavior cloning thành một câu có dùng khóa của bạn. Gợi ý: ánh xạ nhận ảnh camera, và có thể cả $$v$$, $$\omega$$ đo được, rồi trả về $$v$$ và $$\omega$$ lệnh mà người demo đã gửi. Reward không có trong câu.

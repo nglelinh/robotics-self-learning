@@ -128,9 +128,13 @@ pip index versions lerobot
 
 Bài này không mua gì. Cánh tay hạng SO-100 là kit nhập: khung in, servo, tay leader, camera. Cộng bộ servo và tiền ship, hạng kit đó ở Việt Nam thường nằm ở mức nhiều triệu đồng. Hãy đối lại listing thật vào tuần bạn định mua. Bài giảng không gắn link shop cho cánh tay, vì link cũ còn hại hơn không có link. Khóa học không bắt mua. Camera tùy chọn ở chương 11 là cảm biến thêm duy nhất bạn có thể đã có, và card không cần ảnh sống. Robot mà card mô tả là Capstone bạn đã dựng.
 
-## Video tham khảo thực tế
 
-Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi. Chương này luyện policy bằng demonstration. Các clip dưới nói một đường khác: robot bốn chân đang học dáng đi. Đừng ghép action của chúng vào card $$(v, \omega)$$ của Capstone.
+## Video tham khảo
+
+- **Xem trước:** [Core Concepts: Imitation Learning](https://www.youtube.com/watch?v=GDmhrAHxgQE) — Sanjiban Choudhury, tiếng Anh. Học bắt chước: ghi hành động của người, rồi policy làm lại. Khác với reinforcement learning ở các reel Chinbi.
+- [How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)](https://www.youtube.com/watch?v=7tGT8hqRSAo) — Brogan M. Pratt, tiếng Anh. LeRobot và tay SO-101. Bài này chỉ cần thấy dataset, policy, và robot là ba hợp đồng khác nhau.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Đi bộ khi có tải, reinforcement learning](https://www.facebook.com/reel/4089347134533915). Chú thích: training robot bốn chân đi khi mang tải, ghi rõ reinforcement learning. Tải đổi động lực. Policy của một thân không tải không tự thành policy của thân có tải.
 - [Học đứng bằng hai chân](https://www.facebook.com/reel/1624642749368249). Chú thích: Chinbi đang học đứng bằng hai chân. Đó là một dáng, không phải `Twist` của xe vi sai.

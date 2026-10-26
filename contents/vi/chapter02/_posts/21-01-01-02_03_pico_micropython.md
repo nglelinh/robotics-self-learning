@@ -109,6 +109,11 @@ Các lỗi. BOOTSEL được thả trước khi cắm, nên không có ổ và b
 
 An toàn: mọi chân GP chỉ 3,3 V. Lab này không nối pin, motor, hay cảm biến 5 V. `3V3` là ngõ ra. `VSYS` không phải chỗ cho pin 2S.
 
+## Video tham khảo
+
+- **Xem trước:** [Raspberry Pi PICO | Starting With MicroPython + Examples | I2C OLED, ADC, PWM](https://www.youtube.com/watch?v=zlKJ5hvfs6s) — Electronoobs, tiếng Anh. MicroPython trên Pico: nối REPL, rồi một ví dụ PWM và ADC. Giữ các ví dụ I2C cho chương 04.
+- [Raspberry Pi Pico - A Beginners Guide](https://www.youtube.com/watch?v=L03jT5slWnw) — Tinkernut, tiếng Anh. Ảnh firmware và lần cắm USB đầu tiên, trước khi gõ code.
+
 ## Bài tập
 
 1. Viết chuỗi BOOTSEL thành bốn thao tác, và tên ổ phải hiện. Vì sao tên đó không phân biệt được Pico với Pico 2?

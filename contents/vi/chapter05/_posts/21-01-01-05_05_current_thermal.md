@@ -131,6 +131,11 @@ Chỗ còn thiếu là một cầu chì và, nếu bạn vẫn chưa có, một 
 - Lazada: [cầu chì](https://www.lazada.vn/catalog/?q=cau%20chi), [motor TT](https://www.lazada.vn/catalog/?q=motor%20TT)
 - Thế Giới IC: [cầu chì](https://www.thegioiic.com/search?q=cau%20chi), [L298N](https://www.thegioiic.com/search?q=L298N)
 
+## Video tham khảo
+
+- **Xem trước:** [Do you know how to Test Stall Current?](https://www.youtube.com/watch?v=7KbEVKZ2JhA) — SoundTraxx, tiếng Anh. Đo dòng khi trục bị giữ. Motor trong video không phải TT; phép đo stall là cùng một đại lượng.
+- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Dòng stall phải gặp cầu chì trước khi gặp nhiệt. Video cầu chì đứng cạnh bài toán dòng của bài.
+
 ## Bài tập
 
 1. Motor 6 V stall ở 1,2 A. $$R$$ và watt stall là bao nhiêu?

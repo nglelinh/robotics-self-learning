@@ -79,6 +79,10 @@ Một trang ghi: "Điện trở LED xong. Ảnh breadboard đính kèm, không �
 
 Cổng 1 trượt, hoặc cùng lắm là dở dang, vì trang không có phép tính. "Xong" là dấu cho có. Cổng 2 trượt: ảnh breadboard không chữ không phải sơ đồ rail. Cổng 3 trượt: ba số đo không phải năm, và "trông đúng" không phải giải mã cộng đồng hồ. Cổng 4 trượt: đoán vạch tụ hóa không phải lời gọi anode bằng chế độ diode. Cổng 5 trượt: "cầu H" là nhãn bị cấm. Cổng 6 chưa đạt; "tuần sau có lẽ" chỉ thành lịch bù khi một ngày thật thay chữ "có lẽ". Cổng 7 trượt: không pin riêng, không mass chung, không tụ, không nhát 300 ms. Trang không đậu nhờ thành thật. Giờ tiếp theo là cổng 1, 3 và 4 trên bàn, cộng đoạn viết lại cho cổng 7. Cổng 2 và 5 cần một cây bút trên ảnh. Cổng 6 cần một ngày.
 
+## Video tham khảo
+
+- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. Ôm và công suất là cửa của checklist chương. Đo lại một mạch trước khi tick.
+
 ## Bài tập
 
 Mỗi mục là một mẩu sổ cẩu thả. Nói cổng nào trượt, thiếu gì, và sửa nhỏ nhất là gì.

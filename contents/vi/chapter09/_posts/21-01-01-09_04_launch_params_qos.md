@@ -163,6 +163,11 @@ ros2 topic echo /chatter --qos-reliability best_effort
 
 Không linh kiện. Laptop của bài 09-01 là dụng cụ. Nếu bạn đã mua Pi 5 để làm máy robot, hãy làm lab này trên laptop trước, rồi lặp `printenv ROS_DISTRO` trên Pi. Đừng gỡ QoS và thẻ microSD chập chờn trong cùng một buổi chiều.
 
+## Video tham khảo
+
+- **Xem trước:** [ROS2 - Create a Launch File with Python](https://www.youtube.com/watch?v=xJ3WAs8GndA) — Robotics Back-End, tiếng Anh. Launch file Python mở nhiều node một lần. Bài dùng cùng kiểu file.
+- [ROS 2 on Two Computers: Connect Laptop and Robot with DDS + QoS | 08](https://www.youtube.com/watch?v=HEKwLJC5a2o) — Adaptive AgroTech, tiếng Anh. QoS khi hai máy trên một mạng. Khớp ROS_DOMAIN_ID và profile reliability của bài.
+
 ## Bài tập
 
 1. YAML cầu nối đặt `cmd_timeout_ms: 300` và firmware cũng dùng 300 ms. Cái nào cắt nếu tiến trình laptop chết nhưng cáp USB vẫn cắm? Gợi ý: watchdog firmware. Timeout trong YAML chỉ giúp cầu quyết định *gửi* số 0. Cầu đã chết thì nó không gửi gì, và timer trên MCU mới là thứ dừng bánh.

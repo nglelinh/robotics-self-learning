@@ -123,6 +123,11 @@ Phần sim: một file yaml hoặc một log lỗi launch nguyên văn. Phần t
 | SLAM không ra `map` → `odom` | Đang chạy AMCL cùng lúc và giành cạnh. Tắt AMCL khi đang map |
 | `use_sim_time` trên xe | Các stamp không khớp đồng hồ tường. Tắt |
 
+## Video tham khảo
+
+- **Xem trước:** [Easy SLAM with ROS using slam_toolbox](https://www.youtube.com/watch?v=ZaiA3hWaRzE) — Articulated Robotics, tiếng Anh. slam_toolbox tạo bản đồ từ /scan. Nếu lệnh apt trong video không phải jazzy, dùng tên gói của bài lab.
+- [ROS2 Nav2 - Generate a Map with slam_toolbox](https://www.youtube.com/watch?v=hMTxb8Y2cxI) — Robotics Back-End, tiếng Anh. Lưu bản đồ sau khi đi một vòng. Đúng việc map_saver của lab, sau phần mô phỏng.
+
 ## Bài tập
 
 1. LD06 để `z = 0.18` trong khi lidar của bạn cao 0,06 m. Triệu chứng trên bản đồ là gì?

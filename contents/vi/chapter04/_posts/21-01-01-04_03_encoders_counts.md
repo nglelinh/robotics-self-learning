@@ -151,6 +151,11 @@ Mua một cặp động cơ TT đã có encoder Hall, để hai bánh cùng mộ
 
 Đọc kỹ vòng quay trong tin đăng là vòng của trục nào. Rồi kiểm bằng một vòng quay tay.
 
+## Video tham khảo
+
+- **Xem trước:** [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Hai kênh A và B, chiều quay nằm ở thứ tự cạnh. Đó là số đếm bài này cộng dồn.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Odometry là tổng các bước encoder thành tư thế. Chương 08 sẽ viết công thức; video này là bức tranh.
+
 ## Bài tập
 
 Lấy $$r = 0{,}0325~\mathrm{m}$$ và chu vi $$\approx 0{,}2042~\mathrm{m}$$ nếu đề không nói khác.
@@ -169,5 +174,5 @@ Lấy $$r = 0{,}0325~\mathrm{m}$$ và chu vi $$\approx 0{,}2042~\mathrm{m}$$ n�
 
 - [SparkFun: nối rotary encoder](https://learn.sparkfun.com/tutorials/rotary-encoder-breakout-hookup-guide/all) — cạnh nào dẫn trước, và vì sao một kênh chỉ là gợi ý tốc độ.
 - [Pololu: cặp encoder từ](https://www.pololu.com/product/3081) — datasheet ghi số xung trên vòng trục motor; bạn vẫn phải nhân với hộp số.
-- [`nav_msgs/Odometry`](https://docs.ros.org/en/humble/p/nav_msgs/msg/Odometry.html) — tư thế là tổng các bước dead reckoning như bước ở trên.
-- [`diff_drive_controller`](https://control.ros.org/humble/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html) — `wheel_radius` và `wheel_separation` là $$r$$ và $$b$$; $$N$$ nằm ở hardware interface đưa vị trí bánh vào controller.
+- [`nav_msgs/Odometry`](https://docs.ros.org/en/jazzy/p/nav_msgs/msg/Odometry.html) — tư thế là tổng các bước dead reckoning như bước ở trên.
+- [`diff_drive_controller`](https://control.ros.org/jazzy/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html) — `wheel_radius` và `wheel_separation` là $$r$$ và $$b$$; $$N$$ nằm ở hardware interface đưa vị trí bánh vào controller.

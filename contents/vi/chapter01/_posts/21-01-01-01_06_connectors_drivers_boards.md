@@ -98,6 +98,11 @@ Bạn kết thúc với hai bức ảnh và một tờ đã gắn nhãn, mọi d
 
 An toàn: bánh nhấc khỏi bàn dù lab này không quay chúng. Pin tháo. Đừng dò pin khi ngón tay chạm kim loại đầu que. Phép tính 7,4 V làm trên giấy cho đến bài sau, khi đo VM bằng đồng hồ ở thang cao hơn 10 V.
 
+## Video tham khảo
+
+- **Xem trước:** [H Bridge Motor Control Basics Explained](https://www.youtube.com/watch?v=YYMsS50x1UY) — The Engineering Mindset, tiếng Anh. Cầu H là khối trên driver motor. Xem bốn công tắc trước khi nhận mặt module.
+- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Mạch chuyển mức khi một chân 5 V gặp board 3,3 V. Đọc chiều của từng kênh.
+
 ## Bài tập
 
 1. Pin 7,4 V. Lặp phép sụt cho cầu MOSFET 0,3 V và cầu Darlington 2,0 V. Mô-tơ TT thích điện áp nào, và vì sao câu trả lời không phải "mua L298N vì nó cũng 45 000 ₫"?
