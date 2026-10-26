@@ -4,6 +4,7 @@ title: "reference"
 chapter: "26"
 order: 1
 owner: "Your Name"
+lang: en
 ---
 
 # References and Resources
