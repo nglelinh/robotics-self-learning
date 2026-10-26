@@ -128,6 +128,12 @@ Sổ có tên hóa học, điện áp đầy cho phép, ảnh hoặc số buck 5
 | Chì 2 A nổ khi chưa kẹt bánh | $I_{\mathrm{run}}$ đã cao hơn mức chì, hoặc chập VM xuống mass phía sau chì. Đo dòng, đừng tăng chì trước khi tìm chập |
 | Cell nóng trên bàn, không tải | Ngừng. Không sạc. Có thể chập trong hoặc BMS hỏng |
 
+## Video tham khảo thực tế
+
+Clip này là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới link chỉ nói điều chú thích ghi.
+
+- [Test pin drone, ESC cháy](https://www.facebook.com/reel/931720623225817). Chú thích: dùng pin xe nâng nặng 3 tạ để test drone, phần test cháy ESC khi pin chưa hết, cảm ơn PKG Battery. Pack lớn không hết trước khi ESC cháy. Cầu chì và dòng liên tục tính trước khi nối pack đó.
+
 ## Bài tập
 
 1. Tem LiPo 3S ghi 1500 mAh, 30C. $I_{\text{C}}$ bằng bao nhiêu, và vì sao xe hai motor TT vẫn không dùng cầu chì 40 A?

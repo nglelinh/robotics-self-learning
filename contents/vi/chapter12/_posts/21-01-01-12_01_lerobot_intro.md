@@ -128,6 +128,15 @@ pip index versions lerobot
 
 Bài này không mua gì. Cánh tay hạng SO-100 là kit nhập: khung in, servo, tay leader, camera. Cộng bộ servo và tiền ship, hạng kit đó ở Việt Nam thường nằm ở mức nhiều triệu đồng. Hãy đối lại listing thật vào tuần bạn định mua. Bài giảng không gắn link shop cho cánh tay, vì link cũ còn hại hơn không có link. Khóa học không bắt mua. Camera tùy chọn ở chương 11 là cảm biến thêm duy nhất bạn có thể đã có, và card không cần ảnh sống. Robot mà card mô tả là Capstone bạn đã dựng.
 
+## Video tham khảo thực tế
+
+Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi. Chương này luyện policy bằng demonstration. Các clip dưới nói một đường khác: robot bốn chân đang học dáng đi. Đừng ghép action của chúng vào card $$(v, \omega)$$ của Capstone.
+
+- [Đi bộ khi có tải, reinforcement learning](https://www.facebook.com/reel/4089347134533915). Chú thích: training robot bốn chân đi khi mang tải, ghi rõ reinforcement learning. Tải đổi động lực. Policy của một thân không tải không tự thành policy của thân có tải.
+- [Học đứng bằng hai chân](https://www.facebook.com/reel/1624642749368249). Chú thích: Chinbi đang học đứng bằng hai chân. Đó là một dáng, không phải `Twist` của xe vi sai.
+- [Học đi bằng hai chân trước, handstand](https://www.facebook.com/reel/2292393271597807). Chú thích song ngữ: học đi bằng hai chân trước, và learning to do a handstand. Cùng một clip, hai cách gọi dáng. Giữ đúng chữ chú thích, đừng đặt tên khớp hộ.
+- [Học trèo bậc, nhảy lên cầu thang](https://www.facebook.com/reel/2191042771623926). Chú thích song ngữ: học trèo lên bậc, và learning to jump up stairs. Bậc thang là địa hình trong chú thích, chưa phải bản đồ Nav2 của chương 11.
+
 ## Bài tập
 
 1. Trên card của bạn, hai số nào là action, đơn vị từng số là gì? Gợi ý: $$v$$ theo m/s và $$\omega$$ theo rad/s, cùng cặp với `Twist`. Cột nào còn ghi PWM thì card chưa xong.

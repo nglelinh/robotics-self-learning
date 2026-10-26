@@ -147,6 +147,12 @@ Danh sách của bạn dài hơn. Dòng cần có là `/clock`. `ros2 topic list
 
 Lab này là phần mềm trên laptop bạn đã dùng cho Jazzy. Không cần cảm biến, không cần ESP32. Raspberry Pi 5 là máy tính robot tùy chọn về sau, không phải máy GUI tối nay. Bản RAM thấp trên Hshop gần đây khởi điểm khoảng 2,4 triệu đồng; đó là ước lượng 2026, kiểm tra lại trước khi trả. Board: [Raspberry Pi 5 made in UK](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk). Kit: [basic kit](https://hshop.vn/combo-raspberry-pi-5-ram-4-8gb-basic-kit). Slug đổi thì tìm “Raspberry Pi 5” trên [hshop.vn](https://hshop.vn/). Từ khóa Shopee hoặc Lazada: `Raspberry Pi 5 4GB`, cùng lời nhắc 2026. Tin rẻ hơn nhiều so với board Hshop thường thiếu nguồn.
 
+## Video tham khảo thực tế
+
+Clip này là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới link chỉ nói điều chú thích ghi.
+
+- [Lấy dữ liệu 3D từ một vị trí trên trái đất](https://www.facebook.com/reel/2078352426052273). Chú thích: cách lấy dữ liệu 3D từ bất kỳ vị trí nào trên trái đất. Trong Gazebo, mặt đất là một model có đơn vị và gốc. Dữ liệu 3D chỉ vào world sau khi hai thứ đó khớp.
+
 ## Bài tập
 
 1. Chạy `printenv ROS_DISTRO` và `gz sim --help`. Viết hai câu vì sao máy này thiếu binary `gazebo` vẫn chấp nhận được. Gợi ý: bộ mô phỏng của Jazzy là `gz sim` thuộc dòng Harmonic, còn binary `gazebo` là Classic.

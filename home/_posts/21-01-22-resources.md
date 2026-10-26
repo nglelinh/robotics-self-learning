@@ -52,3 +52,21 @@ Mở trang, đối chiếu ảnh và thông số, rồi tự điền giá. Đã 
 - [Lazada](https://www.lazada.vn/): [BMS 2S](https://www.lazada.vn/catalog/?q=bms%202s), [lidar](https://www.lazada.vn/catalog/?q=lidar).
 
 Đối chiếu hóa học pin trên tem với sạc. LiFePO4 không sạc bằng hồ sơ 4,20 V/cell của Li-ion.
+
+## Video Việt Nam: Chinbi Robot (ICTU)
+
+Hoàng Quân, giảng viên Cơ điện tử ICTU, đăng các Facebook Reel ngắn của dự án robot bốn chân Chinbi. Trang dự án ghi trong chú thích là [chinbi.com](https://chinbi.com), đã mở được tháng 10 năm 2026. Cột ngày trong danh sách nguồn để trống, nên trang này không ghi ngày đăng. Mỗi dòng dưới đây là một reel đã đưa vào một bài. Câu xem-cái-gì nằm trong bài đó, và chỉ bám chú thích.
+
+Ba reel không đưa vào khóa: bài đăng lại về công ty robot nước ngoài, chuyến tham quan nhà máy ô tô, và phỏng vấn về startup làm mát trung tâm dữ liệu.
+
+- [Cơ điện tử học làm robot](https://www.facebook.com/reel/1746806056360278) — bài chào mừng, chương 00.
+- [Sinh viên lập trình robot thông minh](https://www.facebook.com/reel/1381152347317660), [Robocon Bắc Ninh 2026](https://www.facebook.com/reel/2015462409114750), [Robocon Bắc Ninh tháng 8 năm 2026](https://www.facebook.com/reel/4471403513091271) — máy trạng thái, chương 03.
+- [Test thiết kế chân](https://www.facebook.com/reel/1615249330240344), [một chân ba bậc tự do](https://www.facebook.com/reel/2974137376266883) — cơ cấu thanh, chương 06.
+- [Test pin drone, ESC cháy](https://www.facebook.com/reel/931720623225817) — pin và an toàn nguồn, chương 07.
+- [Test hệ thống điều khiển](https://www.facebook.com/reel/1092867967065031), [demo robot](https://www.facebook.com/reel/1057849570224248) — firmware teleop, chương 07.
+- [Flight controller, muốn bay ngay](https://www.facebook.com/reel/976436878550867) — PID, chương 08.
+- [Thả ra là bay](https://www.facebook.com/reel/2056881368258089), [UAV vận tải](https://www.facebook.com/reel/1038211995413233), [bước đầu drone vận tải](https://www.facebook.com/reel/1004870148832135) — chu kỳ vòng điều khiển, chương 08.
+- [Dữ liệu 3D từ một vị trí trên trái đất](https://www.facebook.com/reel/2078352426052273) — Gazebo Harmonic, chương 10.
+- [MuJoCo recovery](https://www.facebook.com/reel/1773957523904144), [training bậc thang rồi sim-to-real](https://www.facebook.com/reel/2246938909200876) — checklist sim-to-real, chương 10.
+- [Thuật toán về nhà](https://www.facebook.com/reel/1391050009535827) — tour Nav2, chương 11.
+- [Đi bộ có tải, reinforcement learning](https://www.facebook.com/reel/4089347134533915), [đứng hai chân](https://www.facebook.com/reel/1624642749368249), [hai chân trước / handstand](https://www.facebook.com/reel/2292393271597807), [trèo bậc / nhảy lên cầu thang](https://www.facebook.com/reel/2191042771623926) — mở đầu robot learning, chương 12.

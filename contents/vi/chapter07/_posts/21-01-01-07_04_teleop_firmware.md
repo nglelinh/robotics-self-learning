@@ -226,6 +226,13 @@ Không thêm đồ nếu bài 01 và 02 đã làm thật. Chỗ thiếu thườn
 - [Lazada cáp USB](https://www.lazada.vn/catalog/?q=cap%20micro%20USB%20data), [ESP32](https://www.lazada.vn/catalog/?q=ESP32)
 - [Thế Giới IC ESP32](https://www.thegioiic.com/search?q=ESP32)
 
+## Video tham khảo thực tế
+
+Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi.
+
+- [Test hệ thống điều khiển Chinbi](https://www.facebook.com/reel/1092867967065031). Chú thích: test hệ thống điều khiển Chinbi Robot. Đối chiếu với firmware bài này: có lệnh gửi đi, và có chỗ lệnh phải về không.
+- [Demo robot](https://www.facebook.com/reel/1057849570224248). Chú thích chỉ có hai chữ "Demo robot". Đó là lần mang robot ra chạy sau khi vòng teleop đã có timeout.
+
 ## Bài tập
 
 1. PWM đang áp là 0 và target thành 180. Bao nhiêu bước, bao nhiêu mili giây, thì cầu thấy 180?
