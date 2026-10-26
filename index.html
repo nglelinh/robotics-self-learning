@@ -6,6 +6,6 @@ title: Home
 {% assign page_list = site.categories.home | sort: "order" %}
 {% for page in page_list %}
     {% if page.order %}
-        <p>{{page.content}}</p>
+        <div class="home-section">{{page.content}}</div>
     {% endif %}
 {% endfor %}

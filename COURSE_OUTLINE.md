@@ -6,23 +6,23 @@
 
 ## Chapter map
 
-| Ch | EN | VI | Lessons |
-|----|----|----|--------:|
-| 00 | Introduction, Tracks, Kits & Safety | Giới thiệu, lộ trình, bộ kit & an toàn | 7 |
-| 01 | Electronics, Component ID & Lab Safety | Điện tử, nhận diện linh kiện & an toàn lab | 11 |
-| 02 | Microcontrollers: Arduino, ESP32, Pico | Vi điều khiển: Arduino, ESP32, Pico | 6 |
-| 03 | Embedded Programming Patterns for Robots | Mẫu lập trình nhúng cho robot | 6 |
-| 04 | Sensors & Sensor Package Identification | Cảm biến & nhận diện module cảm biến | 7 |
-| 05 | Actuators, Drivers & Identification | Cơ cấu chấp hành, driver & nhận diện | 7 |
-| 06 | Mechanical Mechanisms, Assembly & CAD-lite | Cơ cấu cơ khí, lắp ráp & CAD nhẹ | 9 |
-| 07 | Capstone A: Diff-Drive + Teleop Firmware | Capstone A: Robot vi sai + firmware teleop | 6 |
-| 08 | Communications & Control Loops | Truyền thông & vòng điều khiển | 5 |
-| 09 | ROS 2 Jazzy Foundations | Nền tảng ROS 2 Jazzy | 6 |
-| 10 | Simulation & micro-ROS | Mô phỏng & micro-ROS | 5 |
-| 11 | Autonomy & Perception Intro | Tự hành & nhận thức mở đầu | 5 |
-| 12 | Modern Robot Learning & Next Paths | Robot learning hiện đại & hướng đi tiếp | 5 |
+| Ch | EN | VI | EN lessons | VI lessons |
+|----|----|----|----------:|----------:|
+| 00 | Introduction, Tracks, Kits & Safety | Giới thiệu, lộ trình, bộ kit & an toàn | 7 | 7 |
+| 01 | Electronics, Component ID & Lab Safety | Điện tử, nhận diện linh kiện & an toàn lab | 11 | 11 |
+| 02 | Microcontrollers: Arduino, ESP32, Pico | Vi điều khiển: Arduino, ESP32, Pico | 6 | 6 |
+| 03 | Embedded Programming Patterns for Robots | Mẫu lập trình nhúng cho robot | 6 | 6 |
+| 04 | Sensors & Sensor Package Identification | Cảm biến & nhận diện module cảm biến | 7 | 7 |
+| 05 | Actuators, Drivers & Identification | Cơ cấu chấp hành, driver & nhận diện | 7 | 7 |
+| 06 | Mechanical Mechanisms, Assembly & CAD-lite | Cơ cấu cơ khí, lắp ráp & CAD nhẹ | 9 | 9 |
+| 07 | Capstone A: Diff-Drive + Teleop Firmware | Capstone A: Robot vi sai + firmware teleop | 6 | 7 |
+| 08 | Communications & Control Loops | Truyền thông & vòng điều khiển | 5 | 7 |
+| 09 | ROS 2 Jazzy Foundations | Nền tảng ROS 2 Jazzy | 6 | 8 |
+| 10 | Simulation & micro-ROS | Mô phỏng & micro-ROS | 5 | 6 |
+| 11 | Autonomy & Perception Intro | Tự hành & nhận thức mở đầu | 5 | 8 |
+| 12 | Modern Robot Learning & Next Paths | Robot learning hiện đại & hướng đi tiếp | 5 | 7 |
 
-**Total EN lessons:** 85 (×2 with VI ≈ 170 files)
+**Total EN lessons:** 85. **Total VI lessons:** 96. Eleven VI-only lessons have no English file; the language switch falls back to the chapter page. Do not renumber existing `order` values, or the EN/VI pairing breaks. New lessons use filename prefix `NN_00` with `order: 0`, or the next integer at the end of the chapter.
 
 ## Emphasis added (2026 refresh)
 
@@ -204,6 +204,8 @@ Optional advanced: MIT Manipulation (Drake) — not required.
 
 ## Chapter 07: Capstone A: Diff-Drive + Teleop Firmware / Capstone A: Robot vi sai + firmware teleop
 
+- **VI only** 07-00 Batteries, power, and safety before assembly (lab)
+  **VI** Pin, nguồn và an toàn trước khi lắp Capstone
 - **EN** 07-01 Assemble chassis, motors, and power (lab)
   **VI** Lắp khung, motor và nguồn
 - **EN** 07-02 Lab: motor driver bring-up and spin test (lab)
@@ -219,6 +221,8 @@ Optional advanced: MIT Manipulation (Drake) — not required.
 
 ## Chapter 08: Communications & Control Loops / Truyền thông & vòng điều khiển
 
+- **VI only** 08-00 Vectors, rotations, and quaternions before TF2 (lab)
+  **VI** Vector, phép quay và quaternion trước TF2
 - **EN** 08-01 Serial protocols beyond println
   **VI** Giao thức serial ngoài println
 - **EN** 08-02 Lab: Wi-Fi and MQTT on ESP32 (lab)
@@ -229,9 +233,13 @@ Optional advanced: MIT Manipulation (Drake) — not required.
   **VI** Động học robot dẫn động vi sai
 - **EN** 08-05 Control-loop timing and jitter
   **VI** Timing vòng điều khiển và jitter
+- **VI only** 08-06 Chapter 08 lab checklist (lab)
+  **VI** Checklist lab chương 08
 
 ## Chapter 09: ROS 2 Jazzy Foundations / Nền tảng ROS 2 Jazzy
 
+- **VI only** 09-00 Linux on the robot computer (lab)
+  **VI** Linux trên máy tính của robot
 - **EN** 09-01 Install ROS 2 Jazzy and a workspace (lab)
   **VI** Cài ROS 2 Jazzy và workspace
 - **EN** 09-02 Nodes, topics, and messages (lab)
@@ -244,6 +252,8 @@ Optional advanced: MIT Manipulation (Drake) — not required.
   **VI** TF2 và hệ tọa độ
 - **EN** 09-06 URDF / xacro robot model basics
   **VI** URDF / xacro cơ bản
+- **VI only** 09-07 Chapter 09 lab checklist (lab)
+  **VI** Checklist lab chương 09
 
 ## Chapter 10: Simulation & micro-ROS / Mô phỏng & micro-ROS
 
@@ -257,6 +267,8 @@ Optional advanced: MIT Manipulation (Drake) — not required.
   **VI** Nối Capstone A với ROS 2
 - **EN** 10-05 Sim-to-real checklist (lab)
   **VI** Checklist sim-to-real
+- **VI only** 10-06 Chapter 10 lab checklist (lab)
+  **VI** Checklist lab chương 10
 
 ## Chapter 11: Autonomy & Perception Intro / Tự hành & nhận thức mở đầu
 
@@ -270,6 +282,12 @@ Optional advanced: MIT Manipulation (Drake) — not required.
   **VI** Nhìn nhanh Behavior Tree
 - **EN** 11-05 MoveIt 2 optional peek
   **VI** Nhìn nhanh MoveIt 2
+- **VI only** 11-06 Capstone B: SLAM in simulation, then a real lidar (lab)
+  **VI** Capstone B: lab SLAM, sim rồi lidar thật
+- **VI only** 11-07 Capstone B: Nav2 in simulation, then the real robot (lab)
+  **VI** Capstone B: lab Nav2, sim rồi xe thật
+- **VI only** 11-08 Chapter 11 lab checklist (lab)
+  **VI** Checklist lab chương 11
 
 ## Chapter 12: Modern Robot Learning & Next Paths / Robot learning hiện đại & hướng đi tiếp
 
@@ -283,3 +301,7 @@ Optional advanced: MIT Manipulation (Drake) — not required.
   **VI** Tổng quan Vision-Language-Action
 - **EN** 12-05 Curated next paths and full references
   **VI** Lộ trình tiếp theo và tài liệu
+- **VI only** 12-06 LeRobot SO-101 arm lab (lab)
+  **VI** Lab tay LeRobot SO-101
+- **VI only** 12-07 Chapter 12 lab checklist (lab)
+  **VI** Checklist lab chương 12

@@ -75,6 +75,14 @@ Bạn không có 2,7 s báo trước bên trong một đoạn đầu hở vòng 
 
 Đặt phác thảo cạnh các số đó. Ở bước khử nhiễu muộn, $$x_t$$ có thể là một chuỗi ngắn mà action đầu gần $$(0.15, 0.48)$$, một đường trái còn nhiễu. Khi đó $$f$$, với ảnh, kéo nó về $$(0.15, 0.50)$$. Ở bước sớm, $$x_t$$ chưa phải đường vòng cái gì cả, và gửi nó lên `cmd_vel` là lái trên nhiễu thuần. Chỉ số $$t$$ trong phác thảo không phải nhịp 50 Hz. Trộn hai đồng hồ là cách một người thực hiện bước "nhiễu" như thể nó là bước "quỹ đạo".
 
+## Cùng ý đó trên tay SO-101
+
+Capstone có hai số $(v, \omega)$. Follower SO-101 có sáu motor: pan, lift, elbow, wrist flex, wrist roll, gripper. Hai demonstration gắp một khối từ hai phía là hai vector sáu chiều. Trung bình từng khớp có thể là một tư thế đi xuyên khối, cùng kiểu với yaw bị triệt khi vòng ghế. Diffusion Policy, nếu train trên dataset của chính tay đó, rút một trong hai cách gắp. Nó không biết gì về `cmd_vel` của xe trừ khi card action của bạn là $(v, \omega)$.
+
+Trang imitation của LeRobot, lúc khóa học đối chiếu, ví dụ `lerobot-train` đang để `--policy.type=act`. Tên `diffusion` là subclass trong mã LeRobot, không phải cờ bạn đoán. Lab tay [bài SO-101]({% multilang_post_url contents/chapter12/12_06_so101_arm_lab %}) là chỗ ghi một episode hoặc viết giấy hoãn, và là chỗ mở file cấu hình trước khi đổi `policy.type`. Bài này vẫn không yêu cầu GPU.
+
+![Sáu khớp không phải vector của một VLA khác thân]({{ site.imgurl }}/generated/ch12_so101_action.png)
+
 ## Lab
 
 Mở trang dự án [diffusion-policy.cs.columbia.edu](https://diffusion-policy.cs.columbia.edu/) và abstract tại [arXiv:2303.04137](https://arxiv.org/abs/2303.04137). Bạn tìm câu khẳng định policy mô hình một phân phối trên chuỗi action, và một hình nào đó cho thấy quỹ đạo hiện ra hoặc một việc đa mode. Đừng đi theo link "train" hoặc "download checkpoint" quá mức đọc để biết nó có tồn tại.

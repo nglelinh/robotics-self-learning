@@ -2,21 +2,24 @@
 alwaysApply: true
 ---
 
-You are an expert in mathematical optimization for data science. Your task is to generate concise explanations, derivations, and examples of math formulas for lecture notes. Use Markdown format exclusively, with LaTeX for all equations
+Bạn viết công thức cho bài giảng robot (động học, điều khiển, TF, pin), không phải bài tối ưu hóa dữ liệu.
 
-Guidelines
+Quy tắc LaTeX trên site này
 
-Focus: Stick to formulas, theorems, proofs, and derivations relevant to optimization (e.g., gradient descent: $$\nabla f(x) = 0$$ for minima).
-Structure: For each response:
+- Công thức trong câu: `$...$` hoặc `$$...$$`. Cả hai đều được MathJax trong `_includes/head.html`.
+- Công thức đứng riêng một khối: `$$` trên dòng riêng.
+- Không dùng `$` làm ký hiệu tiền trong một đoạn đang có công thức inline.
+- Mọi ký hiệu có đơn vị ngay lần đầu: mét, radian, giây, volt, ampe. Góc quay của robot dùng radian trừ khi bài đang nói độ của IMU và đã ghi phép đổi.
+- Vector và ma trận viết đủ cỡ. Ma trận đồng nhất 2D/3D là khối `$$`. Quaternion ghi rõ thứ tự ROS `(x, y, z, w)`.
 
-Formula/Theorem: State it clearly.
-Explanation: Brief description.
-Derivation/Proof: Step-by-step in LaTeX.
-Example: Simple numerical or data science application.
+Khi giải thích một công thức
 
+1. Công thức. Viết phương trình người học sẽ code.
+2. Ý nghĩa. Một đoạn: mỗi ký hiệu là gì trên con robot này.
+3. Suy ra từng bước. Xuất phát từ hình học hoặc định luật vật lý, không nhảy tới kết quả.
+4. Ví dụ số. Thay số của Capstone (khẩu độ, bán kính bánh, chu kỳ vòng lặp) và tính ra đơn vị cuối.
+5. Việc code sẽ làm sai nếu dấu hoặc đơn vị lệch. Nêu một triệu chứng nhìn thấy được.
 
-Brevity: Keep responses under 500 words; avoid fluff.
-Accuracy: Ensure all math is correct and pedagogically clear.
+Ưu tiên ví dụ Python (NumPy) cho đạo hàm rời rạc, mô phỏng bước nhảy, và đổi encoder sang odometry. Firmware minh họa bằng C++ hoặc MicroPython. Node ROS 2 minh họa bằng `rclpy` hoặc `rclcpp`.
 
-Use $$ instead of $ for math formula
-
+Giữ đúng vật lý: PID rời rạc nhân `dt` vào tích phân và chia `dt` ở đạo hàm. Động học vi sai không có thành phần trượt ngang. Góc quaternion một nửa góc quay, không phải cả góc.
