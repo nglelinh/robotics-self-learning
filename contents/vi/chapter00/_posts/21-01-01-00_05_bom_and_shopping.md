@@ -33,7 +33,7 @@ Teleop ở chương 07 hỏng theo những kiểu rất nhàm: driver nuốt m�
 
 BOM là bảng, mỗi dòng là một thứ phải có thật trên bàn, kể cả tua-vít bạn đã có sẵn. BOM không phải ảnh giỏ hàng. Mỗi dòng phải trả lời được: đó là gì, mua mấy cái, thông số nào thì mới chấp nhận, nó làm gì trên robot này, thay bằng gì được, mua ở đâu. Dòng không có thông số thì bạn không phân biệt được hàng thay đúng và hàng rẻ nhìn giống.
 
-Robot mặc định của khóa học là **xe vi sai**: hai bánh dẫn động, một bánh đa hướng, vi điều khiển logic 3,3 V, driver MOSFET, một cảm biến khoảng cách, và pin motor không bao giờ cấp dòng vào chân 3,3 V. IMU, encoder bánh xe, cảm biến ToF là dòng mua sau, khi xe đã chạy theo lệnh. Track B thêm máy Ubuntu 24.04 cho ROS 2 Jazzy. Đừng mua LiDAR cho có cảm giác sẵn sàng.
+Robot mặc định của khóa học là **xe vi sai**: hai bánh dẫn động, một bánh đa hướng, vi điều khiển logic 3,3 V, driver MOSFET, một cảm biến khoảng cách, và pin motor không bao giờ cấp dòng vào chân 3,3 V. IMU, encoder bánh xe, cảm biến ToF là dòng mua sau, khi xe đã chạy theo lệnh. Track B thêm máy Ubuntu 24.04 cho ROS 2 Jazzy. Đừng mua LiDAR ở tuần đầu cho có cảm giác sẵn sàng. Lidar mặt phẳng (LD06 hoặc RPLIDAR A1), Pi 5 hoặc Jetson, và pack có BMS nằm ở đợt 4 bên dưới, đúng chương sẽ dùng chúng.
 
 ```
 USB 5 V ---- logic ESP32 / Pico (GPIO 3,3 V)
@@ -115,6 +115,23 @@ Dung lượng có trần vật lý. Cell 18650 thật hiếm khi quá khoảng 3
 Cell hobby thường **không** có mạch bảo vệ. Tua-vít chạm hai cực có thể xả hàng chục ampe. Đừng để cell trong túi cùng chìa khóa. Đừng sạc trên giường. Dừng nếu cell phồng, dưới khoảng 2,5 V, hoặc nóng. Pin vuông 9 V là lỗi kinh điển còn lại: nội trở sụp ngay khi motor kẹt, vi điều khiển reset trong khi driver vẫn đang được lệnh chạy.
 
 Khi học trên bàn, nuôi vi điều khiển bằng USB. Nối mass USB với mass driver. Bật pin motor sau cùng, và chỉ khi bánh đã được nhấc.
+
+## Đợt 4 — máy trên xe, lidar, và pin (khi tới chương 07, 09, 11)
+
+Đợt 1 đến 3 ở trên vẫn là giỏ để xe chạy teleop. Ba món sau **không** nằm trong giỏ tuần đầu. Mua khi bài cần chúng. Cột giá để trống: listing đổi, và bài này không bịa số. Điền giá hôm bạn mở trang.
+
+| Món | Khi nào | Việc trên lộ trình | Trang đã mở (tìm, không phải một SKU) | Giá (điền khi mua) |
+| --- | --- | --- | --- | --- |
+| Raspberry Pi 5, RAM đủ để Ubuntu Server 24.04 | Đầu chương 09 nếu xe sẽ rời laptop | Máy chạy Jazzy, agent, bridge | [Hshop, raspberry pi](https://hshop.vn/search?q=raspberry+pi), [Shopee, Raspberry Pi 5](https://shopee.vn/search?keyword=raspberry%20pi%205) | |
+| Jetson Orin Nano | Chỉ khi bạn cần GPU trên xe | JetPack 6 là Ubuntu 22.04, không cài Jazzy. JetPack 7 là Ubuntu 24.04. Đọc [quick start](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/quick_start.html) trước khi trả tiền | Tìm `Jetson Orin Nano` trên [Shopee](https://shopee.vn/search?keyword=jetson%20orin%20nano) hoặc nhà phân phối bạn kiểm được hóa đơn | |
+| Lidar mặt phẳng LD06 hoặc RPLIDAR A1 | Chương 11, lab SLAM thật | `/scan` cho `slam_toolbox`. ToF một tia không thay được | [Hshop, lidar](https://hshop.vn/search?q=lidar), [Slamtec A1](https://www.slamtec.com/en/Lidar/A1), [LDRobot](https://www.ldrobot.com/) | |
+| LiPo 2S có giắc cân bằng, hoặc LiFePO4 đúng sạc, hoặc 18650 đã có ở đợt 3 | Trước bài lắp chương 07 | VM. Không dùng chung hồ sơ sạc | [Hshop, lipo](https://hshop.vn/search?q=lipo). Cell 18650 vẫn là link trong mục nguồn bên dưới | |
+| BMS đúng số cell và đúng hóa học, nếu pack chưa có mạch | Cùng lúc với pin | Cắt quá áp / dưới áp. Không thay cầu chì | Tìm `BMS 2S` trên [Shopee](https://shopee.vn/search?keyword=bms%202s) hoặc [Lazada](https://www.lazada.vn/catalog/?q=bms%202s). Đọc tem Li-ion hay LiFePO4 | |
+| Module buck và cầu chì 2 A, 3 A | Chương 07 | 5,0 V cho ESP32, chì trên cực dương | Đã nói ở bài pin chương 07. [Thế Giới IC](https://www.thegioiic.com/), [IC Đây Rồi](https://icdayroi.com/) | |
+
+Pi 5 và Jetson là hai cách có một máy Ubuntu trên xe, không phải mua cả hai. Lidar là một trong hai kiểu, không phải cả LD06 lẫn A1. Bài [pin, nguồn và an toàn]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}) là chỗ tính cầu chì. Bài [Linux trên SBC]({% multilang_post_url contents/chapter09/09_00_linux_on_sbc %}) là chỗ chọn 24.04 chứ không phải ảnh mới hơn.
+
+Câu "đừng mua LiDAR cho có cảm giác sẵn sàng" ở đầu bài vẫn đúng với tuần đầu. Chương 11 là lúc lidar có việc.
 
 ## Cách mua
 

@@ -19,7 +19,7 @@ Bạn cài ROS 2 Jazzy Jalisco trên Ubuntu 24.04 từ gói deb chính thức, t
 
 ## Kiến thức cần trước
 
-Bạn dùng được terminal: `cd`, `sudo apt`, và một trình soạn thảo. Ubuntu 24.04 (Noble) là nền tảng Tier-1 của Jazzy. Máy ảo hoặc PC mini cũ là đủ. ESP32 của chương 02–08 ở trên robot; nó không chạy `colcon`. Khung serial chương 08 là thứ máy này sẽ nói sau. Bài này chưa cần lidar hay Pi.
+Nếu máy sẽ ngồi trên xe là Pi 5 hoặc Jetson, làm [Linux trên máy tính của robot]({% multilang_post_url contents/chapter09/09_00_linux_on_sbc %}) trước hoặc cùng buổi: ảnh phải là Ubuntu 24.04, và Jetson còn Jammy thì chưa được cài Jazzy. Bạn dùng được terminal: `cd`, `sudo apt`, và một trình soạn thảo. Ubuntu 24.04 (Noble) là nền tảng Tier-1 của Jazzy. Máy ảo hoặc PC mini cũ là đủ. ESP32 của chương 02–08 ở trên robot; nó không chạy `colcon`. Khung serial chương 08 là thứ máy này sẽ nói sau. Bài này chưa cần lidar hay Pi.
 
 ## Vì sao bài này nằm trên lộ trình
 

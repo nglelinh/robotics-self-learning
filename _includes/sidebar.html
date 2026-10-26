@@ -66,6 +66,10 @@
       {% endif %}
     {% endif %}
     
+    <a class="sidebar-nav-item" href="{{ '/home/contents/' | absolute_url }}">{% if current_lang == 'vi' %}Mục lục{% else %}Contents{% endif %}</a>
+    <a class="sidebar-nav-item" href="{{ '/home/study-schedule/' | absolute_url }}">{% if current_lang == 'vi' %}Lịch 24 tuần{% else %}24-week plan{% endif %}</a>
+    <a class="sidebar-nav-item" href="{{ '/home/resources/' | absolute_url }}">{% if current_lang == 'vi' %}Tài nguyên{% else %}Resources{% endif %}</a>
+
     <span class="sidebar-nav-item">Currently v{{ site.version }}</span>
   </nav>
 

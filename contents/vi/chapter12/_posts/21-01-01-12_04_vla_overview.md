@@ -59,6 +59,18 @@ Một con số làm embodiment cụ thể. Cầu của bạn nhận hai số th�
 
 Ô laptop của RT-2, để câu trả lời kỳ vọng hiện ra trước khi bạn chép: train RT-2 ở nhà là không. Tinh chỉnh chung các xương sống vision-language mà các bài đó xuất phát không phải việc của máy lớp học. Đọc [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) là toàn bộ bài nếu bạn chọn cột đó.
 
+## SO-101 không phải hàng trong bảng
+
+Follower SO-101 ghi một action sáu số, một số mỗi motor Feetech, tên lấy từ dataset bạn ghi chứ không lấy từ một bài báo VLA. RT-1, RT-2, OpenVLA và pi0 xuất action của thân đã sinh ra demonstration của họ. Không có ô nào trong các bài đó tên `shoulder_pan` của SO-101. Ánh xạ "ô thứ tư là cổ tay" là một bộ điều khiển mới, và lần chạy đầu vẫn phải tắt torque hoặc giữ tay trên giá.
+
+Lab làm việc này nằm ở [bài tay SO-101]({% multilang_post_url contents/chapter12/12_06_so101_arm_lab %}). Nếu chưa có tay, dòng thêm vào bảng tối nay là:
+
+| Hệ | Đầu vào | Không gian action | Có phải 6 khớp SO-101? | Laptop tối nay? |
+| --- | --- | --- | --- | --- |
+| SO-101 của bạn | Ảnh nếu bạn gắn camera, cộng trạng thái khớp | 6 số, đơn vị đúng file dataset | Có, vì đó là thân bạn định ghi | Đọc và calibrate: có, khi tay đã ở trên bàn. Train: không, nếu không có GPU |
+
+Dòng này không thay hai dòng VLA của lab bên dưới. Nó chặn việc điền "có" vào ô Twist.
+
 ## Lab
 
 Chọn **hai** hệ trong danh sách: RT-2, Open X-Embodiment, OpenVLA, pi0. Đừng chọn RT-1. Dòng đó là ví dụ đã làm. Mở các trang, không mở file trọng số.

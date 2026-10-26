@@ -136,6 +136,13 @@ Các trang tìm:
 
 Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một tỉ số.
 
+## Video tham khảo thực tế
+
+Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi.
+
+- [Test thiết kế chân](https://www.facebook.com/reel/1615249330240344). Chú thích: test thiết kế chân. Xem như một cơ cấu chân đang được kiểm trên bàn, trước khi nó thành một khâu trong chuỗi động học.
+- [Một chân, ba bậc tự do](https://www.facebook.com/reel/2974137376266883). Chú thích: một chân có 3 bậc tự do. Ba khớp là ba biến. Bài này chưa biến ba biến đó thành một quỹ đạo đầu chân.
+
 ## Bài tập
 
 1. Các khâu 25 mm, 40 mm, 45 mm và 60 mm. $$s + l < p + q$$ có đúng không? Nếu cố định khâu 45 mm và dẫn khâu 25 mm, các bạn chờ chuyển động gì?

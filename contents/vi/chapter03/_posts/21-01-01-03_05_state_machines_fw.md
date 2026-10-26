@@ -198,6 +198,14 @@ Không motor, không VM, không pin. LED là "động cơ đang được phép."
 
 Nếu LED bật ngay khi sketch vừa khởi động, `apply` không bị chặn bởi TELEOP, hoặc `setup` đã ghi một duty và vòng lặp không ghi lại. Lỗi đó là chủ đề của checklist chương.
 
+## Video tham khảo thực tế
+
+Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi.
+
+- [Sinh viên đang lập trình robot thông minh](https://www.facebook.com/reel/1381152347317660). Chú thích: sinh viên Cơ điện tử, Khoa Kỹ thuật và Công nghệ ICTU, đang lập trình robot. Đối chiếu với bài: chương trình robot là các trạng thái và sự kiện, không phải một vòng `loop` không tên.
+- [Lập trình robot cho Robocon Bắc Ninh 2026](https://www.facebook.com/reel/2015462409114750). Chú thích: sinh viên đang lập trình robot cho Robocon Bắc Ninh 2026. Cuộc thi cũng là một máy trạng thái: chờ, chạy, dừng, lỗi.
+- [Chuẩn bị Robocon Bắc Ninh, tháng 8 năm 2026](https://www.facebook.com/reel/4471403513091271). Chú thích: sinh viên đang lập trình robot để chuẩn bị Robocon Bắc Ninh tháng 8 năm 2026. Cùng việc với clip trên, mốc thời gian trong chú thích là tháng 8.
+
 ## Bài tập
 
 1. Đi vết này và nêu trạng thái cùng duty sau mỗi sự kiện: vừa boot; `F`; im 300 ms; `F` lần nữa mà không có nút; nút; `F`.

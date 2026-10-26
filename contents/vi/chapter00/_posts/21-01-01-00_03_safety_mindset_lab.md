@@ -117,6 +117,8 @@ Sợi echo trong cùng đống sắp đáp vào GPIO ESP32. Cực đại tuyệt
 
 </details>
 
+Trước khi lắp khung ở chương 07, làm tiếp [Pin, nguồn và an toàn trước khi lắp Capstone]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}). Bài đó tách Li-ion 18650, LiPo và LiFePO4, chọn cầu chì, và vẽ cây buck. Thẻ một trang của buổi này vẫn là luật. Bài kia là sơ đồ dây.
+
 ## Đọc thêm
 
 - [Mức logic, SparkFun](https://learn.sparkfun.com/tutorials/logic-levels) — vì sao 5 V và 3,3 V không thay nhau, tức bài toán chân echo thu nhỏ.

@@ -118,6 +118,85 @@ assert abs(body_from_wheels(*wheel_speeds(0.2, 0.5, 0.16), 0.16)[1] - 0.5) < 1e-
 
 Quay tại chỗ, $$v = 0$$, $$\omega = 1,0$$, $$L = 0,16$$: $$v_R = 0,08$$, $$v_L = -0,08$$. Nếu cả hai số đều dương, bạn đã cộng $$\omega L$$ vào cả hai bánh thay vì tách dấu.
 
+## Từ số đếm encoder tới tư thế
+
+Động học ở trên dùng tốc độ vành. Encoder đưa số đếm. Gọi $N$ là số đếm mỗi vòng trục ra, $r$ là bán kính lăn tính bằng mét, $\Delta c_L$ và $\Delta c_R$ là số đếm mới trong một nhịp (có dấu):
+
+$$
+\Delta s_L = \frac{2\pi r}{N}\Delta c_L, \qquad
+\Delta s_R = \frac{2\pi r}{N}\Delta c_R
+$$
+
+$$
+\Delta s = \frac{\Delta s_R + \Delta s_L}{2}, \qquad
+\Delta \psi = \frac{\Delta s_R - \Delta s_L}{L}
+$$
+
+Trong nhịp đó xe đi trên cung tròn nếu hai bánh giữ tốc độ. Hướng dùng để chiếu cung xuống mặt phẳng là hướng ở **giữa** nhịp, không phải hướng lúc bắt đầu nhịp:
+
+$$
+x \leftarrow x + \Delta s \cos\left(\psi + \frac{\Delta\psi}{2}\right)
+$$
+
+$$
+y \leftarrow y + \Delta s \sin\left(\psi + \frac{\Delta\psi}{2}\right)
+$$
+
+$$
+\psi \leftarrow \psi + \Delta\psi
+$$
+
+Chỉ dùng $\psi$ đầu nhịp thì mỗi cú quay bị tính trễ nửa bước. Đi thẳng thì $\Delta\psi = 0$, hai cách trùng. Quay tại chỗ thì $\Delta s = 0$, $x$ và $y$ đứng yên, chỉ $\psi$ đổi. Đó là hai ca mà phép điểm giữa chính xác từng milimét nếu số đếm không bị làm tròn.
+
+Ví dụ khóa học: $r = 0{,}033$ m, $L = 0{,}16$ m, $N = 1440$. Mỗi đếm là
+
+$$
+\frac{2\pi \cdot 0{,}033}{1440} \approx 1{,}440 \times 10^{-4}~\mathrm{m}
+$$
+
+Một mét đi thẳng, hai bánh cùng chiều, cần khoảng 6945 đếm mỗi bánh. Quay trái $\pi/2$ tại chỗ cần khoảng 873 đếm, bánh phải dương và bánh trái âm, vì cung của mỗi bánh là $(L/2)\cdot(\pi/2)$. Đi 1 m thẳng, quay trái đúng góc đó, rồi đi thêm 0,5 m: tư thế cuối gần $(1{,}00~\mathrm{m},\ 0{,}50~\mathrm{m},\ \pi/2)$. Phần lệch nhỏ hơn một milimét trên hình là do làm tròn số đếm về số nguyên trước khi chia nhịp, không phải do công thức.
+
+![Đường odometry: thẳng, quay trái, thẳng]({{ site.imgurl }}/generated/ch08_odom_path.png)
+
+```python
+import math
+
+def pose_from_counts(counts_l, counts_r, radius, track, counts_per_rev):
+    """Từng phần tử là số đếm mới trong một nhịp, có dấu. Tư thế trả về theo mét và radian."""
+    meters = 2.0 * math.pi * radius / counts_per_rev
+    x = y = psi = 0.0
+    for c_l, c_r in zip(counts_l, counts_r):
+        ds_l = c_l * meters
+        ds_r = c_r * meters
+        ds = 0.5 * (ds_r + ds_l)
+        dpsi = (ds_r - ds_l) / track
+        psi_mid = psi + 0.5 * dpsi
+        x += ds * math.cos(psi_mid)
+        y += ds * math.sin(psi_mid)
+        psi += dpsi
+    return x, y, psi
+
+r, L, N = 0.033, 0.16, 1440
+meters = 2.0 * math.pi * r / N
+c_straight = int(round(1.0 / meters))       # ~6945
+c_turn = int(round((L / 2) * (math.pi / 2) / meters))  # ~873
+c_short = int(round(0.50 / meters))          # ~3472
+# 50 nhịp thẳng, 20 nhịp quay, 25 nhịp thẳng. Tổng đếm giữ nguyên.
+ticks = (
+    [(c_straight / 50, c_straight / 50)] * 50
+    + [(-c_turn / 20, c_turn / 20)] * 20
+    + [(c_short / 25, c_short / 25)] * 25
+)
+x, y, psi = pose_from_counts([a for a, _ in ticks], [b for _, b in ticks], r, L, N)
+assert abs(x - 1.0) < 0.01 and abs(y - 0.5) < 0.01
+assert abs(psi - math.pi / 2) < 0.02
+print(round(x, 4), round(y, 4), round(psi, 4))
+```
+
+`print` gần `1.0 0.5 1.5708`. Nếu $y$ ra âm, bạn đã đảo trái và phải trong lúc quay.
+
+Hàm này là thân của message `nav_msgs/Odometry` sau này: $x$, $y$, yaw đổi thành quaternion bài toán TF, và vận tốc lấy $\Delta s / \Delta t$, $\Delta\psi / \Delta t$. Đừng nhét số đếm thô vào ô `linear.x`.
+
 ## Lab
 
 1. Đặt robot lên bàn, bánh trên không hoặc trên giá. Đo $$L$$ ba lần và ghi trung bình theo mét.

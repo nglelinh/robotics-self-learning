@@ -22,7 +22,7 @@ Bài này biến khung thành robot, nhưng bánh chưa được phép quay bằ
 
 ## Kiến thức cần có
 
-Chương 04 đã nói cảm biến và vi điều khiển phải chung đất. Chương 05 là cầu H: TB6612 ngủ khi STBY thấp, và 7805 trên mạch L298N không phải nguồn cho ESP32. Chương 06 để lại hai kích thước, bề rộng $$b$$ giữa hai vết tiếp xúc lốp và bán kính lăn $$r$$ từ một vòng đẩy trên giấy. Bàn thí nghiệm mẫu của khóa này có $$b = 0{,}15~\mathrm{m}$$ và $$r = 31{,}2~\mathrm{mm}$$. Chép hai số ấy vào ghi chú hôm nay; bài này chưa dùng chúng để chạy. Bạn đọc được điện áp một chiều. Chưa có node ROS và chưa có PWM.
+Bài ngay trước, [pin và cây nguồn]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}), đã gọi tên hóa học của pack và đã vặn buck về 5,0 V khi ESP32 còn nằm ngoài mạch. Chương 04 đã nói cảm biến và vi điều khiển phải chung đất. Chương 05 là cầu H: TB6612 ngủ khi STBY thấp, và 7805 trên mạch L298N không phải nguồn cho ESP32. Chương 06 để lại hai kích thước, bề rộng $$b$$ giữa hai vết tiếp xúc lốp và bán kính lăn $$r$$ từ một vòng đẩy trên giấy. Bàn thí nghiệm mẫu của khóa này có $$b = 0{,}15~\mathrm{m}$$ và $$r = 31{,}2~\mathrm{mm}$$. Chép hai số ấy vào ghi chú hôm nay; bài này chưa dùng chúng để chạy. Bạn đọc được điện áp một chiều. Chưa có node ROS và chưa có PWM.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
