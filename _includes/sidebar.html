@@ -19,22 +19,41 @@
     {% assign current_lang = page.lang | default: site.default_lang %}
     {% assign pages_list = site.pages | where: "lang", current_lang | sort: "chapter" %}
     
-    <!-- Hiển thị các chương có sẵn cho ngôn ngữ hiện tại -->
+    <!-- Mỗi chương là một mục. Danh sách bài sinh từ post cùng lang + chapter, xếp theo order. -->
     {% for node in pages_list %}
       {% if node.title != null and node.chapter %}
         {% if node.layout == "page" %}
           {% assign is_hidden = node.hidden | default: false %}
           {% unless is_hidden %}
-            <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ node.url | absolute_url }}">
-              {{node.chapter}}. {{ node.title }}
-              {% if node.lesson_type %}
-                {% if node.lesson_type == 'required' %}
-                  <span class="lesson-badge required">{% t required %}</span>
-                {% elsif node.lesson_type == 'optional' %}
-                  <span class="lesson-badge optional">{% t optional %}</span>
+            {% assign chapter_lessons = site.posts | where_exp: "item", "item.lang == current_lang and item.chapter == node.chapter" | sort: "order" %}
+            <div class="sidebar-chapter{% if page.chapter == node.chapter %} is-current{% endif %}">
+              <input type="checkbox" class="sidebar-chapter-check" id="sidebar-ch-{{ current_lang }}-{{ node.chapter }}"{% if page.chapter == node.chapter %} checked{% endif %}>
+              <div class="sidebar-chapter-head">
+                <a class="sidebar-nav-item sidebar-chapter-link{% if page.url == node.url %} active{% endif %}" href="{{ node.url | absolute_url }}">
+                  {{ node.chapter }}. {{ node.title }}
+                  {% if node.lesson_type %}
+                    {% if node.lesson_type == 'required' %}
+                      <span class="lesson-badge required">{% t required %}</span>
+                    {% elsif node.lesson_type == 'optional' %}
+                      <span class="lesson-badge optional">{% t optional %}</span>
+                    {% endif %}
+                  {% endif %}
+                </a>
+                {% if chapter_lessons.size > 0 %}
+                  <label class="sidebar-chapter-toggle" for="sidebar-ch-{{ current_lang }}-{{ node.chapter }}">
+                    <span class="sidebar-chevron" aria-hidden="true"></span>
+                    <span class="visually-hidden">{% if current_lang == 'vi' %}Mở danh sách bài{% else %}Show lessons{% endif %}</span>
+                  </label>
                 {% endif %}
+              </div>
+              {% if chapter_lessons.size > 0 %}
+                <div class="sidebar-lessons">
+                  {% for lesson in chapter_lessons %}
+                    <a class="sidebar-lesson{% if page.url == lesson.url %} active{% endif %}" href="{{ lesson.url | absolute_url }}">{{ lesson.title }}</a>
+                  {% endfor %}
+                </div>
               {% endif %}
-            </a>
+            </div>
           {% endunless %}
         {% endif %}
       {% endif %}
