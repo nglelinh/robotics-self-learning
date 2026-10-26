@@ -57,6 +57,10 @@ Train tai nha: khong
 | "CUDA out of memory" trong ô đạt | Lab không chấm GPU. Viết đoạn văn |
 | Bảng VLA để Twist là có | Đọc lại embodiment. Viết không |
 
+## Video tham khảo
+
+- **Xem trước:** [How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)](https://www.youtube.com/watch?v=7tGT8hqRSAo) — Brogan M. Pratt, tiếng Anh. Checklist chương hỏi một lần teleop hoặc một tờ dataset card. Xem tay SO-101 trước khi tick đường có phần cứng.
+
 ## Bài tập
 
 1. Cửa nào trượt nếu đoạn diffusion đúng nhưng card không có `fps`?

@@ -140,6 +140,12 @@ Không có gì chuyển động. Chưa có subscriber nào cầm động cơ. S�
 
 Không phần cứng. Tùy chọn sau: Pi 5 của bài 09-01 nếu bạn muốn đồ thị này rời laptop. Đừng mua “kit robot ROS” tuần này chỉ để thấy `/chatter`.
 
+## Video tham khảo
+
+- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Node và topic là hai danh từ bài này viết code. Xem một publisher và một subscriber.
+- [ROS2 & F1TENTH #01 | ROS2 là gì? Workspace, Package, Node](https://www.youtube.com/watch?v=UJ7zkUJnVKw) — Nhat Tran, tiếng Việt. Workspace, package, node bằng tiếng Việt. Tên distro trên máy bạn vẫn là Jazzy.
+- [ROS 2 Series #4 | Viết template ROS2 Python section | TeslaEdison](https://www.youtube.com/watch?v=03kUlBnH7gg) — TeslaEdison, tiếng Việt. Khung một node Python. Giữ API rclpy của Jazzy nếu video dùng chữ ký cũ.
+
 ## Bài tập
 
 1. Một câu: vì sao hai terminal cùng echo `/chatter` được? Gợi ý: topic là bus, không phải cuộc gọi.

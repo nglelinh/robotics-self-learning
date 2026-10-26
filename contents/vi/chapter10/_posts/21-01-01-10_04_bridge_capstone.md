@@ -286,6 +286,11 @@ Phép kiểm yaw in `OK V,-8,8`. Trên board thật, cả hai bánh quay tiến 
 
 Không có linh kiện mới. Buổi chạy khô là `socat` và Python. Bản phần cứng dùng Capstone và cáp USB bạn đã có. Chỉ tìm “ESP32” trên [hshop.vn](https://hshop.vn/) nếu board đó đã chết. DevKit thay trên Shopee là `ESP32 DevKit V1 30 chân`, khoảng 2026 khoảng 80.000–180.000 đồng, kiểm tra trước khi trả. Đừng nuôi động cơ từ cáp USB đó.
 
+## Video tham khảo
+
+- **Xem trước:** [How to start develop micro-ROS on ESP32 quickly!](https://www.youtube.com/watch?v=48SxC6LBVs8) — stepbystep-robotics, tiếng Anh. Đường từ firmware ESP32 lên graph ROS 2. Capstone A là phía MCU của cây đó.
+- [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Topic cmd_vel phải có người nhận. Nhìn graph trước khi đổ lỗi cho motor.
+
 ## Bài tập
 
 1. Tính số nguyên trên dây cho $$v = 0.2$$ m/s và $$\omega = 0.5$$ rad/s với $$L = 0.16$$ và tỉ lệ 0,5 m/s. Gợi ý: vành trái 0,16 m/s thành 32, vành phải 0,24 m/s thành 48, nên payload là `V,32,48`.

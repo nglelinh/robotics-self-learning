@@ -154,6 +154,11 @@ Chỉ phần mềm, cho đến khi bạn muốn một máy robot không phải l
 
 Từ khóa Shopee nếu Hshop hết: `Raspberry Pi 5 4GB chính hãng`. Tránh tin chỉ bán “vỏ case.” ESP32 vẫn là máy động cơ. Pi, về sau, là máy ROS.
 
+## Video tham khảo
+
+- **Xem trước:** [How to Correctly Install ROS2 Jazzy Jalisco in Linux Ubuntu 24.04 (Noble) - ROS2 Tutorial](https://www.youtube.com/watch?v=08o46x5SfJM) — Aleksandar Haber PhD, tiếng Anh. Cài Jazzy trên Ubuntu 24.04. Đối chiếu từng lệnh apt với bài; đừng source thêm distro khác.
+- [ROS 2 Jazzy + Ubuntu 24.04: Complete Installation Guide!](https://www.youtube.com/watch?v=CSsp7LcBD-Y) — Robotics Unboxed, tiếng Anh. Cùng việc, ngắn hơn. Dùng để kiểm thứ tự source trước khi tạo workspace.
+
 ## Bài tập
 
 1. Dán kết quả `printenv ROS_DISTRO` và `which ros2` vào `lab-notes.md`. Gợi ý: cả hai phải nói jazzy và `/opt/ros/jazzy/...`.

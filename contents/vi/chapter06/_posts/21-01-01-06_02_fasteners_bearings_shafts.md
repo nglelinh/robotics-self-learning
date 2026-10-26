@@ -111,6 +111,12 @@ Tìm và so hai người bán. Giá dịch chuyển.
 - [Lazada: bạc đạn 608](https://www.lazada.vn/catalog/?q=b%E1%BA%A1c%20%C4%91%E1%BA%A1n%20608)
 - [Thế Giới IC: ốc vít](https://www.thegioiic.com/search?q=%E1%BB%91c%20v%C3%ADt)
 
+## Video tham khảo
+
+- **Xem trước:** [How to Measure Screws & Bolts - US & Metric Sizing | Fasteners 101](https://www.youtube.com/watch?v=78R1QXL9ijM) — Albany County Fasteners, tiếng Anh. Đo ren và chiều dài ốc. Đơn vị inch và mét không trộn trên cùng một lỗ.
+- [What is Bearing? Types of Bearings and How they Work?](https://www.youtube.com/watch?v=8q25EUszBSI) — The Engineers Post, tiếng Anh. Bạc đạn giữ trục quay. Xem loại bạc đạn trước khi siết khớp nối.
+- [How to Identify Thread Pitch and Size | Tech Tips | Swagelok (2020)](https://www.youtube.com/watch?v=Gdvtw0pTAOs) — Swagelok, tiếng Anh. Bước ren. Dùng khi hai ốc trông cùng đường kính nhưng không vào cùng đai ốc.
+
 ## Bài tập
 
 1. Một con ốc đo 2,9 mm qua đỉnh ren và tiến 0,5 mm mỗi vòng. Tên gọi của nó là gì, và sáu vòng nó tiến bao xa?

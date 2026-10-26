@@ -96,6 +96,11 @@ Cùng buổi chiều một viên 18650 đo 2,1 V và có người đưa TP4056 "
 
 Sợi echo trong cùng đống sắp đáp vào GPIO ESP32. Cực đại tuyệt đối của pad đó không phải 5 V, nên dây chờ mạch dịch mức. Điện áp motor là lệnh cấm cùng loại, chỉ lớn hơn.
 
+## Video tham khảo
+
+- **Xem trước:** [What is ESD and How to Prevent it – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=pWhtyz-UFZc) — DigiKey, tiếng Anh. ESD: vì sao chạm linh kiện khi chưa xả tĩnh điện làm hỏng board trước khi robot chạy.
+- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Cầu chì làm gì trên đường nguồn. Đặt cạnh quy tắc ngắt nguồn của bài này.
+
 ## Bài tập
 
 Đây là tình huống. Viết hành động, không viết định nghĩa.

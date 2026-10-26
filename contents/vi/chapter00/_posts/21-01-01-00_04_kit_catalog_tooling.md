@@ -105,6 +105,11 @@ $$
 
 đồng. Với UT33D+ tổng ngăn kéo trống là 494000 ₫. Quân ghi cả hai con số, ngày 23 tháng 9 năm 2026, và không đặt oscilloscope.
 
+## Video tham khảo
+
+- **Xem trước:** [EEVblog 1636 - Ultimate Multimeter Beginners Guide!](https://www.youtube.com/watch?v=52w3xeXrMU8) — EEVblog, tiếng Anh. Đồng hồ vạn năng là dụng cụ đo của bàn lab. Xem cách chọn thang đo trước khi mua thêm đồ.
+- [iFixit's Soldering 101: Beginners Guide](https://www.youtube.com/watch?v=rK38rpUy568) — iFixit, tiếng Anh. Mỏ hàn và thiếc trong danh mục dụng cụ. Các bước hàn sẽ thành bài riêng ở chương 01.
+
 ## Bài tập
 
 1. Hai que đang chạm và đồng hồ im. Bạn có được đo chân 3,3 V rồi tin con số không? Kiểm tra gì trước?

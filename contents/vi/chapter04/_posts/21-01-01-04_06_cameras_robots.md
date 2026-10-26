@@ -122,6 +122,11 @@ Ba số (18.432.000 byte/s, 147 Mbit/s, MJPEG khoảng 15 Mbit/s) và câu hoãn
 - [Lazada: ESP32-CAM](https://www.lazada.vn/catalog/?q=ESP32-CAM)
 - [Thế Giới IC: ESP32-CAM](https://www.thegioiic.com/search?q=ESP32-CAM)
 
+## Video tham khảo
+
+- **Xem trước:** [How to choose a camera for your Raspberry Pi](https://www.youtube.com/watch?v=wQB1ffECTS0) — Yahboom Technology, tiếng Anh. Chọn camera cho Pi: cổng và băng thông. Đối chiếu USB và CSI với bảng trong bài.
+- [Why choose a MIPI CSI-2 interface rather than USB?](https://www.youtube.com/watch?v=lfI-mcwCYF4) — AlliedVisionTV, tiếng Anh. Vì sao CSI và USB không cùng một đường dữ liệu. Giữ ý này khi tính ảnh mỗi giây.
+
 ## Bài tập
 
 1. Tính tốc độ byte và tốc độ bit của YUYV 640×480 ở 30 fps.
@@ -138,5 +143,5 @@ Ba số (18.432.000 byte/s, 147 Mbit/s, MJPEG khoảng 15 Mbit/s) và câu hoãn
 
 - [Định dạng điểm ảnh YUYV của V4L2](https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/pixfmt-yuyv.html) — hai byte mỗi điểm ảnh, số 2 trong công thức.
 - [`usb_cam` trên ROS 2](https://index.ros.org/p/usb_cam/) — node thường đứng sau webcam UVC, xuất ảnh chứ không xuất khoảng cách.
-- [`sensor_msgs/Image`](https://docs.ros.org/en/humble/p/sensor_msgs/msg/Image.html) và [`sensor_msgs/CompressedImage`](https://docs.ros.org/en/humble/p/sensor_msgs/msg/CompressedImage.html) — thô và JPEG, tức lựa chọn 147 hay 15.
+- [`sensor_msgs/Image`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/Image.html) và [`sensor_msgs/CompressedImage`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/CompressedImage.html) — thô và JPEG, tức lựa chọn 147 hay 15.
 - [Tài liệu camera Raspberry Pi](https://www.raspberrypi.com/documentation/accessories/camera.html) — cáp CSI, và vì sao đó không phải ngoại vi của ESP32.

@@ -230,6 +230,11 @@ Sai bán kính khoảng 10 phần trăm trên thảm là trượt và miết, kh
 
 Không có linh kiện mới. Thước dây 3 m ở quầy văn phòng phẩm là đủ (khoảng 15.000–40.000 đồng trên Shopee, từ khóa `thước dây 3m`). Lốp méo hoặc mút bị bẹp thì thay cả cặp để $$r$$ khớp: tìm `bánh xe robot cao su 65mm`, khoảng 20.000–60.000 đồng mỗi bánh. Mua hai bánh cùng lúc. Trộn hai đường kính là một lỗi động học giả.
 
+## Video tham khảo
+
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Từ vận tốc hai bánh ra vận tốc tiến và vận tốc góc. Đúng cặp công thức bài suy ra.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Cộng từng bước encoder thành x, y, yaw. Video dùng hình học; bài dùng số đếm nguyên.
+
 ## Bài tập
 
 1. Khẩu độ của bạn là 0,20 m. Joystick xin $$v = 0$$, $$\omega = -0,8$$ rad/s. Tính $$v_L$$, $$v_R$$ và gọi tên cú cua. Gợi ý: bánh phải âm, bánh trái dương, cua phải (yaw âm).

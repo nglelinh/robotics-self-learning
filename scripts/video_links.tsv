@@ -1,0 +1,201 @@
+lesson	url	title	channel	verified_date
+00_01_welcome_and_outcomes	https://www.facebook.com/reel/1746806056360278	Cơ điện tử học làm robot	Facebook	2026-10-26
+00_01_welcome_and_outcomes	https://www.youtube.com/watch?v=7TVWlADXwRw	What Is ROS2? - Framework Overview	Raymond Andrade	2026-10-26
+00_01_welcome_and_outcomes	https://www.youtube.com/watch?v=oJs0cVYuQTw	Raspberry Pi VS Arduino VS ESP32	TechteamGB	2026-10-26
+00_02_learning_tracks_budget	https://www.youtube.com/watch?v=_vovUjZM6os	ROS 2 Series #1 | Giới thiệu sơ lược về ROS | TeslaEdison	TeslaEdison	2026-10-26
+00_02_learning_tracks_budget	https://www.youtube.com/watch?v=oJs0cVYuQTw	Raspberry Pi VS Arduino VS ESP32	TechteamGB	2026-10-26
+00_03_safety_mindset_lab	https://www.youtube.com/watch?v=W770Z1yvXs8	What is a fuse? the basics explained	The Engineering Mindset	2026-10-26
+00_03_safety_mindset_lab	https://www.youtube.com/watch?v=pWhtyz-UFZc	What is ESD and How to Prevent it – ATM | Digi-Key Electronics	DigiKey	2026-10-26
+00_04_kit_catalog_tooling	https://www.youtube.com/watch?v=52w3xeXrMU8	EEVblog 1636 - Ultimate Multimeter Beginners Guide!	EEVblog	2026-10-26
+00_04_kit_catalog_tooling	https://www.youtube.com/watch?v=rK38rpUy568	iFixit's Soldering 101: Beginners Guide	iFixit	2026-10-26
+00_05_bom_and_shopping	https://www.youtube.com/watch?v=RsZBxfpcLu8	PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS	Aleksandar Haber PhD	2026-10-26
+00_05_bom_and_shopping	https://www.youtube.com/watch?v=v2d5H5k_SAc	How To Read A Datasheet - Electronics with Becky Stern | DigiKey	DigiKey	2026-10-26
+00_06_workspace_toolchain_preview	https://www.youtube.com/watch?v=3ATDCi4ApY4	Get started with PlatformIO and the ESP 32	John Green Dev	2026-10-26
+00_06_workspace_toolchain_preview	https://www.youtube.com/watch?v=W6mixXsn-Vc	Breadboard tutorial: How to use a breadboard (for beginners)	LeftyMaker	2026-10-26
+00_07_ch00_lab_checklist	https://www.youtube.com/watch?v=52w3xeXrMU8	EEVblog 1636 - Ultimate Multimeter Beginners Guide!	EEVblog	2026-10-26
+01_01_voltage_current_ohm	https://www.youtube.com/watch?v=HsLLq6Rm5tU	Ohms Law Explained - The basics circuit theory	The Engineering Mindset	2026-10-26
+01_01_voltage_current_ohm	https://www.youtube.com/watch?v=Pd7jlqP4CRw	video tập giảng: Định luật Ôm đối với toàn mạch- Trần Thị Hồng Nhung	Trường Đại học Giáo dục - ĐHQGHN	2026-10-26
+01_02_breadboard_meter	https://www.youtube.com/watch?v=FsBgW0WDQSw	CÁCH SỬ DỤNG ĐỒNG HỒ VẠN NĂNG ĐO ĐIỆN ĐƠN GIẢN	Sơn Tiện Ích	2026-10-26
+01_02_breadboard_meter	https://www.youtube.com/watch?v=W6mixXsn-Vc	Breadboard tutorial: How to use a breadboard (for beginners)	LeftyMaker	2026-10-26
+01_03_resistor_color_smd	https://www.youtube.com/watch?v=G1mZutobxDU	Resistor Color Code Chart Tutorial Review - Physics	The Organic Chemistry Tutor	2026-10-26
+01_03_resistor_color_smd	https://www.youtube.com/watch?v=GLD7AgAYqwA	How to Read Resistor Color Codes | 4-Band Resistor Values and Tolerance	Engineering Technology Simulation Learning Videos	2026-10-26
+01_04_cap_diode_led_id	https://www.youtube.com/watch?v=Fwj_d3uO5g8	Diodes Explained - The basics how diodes work working principle pn junction	The Engineering Mindset	2026-10-26
+01_04_cap_diode_led_id	https://www.youtube.com/watch?v=X4EUwTwZ110	Capacitors Explained - The basics how capacitors work working principle	The Engineering Mindset	2026-10-26
+01_05_transistor_mosfet_ic_id	https://www.youtube.com/watch?v=AwRJsze_9m4	MOSFET Explained - How MOSFET Works	The Engineering Mindset	2026-10-26
+01_06_connectors_drivers_boards	https://www.youtube.com/watch?v=YYMsS50x1UY	H Bridge Motor Control Basics Explained	The Engineering Mindset	2026-10-26
+01_06_connectors_drivers_boards	https://www.youtube.com/watch?v=f7aySy_0URE	Logic Level Converters - Learn & Example Project - TXS0108E	DIY Machines	2026-10-26
+01_07_datasheet_pinouts	https://www.youtube.com/watch?v=1EXXqWweTkI	How To Read A Datasheet - Phil's Lab #123	Phil’s Lab	2026-10-26
+01_07_datasheet_pinouts	https://www.youtube.com/watch?v=v2d5H5k_SAc	How To Read A Datasheet - Electronics with Becky Stern | DigiKey	DigiKey	2026-10-26
+01_08_soldering_basics	https://www.youtube.com/watch?v=Qps9woUGkvI	Soldering Tutorial for Beginners: Five Easy Steps	oneTesla	2026-10-26
+01_08_soldering_basics	https://www.youtube.com/watch?v=rK38rpUy568	iFixit's Soldering 101: Beginners Guide	iFixit	2026-10-26
+01_09_esd_polarity_brownout	https://www.youtube.com/watch?v=W770Z1yvXs8	What is a fuse? the basics explained	The Engineering Mindset	2026-10-26
+01_09_esd_polarity_brownout	https://www.youtube.com/watch?v=pWhtyz-UFZc	What is ESD and How to Prevent it – ATM | Digi-Key Electronics	DigiKey	2026-10-26
+01_09_esd_polarity_brownout	https://www.youtube.com/watch?v=sF0KOVWj9p8	The Best Protection for your Circuit is NOT a Fuse!.....but a Resettable Fuse? EB#54	GreatScott!	2026-10-26
+01_10_component_id_lab	https://www.youtube.com/watch?v=FsBgW0WDQSw	CÁCH SỬ DỤNG ĐỒNG HỒ VẠN NĂNG ĐO ĐIỆN ĐƠN GIẢN	Sơn Tiện Ích	2026-10-26
+01_10_component_id_lab	https://www.youtube.com/watch?v=G1mZutobxDU	Resistor Color Code Chart Tutorial Review - Physics	The Organic Chemistry Tutor	2026-10-26
+01_11_ch01_lab_checklist	https://www.youtube.com/watch?v=HsLLq6Rm5tU	Ohms Law Explained - The basics circuit theory	The Engineering Mindset	2026-10-26
+02_01_mcu_landscape	https://www.youtube.com/watch?v=L03jT5slWnw	Raspberry Pi Pico - A Beginners Guide	Tinkernut	2026-10-26
+02_01_mcu_landscape	https://www.youtube.com/watch?v=oJs0cVYuQTw	Raspberry Pi VS Arduino VS ESP32	TechteamGB	2026-10-26
+02_02_esp32_platformio	https://www.youtube.com/watch?v=3ATDCi4ApY4	Get started with PlatformIO and the ESP 32	John Green Dev	2026-10-26
+02_02_esp32_platformio	https://www.youtube.com/watch?v=sJtJJU3c3xE	Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT	Điện thông minh E-smart	2026-10-26
+02_03_pico_micropython	https://www.youtube.com/watch?v=L03jT5slWnw	Raspberry Pi Pico - A Beginners Guide	Tinkernut	2026-10-26
+02_03_pico_micropython	https://www.youtube.com/watch?v=zlKJ5hvfs6s	Raspberry Pi PICO | Starting With MicroPython + Examples | I2C OLED, ADC, PWM	Electronoobs	2026-10-26
+02_04_blink_serial_hello	https://www.youtube.com/watch?v=sJtJJU3c3xE	Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT	Điện thông minh E-smart	2026-10-26
+02_04_blink_serial_hello	https://www.youtube.com/watch?v=zCzchrkpHzk	ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output	Alvin Pribadi	2026-10-26
+02_05_pinouts_power_rails	https://www.youtube.com/watch?v=RBDVBafNF44	HOW TO USE LOGIC LEVEL SHIFTER ON ARDUINO TO CONVERT CIRCUITS AND SENSORS FROM 5V TO 3.3V CIRCUITS	Circuit Desolator	2026-10-26
+02_05_pinouts_power_rails	https://www.youtube.com/watch?v=f7aySy_0URE	Logic Level Converters - Learn & Example Project - TXS0108E	DIY Machines	2026-10-26
+02_06_ch02_lab_checklist	https://www.youtube.com/watch?v=sJtJJU3c3xE	Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT	Điện thông minh E-smart	2026-10-26
+03_01_cpp_vs_micropython	https://www.youtube.com/watch?v=3ATDCi4ApY4	Get started with PlatformIO and the ESP 32	John Green Dev	2026-10-26
+03_01_cpp_vs_micropython	https://www.youtube.com/watch?v=zlKJ5hvfs6s	Raspberry Pi PICO | Starting With MicroPython + Examples | I2C OLED, ADC, PWM	Electronoobs	2026-10-26
+03_02_gpio_patterns	https://www.youtube.com/watch?v=IvU8m_30iK0	What is Switch Bounce and How to Debounce – ATM | Digi-Key Electronics	DigiKey	2026-10-26
+03_02_gpio_patterns	https://www.youtube.com/watch?v=zCzchrkpHzk	ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output	Alvin Pribadi	2026-10-26
+03_03_pwm_timers	https://www.youtube.com/watch?v=vbAZdQGTA0s	Quick Guide to Servos	SparkFun Electronics	2026-10-26
+03_03_pwm_timers	https://www.youtube.com/watch?v=vzdAOaAk5JQ	ESP32 + PWM + Android | What is PWM? |  Pulse Width Modulation	Slavko's Hobby Channel	2026-10-26
+03_04_interrupts_debounce	https://www.youtube.com/watch?v=IvU8m_30iK0	What is Switch Bounce and How to Debounce – ATM | Digi-Key Electronics	DigiKey	2026-10-26
+03_04_interrupts_debounce	https://www.youtube.com/watch?v=zCzchrkpHzk	ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output	Alvin Pribadi	2026-10-26
+03_05_state_machines_fw	https://www.facebook.com/reel/1381152347317660	Sinh viên đang lập trình robot thông minh	Facebook	2026-10-26
+03_05_state_machines_fw	https://www.facebook.com/reel/2015462409114750	Lập trình robot cho Robocon Bắc Ninh 2026	Facebook	2026-10-26
+03_05_state_machines_fw	https://www.facebook.com/reel/4471403513091271	Chuẩn bị Robocon Bắc Ninh, tháng 8 năm 2026	Facebook	2026-10-26
+03_05_state_machines_fw	https://www.youtube.com/watch?v=-Yicg2TTMPs	Understanding State Machines, Part 1: What Are They?	MATLAB	2026-10-26
+03_05_state_machines_fw	https://www.youtube.com/watch?v=CbNXEyYL_f8	Finite State Machines: The Embedded Trick That Changes Everything	AsabreTech	2026-10-26
+03_06_ch03_lab_checklist	https://www.youtube.com/watch?v=-Yicg2TTMPs	Understanding State Machines, Part 1: What Are They?	MATLAB	2026-10-26
+04_01_bus_interfaces	https://www.youtube.com/watch?v=IyGwvGzrqp8	Serial Communications Explained: UART, I2C, and SPI	Electronoobs	2026-10-26
+04_02_sensor_package_id	https://www.youtube.com/watch?v=n-gJ00GTsNg	HC-SR04 Ultrasonic Distance Sensor and Arduino (Lesson #9)	Science Buddies	2026-10-26
+04_02_sensor_package_id	https://www.youtube.com/watch?v=qS9GwaekLW4	What is an Inertial Measurement Unit (IMU)?	Phidgets Inc.	2026-10-26
+04_02_sensor_package_id	https://www.youtube.com/watch?v=v4BbSzJ-hz4	How Rotary Encoder Works and How To Use It with Arduino	How To Mechatronics	2026-10-26
+04_03_encoders_counts	https://www.youtube.com/watch?v=eQ9E0Zvp9jw	Modern Robotics, Chapter 13.4:  Odometry	Northwestern Robotics	2026-10-26
+04_03_encoders_counts	https://www.youtube.com/watch?v=v4BbSzJ-hz4	How Rotary Encoder Works and How To Use It with Arduino	How To Mechatronics	2026-10-26
+04_04_imu_basics	https://www.youtube.com/watch?v=KuekQ-m9xpw	How does an Accelerometer work? | 3D Animation	CircuitBread	2026-10-26
+04_04_imu_basics	https://www.youtube.com/watch?v=qS9GwaekLW4	What is an Inertial Measurement Unit (IMU)?	Phidgets Inc.	2026-10-26
+04_05_ultrasonic_tof	https://www.youtube.com/watch?v=6F1B_N6LuKw	Using the HC-SR04 Ultrasonic Distance Sensor with Arduino - Everything you need to know!	DroneBot Workshop	2026-10-26
+04_05_ultrasonic_tof	https://www.youtube.com/watch?v=SWBI6_rxmT8	VL53l0x: Time-of-Flight Distance Sensor (ESP32 + Arduino series)	Simply Explained	2026-10-26
+04_06_cameras_robots	https://www.youtube.com/watch?v=lfI-mcwCYF4	Why choose a MIPI CSI-2 interface rather than USB?	AlliedVisionTV	2026-10-26
+04_06_cameras_robots	https://www.youtube.com/watch?v=wQB1ffECTS0	How to choose a camera for your Raspberry Pi	Yahboom Technology	2026-10-26
+04_07_ch04_lab_checklist	https://www.youtube.com/watch?v=IyGwvGzrqp8	Serial Communications Explained: UART, I2C, and SPI	Electronoobs	2026-10-26
+05_01_dc_hbridge	https://www.youtube.com/watch?v=YYMsS50x1UY	H Bridge Motor Control Basics Explained	The Engineering Mindset	2026-10-26
+05_01_dc_hbridge	https://www.youtube.com/watch?v=fVgnUWIWzZ8	Driving DC motors, part 3/3:  H-bridges (Kevin Lynch)	Northwestern Robotics	2026-10-26
+05_02_driver_board_id	https://www.youtube.com/watch?v=3N_4VpzmKY0	What is an H-Bridge?	CircuitBread	2026-10-26
+05_02_driver_board_id	https://www.youtube.com/watch?v=JPPTRj0KWbg	TB6612FNG H-Bridge Motor Controller - Better than L298N?	DroneBot Workshop	2026-10-26
+05_03_servos_pwm	https://www.youtube.com/watch?v=vbAZdQGTA0s	Quick Guide to Servos	SparkFun Electronics	2026-10-26
+05_04_steppers_intro	https://www.youtube.com/watch?v=Bs1zIZV1uSY	Operating Principles of a Microstep Stepper Motor Drive	Oriental Motor USA	2026-10-26
+05_04_steppers_intro	https://www.youtube.com/watch?v=X4qkWxRBTEg	Microstepping in bipolar stepper motors	Texas Instruments	2026-10-26
+05_05_current_thermal	https://www.youtube.com/watch?v=7KbEVKZ2JhA	Do you know how to Test Stall Current?	SoundTraxx	2026-10-26
+05_05_current_thermal	https://www.youtube.com/watch?v=W770Z1yvXs8	What is a fuse? the basics explained	The Engineering Mindset	2026-10-26
+05_06_closed_loop_intro	https://www.youtube.com/watch?v=O-OqgFE9SD4	Control Systems Lectures - Closed Loop Control	Brian Douglas	2026-10-26
+05_06_closed_loop_intro	https://www.youtube.com/watch?v=UR0hOmjaHp0	PID Control - A brief introduction	Brian Douglas	2026-10-26
+05_07_ch05_lab_checklist	https://www.youtube.com/watch?v=JPPTRj0KWbg	TB6612FNG H-Bridge Motor Controller - Better than L298N?	DroneBot Workshop	2026-10-26
+06_01_chassis_anatomy	https://www.youtube.com/watch?v=2QE3LG5h2tw	Differential Drive & Odometry Explained: How It Works	Netizen Robotics	2026-10-26
+06_01_chassis_anatomy	https://www.youtube.com/watch?v=RsZBxfpcLu8	PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS	Aleksandar Haber PhD	2026-10-26
+06_02_fasteners_bearings_shafts	https://www.youtube.com/watch?v=78R1QXL9ijM	How to Measure Screws & Bolts - US & Metric Sizing | Fasteners 101	Albany County Fasteners	2026-10-26
+06_02_fasteners_bearings_shafts	https://www.youtube.com/watch?v=8q25EUszBSI	What is Bearing? Types of Bearings and How they Work?	The Engineers Post	2026-10-26
+06_02_fasteners_bearings_shafts	https://www.youtube.com/watch?v=Gdvtw0pTAOs	How to Identify Thread Pitch and Size | Tech Tips | Swagelok [2020]	Swagelok	2026-10-26
+06_03_gear_trains_ratios	https://www.youtube.com/watch?v=K8HQA1Uz1sE	Worm Gears Explained, Calculated & Modeled	INTEGRAL PHYSICS	2026-10-26
+06_03_gear_trains_ratios	https://www.youtube.com/watch?v=NmUq2TQ8m2M	Compound Gears Explained:  Calculate Gear Ratio	INTEGRAL PHYSICS	2026-10-26
+06_03_gear_trains_ratios	https://www.youtube.com/watch?v=aGHrhm-Rcp0	Gear Train Design - How to calculate gear trains mechanical engineering	The Engineering Mindset	2026-10-26
+06_04_linkages_belts_cams	https://www.facebook.com/reel/1615249330240344	Test thiết kế chân	Facebook	2026-10-26
+06_04_linkages_belts_cams	https://www.facebook.com/reel/2974137376266883	Một chân, ba bậc tự do	Facebook	2026-10-26
+06_04_linkages_belts_cams	https://www.youtube.com/watch?v=1Ty_1LF3Qv0	Basic Mechanisms:  4 Bar Linkage	Mr. Dillman's Tech Channel	2026-10-26
+06_04_linkages_belts_cams	https://www.youtube.com/watch?v=EBqrDj-Wkiw	Four-Bar Linkage and Its Three Possible Motions	mecademie	2026-10-26
+06_05_wheels_casters_diff	https://www.youtube.com/watch?v=2QE3LG5h2tw	Differential Drive & Odometry Explained: How It Works	Netizen Robotics	2026-10-26
+06_05_wheels_casters_diff	https://www.youtube.com/watch?v=eQ9E0Zvp9jw	Modern Robotics, Chapter 13.4:  Odometry	Northwestern Robotics	2026-10-26
+06_06_materials_print_laser	https://www.youtube.com/watch?v=6MA1Lv4YilM	Laser, CNC, or 3D Printer Which One Is RIGHT For You?	Andy Bird Builds	2026-10-26
+06_07_mech_failure_modes	https://www.youtube.com/watch?v=8fYwUV6QV8c	How to measure Gear Backlash and Center Distance	Evolvent Design	2026-10-26
+06_07_mech_failure_modes	https://www.youtube.com/watch?v=8q25EUszBSI	What is Bearing? Types of Bearings and How they Work?	The Engineers Post	2026-10-26
+06_08_mechanisms_lab	https://www.youtube.com/watch?v=8fYwUV6QV8c	How to measure Gear Backlash and Center Distance	Evolvent Design	2026-10-26
+06_08_mechanisms_lab	https://www.youtube.com/watch?v=NmUq2TQ8m2M	Compound Gears Explained:  Calculate Gear Ratio	INTEGRAL PHYSICS	2026-10-26
+06_09_ch06_lab_checklist	https://www.youtube.com/watch?v=aGHrhm-Rcp0	Gear Train Design - How to calculate gear trains mechanical engineering	The Engineering Mindset	2026-10-26
+07_00_batteries_power_safety	https://www.facebook.com/reel/931720623225817	Test pin drone, ESC cháy	Facebook	2026-10-26
+07_00_batteries_power_safety	https://www.youtube.com/watch?v=4qIYyaRKGVE	LiPo C Rating Explained – No, a Higher C Rating Won't Hurt Your ESC or Motor	RcHelpDotCom	2026-10-26
+07_00_batteries_power_safety	https://www.youtube.com/watch?v=rT-1gvkFj60	BMS (Battery Management System) || DIY or Buy || Properly protecting Li-Ion/Li-Po Battery Packs	GreatScott!	2026-10-26
+07_00_batteries_power_safety	https://www.youtube.com/watch?v=rfChSvb8FX0	Buck Converter	The Organic Chemistry Tutor	2026-10-26
+07_01_assemble_power	https://www.youtube.com/watch?v=RsZBxfpcLu8	PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS	Aleksandar Haber PhD	2026-10-26
+07_01_assemble_power	https://www.youtube.com/watch?v=rT-1gvkFj60	BMS (Battery Management System) || DIY or Buy || Properly protecting Li-Ion/Li-Po Battery Packs	GreatScott!	2026-10-26
+07_02_driver_bringup	https://www.youtube.com/watch?v=JPPTRj0KWbg	TB6612FNG H-Bridge Motor Controller - Better than L298N?	DroneBot Workshop	2026-10-26
+07_02_driver_bringup	https://www.youtube.com/watch?v=fVgnUWIWzZ8	Driving DC motors, part 3/3:  H-bridges (Kevin Lynch)	Northwestern Robotics	2026-10-26
+07_03_teleop_protocol	https://www.youtube.com/watch?v=sTHckUyxwp8	Understanding UART	Rohde & Schwarz	2026-10-26
+07_04_teleop_firmware	https://www.facebook.com/reel/1057849570224248	Demo robot	Facebook	2026-10-26
+07_04_teleop_firmware	https://www.facebook.com/reel/1092867967065031	Test hệ thống điều khiển Chinbi	Facebook	2026-10-26
+07_04_teleop_firmware	https://www.youtube.com/watch?v=JPPTRj0KWbg	TB6612FNG H-Bridge Motor Controller - Better than L298N?	DroneBot Workshop	2026-10-26
+07_04_teleop_firmware	https://www.youtube.com/watch?v=sTHckUyxwp8	Understanding UART	Rohde & Schwarz	2026-10-26
+07_05_field_acceptance	https://www.youtube.com/watch?v=2QE3LG5h2tw	Differential Drive & Odometry Explained: How It Works	Netizen Robotics	2026-10-26
+07_06_ch07_lab_checklist	https://www.youtube.com/watch?v=JPPTRj0KWbg	TB6612FNG H-Bridge Motor Controller - Better than L298N?	DroneBot Workshop	2026-10-26
+08_00_math_for_tf	https://www.youtube.com/watch?v=kYB8IZa5AuE	Linear transformations and matrices | Chapter 3, Essence of linear algebra	3Blue1Brown	2026-10-26
+08_00_math_for_tf	https://www.youtube.com/watch?v=vlb3P7arbkU	Modern Robotics, Chapter 3.3.1:  Homogeneous Transformation Matrices	Northwestern Robotics	2026-10-26
+08_00_math_for_tf	https://www.youtube.com/watch?v=zjMuIxRvygQ	Quaternions and 3d rotation, explained interactively	3Blue1Brown	2026-10-26
+08_01_serial_protocols	https://www.youtube.com/watch?v=IyGwvGzrqp8	Serial Communications Explained: UART, I2C, and SPI	Electronoobs	2026-10-26
+08_01_serial_protocols	https://www.youtube.com/watch?v=sTHckUyxwp8	Understanding UART	Rohde & Schwarz	2026-10-26
+08_02_wifi_mqtt	https://www.youtube.com/watch?v=OAoM5IV393o	Getting Started with ESP32 & MQTT: The Complete Beginner's Guide	IoT Bhai	2026-10-26
+08_03_pid_tuning	https://www.facebook.com/reel/976436878550867	Flight controller, muốn bay ngay	Facebook	2026-10-26
+08_03_pid_tuning	https://www.youtube.com/watch?v=UR0hOmjaHp0	PID Control - A brief introduction	Brian Douglas	2026-10-26
+08_03_pid_tuning	https://www.youtube.com/watch?v=XfAt6hNV8XM	Simple Examples of PID Control	Brian Douglas	2026-10-26
+08_04_diff_kinematics	https://www.youtube.com/watch?v=2QE3LG5h2tw	Differential Drive & Odometry Explained: How It Works	Netizen Robotics	2026-10-26
+08_04_diff_kinematics	https://www.youtube.com/watch?v=eQ9E0Zvp9jw	Modern Robotics, Chapter 13.4:  Odometry	Northwestern Robotics	2026-10-26
+08_05_loop_timing	https://www.facebook.com/reel/1004870148832135	Những bước đầu làm drone vận tải	Facebook	2026-10-26
+08_05_loop_timing	https://www.facebook.com/reel/1038211995413233	Sinh viên làm UAV vận tải	Facebook	2026-10-26
+08_05_loop_timing	https://www.facebook.com/reel/2056881368258089	Thả ra là bay	Facebook	2026-10-26
+08_05_loop_timing	https://www.youtube.com/watch?v=UR0hOmjaHp0	PID Control - A brief introduction	Brian Douglas	2026-10-26
+08_05_loop_timing	https://www.youtube.com/watch?v=vzdAOaAk5JQ	ESP32 + PWM + Android | What is PWM? |  Pulse Width Modulation	Slavko's Hobby Channel	2026-10-26
+08_06_ch08_lab_checklist	https://www.youtube.com/watch?v=UR0hOmjaHp0	PID Control - A brief introduction	Brian Douglas	2026-10-26
+09_00_linux_on_sbc	https://www.youtube.com/watch?v=BOxWrMNXKpU	Udev Rules Linux: Ensure USB (and other) Devices Always Keep Same Port	Practical Robotics	2026-10-26
+09_00_linux_on_sbc	https://www.youtube.com/watch?v=N1vgvhiyq0E	systemd on Linux 1: Intro and Unit Files	tutoriaLinux	2026-10-26
+09_00_linux_on_sbc	https://www.youtube.com/watch?v=fgonBE4KWGw	Ubuntu 24.04 on the Raspberry Pi - How to, Setup, and Demo	Gary Explains	2026-10-26
+09_01_jazzy_install_ws	https://www.youtube.com/watch?v=08o46x5SfJM	How to Correctly Install ROS2 Jazzy Jalisco in Linux Ubuntu 24.04 (Noble) - ROS2 Tutorial	Aleksandar Haber PhD	2026-10-26
+09_01_jazzy_install_ws	https://www.youtube.com/watch?v=CSsp7LcBD-Y	ROS 2 Jazzy + Ubuntu 24.04: Complete Installation Guide!	Robotics Unboxed	2026-10-26
+09_02_nodes_topics	https://www.youtube.com/watch?v=03kUlBnH7gg	ROS 2 Series #4 | Viết template ROS2 Python section | TeslaEdison	TeslaEdison	2026-10-26
+09_02_nodes_topics	https://www.youtube.com/watch?v=7TVWlADXwRw	What Is ROS2? - Framework Overview	Raymond Andrade	2026-10-26
+09_02_nodes_topics	https://www.youtube.com/watch?v=UJ7zkUJnVKw	ROS2 & F1TENTH #01 | ROS2 là gì? Workspace, Package, Node	Nhat Tran	2026-10-26
+09_03_services_actions	https://www.youtube.com/watch?v=WzOopOkrowA	ROS/ROS 2 - What are messages, services and actions?	Hummingbird	2026-10-26
+09_04_launch_params_qos	https://www.youtube.com/watch?v=HEKwLJC5a2o	ROS 2 on Two Computers: Connect Laptop and Robot with DDS + QoS | 08	Adaptive AgroTech	2026-10-26
+09_04_launch_params_qos	https://www.youtube.com/watch?v=xJ3WAs8GndA	ROS2 - Create a Launch File with Python	Robotics Back-End	2026-10-26
+09_05_tf2_frames	https://www.youtube.com/watch?v=QyvHhY4Y_Y8	The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6	Articulated Robotics	2026-10-26
+09_05_tf2_frames	https://www.youtube.com/watch?v=zjMuIxRvygQ	Quaternions and 3d rotation, explained interactively	3Blue1Brown	2026-10-26
+09_06_urdf_basics	https://www.youtube.com/watch?v=CwdbsvcpOHM	How do we describe a robot? With URDF! | Getting Ready to build Robots with ROS #7	Articulated Robotics	2026-10-26
+09_06_urdf_basics	https://www.youtube.com/watch?v=DoT3iAgY9Vc	ROS2 URDF Tutorial Xacro Files (Simplify URDF with Xacro Propety and Xacro Macro)	Kevin Wood | Robotics & AI	2026-10-26
+09_07_ch09_lab_checklist	https://www.youtube.com/watch?v=QyvHhY4Y_Y8	The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6	Articulated Robotics	2026-10-26
+10_01_gazebo_harmonic	https://www.facebook.com/reel/2078352426052273	Lấy dữ liệu 3D từ một vị trí trên trái đất	Facebook	2026-10-26
+10_01_gazebo_harmonic	https://www.youtube.com/watch?v=campHHAPtyg	ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python	Aleksandar Haber PhD	2026-10-26
+10_01_gazebo_harmonic	https://www.youtube.com/watch?v=dY8JxldcuqA	Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues	Aleksandar Haber PhD	2026-10-26
+10_02_urdf_sim_bringup	https://www.youtube.com/watch?v=CwdbsvcpOHM	How do we describe a robot? With URDF! | Getting Ready to build Robots with ROS #7	Articulated Robotics	2026-10-26
+10_02_urdf_sim_bringup	https://www.youtube.com/watch?v=XH6Fvv7p5n0	ROS2 - Create a Xacro Macro	Robotics Back-End	2026-10-26
+10_02_urdf_sim_bringup	https://www.youtube.com/watch?v=campHHAPtyg	ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python	Aleksandar Haber PhD	2026-10-26
+10_03_microros_mcu	https://www.youtube.com/watch?v=48SxC6LBVs8	How to start develop micro-ROS on ESP32 quickly!	stepbystep-robotics	2026-10-26
+10_03_microros_mcu	https://www.youtube.com/watch?v=aD3Lf-9cb0A	Intro to micro-ROS	Marine Robotics Group at Georgia Tech	2026-10-26
+10_04_bridge_capstone	https://www.youtube.com/watch?v=48SxC6LBVs8	How to start develop micro-ROS on ESP32 quickly!	stepbystep-robotics	2026-10-26
+10_04_bridge_capstone	https://www.youtube.com/watch?v=7TVWlADXwRw	What Is ROS2? - Framework Overview	Raymond Andrade	2026-10-26
+10_05_sim_to_real	https://www.facebook.com/reel/1773957523904144	MuJoCo recovery test	Facebook	2026-10-26
+10_05_sim_to_real	https://www.facebook.com/reel/2246938909200876	Training bậc thang, rồi sim-to-real	Facebook	2026-10-26
+10_05_sim_to_real	https://www.youtube.com/watch?v=campHHAPtyg	ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python	Aleksandar Haber PhD	2026-10-26
+10_05_sim_to_real	https://www.youtube.com/watch?v=dY8JxldcuqA	Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues	Aleksandar Haber PhD	2026-10-26
+10_06_ch10_lab_checklist	https://www.youtube.com/watch?v=dY8JxldcuqA	Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues	Aleksandar Haber PhD	2026-10-26
+11_01_slam_overview	https://www.youtube.com/watch?v=-XU54IsG8Vo	SLAM Robot Mapping - Computerphile	Computerphile	2026-10-26
+11_01_slam_overview	https://www.youtube.com/watch?v=BuRCJ2fegcc	SLAM - 5 Minutes with Cyrill	Cyrill Stachniss	2026-10-26
+11_02_nav2_tour	https://www.facebook.com/reel/1391050009535827	Thuật toán về nhà	Facebook	2026-10-26
+11_02_nav2_tour	https://www.youtube.com/watch?v=hMTxb8Y2cxI	ROS2 Nav2 - Generate a Map with slam_toolbox	Robotics Back-End	2026-10-26
+11_02_nav2_tour	https://www.youtube.com/watch?v=jkoGkAd0GYk	Making robot navigation easy with Nav2 and ROS!	Articulated Robotics	2026-10-26
+11_03_vision_pipeline	https://www.youtube.com/watch?v=H5qbRTikxI4	OpenCV Python Camera Calibration (Intrinsic, Extrinsic, Distortion)	Kevin Wood | Robotics & AI	2026-10-26
+11_03_vision_pipeline	https://www.youtube.com/watch?v=sd25t4HmFdU	Control your Webcam with Python - OpenCV Beginners Tutorial #4	Sam Westby Tech	2026-10-26
+11_04_bt_peek	https://www.youtube.com/watch?v=KeShMInMjro	5 minute Behavior Tree tutorial	Petter Ögren	2026-10-26
+11_04_bt_peek	https://www.youtube.com/watch?v=kRp3eA09JkM	Behavior Trees in Robotics (Part 1 - Concept)	Hummingbird	2026-10-26
+11_05_moveit_peek	https://www.youtube.com/watch?v=-xDyxxRiW7M	ROS 2 MoveIt 2 [1H Crash Course]	Robotics Back-End	2026-10-26
+11_06_capstone_b_slam	https://www.youtube.com/watch?v=ZaiA3hWaRzE	Easy SLAM with ROS using slam_toolbox	Articulated Robotics	2026-10-26
+11_06_capstone_b_slam	https://www.youtube.com/watch?v=hMTxb8Y2cxI	ROS2 Nav2 - Generate a Map with slam_toolbox	Robotics Back-End	2026-10-26
+11_07_capstone_b_nav2	https://www.youtube.com/watch?v=hMTxb8Y2cxI	ROS2 Nav2 - Generate a Map with slam_toolbox	Robotics Back-End	2026-10-26
+11_07_capstone_b_nav2	https://www.youtube.com/watch?v=jkoGkAd0GYk	Making robot navigation easy with Nav2 and ROS!	Articulated Robotics	2026-10-26
+11_08_ch11_lab_checklist	https://www.youtube.com/watch?v=jkoGkAd0GYk	Making robot navigation easy with Nav2 and ROS!	Articulated Robotics	2026-10-26
+12_01_lerobot_intro	https://www.facebook.com/reel/1624642749368249	Học đứng bằng hai chân	Facebook	2026-10-26
+12_01_lerobot_intro	https://www.facebook.com/reel/2191042771623926	Học trèo bậc, nhảy lên cầu thang	Facebook	2026-10-26
+12_01_lerobot_intro	https://www.facebook.com/reel/2292393271597807	Học đi bằng hai chân trước, handstand	Facebook	2026-10-26
+12_01_lerobot_intro	https://www.facebook.com/reel/4089347134533915	Đi bộ khi có tải, reinforcement learning	Facebook	2026-10-26
+12_01_lerobot_intro	https://www.youtube.com/watch?v=7tGT8hqRSAo	How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)	Brogan M. Pratt	2026-10-26
+12_01_lerobot_intro	https://www.youtube.com/watch?v=GDmhrAHxgQE	Core Concepts: Imitation Learning	Sanjiban Choudhury	2026-10-26
+12_02_imitation_act	https://www.youtube.com/watch?v=GDmhrAHxgQE	Core Concepts: Imitation Learning	Sanjiban Choudhury	2026-10-26
+12_02_imitation_act	https://www.youtube.com/watch?v=ft73x0LfGpM	ALOHA and ACT: LeRobot Research Presentation #1 by Alexander Soare	Hugging Face	2026-10-26
+12_03_diffusion_policy	https://www.youtube.com/watch?v=M03sZFfW-qU	Diffusion Policy: LeRobot Research Presentation #2 by Cheng Chi	Hugging Face	2026-10-26
+12_04_vla_overview	https://www.youtube.com/watch?v=-0s0v3q7mBk	OpenVLA: LeRobot Research Presentation #5 by Moo Jin Kim	Hugging Face	2026-10-26
+12_04_vla_overview	https://www.youtube.com/watch?v=5mY71rGXAkM	π0: A Foundation Model for Robotics with Sergey Levine - 719	The TWIML AI Podcast with Sam Charrington	2026-10-26
+12_04_vla_overview	https://www.youtube.com/watch?v=yJYchWc9j8A	RT - 2 Visual Language Action Models | Robotics Transformer 2 | Google DeepMind	MLNews	2026-10-26
+12_05_next_paths_refs	https://www.youtube.com/watch?v=5mY71rGXAkM	π0: A Foundation Model for Robotics with Sergey Levine - 719	The TWIML AI Podcast with Sam Charrington	2026-10-26
+12_05_next_paths_refs	https://www.youtube.com/watch?v=GDmhrAHxgQE	Core Concepts: Imitation Learning	Sanjiban Choudhury	2026-10-26
+12_06_so101_arm_lab	https://www.youtube.com/watch?v=7tGT8hqRSAo	How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)	Brogan M. Pratt	2026-10-26
+12_06_so101_arm_lab	https://www.youtube.com/watch?v=ft73x0LfGpM	ALOHA and ACT: LeRobot Research Presentation #1 by Alexander Soare	Hugging Face	2026-10-26
+12_07_ch12_lab_checklist	https://www.youtube.com/watch?v=7tGT8hqRSAo	How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)	Brogan M. Pratt	2026-10-26

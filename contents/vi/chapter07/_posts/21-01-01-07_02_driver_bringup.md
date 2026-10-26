@@ -105,6 +105,11 @@ Bạn đáng lẽ đã có driver. Nếu bài 07-01 còn motor mà chưa có c�
 - [Lazada TB6612](https://www.lazada.vn/catalog/?q=TB6612), [L298N](https://www.lazada.vn/catalog/?q=L298N)
 - [Thế Giới IC TB6612](https://www.thegioiic.com/search?q=TB6612), [L298N](https://www.thegioiic.com/search?q=L298N)
 
+## Video tham khảo
+
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Đưa PWM và chiều vào TB6612, motor quay. Làm bánh kê lên, đúng bring-up của lab.
+- [Driving DC motors, part 3/3:  H-bridges (Kevin Lynch)](https://www.youtube.com/watch?v=fVgnUWIWzZ8) — Northwestern Robotics, tiếng Anh. Nếu motor quay ngược so với bảng, sửa một cặp công tắc trong cầu H, không sửa cả hai chỗ.
+
 ## Bài tập
 
 1. VM $$8{,}0~\mathrm{V}$$, lệnh đầu 80 nấc trên 255. Tính $$D$$ và $$V_{avg}$$ trước sụt cầu. Nếu L298N sụt thêm $$1{,}8~\mathrm{V}$$, chổi than còn bao nhiêu?

@@ -157,6 +157,11 @@ Cấp board từ USB. Đừng nối bộ pin, và đừng để dây chạm head
 
 Nếu LED tối trong khi `press` vẫn in, LED bị ngược hoặc sai chân. Tin dòng serial trước, rồi xoay LED. Nếu `press` không bao giờ in và chân đo 3,3 V ở cả hai vị trí, bạn đã dựng lỗi luôn-cao: công tắc nằm phía 3,3 V.
 
+## Video tham khảo
+
+- **Xem trước:** [ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output](https://www.youtube.com/watch?v=zCzchrkpHzk) — Alvin Pribadi, tiếng Anh. Đọc nút, ghi LED. Đối chiếu với mẫu input_pullup và output trong bài.
+- [What is Switch Bounce and How to Debounce – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=IvU8m_30iK0) — DigiKey, tiếng Anh. Nút dội cơ học. Lab GPIO sẽ thấy nhiều cạnh nếu chưa chống dội.
+
 ## Bài tập
 
 1. Một LED đỏ ghi $V_F = 1{,}8$ V và bạn dự trù $I_F = 6$ mA từ 3,3 V. Tính $R$, rồi nêu giá trị thông dụng gần nhất bạn sẽ hàn, chọn món không vượt 6 mA.

@@ -128,9 +128,14 @@ Sổ có tên hóa học, điện áp đầy cho phép, ảnh hoặc số buck 5
 | Chì 2 A nổ khi chưa kẹt bánh | $I_{\mathrm{run}}$ đã cao hơn mức chì, hoặc chập VM xuống mass phía sau chì. Đo dòng, đừng tăng chì trước khi tìm chập |
 | Cell nóng trên bàn, không tải | Ngừng. Không sạc. Có thể chập trong hoặc BMS hỏng |
 
-## Video tham khảo thực tế
 
-Clip này là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới link chỉ nói điều chú thích ghi.
+## Video tham khảo
+
+- **Xem trước:** [BMS (Battery Management System) || DIY or Buy || Properly protecting Li-Ion/Li-Po Battery Packs](https://www.youtube.com/watch?v=rT-1gvkFj60) — GreatScott!, tiếng Anh. BMS bảo vệ pack lithium: quá áp, dưới áp, quá dòng. Không thay cầu chì bằng cách bỏ BMS.
+- [LiPo C Rating Explained – No, a Higher C Rating Won't Hurt Your ESC or Motor](https://www.youtube.com/watch?v=4qIYyaRKGVE) — RcHelpDotCom, tiếng Anh. Chữ C trên tem LiPo là dòng xả ghi trên nhãn. Bài này không lấy số đó làm cỡ cầu chì.
+- [Buck Converter](https://www.youtube.com/watch?v=rfChSvb8FX0) — The Organic Chemistry Tutor, tiếng Anh. Buck hạ áp xuống 5 V. Đặt điện áp ra trước khi nối ESP32, đúng thứ tự lab.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Test pin drone, ESC cháy](https://www.facebook.com/reel/931720623225817). Chú thích: dùng pin xe nâng nặng 3 tạ để test drone, phần test cháy ESC khi pin chưa hết, cảm ơn PKG Battery. Pack lớn không hết trước khi ESC cháy. Cầu chì và dòng liên tục tính trước khi nối pack đó.
 

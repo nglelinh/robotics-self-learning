@@ -126,6 +126,11 @@ Mua phần còn thiếu, đừng mua thêm một con robot. Giá đổi. Khoản
 - [Lazada ESP32](https://www.lazada.vn/catalog/?q=ESP32), [pin 18650](https://www.lazada.vn/catalog/?q=pin%2018650%202S)
 - [Thế Giới IC LM2596](https://www.thegioiic.com/search?q=LM2596), [ESP32](https://www.thegioiic.com/search?q=ESP32)
 
+## Video tham khảo
+
+- **Xem trước:** [PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS](https://www.youtube.com/watch?v=RsZBxfpcLu8) — Aleksandar Haber PhD, tiếng Anh. Thứ tự lắp một xe vi sai nhỏ: khung, motor, rồi nguồn. Giữ pack chưa cắm cho đến khi buck đã đo.
+- [BMS (Battery Management System) || DIY or Buy || Properly protecting Li-Ion/Li-Po Battery Packs](https://www.youtube.com/watch?v=rT-1gvkFj60) — GreatScott!, tiếng Anh. Pack và BMS trên xe thật. Nhìn cực và giắc trước khi siết nắp.
+
 ## Bài tập
 
 1. Tấm và motor $$220~\mathrm{g}$$ tại $$x = +15~\mathrm{mm}$$, pin $$90~\mathrm{g}$$ tại $$x_b = -20~\mathrm{mm}$$, caster tại $$+90~\mathrm{mm}$$. Tính $$x_{cg}$$. Mũi có giữ xuống không?

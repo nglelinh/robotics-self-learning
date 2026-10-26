@@ -137,6 +137,10 @@ Bài này không thêm linh kiện bắt buộc. Nếu vẫn chưa có ESP32 đ�
 - [Lazada ESP32](https://www.lazada.vn/catalog/?q=ESP32)
 - [Thế Giới IC ESP32](https://www.thegioiic.com/search?q=ESP32)
 
+## Video tham khảo
+
+- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Khung UART: bit start, dữ liệu, bit stop. Giao thức teleop của bài nằm trên đường này.
+
 ## Bài tập
 
 1. `V -60 60\n` có bao nhiêu byte, và khung ấy dài bao lâu ở 115200 8N1?

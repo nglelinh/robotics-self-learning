@@ -126,6 +126,11 @@ Một lần thu gom rác khoảng 15 ms trên vòng MicroPython còn biết như
 3. Nhét `delay(200)` hoặc `time.sleep(0.2)` mỗi vòng. Nhìn LED và bộ đếm. Nhịp vòng lặp sụp, và im lặng 300 ms chỉ được nhận ra trên lưới 200 ms của ví dụ trên.
 4. Gỡ lệnh 200 ms trước khi rời bàn. File bạn giữ là nhịp tim không chặn. Trong sổ, ghi ngôn ngữ, số chân, số vòng mỗi giây, và câu "ngủ 200 ms thì robot dừng ở 400 ms."
 
+## Video tham khảo
+
+- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. Phía C++: một project PlatformIO biên dịch rồi nạp.
+- [Raspberry Pi PICO | Starting With MicroPython + Examples | I2C OLED, ADC, PWM](https://www.youtube.com/watch?v=zlKJ5hvfs6s) — Electronoobs, tiếng Anh. Phía MicroPython: file chạy trên Pico, không có bước biên dịch.
+
 ## Bài tập
 
 1. Vòng không chặn của bạn hoàn thành 25000 lượt trong một giây. Một lần `delay(200)` xóa bao nhiêu lượt, và lần đầu tiên phép thử im lặng 300 ms có thể đúng là lúc nào nếu nó chỉ được xét sau mỗi lần ngủ như vậy?

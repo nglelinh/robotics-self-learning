@@ -115,6 +115,10 @@ ros2 action send_goal /fibonacci action_tutorials_interfaces/action/Fibonacci "{
 
 Không có gì. Đây là lab laptop.
 
+## Video tham khảo
+
+- **Xem trước:** [ROS/ROS 2 - What are messages, services and actions?](https://www.youtube.com/watch?v=WzOopOkrowA) — Hummingbird, tiếng Anh. Message, service, và action khác nhau ở chỗ có chờ kết quả hay không. Đúng bảng bài này.
+
 ## Bài tập
 
 1. Xếp loại “xuất bản điện áp pin mười lần một giây.” Gợi ý: topic.

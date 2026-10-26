@@ -147,9 +147,13 @@ Danh sách của bạn dài hơn. Dòng cần có là `/clock`. `ros2 topic list
 
 Lab này là phần mềm trên laptop bạn đã dùng cho Jazzy. Không cần cảm biến, không cần ESP32. Raspberry Pi 5 là máy tính robot tùy chọn về sau, không phải máy GUI tối nay. Bản RAM thấp trên Hshop gần đây khởi điểm khoảng 2,4 triệu đồng; đó là ước lượng 2026, kiểm tra lại trước khi trả. Board: [Raspberry Pi 5 made in UK](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk). Kit: [basic kit](https://hshop.vn/combo-raspberry-pi-5-ram-4-8gb-basic-kit). Slug đổi thì tìm “Raspberry Pi 5” trên [hshop.vn](https://hshop.vn/). Từ khóa Shopee hoặc Lazada: `Raspberry Pi 5 4GB`, cùng lời nhắc 2026. Tin rẻ hơn nhiều so với board Hshop thường thiếu nguồn.
 
-## Video tham khảo thực tế
 
-Clip này là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới link chỉ nói điều chú thích ghi.
+## Video tham khảo
+
+- **Xem trước:** [Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues](https://www.youtube.com/watch?v=dY8JxldcuqA) — Aleksandar Haber PhD, tiếng Anh. Cài Gazebo Harmonic cạnh Jazzy. Từ chối gói tên gazebo classic, đúng cảnh báo của bài.
+- [ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python](https://www.youtube.com/watch?v=campHHAPtyg) — Aleksandar Haber PhD, tiếng Anh. Một model xe trong Gazebo, điều khiển từ ROS 2. Dài; xem đoạn spawn và cmd_vel.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Lấy dữ liệu 3D từ một vị trí trên trái đất](https://www.facebook.com/reel/2078352426052273). Chú thích: cách lấy dữ liệu 3D từ bất kỳ vị trí nào trên trái đất. Trong Gazebo, mặt đất là một model có đơn vị và gốc. Dữ liệu 3D chỉ vào world sau khi hai thứ đó khớp.
 

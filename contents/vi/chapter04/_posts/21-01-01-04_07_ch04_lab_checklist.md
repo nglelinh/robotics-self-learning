@@ -146,6 +146,10 @@ Chốt chương bằng những món cửa ký duyệt vẫn còn thiếu. Bỏ c
 - [Lazada: động cơ TT encoder](https://www.lazada.vn/catalog/?q=dong%20co%20TT%20encoder)
 - [Thế Giới IC: VL53L0X](https://www.thegioiic.com/search?q=VL53L0X)
 
+## Video tham khảo
+
+- **Xem trước:** [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs, tiếng Anh. Checklist cảm biến trượt nếu nhầm bus. Xem lại ba cách nối trước khi tick.
+
 ## Bài tập
 
 Dùng sổ trượt và các số của bài. Trả lời ngắn.
@@ -164,5 +168,5 @@ Dùng sổ trượt và các số của bài. Trả lời ngắn.
 
 - [Datasheet HC-SR04 (bản SparkFun)](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — vì sao ECHO là xung 5 V.
 - [Datasheet MPU-6050](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf) — thang biến 16384 thành 1 g.
-- [`sensor_msgs/Range`](https://docs.ros.org/en/humble/p/sensor_msgs/msg/Range.html) và [`nav_msgs/Odometry`](https://docs.ros.org/en/humble/p/nav_msgs/msg/Odometry.html) — hai message mà cửa ký duyệt này đang giữ.
+- [`sensor_msgs/Range`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/Range.html) và [`nav_msgs/Odometry`](https://docs.ros.org/en/jazzy/p/nav_msgs/msg/Odometry.html) — hai message mà cửa ký duyệt này đang giữ.
 - [I2C của Espressif](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/i2c.html) — lần quét mà bức ảnh phải khớp.

@@ -163,6 +163,11 @@ Phép tính Dũng ghi bên lề là lý do `delay(1000)` đã ra khỏi file. M�
 
 Dừng ở đó. Đừng thêm Wi-Fi, driver, hay pin để log “thật hơn.”
 
+## Video tham khảo
+
+- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Nạp chương trình nhấp LED cho ESP32. Serial hello của bài là bước ngay sau khi LED đã nhấp.
+- [ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output](https://www.youtube.com/watch?v=zCzchrkpHzk) — Alvin Pribadi, tiếng Anh. Một nút và một LED trên GPIO. Đúng cặp chân mà lab blink sẽ dùng lại.
+
 ## Bài tập
 
 1. Một nhịp đủ là 500 ms và LED đảo mỗi 250 ms. Trong 4 giây bạn chờ bao nhiêu lần nhấp trọn, và bao nhiêu dòng nhịp tim?

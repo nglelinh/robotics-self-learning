@@ -102,6 +102,11 @@ Tụ hoá nhôm bị đảo trên rail đang sống không ngồi im. Màng oxit
 
 An toàn: chỉ thang diode, linh kiện ra khỏi mạch, USB rút, không nối VM. Đừng xả tụ lớn bằng cách chập nó với ngón tay hoặc với đầu que đang cầm. Tụ 100 µF trong kit là nhỏ; thói quen vẫn quan trọng khi board sau này không nhỏ.
 
+## Video tham khảo
+
+- **Xem trước:** [Diodes Explained - The basics how diodes work working principle pn junction](https://www.youtube.com/watch?v=Fwj_d3uO5g8) — The Engineering Mindset, tiếng Anh. Diode và cực: chiều nào dẫn. LED là diode phát quang, vẫn có anode và cathode.
+- [Capacitors Explained - The basics how capacitors work working principle](https://www.youtube.com/watch?v=X4EUwTwZ110) — The Engineering Mindset, tiếng Anh. Tụ tích điện và phóng điện. Nhìn ký hiệu và cực trên tụ hóa.
+
 ## Bài tập
 
 1. Một tụ gốm ghi 104, tụ kia ghi 223. Đổi cả hai ra nF.

@@ -115,6 +115,11 @@ Bạn sẽ thấy số đo nằm trong dung sai với những con còn lành và
 
 An toàn: không đo ôm trên rail có điện, trên pin, hoặc trên chân VM của driver. Pin 2S không phải điện trở. Que đỏ không nằm ở ổ dòng, để lần đo áp sau trên chân 3,3 V không thành một ngắn mạch.
 
+## Video tham khảo
+
+- **Xem trước:** [Resistor Color Code Chart Tutorial Review - Physics](https://www.youtube.com/watch?v=G1mZutobxDU) — The Organic Chemistry Tutor, tiếng Anh. Bốn vạch màu ra giá trị và dung sai. Đối chiếu với đồng hồ, đừng tin mỗi bảng màu.
+- [How to Read Resistor Color Codes | 4-Band Resistor Values and Tolerance](https://www.youtube.com/watch?v=GLD7AgAYqwA) — Engineering Technology Simulation Learning Videos, tiếng Anh. Một điện trở bốn vạch, đọc chậm từng vạch. Dùng làm đối chứng cho bài lab.
+
 ## Bài tập
 
 1. Giải vàng-tím-nâu-vàng, cam-cam-đỏ-vàng, và lam-xám-đen-vàng. Cho giá trị danh định và cửa sổ ±5%.

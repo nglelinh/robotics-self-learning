@@ -133,6 +133,11 @@ lab-notes: cmd_vel in, capstone_telem out, frames odom and base_link
 
 Buổi chạy khô cần Docker trên laptop, không cần PCB mới. Khi nạp, dùng ESP32 DevKit cùng lớp với Capstone A. Tìm “ESP32” trên [hshop.vn](https://hshop.vn/). Từ khóa Shopee hoặc Lazada: `ESP32 DevKit V1 30 chân`. Khoảng 2026 khoảng 80.000–180.000 đồng; kiểm tra trước khi trả, và bỏ module trần không chip USB nếu bạn muốn DevKit. Đừng mua Pico cho bài này, và đừng nuôi động cơ từ cáp USB.
 
+## Video tham khảo
+
+- **Xem trước:** [Intro to micro-ROS](https://www.youtube.com/watch?v=aD3Lf-9cb0A) — Marine Robotics Group at Georgia Tech, tiếng Anh. micro-ROS: MCU nói DDS qua một agent. Giữ ý này trước khi cài gói.
+- [How to start develop micro-ROS on ESP32 quickly!](https://www.youtube.com/watch?v=48SxC6LBVs8) — stepbystep-robotics, tiếng Anh. ESP32 và agent. Nếu video kéo image khác jazzy, dừng và dùng thẻ bài này ghi.
+
 ## Bài tập
 
 1. Container agent đang chạy và bạn chưa nạp gì. `ros2 topic list` phải từ chối hiện cái gì, và vì sao? Gợi ý: nó phải từ chối topic của MCU, vì agent chỉ tạo các thực thể đó sau một phiên client.

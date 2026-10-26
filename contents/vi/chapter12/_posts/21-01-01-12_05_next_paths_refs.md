@@ -106,6 +106,11 @@ Bằng chứng tuần một của hướng A là một câu về trang Nav2 bạ
 | linorobot2 được nạp làm driver động cơ ở ngày thứ hai | Bạn thay một timeout bạn hiểu bằng một stack bạn chưa đọc. Hãy đọc. Giữ cầu của bạn |
 | Ghi chú tuần một là "xem vài video" | Nêu trang và đoạn bạn sẽ tóm tắt được |
 
+## Video tham khảo
+
+- **Xem trước:** [Core Concepts: Imitation Learning](https://www.youtube.com/watch?v=GDmhrAHxgQE) — Sanjiban Choudhury, tiếng Anh. Một tháng theo hướng bắt chước bắt đầu bằng khái niệm này, trước khi mua tay.
+- [π0: A Foundation Model for Robotics with Sergey Levine - 719](https://www.youtube.com/watch?v=5mY71rGXAkM) — The TWIML AI Podcast with Sam Charrington, tiếng Anh. π0 là hướng nền tảng khác, không nằm trong lab 24 tuần. Nghe để biết nó không phải gói apt.
+
 ## Bài tập
 
 Mỗi câu trả lời nêu một hướng. Một câu áp được cho cả ba hướng là chưa xong.
@@ -137,7 +142,7 @@ Các link khóa học thực sự dùng, gom lại để tháng sau không phụ
 - [RT-2, arXiv:2307.15818](https://arxiv.org/abs/2307.15818)
 - [Open X-Embodiment](https://robotics-transformer-x.github.io/)
 - [OpenVLA, arXiv:2406.09246](https://arxiv.org/abs/2406.09246) và [openvla.github.io](https://openvla.github.io/)
-- [pi0](https://www.physicalintelligence.company/blog/pi0)
+- [pi0](https://www.pi.website/blog/pi0)
 
 **Lý thuyết, đọc miễn phí**
 

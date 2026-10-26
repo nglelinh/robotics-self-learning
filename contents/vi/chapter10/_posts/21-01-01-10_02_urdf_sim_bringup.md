@@ -195,6 +195,12 @@ wheels rolling in Gazebo while linear.x is 0.2
 
 Chỉ phần mềm. Lab chạy trên cùng laptop Ubuntu 24.04 của bài 10-01. Không cần board mới, không cần lidar, không cần robot trên bàn. Capstone thật để tắt nguồn; bài này không đụng cổng serial.
 
+## Video tham khảo
+
+- **Xem trước:** [How do we describe a robot? With URDF! | Getting Ready to build Robots with ROS #7](https://www.youtube.com/watch?v=CwdbsvcpOHM) — Articulated Robotics, tiếng Anh. URDF phải khớp joint thật trước khi Gazebo chịu spawn.
+- [ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python](https://www.youtube.com/watch?v=campHHAPtyg) — Aleksandar Haber PhD, tiếng Anh. Đưa model vào world Jazzy và gửi lệnh. Đối chiếu tên topic với launch của bài.
+- [ROS2 - Create a Xacro Macro](https://www.youtube.com/watch?v=XH6Fvv7p5n0) — Robotics Back-End, tiếng Anh. Macro xacro cho từng bánh. Dùng khi file URDF của xe bắt đầu lặp.
+
 ## Bài tập
 
 1. Khẩu độ xacro là 0,16 còn `wheel_separation` của plugin là 0,20. Tiếp xúc lăn dùng số nào, và bạn sửa gì? Gợi ý: khoảng cách trong plugin điều khiển động học mô phỏng, nên sửa nó về 0,16 rồi spawn lại, đừng “sửa” trong RViz.

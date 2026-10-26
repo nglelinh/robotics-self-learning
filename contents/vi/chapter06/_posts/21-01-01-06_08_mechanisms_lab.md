@@ -118,6 +118,11 @@ Các trang tìm:
 
 Giá dịch chuyển. Đừng mua hộp giảm tốc thứ hai để tránh đo hộp thứ nhất.
 
+## Video tham khảo
+
+- **Xem trước:** [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Đếm răng, tính tỉ số, rồi quay trục vào để kiểm. Đúng lab đo tỉ số của bài.
+- [How to measure Gear Backlash and Center Distance](https://www.youtube.com/watch?v=8fYwUV6QV8c) — Evolvent Design, tiếng Anh. Nếu cặp bánh có khe, đo khe trước khi kết luận tỉ số sai.
+
 ## Bài tập
 
 1. Dấu đóng 1:90. Dự đoán góc đầu ra cho ba vòng đầu vào.

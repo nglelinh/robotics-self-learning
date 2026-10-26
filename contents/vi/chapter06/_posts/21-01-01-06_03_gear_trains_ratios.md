@@ -137,6 +137,12 @@ Các trang tìm:
 
 Giá dịch chuyển. Khớp trục với bánh đã mua ở Bài 01 trước khi trả tiền.
 
+## Video tham khảo
+
+- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Tỉ số của một chuỗi bánh răng. Nhân từng cặp, đúng cách bài tính.
+- [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Bánh răng kép: số răng nào nằm trên cùng một trục. Dễ đếm sai ở chỗ đó.
+- [Worm Gears Explained, Calculated & Modeled](https://www.youtube.com/watch?v=K8HQA1Uz1sE) — INTEGRAL PHYSICS, tiếng Anh. Bánh worm: một chiều truyền và tỉ số lớn. Đối chiếu với backlash ở bài sau.
+
 ## Bài tập
 
 1. Một bánh dẫn 15 răng kéo một bánh 60 răng. Tìm $$i$$, góc đầu ra cho một vòng động cơ, và chiều so với động cơ.

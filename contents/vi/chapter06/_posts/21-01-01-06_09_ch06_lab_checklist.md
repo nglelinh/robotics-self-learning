@@ -117,6 +117,10 @@ Các trang tìm:
 
 Giá dịch chuyển. Đặt dòng còn thiếu trước khi đăng ký bàn Chương 07, và giữ hóa đơn cạnh sổ để chi tiết về tới đúng cỡ các bạn đã đo.
 
+## Video tham khảo
+
+- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Checklist cơ khí hỏi một tỉ số bạn tính được. Xem lại cách nhân tỉ số trước khi tick.
+
 ## Bài tập
 
 1. Hai quãng lăn của các bạn là 196 mm và 191 mm. Tính cả hai bán kính. Đã được lấy trung bình chưa?

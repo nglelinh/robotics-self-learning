@@ -91,6 +91,10 @@ Bạn kết thúc với một danh sách đã gắn nhãn, không phải với m
 
 An toàn: lab này không có nguồn mô-tơ, không thí nghiệm 12 V, thang diode chỉ trên linh kiện rời. Tai TO-220 của ổn áp trên board đã lắp có thể vừa mang điện vừa nóng; đừng nắm để xem xe có chạy không.
 
+## Video tham khảo
+
+- **Xem trước:** [MOSFET Explained - How MOSFET Works](https://www.youtube.com/watch?v=AwRJsze_9m4) — The Engineering Mindset, tiếng Anh. MOSFET: cực cổng điều khiển kênh dẫn. Đây là linh kiện đóng cắt, chưa phải cầu H.
+
 ## Bài tập
 
 1. DIP có rãnh. Nhìn từ trên, chân 1 ở đâu, và số chạy chiều nào?
