@@ -91,6 +91,11 @@ Bạn phải có một trang mà bạn cùng lớp đọc được. Đạt khi g
 
 An toàn: chưa nối pin, động cơ, hay cảm biến 5 V khi vẫn đang chọn board. Việc điện duy nhất hôm nay là đọc nhãn.
 
+## Video tham khảo
+
+- **Xem trước:** [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Arduino, ESP32, và Raspberry Pi không thay được cho nhau. Khớp với bảng chọn board của bài.
+- [Raspberry Pi Pico - A Beginners Guide](https://www.youtube.com/watch?v=L03jT5slWnw) — Tinkernut, tiếng Anh. Pico là board thứ ba trong bài. Xem cổng USB và các chân trước khi so với ESP32.
+
 ## Bài tập
 
 1. Điền bảng so sánh Uno, ESP32, và Pico, kể cả Pico gốc với Pico W, Pico 2 với Pico 2 W. Một ô phải ghi “GPIO 5 V.”

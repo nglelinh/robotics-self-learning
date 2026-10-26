@@ -126,7 +126,7 @@ The links the course actually uses, gathered so a later month does not depend on
 - [RT-2, arXiv:2307.15818](https://arxiv.org/abs/2307.15818)
 - [Open X-Embodiment](https://robotics-transformer-x.github.io/)
 - [OpenVLA, arXiv:2406.09246](https://arxiv.org/abs/2406.09246) and [openvla.github.io](https://openvla.github.io/)
-- [pi0](https://www.physicalintelligence.company/blog/pi0)
+- [pi0](https://www.pi.website/blog/pi0)
 
 **Theory, free to read**
 

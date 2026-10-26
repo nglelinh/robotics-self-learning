@@ -100,6 +100,10 @@ Rồi viết một đoạn trong `lab-notes.md` về đa mode, dùng Capstone. C
 | Bạn viết diffusion an toàn hơn vì nó lặp | Vòng lặp sinh một mẫu. Mẫu có thể nói tiến. An toàn vẫn là timeout cộng một số 0 tường minh khi đoạn đầu sai |
 | Bạn gửi một bước khử nhiễu sớm tới động cơ vì nó đã có hình $$(v, \omega)$$ | Bước sớm là nhiễu mang hình đó. Chỉ quỹ đạo đã xong mới là ứng viên lệnh, và chỉ theo đơn vị của dataset |
 
+## Video tham khảo
+
+- **Xem trước:** [Diffusion Policy: LeRobot Research Presentation #2 by Cheng Chi](https://www.youtube.com/watch?v=M03sZFfW-qU) — Hugging Face, tiếng Anh. Cheng Chi nói về Diffusion Policy trên kênh Hugging Face. Xem ý khử nhiễu một quỹ đạo, không cần train.
+
 ## Bài tập
 
 1. Demo L là $$(v, \omega) = (0.20, +0.80)$$ và demo R là $$(0.20, -0.40)$$, đơn vị m/s và rad/s. Action trung bình là gì, và nó yaw về phía nào? Gợi ý: trung bình $$v = 0.20$$, trung bình $$\omega = +0.20$$. Yaw không triệt tiêu. Trung bình vẫn không cần phải là một trong hai demonstration. Nói bạn có thực hiện nó khi ghế nằm giữa hay không.

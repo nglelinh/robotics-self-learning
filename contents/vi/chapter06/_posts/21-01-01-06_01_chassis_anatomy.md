@@ -123,6 +123,11 @@ Tìm trên các trang sau, vì đường dẫn cửa hàng đổi và giá chợ
 
 Trước khi thanh toán, kiểm tra rãnh động cơ khớp hộp giảm tốc TT, và bánh caster đã gồm trong kit hoặc được bán ngay cạnh tấm. Một tấm đẹp mà không có lỗ caster sẽ biến Capstone A thành xe cày mũi.
 
+## Video tham khảo
+
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Hai bánh chủ động và khoảng cách giữa hai bánh. Đó là khung vi sai bài này bảo bạn đo.
+- [PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS](https://www.youtube.com/watch?v=RsZBxfpcLu8) — Aleksandar Haber PhD, tiếng Anh. Một khung giá thấp đang được dựng. Đối chiếu vị trí motor, bánh, và pin với sơ đồ bài.
+
 ## Bài tập
 
 1. Phép lăn cho $$s = 200$$ mm. Tính $$r$$ bằng milimét, lấy một chữ số thập phân.

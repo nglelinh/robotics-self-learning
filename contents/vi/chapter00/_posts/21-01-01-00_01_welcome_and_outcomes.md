@@ -113,9 +113,13 @@ Hà bắt đầu tối thứ Tư, laptop Windows, chưa có linh kiện. Kế ho
 
 Cô chép quy tắc 300 ms vào cùng mục. Serial ghi `không có — chưa có board`. Ảnh ghi `không có`. Cái gì hỏng: chưa cấp nguồn. Cái gì sửa được: cô viết số tuần trước khi mở tab mua. Thứ Năm 20:00–21:30 là buổi Bàn, nhãn "thẻ an toàn, chưa hàn". File đó là đạt.
 
-## Video tham khảo thực tế
 
-Clip này là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới link chỉ nói điều chú thích ghi.
+## Video tham khảo
+
+- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Khung ROS 2 mà nửa sau khóa sẽ dùng: node, topic, và một hệ chạy nhiều tiến trình.
+- [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Ba loại board trên lộ trình. Chọn một board cho các tuần MCU, chưa mua cả bộ.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Cơ điện tử học làm robot](https://www.facebook.com/reel/1746806056360278). Chú thích: sinh viên cơ điện tử học làm robot. Đây là cùng việc khóa này giao, từ bàn lab tới một robot chạy được.
 

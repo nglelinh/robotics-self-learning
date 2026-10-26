@@ -87,6 +87,11 @@ Không có gì quay. Bạn nộp hai tờ.
 
 Dừng nếu một chân nóng, hoặc lỗ bạn sắp gọi là GPIO đo được gần 5 V.
 
+## Video tham khảo
+
+- **Xem trước:** [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Thứ tự đọc một datasheet: tính năng, điện áp tối đa, rồi sơ đồ chân.
+- [How To Read A Datasheet - Phil's Lab #123](https://www.youtube.com/watch?v=1EXXqWweTkI) — Phil’s Lab, tiếng Anh. Cùng việc, đi sâu hơn vào bảng điện và đồ thị. Dừng ở bảng chân của con IC bạn đang cầm.
+
 ## Bài tập
 
 Mỗi câu trả lời gồm một con số, bảng chứa nó, và sợi dây mà con số ấy cấm.

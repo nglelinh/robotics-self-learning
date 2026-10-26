@@ -126,6 +126,11 @@ Bạn có thể xong bài này mà không mua gì. Nếu muốn một demo bàn,
 - Lazada: [A4988](https://www.lazada.vn/catalog/?q=A4988), [DRV8825](https://www.lazada.vn/catalog/?q=DRV8825)
 - Thế Giới IC: [A4988](https://www.thegioiic.com/search?q=A4988), [ULN2003](https://www.thegioiic.com/search?q=ULN2003)
 
+## Video tham khảo
+
+- **Xem trước:** [Microstepping in bipolar stepper motors](https://www.youtube.com/watch?v=X4qkWxRBTEg) — Texas Instruments, tiếng Anh. Microstep trên stepper hai cực: dòng hai cuộn lệch pha. Đúng cơ chế bài đang nói.
+- [Operating Principles of a Microstep Stepper Motor Drive](https://www.youtube.com/watch?v=Bs1zIZV1uSY) — Oriental Motor USA, tiếng Anh. Một bước đầy đủ bị chia nhỏ. Xem đĩa quay chậm lại chứ không phải mô-men tăng vô hạn.
+
 ## Bài tập
 
 1. Motor 1,8 độ lấy bao nhiêu bước đầy mỗi vòng? Bấy nhiêu là bao nhiêu vi bước 1/16?

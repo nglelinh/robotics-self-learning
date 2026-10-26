@@ -90,6 +90,10 @@ Cùng cách soi bắt một bản tinh hơn: máy trạng thái là thật, như
 
 Board chưa về không phải mục 6. Nếu phần cứng trễ, mục 1–3 còn mở. Mục 4 và 5 có thể phác từ mã bạn đã thực sự biên dịch hoặc đã kiểm cú pháp, và chúng giữ nhãn "chỉ mã nguồn" cho tới khi LED đã làm được chúng.
 
+## Video tham khảo
+
+- **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Checklist chương hỏi máy trạng thái có về IDLE và duty về không. Video này là hình của các trạng thái đó.
+
 ## Bài tập
 
 1. Soi sketch trong ví dụ như thể bạn là người chấm. Liệt kê các mục checklist nó trượt, và trích dòng làm câu "PWM bằng không trong FAULT" thành sai.

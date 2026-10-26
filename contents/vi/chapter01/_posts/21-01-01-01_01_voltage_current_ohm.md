@@ -147,6 +147,11 @@ Bạn sẽ thấy ánh đỏ rõ, không chói gắt. Điện áp trên điện 
 
 An toàn: bánh xe nếu đã gắn thì phải nhấc khỏi mặt bàn, chưa nối nguồn mô-tơ, và không đưa VM hay 5 V của USB vào GPIO. Cả thí nghiệm chỉ là một LED vài miliampe.
 
+## Video tham khảo
+
+- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. V, I, R và công suất trên một mạch đơn. Đây là hình của định luật Ôm trong bài.
+- [video tập giảng: Định luật Ôm đối với toàn mạch- Trần Thị Hồng Nhung](https://www.youtube.com/watch?v=Pd7jlqP4CRw) — Trường Đại học Giáo dục - ĐHQGHN, tiếng Việt. Bài giảng tiếng Việt về định luật Ôm cho toàn mạch, có sức điện động và điện trở trong.
+
 ## Bài tập
 
 1. LED xanh, $V_f = 2{,}2\ \mathrm{V}$, thắp từ 5 V ở 10 mA, mắc giữa 5 V và GND, không vào GPIO. Tính $R$, chọn giá trị kế trên trong bộ 220 Ω, 270 Ω, 330 Ω, rồi tính $P$ trên điện trở đó.

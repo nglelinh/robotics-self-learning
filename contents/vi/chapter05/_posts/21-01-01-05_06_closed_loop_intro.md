@@ -144,6 +144,11 @@ Lab này dùng cảm biến và driver bạn đã có. Chỉ mua chỗ thiếu: 
 - Lazada: [HC-SR04](https://www.lazada.vn/catalog/?q=HC-SR04), [VL53L0X](https://www.lazada.vn/catalog/?q=VL53L0X)
 - Thế Giới IC: [HC-SR04](https://www.thegioiic.com/search?q=HC-SR04), [L298N](https://www.thegioiic.com/search?q=L298N)
 
+## Video tham khảo
+
+- **Xem trước:** [Control Systems Lectures - Closed Loop Control](https://www.youtube.com/watch?v=O-OqgFE9SD4) — Brian Douglas, tiếng Anh. Vòng kín: đo, so với đích, sửa lệnh. Đúng vòng cảm nhận rồi tác động của lab.
+- [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. PID là một cách điền chỗ sửa lệnh. Chương 08 sẽ chỉnh số; bài này chỉ cần thấy vòng kín.
+
 ## Bài tập
 
 1. Khoảng cách đọc 180 mm, rồi 900 mm, rồi một timeout. Bạn lệnh PWM bao nhiêu trong mỗi trường hợp nếu dừng là 200 mm và đi là 250 mm?

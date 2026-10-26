@@ -146,6 +146,11 @@ Camera độ sâu nằm ngoài phạm vi. Tìm Shopee bằng `camera USB UVC`. W
 
 Camera Pi loại IMX219 là lựa chọn kia, thường vài trăm nghìn đồng. Một Waveshare IMX219-77 từng niêm yết gần 432.000 đồng. Xem lại trang hiện tại trước khi đặt. Cả hai loại nuôi được script hoặc topic ảnh ROS. Không loại nào phải là RealSense.
 
+## Video tham khảo
+
+- **Xem trước:** [Control your Webcam with Python - OpenCV Beginners Tutorial #4](https://www.youtube.com/watch?v=sd25t4HmFdU) — Sam Westby Tech, tiếng Anh. Đọc một khung hình từ camera bằng OpenCV. Pipeline bài này bắt đầu ở đúng chỗ đó.
+- [OpenCV Python Camera Calibration (Intrinsic, Extrinsic, Distortion)](https://www.youtube.com/watch?v=H5qbRTikxI4) — Kevin Wood | Robotics & AI, tiếng Anh. Hiệu chỉnh nội tại camera. Chỉ cần thấy ma trận và méo; chưa cần chạy hiệu chỉnh tối nay.
+
 ## Bài tập
 
 ### Bài 1

@@ -64,6 +64,10 @@ tf2_echo base_link -> :
 | `tf2_echo` chờ mãi | Sai tên frame. `ros2 run tf2_tools view_frames` |
 | Pi chạy Ubuntu 26.04 | Ngoài apt Jazzy. Ghi lại 24.04 hoặc dừng cửa bản cài |
 
+## Video tham khảo
+
+- **Xem trước:** [The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6](https://www.youtube.com/watch?v=QyvHhY4Y_Y8) — Articulated Robotics, tiếng Anh. Checklist chương hỏi một cây frame nhìn được. Video TF là hình cần có trước khi tick.
+
 ## Bài tập
 
 1. Cửa nào trượt khi topic thấy nhau nhưng `lsb_release` là `jammy`?

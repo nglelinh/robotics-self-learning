@@ -110,6 +110,12 @@ Mua cảm biến khoảng cách và, nếu ví cho phép, motor TT đã kèm enc
 - [Lazada, VL53L0X](https://www.lazada.vn/catalog/?q=VL53L0X)
 - [Thế Giới IC](https://www.thegioiic.com/search?q=HC-SR04)
 
+## Video tham khảo
+
+- **Xem trước:** [HC-SR04 Ultrasonic Distance Sensor and Arduino (Lesson #9)](https://www.youtube.com/watch?v=n-gJ00GTsNg) — Science Buddies, tiếng Anh. HC-SR04: hai chân echo và trig, không phải I2C.
+- [What is an Inertial Measurement Unit (IMU)?](https://www.youtube.com/watch?v=qS9GwaekLW4) — Phidgets Inc., tiếng Anh. IMU là một vỏ có gia tốc và gyro. Nhận module trước khi đọc thanh ghi.
+- [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Encoder quay có hai kênh. Nhìn đĩa và cảm biến, đừng nhầm với biến trở.
+
 ## Bài tập
 
 1. Board có hai ống kim loại và chân VCC, TRIG, ECHO, GND. ECHO lên bao nhiêu vôn, và bạn thêm hai điện trở nào cho ESP32?

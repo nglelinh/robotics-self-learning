@@ -134,6 +134,11 @@ Các trang tìm:
 
 Giá dịch chuyển. Khớp moay-ơ với trục chữ D của TT, hoặc với lỗ khớp nối đã đo ở Bài 02.
 
+## Video tham khảo
+
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Vi sai: vận tốc hai bánh thành tiến và quay. Caster không phải bánh chủ động.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Odometry từ bánh xe. Giữ bán kính bánh và khoảng cách hai bánh là hai số khác nhau.
+
 ## Bài tập
 
 1. $$b = 0.18$$ m, $$v_r = 0.15$$ m/s, $$v_l = -0.15$$ m/s. Tìm $$v$$, $$\omega$$, và thời gian cho một vòng xoay đủ.

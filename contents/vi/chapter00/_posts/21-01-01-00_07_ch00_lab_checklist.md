@@ -79,6 +79,10 @@ Cô tick kế hoạch đã viết, không tick cáp đã chứng minh, và để
 
 Một bạn khác, Khoa, có tiếng bíp, có thẻ, có câu lộ trình, và cũng có ảnh TP4056 nối qua hai cell vì "giắc vừa". Dòng cục sạc của anh là `mở`, và ảnh là bằng chứng lỗi, không phải sự sẵn sàng. Anh ngắt module, viết mỗi cell sẽ được sạc riêng tới 4,2 V hoặc không sạc, rồi mới được xem lại dấu tick. `bom.csv` của anh không có tổng. Anh quay lại bài 00-05 trước khi gọi cửa là đạt. Một stack nhắn tin trên Ubuntu sẽ không bắt được cả hai sơ suất.
 
+## Video tham khảo
+
+- **Xem trước:** [EEVblog 1636 - Ultimate Multimeter Beginners Guide!](https://www.youtube.com/watch?v=52w3xeXrMU8) — EEVblog, tiếng Anh. Trước khi tick bàn đã sẵn sàng: đo thử một điện áp và một điện trở trên đồng hồ.
+
 ## Bài tập
 
 Các câu này hỏi bạn tìm chỗ thiếu mất an toàn. Chúng nói về buổi rà của bạn, hoặc các buổi rà dưới đây, không phải nhắc lại chương.

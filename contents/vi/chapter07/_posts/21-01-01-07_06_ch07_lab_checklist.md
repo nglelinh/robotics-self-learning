@@ -120,6 +120,10 @@ Chỉ mua dòng còn trống. Giá đổi. Khoảng 2026: khung 60.000–150.000
 - [Lazada TB6612](https://www.lazada.vn/catalog/?q=TB6612), [ESP32](https://www.lazada.vn/catalog/?q=ESP32)
 - [Thế Giới IC LM2596](https://www.thegioiic.com/search?q=LM2596), [L298N](https://www.thegioiic.com/search?q=L298N)
 
+## Video tham khảo
+
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Checklist capstone hỏi motor chịu lệnh. Một lần quay có kiểm soát trên driver là bằng chứng tối thiểu.
+
 ## Bài tập
 
 1. Log có một `V 80 80` thẳng, rồi xe còn lăn sau khi laptop ngủ. Dòng xong việc nào trượt, và trên hộp điều gì phải đúng trước khi đụng chương 08 hoặc 09?

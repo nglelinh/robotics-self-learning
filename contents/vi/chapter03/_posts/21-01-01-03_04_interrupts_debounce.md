@@ -163,6 +163,11 @@ Dùng dây nút của bài GPIO. Chỉ USB. Không có cực motor trên chân.
 3. Đừng "sửa" chùm bằng cách đặt `delay(20)` trong `onFall`. Đọc lại listing xấu ở phần nội dung và viết một câu trong sổ: khoảng chờ nằm cạnh `millis()` hoặc `ticks_diff`, không nằm trong ISR.
 4. Tùy chọn: chuyển cờ kích sang `CHANGE` và xác nhận một phép thử đứng yên lỏng cũng phản ứng với chùm lúc nhả. Số đếm vẫn chỉ nên tăng một mỗi lần nhấn nếu bạn chỉ tăng khi LOW đã ổn.
 
+## Video tham khảo
+
+- **Xem trước:** [What is Switch Bounce and How to Debounce – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=IvU8m_30iK0) — DigiKey, tiếng Anh. Dội tiếp điểm tạo nhiều ngắt cho một lần nhấn. Xem dạng sóng trước khi viết ISR.
+- [ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output](https://www.youtube.com/watch?v=zCzchrkpHzk) — Alvin Pribadi, tiếng Anh. Nút trên GPIO ESP32. ISR của bài phải ngắn hơn phần việc trong video ví dụ.
+
 ## Bài tập
 
 1. Một lần nhấn sinh cạnh xuống ở 0, 2, 5, 9, 14 và 18 ms, rồi giữ LOW. ISR trần sinh bao nhiêu nhịp đếm, và luật 20 ms chấp nhận lần nhấn vào lúc nào?

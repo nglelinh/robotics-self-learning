@@ -88,6 +88,11 @@ Các lỗi. Que đen trên chân 5V và que đỏ trên GND cho số âm hoặc 
 
 An toàn: pin ở trong túi. Đừng mắc đồng hồ ở chế độ đo dòng nối tắt giữa 5V và GND. Đó là một mạch ngắn qua đồng hồ.
 
+## Video tham khảo
+
+- **Xem trước:** [HOW TO USE LOGIC LEVEL SHIFTER ON ARDUINO TO CONVERT CIRCUITS AND SENSORS FROM 5V TO 3.3V CIRCUITS](https://www.youtube.com/watch?v=RBDVBafNF44) — Circuit Desolator, tiếng Anh. 5 V và 3,3 V không nối thẳng. Xem mạch chuyển mức trước khi cắm cảm biến vào ESP32.
+- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Một module chuyển mức tám kênh. Chiều cao và chiều thấp phải khớp sơ đồ chân bài này.
+
 ## Bài tập
 
 1. Tính ngõ ra mạch chia cho 5 V với $$1\,\mathrm{k}\Omega$$ phía trên và $$2\,\mathrm{k}\Omega$$ phía dưới. Nếu cả hai điện trở cao thêm 5 phần trăm, tỉ số có đổi không?

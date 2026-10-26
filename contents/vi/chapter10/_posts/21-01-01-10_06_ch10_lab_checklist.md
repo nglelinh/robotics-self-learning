@@ -57,6 +57,10 @@ use_sim_time tren robot that: khong
 | Bánh sim quay ngược | Dấu joint hoặc dấu plugin, sửa một chỗ |
 | Robot thật cũng `use_sim_time:=true` | Bỏ. Đồng hồ tường là đồng hồ của sàn |
 
+## Video tham khảo
+
+- **Xem trước:** [Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues](https://www.youtube.com/watch?v=dY8JxldcuqA) — Aleksandar Haber PhD, tiếng Anh. Checklist mô phỏng bắt đầu bằng gz sim mở được trong môi trường Jazzy.
+
 ## Bài tập
 
 1. Cửa nào vẫn trượt nếu GUI hiện model nhưng `gz topic -l` không có `/clock`?

@@ -136,9 +136,13 @@ Các trang tìm:
 
 Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một tỉ số.
 
-## Video tham khảo thực tế
 
-Các clip là Facebook Reel ngắn của Hoàng Quân, giảng viên Cơ điện tử ICTU, trên dự án robot bốn chân Chinbi ([chinbi.com](https://chinbi.com)). Dòng dưới mỗi link chỉ nói điều chú thích ghi.
+## Video tham khảo
+
+- **Xem trước:** [Four-Bar Linkage and Its Three Possible Motions](https://www.youtube.com/watch?v=EBqrDj-Wkiw) — mecademie, tiếng Anh. Bốn thanh và ba kiểu chuyển động. Đếm khâu trước khi đoán đầu chân đi được.
+- [Basic Mechanisms:  4 Bar Linkage](https://www.youtube.com/watch?v=1Ty_1LF3Qv0) — Mr. Dillman's Tech Channel, tiếng Anh. Một bốn thanh chạy thật, rất ngắn. Dùng để nhìn khâu nào cố định.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
 - [Test thiết kế chân](https://www.facebook.com/reel/1615249330240344). Chú thích: test thiết kế chân. Xem như một cơ cấu chân đang được kiểm trên bàn, trước khi nó thành một khâu trong chuỗi động học.
 - [Một chân, ba bậc tự do](https://www.facebook.com/reel/2974137376266883). Chú thích: một chân có 3 bậc tự do. Ba khớp là ba biến. Bài này chưa biến ba biến đó thành một quỹ đạo đầu chân.

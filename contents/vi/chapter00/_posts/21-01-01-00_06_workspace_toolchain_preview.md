@@ -118,6 +118,11 @@ Trang dùng Windows, lộ trình A, ESP32, trần tiền đã chốt ở bài 00
 
 Một bạn trên Ubuntu 24.04 có thể cài Jazzy ở giờ khác và dán chuỗi phiên bản thật. Bạn đó vẫn nợ cùng thư mục firmware. Trang không chép một phiên bản cô không chạy.
 
+## Video tham khảo
+
+- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. PlatformIO là toolchain ESP32 mà chương 02 sẽ cài. Xem một project mở và nạp được.
+- [Breadboard tutorial: How to use a breadboard (for beginners)](https://www.youtube.com/watch?v=W6mixXsn-Vc) — LeftyMaker, tiếng Anh. Breadboard là mặt bàn của các lab đầu. Hàng lỗ nào thông nhau.
+
 ## Bài tập
 
 1. Câu lộ trình của bạn nói Pico 2 và MicroPython. Bạn tạo thư mục nào, BOOTSEL phải làm gì trước khi có file được chép, và hai công cụ nào hợp lệ cho REPL?

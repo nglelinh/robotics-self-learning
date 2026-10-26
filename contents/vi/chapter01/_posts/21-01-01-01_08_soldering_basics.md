@@ -97,6 +97,11 @@ $$
 
 Nửa oát trong một hạt thiếc thì nóng rất nhanh. Mô-tơ ấy thấy ít hơn mô-tơ kia khoảng nửa vôn, xe kéo lệch dù hai lệnh PWM giống nhau. Cách sửa: hút sạch mối, tráng sợi cho tử tế, tạo vành lõm, bọc gen, thêm vòng giảm kéo. Thông mạch lại chỉ sau khi thiếc nguội và tay đã buông.
 
+## Video tham khảo
+
+- **Xem trước:** [iFixit's Soldering 101: Beginners Guide](https://www.youtube.com/watch?v=rK38rpUy568) — iFixit, tiếng Anh. Năm việc của một mối hàn: nhiệt, thiếc, thời gian, và mối bóng. Không thổi mối cho nguội.
+- [Soldering Tutorial for Beginners: Five Easy Steps](https://www.youtube.com/watch?v=Qps9woUGkvI) — oneTesla, tiếng Anh. Một mạch nhỏ, lặp lại cùng các bước. Dùng làm nhịp trước khi hàn header.
+
 ## Bài tập
 
 1. Liệt kê thứ tự chạm của một mối: mỏ chạm gì, thiếc chạm đâu, món nào rời trước, và khi nào được dịch dây. Đảo một bước là hỏng câu trả lời.

@@ -109,6 +109,12 @@ USB là $$0{,}50\,\mathrm{A}$$. Phần dư khi bánh trên không khoảng $$0{,
 
 Cầu chì 0,5 A "để khỏi kẹt" nằm đúng trên dòng chạy nhẹ và sẽ đứt lúc chạy bình thường. Người ta sẽ nối tắt cầu chì. Chọn 2 A hoặc 3 A, và để thời gian chờ xử lý lúc kẹt.
 
+## Video tham khảo
+
+- **Xem trước:** [What is ESD and How to Prevent it – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=pWhtyz-UFZc) — DigiKey, tiếng Anh. ESD xuống chân IC. Thói quen chạm đất và cách để board trước khi cắm.
+- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Cầu chì ngắt khi dòng vượt mức. Đối chiếu với cực tính và sụt áp trong bài.
+- [The Best Protection for your Circuit is NOT a Fuse!.....but a Resettable Fuse? EB#54](https://www.youtube.com/watch?v=sF0KOVWj9p8) — GreatScott!, tiếng Anh. Cầu chì tự phục hồi là một lựa chọn khác, không thay được tính dòng của bài.
+
 ## Bài tập
 
 1. Hai mô-tơ không tải 150 mA, USB 500 mA. Tính tổng lúc chạy nhẹ và phần còn lại. Vì sao phần còn lại không có nghĩa USB được nuôi VM khi bánh chạm đất?

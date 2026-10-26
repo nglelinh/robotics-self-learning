@@ -116,6 +116,10 @@ Các trang tìm:
 
 Giá dịch chuyển. Một xưởng laser địa phương thường là tấm biển trên cửa makerspace hơn là một mã hàng toàn quốc. Hãy xin DXF, milimét, đường kín, và chiều dày tấm họ có sẵn, thường là mica 3 mm.
 
+## Video tham khảo
+
+- **Xem trước:** [Laser, CNC, or 3D Printer Which One Is RIGHT For You?](https://www.youtube.com/watch?v=6MA1Lv4YilM) — Andy Bird Builds, tiếng Anh. In 3D, laser, và CNC không cùng một việc. Chọn theo lực và độ phẳng của khung, không theo máy đang có sẵn.
+
 ## Bài tập
 
 1. Lỗ vẽ 3,4 mm, khe cắt 0,2 mm. Đường kính các bạn chờ trên mica là bao nhiêu, và ốc M3 còn đi qua không?

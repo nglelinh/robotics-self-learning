@@ -82,6 +82,11 @@ Bạn sẽ nghe bíp qua jumper tốt và trong một hàng, im qua rãnh, và i
 
 An toàn: bắt đầu ở thang áp cao hơn cái bạn chờ, để pin 2S gần 8 V không bị gặp trước tiên ở thang 200 mV. Ngón tay rời đầu que khi đo pin hoặc củ sạc; chỉ phần kim loại đầu que được chạm mạch. Bài này không đo dòng trên USB. Đừng cắm củ sạc vào GPIO của ESP32 hoặc Pico để "xem 5 V có ở đó không".
 
+## Video tham khảo
+
+- **Xem trước:** [CÁCH SỬ DỤNG ĐỒNG HỒ VẠN NĂNG ĐO ĐIỆN ĐƠN GIẢN](https://www.youtube.com/watch?v=FsBgW0WDQSw) — Sơn Tiện Ích, tiếng Việt. Đo điện áp và điện trở bằng đồng hồ, tiếng Việt. Chọn đúng lỗ và đúng thang trước khi chạm mạch.
+- [Breadboard tutorial: How to use a breadboard (for beginners)](https://www.youtube.com/watch?v=W6mixXsn-Vc) — LeftyMaker, tiếng Anh. Breadboard: hàng nào nối sẵn. Đo thông mạch để kiểm, đừng tin màu dây.
+
 ## Bài tập
 
 1. Board có 30 cột mỗi bên rãnh, và cả cặp thanh nguồn trên lẫn dưới đều bị tách một lần ở giữa. Có bao nhiêu nút năm lỗ trong vùng giữa? Có bao nhiêu đoạn thanh nguồn riêng?

@@ -62,6 +62,10 @@ Cả ba dòng trượt. Ổn không phải là số. $16$ trong công thức mé
 | CSV toàn số 0 | Encoder chưa vào ngắt, hoặc $\Delta t$ sai đơn vị |
 | Mô phỏng P không vọt | Bạn đang chạy plant khác bài. Chạy lại script của bài PID |
 
+## Video tham khảo
+
+- **Xem trước:** [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. Checklist chương hỏi một bước nhảy và một tư thế từ encoder. Xem lại hình PID trước khi tick.
+
 ## Bài tập
 
 1. Cửa nào trượt nếu quaternion đúng nhưng điểm yaw $\pi$ vẫn dương?

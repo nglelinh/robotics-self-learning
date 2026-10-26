@@ -110,6 +110,11 @@ Board của Bình là NodeMCU-32S của Hshop, CH340, trên laptop Windows. Lầ
 
 An toàn: chỉ USB. Không pin, không motor, không nối VM. Chân 5 V không phải nguồn motor, và một lần kẹt bánh trong lúc nạp đúng là brownout mà lab này bảo bạn gỡ ra.
 
+## Video tham khảo
+
+- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. Tạo project PlatformIO, chọn board ESP32, nạp một chương trình. Đúng toolchain của bài.
+- [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Cùng ESP32 nhưng nạp bằng Arduino IDE, tiếng Việt. Bài dùng PlatformIO; video này chỉ để thấy board đã sống.
+
 ## Bài tập
 
 1. Viết bốn khóa `platformio.ini` bài này yêu cầu, và viết URL board của Arduino IDE theo trí nhớ.

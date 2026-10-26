@@ -37,7 +37,7 @@ Một vision-language-action model, gọi tắt VLA, nhận điểm ảnh và m�
 
 **OpenVLA** ([arXiv:2406.09246](https://arxiv.org/abs/2406.09246), trang dự án [openvla.github.io](https://openvla.github.io/)) là một VLA trọng số mở cùng họ ý tưởng: ảnh và chỉ dẫn đi vào, action robot rời rạc đi ra, luyện từ một xương sống vision-language mở trên dữ liệu Open X-Embodiment. "Trọng số mở" nghĩa là một người nghiên cứu có đúng máy thì nạp được. Nó không nghĩa là laptop lớp học không GPU luyện được, và không nghĩa là laptop đó chạy một mạng nhiều tỉ tham số ở 50 Hz giữa các khung serial của bạn. Action các trọng số đó phát đi theo robot trong dataset, thường là chuyển động đầu cuối của một cánh tay cộng một kẹp, không phải `linear.x` và `angular.z` cho khung vi sai. Việc trung thực tối nay là bài báo và trang dự án.
 
-**pi0**, của Physical Intelligence, là đầu flow-matching của cùng một ý. Hãy đọc bài blog [pi0](https://www.physicalintelligence.company/blog/pi0) thay vì một tin đồn về kiến trúc. Bài viết trình bày một policy tổng quát: ảnh và ngôn ngữ đi vào, action liên tục đi ra, sinh bằng flow (họ hàng của phép khử nhiễu bạn vừa đọc, không phải một ACT thứ hai). Robot trong bài là của họ. Flow matching không đổi quỹ đạo kẹp thành đế bánh của bạn. Nếu chữ trên blog đã đổi lúc bạn mở, hãy trích đúng chỗ bạn thấy và giữ câu embodiment bằng lời của bạn.
+**pi0**, của Physical Intelligence, là đầu flow-matching của cùng một ý. Hãy đọc bài blog [pi0](https://www.pi.website/blog/pi0) thay vì một tin đồn về kiến trúc. Bài viết trình bày một policy tổng quát: ảnh và ngôn ngữ đi vào, action liên tục đi ra, sinh bằng flow (họ hàng của phép khử nhiễu bạn vừa đọc, không phải một ACT thứ hai). Robot trong bài là của họ. Flow matching không đổi quỹ đạo kẹp thành đế bánh của bạn. Nếu chữ trên blog đã đổi lúc bạn mở, hãy trích đúng chỗ bạn thấy và giữ câu embodiment bằng lời của bạn.
 
 An toàn nằm dưới mọi dòng của bảng. Một lệnh ngôn ngữ không phải E-stop. Chuỗi "stop" chỉ là thêm một token. Mạng vẫn có thể phát một action tiến nhỏ, hoặc phát dừng muộn một chunk, hoặc bỏ qua từ đó vì demonstration dùng từ khác. Timeout động cơ không đọc tiếng Anh. Nó chỉ nhận ra khung serial đã ngừng. Nếu node policy còn sống và vẫn xuất bản phần còn lại của quỹ đạo, timer 300 ms cứ reset, đúng như với chunk ACT xấu. Một chữ "dừng" đã gõ chỉ an toàn sau khi mã của bạn biến nó thành PWM bằng 0, một `Twist` bằng 0, hoặc một ngắt phần cứng. Công tắc nguồn tay với tới vẫn thắng chuỗi chỉ dẫn. Lần đầu một node mới được phép xuất bản, bánh vẫn phải nhấc lên.
 
@@ -78,7 +78,7 @@ Chọn **hai** hệ trong danh sách: RT-2, Open X-Embodiment, OpenVLA, pi0. Đ�
 - RT-2: [arXiv:2307.15818](https://arxiv.org/abs/2307.15818)
 - Open X-Embodiment: [robotics-transformer-x.github.io](https://robotics-transformer-x.github.io/)
 - OpenVLA: [arXiv:2406.09246](https://arxiv.org/abs/2406.09246) và [openvla.github.io](https://openvla.github.io/)
-- pi0: [physicalintelligence.company/blog/pi0](https://www.physicalintelligence.company/blog/pi0)
+- pi0: [pi.website/blog/pi0](https://www.pi.website/blog/pi0)
 
 Chép dòng tiêu đề bảng vào `lab-notes.md` và thêm hai dòng của bạn.
 
@@ -103,6 +103,12 @@ Chép dòng tiêu đề bảng vào `lab-notes.md` và thêm hai dòng của b�
 
 Không món mua nào phục vụ bài này. Đừng mua kẹp, bo hạng Jetson, hay máy thứ hai vì một demo VLA có nhiều camera hơn bạn. Camera tùy chọn ở chương 11 đã là phần bàn về ảnh của khóa học. Camera trên Capstone vẫn không biến đế thành robot bên trong RT-1 hay OpenVLA.
 
+## Video tham khảo
+
+- **Xem trước:** [OpenVLA: LeRobot Research Presentation #5 by Moo Jin Kim](https://www.youtube.com/watch?v=-0s0v3q7mBk) — Hugging Face, tiếng Anh. OpenVLA, Moo Jin Kim trình bày trên kênh Hugging Face. Ảnh và chữ vào, action của một thân robot ra.
+- [RT - 2 Visual Language Action Models | Robotics Transformer 2 | Google DeepMind](https://www.youtube.com/watch?v=yJYchWc9j8A) — MLNews, tiếng Anh. RT-2 được gọi đúng tên trên tiêu đề. Video rất ngắn; chỉ dùng để đặt RT-2 cạnh OpenVLA, rồi đọc bài báo.
+- [π0: A Foundation Model for Robotics with Sergey Levine - 719](https://www.youtube.com/watch?v=5mY71rGXAkM) — The TWIML AI Podcast with Sam Charrington, tiếng Anh. π0 với Sergey Levine. Đối chiếu action liên tục trong podcast với action rời của OpenVLA.
+
 ## Bài tập
 
 1. Bảng của bạn có RT-2. Viết ô laptop thành một câu đầy đủ, rồi thêm việc bạn được phép làm với PDF. Gợi ý: train ở nhà là không, kể cả một notebook mượn mà bạn hy vọng là đủ lớn. Bạn được trích abstract.
@@ -117,4 +123,4 @@ Không món mua nào phục vụ bài này. Đừng mua kẹp, bo hạng Jetson,
 - [RT-2](https://arxiv.org/abs/2307.15818).
 - [Open X-Embodiment](https://robotics-transformer-x.github.io/).
 - [OpenVLA](https://arxiv.org/abs/2406.09246) và [trang dự án](https://openvla.github.io/).
-- [pi0, Physical Intelligence](https://www.physicalintelligence.company/blog/pi0).
+- [pi0, Physical Intelligence](https://www.pi.website/blog/pi0).

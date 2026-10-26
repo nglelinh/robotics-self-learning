@@ -108,6 +108,11 @@ Con thứ ba có năm vạch nhưng lần đầu bị ghi như bốn vạch, ra 
 
 Trên diode, đầu có vạch là cathode, nên anode là chân kia. Que đỏ ở anode, que đen ở vạch, màn hình 0,62 V. Đảo que thì OL. Trên LED đỏ, que đỏ ở chân dài ra 1,85 V và le sáng, nên chân dài ấy là anode hôm nay. Hai điện áp trong cùng một bảng là cách chứng minh không bị tráo món: khoảng 0,6 V là diode, khoảng 1,8 V là LED đỏ.
 
+## Video tham khảo
+
+- **Xem trước:** [Resistor Color Code Chart Tutorial Review - Physics](https://www.youtube.com/watch?v=G1mZutobxDU) — The Organic Chemistry Tutor, tiếng Anh. Đọc màu rồi đo ohm. Hai kết quả phải cùng một giá trị trước khi cắm.
+- [CÁCH SỬ DỤNG ĐỒNG HỒ VẠN NĂNG ĐO ĐIỆN ĐƠN GIẢN](https://www.youtube.com/watch?v=FsBgW0WDQSw) — Sơn Tiện Ích, tiếng Việt. Thang ohm và thang thông mạch trên đồng hồ. Linh kiện dễ nhầm được phân biệt bằng số đo, không bằng vỏ.
+
 ## Bài tập
 
 1. Điện trở 470 Ω, vạch vàng, đo được 502 Ω. Tính cửa sổ 5% và đưa kết luận.

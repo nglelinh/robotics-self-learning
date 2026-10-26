@@ -167,6 +167,11 @@ Buổi chạy khô chỉ cần laptop. Bản có mạch dùng đúng board Capst
 
 Module USB-TTL 5 V vẫn phải nói logic 3,3 V vào chân RX của ESP32. Nguồn động cơ lấy từ pack robot, không lấy từ cổng USB laptop. Giá đổi; khoảng trên chỉ để kiểm tra túi tiền, không phải báo giá.
 
+## Video tham khảo
+
+- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Khung byte trên UART, không phải một dòng println. Đối chiếu với bộ đệm và checksum của bài.
+- [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs, tiếng Anh. UART đứng cạnh I2C và SPI để thấy vì sao teleop của xe dùng UART.
+
 ## Bài tập
 
 1. Tính tay XOR các byte ASCII của `V,0,0`, rồi đối chiếu với hàm `frame()`. Gợi ý: XOR giao hoán, thứ tự byte không đổi kết quả, và kết quả là một byte trong `0x00`–`0xFF`.

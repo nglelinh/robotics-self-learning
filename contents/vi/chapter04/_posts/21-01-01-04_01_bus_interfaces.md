@@ -126,6 +126,10 @@ Tìm bằng ô search, đừng bấm vào ảnh sản phẩm lạ trên mạng:
 
 Giá chợ đổi. So hai người bán và ưu tiên module có chữ chân in trên PCB.
 
+## Video tham khảo
+
+- **Xem trước:** [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs, tiếng Anh. UART, I2C, SPI trên một bảng: số dây và ai phát clock. Khớp ba bus của bài.
+
 ## Bài tập
 
 1. Một board ghi SDA, SCL, GND, VCC và dòng chữ “I2C 0x29”. Đó là bus nào, có thể cần thêm linh kiện gì, và lần quét phải in gì?

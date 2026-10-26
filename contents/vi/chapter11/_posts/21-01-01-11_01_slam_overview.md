@@ -116,6 +116,11 @@ Chỉ mua máy quét khi bạn sẵn sàng dựng bản đồ. Lidar mặt phẳ
 
 Máy tính chạy mapper là Raspberry Pi 5. [Trang Pi 5 của Hshop](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk) từng gần 2,4 triệu đồng cho bản RAM thấp. Xem lại. Pi không thay lidar. Mở [trang TF-Luna](https://hshop.vn/cam-bien-khoang-cach-dfrobot-tf-luna-tof-micro-single-point-ranging-lidar) và đọc chữ single-point: hữu ích làm cản va, sai cho bài này. [MPU6050](https://hshop.vn/cam-bien-6-dof-bac-tu-do-gy-521-mpu6050) là tùy chọn cho bộ lọc sau, không thay laser, và không cần cho lab hợp đồng.
 
+## Video tham khảo
+
+- **Xem trước:** [SLAM - 5 Minutes with Cyrill](https://www.youtube.com/watch?v=BuRCJ2fegcc) — Cyrill Stachniss, tiếng Anh. SLAM trong năm phút: bản đồ và tư thế cùng lúc. Đúng định nghĩa bài này mở đầu.
+- [SLAM Robot Mapping - Computerphile](https://www.youtube.com/watch?v=-XU54IsG8Vo) — Computerphile, tiếng Anh. Vì sao robot cần bản đồ khi chưa có sẵn. Computerphile, không gắn một distro ROS.
+
 ## Bài tập
 
 ### Bài 1

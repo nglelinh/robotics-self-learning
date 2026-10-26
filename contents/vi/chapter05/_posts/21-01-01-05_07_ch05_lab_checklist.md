@@ -135,6 +135,10 @@ Chỉ mua chỗ thiếu. Những chỗ thiếu thường gặp ở cổng này l
 - Lazada: [L298N](https://www.lazada.vn/catalog/?q=L298N), [motor TT](https://www.lazada.vn/catalog/?q=motor%20TT)
 - Thế Giới IC: [TB6612](https://www.thegioiic.com/search?q=TB6612), [L298N](https://www.thegioiic.com/search?q=L298N)
 
+## Video tham khảo
+
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Checklist driver đạt khi motor đổi chiều và đổi tốc trên đúng module bạn đã nhận diện.
+
 ## Bài tập
 
 1. Ô nào, nếu để lại mỗi chữ “có”, làm hỏng cổng dù các ô kia đã là số?
