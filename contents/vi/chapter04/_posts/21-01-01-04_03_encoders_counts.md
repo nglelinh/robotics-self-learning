@@ -134,6 +134,26 @@ Ba vòng quay tay, một $$N$$ thống nhất, quãng đường trên mỗi xung
 | Bánh đứng yên mà số vẫn tăng | Dội xung, chân để nổi, hoặc không chung mass |
 | Quãng đường dài gấp vài chục lần | $$N$$ là xung trên vòng trục motor; quên hộp số |
 
+## Cùng PWM, sao xe lại vòng?
+
+Cùng một đoạn code, cùng một số PWM gửi sang hai bánh, xe vi sai vẫn thường vòng. Hai motor hộp số TT vàng không giống nhau từng chiếc: khe bánh răng, ma sát và dung sai làm một trục quay nhanh hơn vài phần trăm. Điều khiển vòng hở không nhìn thấy việc đó; nó chỉ giữ nguyên lệnh.
+
+Encoder là mắt. Đĩa rãnh 20 khe với cặp quang, đúng ví dụ $$N = 20$$ ở trên, đủ để học cách đếm. Trên robot của khóa, hãy dùng encoder Hall đã gắn trên motor TT, đếm bằng ESP32 hoặc Pico, và lái bằng TB6612. Clip minh họa bên dưới dùng Arduino và L298N; đó không phải kit mặc định.
+
+Khi đếm cả hai bánh cùng lúc, lệch hiện ra ngay. Ví dụ sau một khoảng chạy: trái 519, phải 552. Phải đi trước $$552 - 519 = 33$$ xung, tức
+
+$$
+\frac{33}{519} \approx 6{,}4\%
+$$
+
+nhanh hơn bánh trái. Cùng PWM mà một bánh đã bỏ xa bánh kia thì lệnh “đi thẳng” thành một cung.
+
+Thử nhanh, bánh trên không: cùng một duty vừa phải trên cả hai kênh, chạy trong ba giây, rồi so hai số đếm. Ghi cặp số vào `lab-notes.md`. Đừng để bánh chạm bàn; motor TT sẽ tự bò.
+
+Sửa đúng không phải chỉnh tay một hệ số PWM rồi quên. Đó là vòng kín tốc độ từng bánh, PID ở [bài 08-03]({% multilang_post_url contents/chapter08/08_03_pid_tuning %}), và vì sao “lệnh đi thẳng lại thành vòng” được ghi trong [bài 08-04]({% multilang_post_url contents/chapter08/08_04_diff_kinematics %}).
+
+Xem thêm: video ngắn của LPPS - 1 Robotics Team, [cùng PWM, sao xe không đi thẳng](https://www.facebook.com/reel/1851960802892543).
+
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
 Mua một cặp động cơ TT đã có encoder Hall, để hai bánh cùng một kiểu hộp số. Giá thay đổi.

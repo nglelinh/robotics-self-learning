@@ -134,6 +134,26 @@ Three hand revolutions, one agreed $$N$$, a distance-per-count in meters, and on
 | Count climbs while the wheel is still | Bounce, a floating pin, or no common ground |
 | Distance looks tens of times too long | $$N$$ is pulses per motor turn; the gearbox was left out |
 
+## Same PWM, why does the car curve?
+
+The same sketch and the same PWM on both wheels still leave a differential-drive chassis curving. No two yellow TT gearmotors are identical: tooth backlash, friction, and ordinary tolerance make one shaft a few percent faster. Open-loop control cannot see that; it just keeps sending the same command.
+
+An encoder gives the robot eyes. A 20-slot disk and a photo-interrupter, the $$N = 20$$ teaching disk already used above, are enough to learn the count. On this course’s robot, use the Hall encoder that comes on a TT motor, count on an ESP32 or a Pico, and drive with a TB6612. The short video credited below uses an Arduino and an L298N; that is not the default kit.
+
+Once you count both wheels at once, the mismatch is visible. After one run the log might show 519 counts on the left and 552 on the right. The right wheel is ahead by $$552 - 519 = 33$$ counts, or
+
+$$
+\frac{33}{519} \approx 6.4\%
+$$
+
+faster than the left. Equal PWM with one wheel already pulling away is how a “drive straight” command becomes an arc.
+
+A quick check, wheels in the air: the same modest duty on both channels, run for three seconds, and compare the two counts. Paste the pair into `lab-notes.md`. Keep the tires off the bench; a TT wheel will walk.
+
+Fixing it properly is not a one-time PWM fudge. That is closed-loop speed control on each wheel, the PID in [lesson 08-03]({% multilang_post_url contents/chapter08/08_03_pid_tuning %}), and the note in [lesson 08-04]({% multilang_post_url contents/chapter08/08_04_diff_kinematics %}) on why a straight command becomes a curve.
+
+Further watching: a short video by LPPS - 1 Robotics Team, [same power to both wheels, why the car will not drive straight](https://www.facebook.com/reel/1851960802892543).
+
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
 Buy a pair of TT gearmotors that already include a Hall encoder, so both wheels share a gearbox. Prices move.
