@@ -156,6 +156,11 @@ Lab này là phần mềm trên laptop bạn đã dùng cho Jazzy. Không cần 
 
 Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
+- **Xem trước:** [Correctly Install Gazebo Harmonic Inside of ROS2 Jazzy Installation -Fix Gazebo Installation Issues](https://www.youtube.com/watch?v=dY8JxldcuqA) — Aleksandar Haber PhD, tiếng Anh. Cài Gazebo Harmonic cạnh Jazzy. Từ chối gói tên gazebo classic, đúng cảnh báo của bài.
+- [ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python](https://www.youtube.com/watch?v=campHHAPtyg) — Aleksandar Haber PhD, tiếng Anh. Một model xe trong Gazebo, điều khiển từ ROS 2. Dài; xem đoạn spawn và cmd_vel.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
+
 ```bash
 sudo apt install ros-jazzy-ros-gz
 ```

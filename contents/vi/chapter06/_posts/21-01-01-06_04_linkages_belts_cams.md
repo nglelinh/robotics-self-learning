@@ -138,8 +138,13 @@ Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một
 
 Sách giáo khoa viết $$\le$$. Dấu bằng là cơ cấu điểm đổi: nó gập phẳng và kẹt, nên hãy coi dấu bằng là một thiết kế phải đo hai lần trước khi tin. Khi bất đẳng thức đúng và khâu ngắn nhất nằm cạnh khâu cố định, các bạn có maniven-cần lắc. Khâu ngắn quay tròn; khâu đối diện lắc. Gạt mưa kính chắn gió là chuyển động ấy. Nếu $$s + l$$ lớn hơn $$p + q$$, không khâu nào quay hết vòng. Cơ cấu chỉ lắc, và một động cơ bị lệnh quay đủ một vòng sẽ chết tải vào chốt.
 
-![Cơ cấu bốn thanh: maniven quay, cần lắc đung đưa, thanh nối ghép chúng]({{ site.imgurl }}/generated/four_bar_linkage.png)
 ## Video tham khảo
+
+- **Xem trước:** [Four-Bar Linkage and Its Three Possible Motions](https://www.youtube.com/watch?v=EBqrDj-Wkiw) — mecademie, tiếng Anh. Bốn thanh và ba kiểu chuyển động. Đếm khâu trước khi đoán đầu chân đi được.
+- [Basic Mechanisms:  4 Bar Linkage](https://www.youtube.com/watch?v=1Ty_1LF3Qv0) — Mr. Dillman's Tech Channel, tiếng Anh. Một bốn thanh chạy thật, rất ngắn. Dùng để nhìn khâu nào cố định.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
+![Cơ cấu bốn thanh: maniven quay, cần lắc đung đưa, thanh nối ghép chúng]({{ site.imgurl }}/generated/four_bar_linkage.png)
 
 - **Xem trước:** [Four-Bar Linkage and Its Three Possible Motions](https://www.youtube.com/watch?v=EBqrDj-Wkiw) — mecademie, tiếng Anh. Bốn thanh và ba kiểu chuyển động. Đếm khâu trước khi đoán đầu chân đi được.
 - [Basic Mechanisms:  4 Bar Linkage](https://www.youtube.com/watch?v=1Ty_1LF3Qv0) — Mr. Dillman's Tech Channel, tiếng Anh. Một bốn thanh chạy thật, rất ngắn. Dùng để nhìn khâu nào cố định.

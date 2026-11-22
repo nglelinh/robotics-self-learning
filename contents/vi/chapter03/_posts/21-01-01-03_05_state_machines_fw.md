@@ -200,8 +200,13 @@ Nếu LED bật ngay khi sketch vừa khởi động, `apply` không bị chặn
 
 Máy trạng thái là một biến gọi đúng một tình huống, cộng một luật cho từng sự kiện đổi cái tên đó. Firmware này có ba tên.
 
-IDLE nghĩa là chưa được phép chạy. Cả hai kênh PWM bằng 0. LED đứng vai "động cơ đang được phép" thì tắt. Một lệnh hợp lệ là sự kiện rời IDLE.
 ## Video tham khảo
+
+- **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Trạng thái, sự kiện, chuyển. Đúng ba thứ firmware teleop sau này sẽ có: chờ, chạy, lỗi.
+- [Finite State Machines: The Embedded Trick That Changes Everything](https://www.youtube.com/watch?v=CbNXEyYL_f8) — AsabreTech, tiếng Anh. Cùng máy trạng thái, nhìn từ phía người viết firmware nhúng.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
+IDLE nghĩa là chưa được phép chạy. Cả hai kênh PWM bằng 0. LED đứng vai "động cơ đang được phép" thì tắt. Một lệnh hợp lệ là sự kiện rời IDLE.
 
 - **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Trạng thái, sự kiện, chuyển. Đúng ba thứ firmware teleop sau này sẽ có: chờ, chạy, lỗi.
 - [Finite State Machines: The Embedded Trick That Changes Everything](https://www.youtube.com/watch?v=CbNXEyYL_f8) — AsabreTech, tiếng Anh. Cùng máy trạng thái, nhìn từ phía người viết firmware nhúng.

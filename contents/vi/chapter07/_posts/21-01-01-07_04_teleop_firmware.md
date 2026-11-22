@@ -228,8 +228,13 @@ Không thêm đồ nếu bài 01 và 02 đã làm thật. Chỗ thiếu thườn
 
 Ô cảm và ô tính trong hình là encoder và PID bạn chưa có. Bài này là ô hành động: PWM, và timeout ép về không.
 
-![Hành động là PWM tới driver; timeout ép về không đã nằm trong ô ấy]({{ site.imgurl }}/generated/sense_compute_act.png)
 ## Video tham khảo
+
+- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Byte đi từ máy tính tới MCU. Firmware bài này chỉ chấp nhận khung đúng, rồi tắt PWM khi im.
+- [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. PWM ra cầu H là đầu cuối của vòng teleop. Xem duty đổi tốc trước khi gắn giao thức.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
+![Hành động là PWM tới driver; timeout ép về không đã nằm trong ô ấy]({{ site.imgurl }}/generated/sense_compute_act.png)
 
 - **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Byte đi từ máy tính tới MCU. Firmware bài này chỉ chấp nhận khung đúng, rồi tắt PWM khi im.
 - [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. PWM ra cầu H là đầu cuối của vòng teleop. Xem duty đổi tốc trước khi gắn giao thức.

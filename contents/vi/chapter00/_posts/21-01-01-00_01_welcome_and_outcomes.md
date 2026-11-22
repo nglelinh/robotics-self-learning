@@ -115,10 +115,15 @@ Cô chép quy tắc 300 ms vào cùng mục. Serial ghi `không có — chưa c�
 
 Chương 04 tới 06 thêm cảm biến, board lái, và cơ khí của hai bánh dẫn động. Chương 07 là bài nghiệm thu. Bạn gửi tiến, xoay, hoặc dừng, qua serial USB hoặc, sau này, một trang Wi-Fi nhỏ nếu bạn chọn ESP32. Bánh ở trên không. Một bộ đếm nhớ lệnh hợp lệ cuối. Gọi $t_{\mathrm{last}}$ là mốc đó và $t_{\mathrm{now}}$ là thời điểm trong vòng lặp. Khoảng im là
 
+## Video tham khảo
+
+- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Khung ROS 2 mà nửa sau khóa sẽ dùng: node, topic, và một hệ chạy nhiều tiến trình.
+- [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Ba loại board trên lộ trình. Chọn một board cho các tuần MCU, chưa mua cả bộ.
+
+Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 $$
 t_{\mathrm{silence}} = t_{\mathrm{now}} - t_{\mathrm{last}}.
 $$
-## Video tham khảo
 
 - **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Khung ROS 2 mà nửa sau khóa sẽ dùng: node, topic, và một hệ chạy nhiều tiến trình.
 - [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Ba loại board trên lộ trình. Chọn một board cho các tuần MCU, chưa mua cả bộ.
