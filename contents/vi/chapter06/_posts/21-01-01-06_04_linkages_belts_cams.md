@@ -136,7 +136,9 @@ Các trang tìm:
 
 Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một tỉ số.
 
+Sách giáo khoa viết $$\le$$. Dấu bằng là cơ cấu điểm đổi: nó gập phẳng và kẹt, nên hãy coi dấu bằng là một thiết kế phải đo hai lần trước khi tin. Khi bất đẳng thức đúng và khâu ngắn nhất nằm cạnh khâu cố định, các bạn có maniven-cần lắc. Khâu ngắn quay tròn; khâu đối diện lắc. Gạt mưa kính chắn gió là chuyển động ấy. Nếu $$s + l$$ lớn hơn $$p + q$$, không khâu nào quay hết vòng. Cơ cấu chỉ lắc, và một động cơ bị lệnh quay đủ một vòng sẽ chết tải vào chốt.
 
+![Cơ cấu bốn thanh: maniven quay, cần lắc đung đưa, thanh nối ghép chúng]({{ site.imgurl }}/generated/four_bar_linkage.png)
 ## Video tham khảo
 
 - **Xem trước:** [Four-Bar Linkage and Its Three Possible Motions](https://www.youtube.com/watch?v=EBqrDj-Wkiw) — mecademie, tiếng Anh. Bốn thanh và ba kiểu chuyển động. Đếm khâu trước khi đoán đầu chân đi được.
@@ -144,6 +146,100 @@ Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một
 
 Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
+$$
+i = \frac{N_{\text{driven}}}{N_{\text{driver}}}.
+$$
+
+Không có trượt khi đai đã căng và răng còn ăn. Chiều quay đảo một lần, giống một cặp bánh răng ăn ngoài, trừ khi một pulley trung gian đảo lại. Chiều dài đai cố định khoảng cách tâm. Các bạn không “chỉnh tỉ số” bằng cách kéo hai động cơ ra xa nhau. Đai quá căng ăn bạc lót mà Bài 02 đã quyết định để yên. Đai lỏng nhảy răng dưới mô-men. Cú nhảy trông giống độ rơ: một vùng chết, rồi một bước nhảy, và encoder không thấy bước nhảy ấy vì pulley động cơ vẫn quay. Búng đai. Một nốt trầm căng vừa là đích. Một nốt cao ngân là quá căng. Đai oặt là quá lỏng.
+
+![Đai GT2 và pulley: số răng đặt tỉ số, độ căng quyết định răng có còn ăn]({{ site.imgurl }}/generated/belt_pulley.png)
+
+Bánh răng và thanh răng đổi quay thành đường thẳng. Trong một vòng của bánh dẫn, hành trình thanh răng là chu vi vòng chia,
+
+$$
+x = \pi d,
+$$
+
+trong đó $$d$$ là đường kính vòng chia của bánh dẫn, đường kính nơi răng thực sự lăn. Một ray thẳng trên cánh tay nhỏ, hoặc bệ đầu quét, là thiết bị này. Capstone A không cần. Phép tính cùng họ với bán kính lăn: chiều dài cung trên vòng chia.
+
+Cam là một rô-to tạo hình tỳ vào con đội. Đoạn nâng nâng con đội. Đoạn dừng giữ con đội đứng yên trong khi cam vẫn quay. Robot gặp cam ở bộ hạn chế cơ khí và ở vài gắp phải dừng ở trạng thái khép. Đoạn dừng là một giới hạn chuyển động cứng. Trong URDF, các bạn diễn khoảng dừng ấy thành giới hạn khớp, hoặc thành một cơ cấu đơn giản không phải khớp tự do. Các bạn sẽ không thiết kế cam cho Capstone A.
+
+Bất cứ thứ gì các bạn thêm vào giữa encoder và lốp, hãy ghi tỉ số. Hộp số 48, đai 2, bánh xe thấy $$i = 96$$. Tích ấy là thứ `diff_drive_controller` phải dùng. Một khớp trong ROS không phải chỗ giấu một pulley bị quên.
+
+## Ví dụ tính tay
+
+Grashof trước. Các chiều $$s = 30$$ mm, $$p = 55$$ mm, $$q = 70$$ mm, $$l = 90$$ mm.
+
+$$
+s + l = 120\ \text{mm}, \qquad p + q = 125\ \text{mm}.
+$$
+
+$$120 < 125$$, nên ít nhất một khâu quay đủ vòng. Cố định cạnh 70 mm và dẫn maniven 30 mm, khâu đối diện lắc: một cái gạt. Đổi khâu dài thành 110 mm thì $$s + l = 140$$ trong khi $$p + q = 125$$. Bất đẳng thức thất bại. Tấm bìa sẽ kẹt trước khi quay đủ vòng. Cú kẹt ấy là giới hạn khớp, cảm được bằng ngón tay.
+
+Thanh răng tiếp theo. Một bánh dẫn có đường kính vòng chia 12 mm đẩy thanh răng, mỗi vòng,
+
+$$
+x = \pi \times 12 \approx 37.7\ \text{mm}.
+$$
+
+Nửa vòng khoảng 18,8 mm. Nếu bánh dẫn trên bản vẽ là đường kính ngoài và đường kính vòng chia nhỏ hơn, hành trình co theo. Dùng đường kính vòng chia, và nói các bạn đã đo đường kính nào.
+
+Đai, để ghi sổ: pulley động cơ 20 răng và pulley bánh 60 răng cho $$i = 3$$, cùng cấu trúc với cặp bánh 12 vào 36. Ba vòng động cơ, một vòng bánh, cộng hộp giảm tốc ngồi trước pulley động cơ.
+
+## Lab: bìa, hoặc pulley, hoặc phác họa
+
+### An toàn
+
+Đinh ghim nhọn. Giữ chúng trên bìa, không cho vào túi. Nếu căng một đai GT2 thật, nguồn tắt và ngón tay ra khỏi pulley. Đai quá căng có thể bắn một vít cố định trục đang lỏng.
+
+### BOM
+
+| Hạng mục | Vai trò |
+|------|------|
+| Bìa, bốn đinh ghim hoặc chốt, thước | Cơ cấu bốn thanh |
+| Hoặc một cặp pulley GT2 và đai | Đếm răng |
+| Bút chì | Phác cơ cấu không thỏa Grashof và số thanh răng |
+| `lab-notes.md` | Chiều dài, $$i$$, hoặc hành trình thanh răng |
+
+### Các bước
+
+1. Cắt bốn thanh. Dùng các chiều trong ví dụ: 30, 55, 70, 90 mm giữa tâm lỗ. Ghim chúng thành vòng, cố định thanh 70 mm xuống bàn, và quay maniven 30 mm. Quan sát cần lắc.
+2. Dựng lại với khâu dài nhất 110 mm, các chiều còn lại như ví dụ thất bại, và cảm cú kẹt. Phác cả hai và ghi cái nào thỏa $$s + l < p + q$$.
+3. Nếu có phần cứng GT2, đếm răng pulley dẫn và pulley bị dẫn, tính $$i$$, và ghi đai đang oặt, đang ngân, hay búng được một nốt trầm. Bỏ bước bìa nếu lần đếm pulley là phép đo giàu hơn, nhưng vẫn phác một vòng thỏa Grashof và một vòng không thỏa, có chiều dài ghi trên từng khâu.
+4. Nếu không có pulley cũng không có đinh ghim, tính ví dụ thanh răng 12 mm và vẽ cả hai cơ cấu bốn thanh đúng tỉ lệ. Dán nhãn trang là “bản vẽ”.
+5. Viết một câu: tỉ số từ encoder tới bánh của Capstone A, chỉ gồm đai nếu robot của các bạn có đai.
+
+### Kết quả mong đợi
+
+Hai phác họa đã dán nhãn, một cái quay được và một cái kẹt, hoặc một tỉ số GT2 kèm những phác họa ấy. Số thanh răng 37,7 mm mỗi vòng nằm trong ghi chú nếu các bạn đã tính. Câu encoder-tới-bánh khớp dấu đóng của Bài 03, trừ khi một đai nhân thêm vào.
+
+### Lỗi thường gặp
+
+| Các bạn thấy | Thường nghĩa là |
+|--------------|------------------------|
+| “Maniven” không quay hết | $$s + l$$ lớn hơn $$p + q$$, hoặc lỗ cách đầu thanh quá xa nên chiều dài thật khác nhãn |
+| Đai nhảy răng dưới mô-men ngón tay | Quá lỏng, hoặc răng không khớp bước đai |
+| Bạc nóng và đai ngân | Quá căng |
+| Góc bánh từ xung chỉ bằng một nửa những gì sàn cho thấy | Một đai 2:1 bị bỏ khỏi $$i$$ |
+
+## Mua ở Việt Nam / Where to buy in Vietnam
+
+Bìa cứng là đủ cho lab. Chỉ mua GT2 nếu truyền động của các bạn, hoặc một trục về sau, dùng đai. Hai bánh TT của Capstone A thường không dùng.
+
+| Mua gì | Từ khóa | Khoảng giá (VND) | Ghi chú |
+|------|----------|------------------|-------|
+| Đai GT2 | `dây đai GT2` | 15.000–40.000 | Nêu chiều dài và bề rộng, thường 6 mm |
+| Pulley GT2 | `pulley GT2` | 8.000–30.000 | Số răng là tỉ số; khớp lỗ trục |
+| Bộ thanh răng và bánh răng | `thanh răng bánh răng` | 30.000–90.000 | Tùy chọn; đường kính vòng chia đi vào $$x = \pi d$$ |
+
+Các trang tìm:
+
+- [Hshop](https://hshop.vn/search?q=d%C3%A2y+%C4%91ai+GT2)
+- [Shopee](https://shopee.vn/search?keyword=d%C3%A2y%20%C4%91ai%20GT2)
+- [Lazada](https://www.lazada.vn/catalog/?q=d%C3%A2y%20%C4%91ai%20GT2)
+- [Thế Giới IC](https://www.thegioiic.com/search?q=GT2)
+
+Giá dịch chuyển. Một tin pulley giấu số răng thì chưa phải một tỉ số.
 - [Test thiết kế chân](https://www.facebook.com/reel/1615249330240344). Chú thích: test thiết kế chân. Xem như một cơ cấu chân đang được kiểm trên bàn, trước khi nó thành một khâu trong chuỗi động học.
 - [Một chân, ba bậc tự do](https://www.facebook.com/reel/2974137376266883). Chú thích: một chân có 3 bậc tự do. Ba khớp là ba biến. Bài này chưa biến ba biến đó thành một quỹ đạo đầu chân.
 
