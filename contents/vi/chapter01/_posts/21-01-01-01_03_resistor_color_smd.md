@@ -13,138 +13,138 @@ draft: false
 
 ## Mục tiêu
 
-Học xong, bạn đọc điện trở bốn vạch theo thứ tự chữ số, chữ số, hệ số nhân, và dung sai, rồi tính khoảng giá trị dung sai cho phép. Bạn giải mã nâu-đen-đỏ-vàng thành 1 kΩ ±5% và nâu-lam-cam-vàng thành 16 kΩ ±5% mà không phải tính lại từ đầu. Bạn nhận ra hàng năm vạch là ba chữ số cộng hệ số nhân, đọc mã SMD ba số như 103 hoặc 472, và coi chữ R trong mã kiểu R22 là dấu phẩy thập phân. Bạn đối chiếu giá trị vừa giải với đồng hồ khi mạch mất nguồn, và biết lúc nào điện trở của que đo mới là thứ mình đang thấy.
+Sau bài học này, bạn sẽ đọc thành thạo điện trở 4 vạch theo thứ tự: chữ số thứ nhất, chữ số thứ hai, hệ số nhân và dung sai, đồng thời tính được khoảng giá trị cho phép theo dung sai. Bạn sẽ nhận diện nhanh hai mã thông dụng như nâu-đen-đỏ-vàng (1 kΩ ±5%) và nâu-lam-cam-vàng (16 kΩ ±5%), nhận biết điện trở 5 vạch (ba chữ số có nghĩa cộng hệ số nhân), giải mã điện trở dán SMD ba số như `103` hoặc `472`, và hiểu vai trò dấu thập phân của chữ `R` trong mã như `R22`. Bạn cũng sẽ biết cách đối chiếu giá trị đọc được với đồng hồ vạn năng ở trạng thái ngắt nguồn và trừ sai số điện trở dây que đo khi đo trị số nhỏ.
 
 ## Cần có gì trước
 
-Cần định luật Ohm ở bài đầu, nhất là $I = V/R$ và lý do đèn báo dùng khoảng 180 Ω chứ không phải hình trụ nào nằm gần mỏ hàn. Cần thói quen đo ôm của bài trước: linh kiện mất nguồn, que đỏ ở ổ điện áp/ôm, không ở ổ dòng. Chưa phải hàn SMD. Kit toàn chân xuyên lỗ thì phần SMD vẫn đáng đọc, vì cùng kiểu mã đang in trên linh kiện nhỏ đã hàn sẵn trên board ESP32 và module TB6612.
+Bạn cần nắm định luật Ohm từ bài 01 (đặc biệt là $I = V/R$ và lý do đèn báo dùng điện trở quanh 180 Ω) cùng quy tắc đo điện trở của bài 02 (linh kiện không cấp nguồn, que đỏ cắm ở lỗ V/Ω). Bài này chưa yêu cầu hàn linh kiện dán (SMD), nhưng kiến thức đọc mã SMD vẫn rất hữu ích vì các linh kiện nhỏ hàn sẵn trên board ESP32 và module TB6612 đều dùng quy chuẩn này.
 
-## Vì sao xe hai bánh cần biết vạch màu
+## Vì sao xe hai bánh cần đọc chính xác mã điện trở
 
-Đèn 3,3 V trên ESP32 hoặc Pico chỉ sáng đúng nếu hình trụ vừa cắm thực sự gần 180 Ω. Nâu-đen-cam là 10 kΩ, không phải 1 kΩ, và đèn khi đó chạy ở
+Đèn báo 3,3 V trên ESP32 hay Pico chỉ sáng đúng thiết kế nếu điện trở bạn cắm thực sự gần mức 180 Ω. Nếu nhầm sang nâu-đen-cam (10 kΩ thay vì 1 kΩ), dòng qua LED chỉ còn:
 
 $$
 I = \frac{1.3}{10000} = 0.13\ \mathrm{mA}
 $$
 
-trông như GPIO chết trong phòng có đèn. Lỗi ngược lại, vài ôm ở chỗ cần vài trăm ôm, xả thẳng chân cắm.
+khiến đèn tối đến mức dễ nhầm là chân GPIO bị hỏng. Ngược lại, cắm nhầm điện trở vài ôm vào vị trí cần vài trăm ôm sẽ gây quá dòng trực tiếp cho chân vi điều khiển.
 
-Cùng kỹ năng ấy xuất hiện ngoài breadboard. Điện trở kéo lên của nút nhấn, điện trở nối tiếp bạn có thể dùng sau này để thu echo của HC-SR04, và các con nhỏ trên module driver đều là điện trở, hoặc có vạch hoặc có mã in. TB6612 không an toàn hơn chỉ vì con trở "trông hơi đỏ". Hai mô-tơ TT vẫn không được đối xử như điện trở trên GPIO. Đọc linh kiện trước, rồi mới quyết định nó có được vào mạch hay không.
+Kỹ năng này còn áp dụng rộng rãi hơn ngoài breadboard: từ điện trở kéo lên cho nút nhấn, cầu chia áp cho chân echo của cảm biến HC-SR04 cho tới các điện trở dán trên module mạch lái động cơ. Việc đọc chính xác và đo kiểm linh kiện trước khi lắp mạch giúp loại trừ hoàn toàn các lỗi chủ quan do nhầm trị số.
 
-## Bốn vạch, rồi đến năm
+## Điện trở 4 vạch và 5 vạch màu
 
-Điện trở bốn vạch chuẩn được đọc từ đầu sát các vạch, vạch dung sai — trên đồ chơi gần như luôn là vàng hoặc bạc — để bên phải. Hai vạch đầu là chữ số có nghĩa. Vạch thứ ba là hệ số nhân, một luỹ thừa của mười. Vạch thứ tư là dung sai, tức giá trị thật được phép lệch bao xa so với số sơn.
+Với điện trở 4 vạch tiêu chuẩn, bạn đặt đầu có các vạch nằm sát nhau về bên trái, còn vạch dung sai (thường là màu vàng nhũ hoặc bạc ở linh kiện phổ thông) về bên phải. Hai vạch đầu biểu thị hai chữ số có nghĩa, vạch thứ ba là hệ số nhân (lũy thừa của 10), và vạch thứ tư là dung sai — cho biết trị số thực tế được phép lệch bao nhiêu phần trăm so với trị số danh định.
 
-Màu chữ số dùng trong khóa này: đen 0, nâu 1, đỏ 2, cam 3, vàng 4, lục 5, lam 6, tím 7, xám 8, trắng 9. Hệ số nhân dùng cùng bảng màu như luỹ thừa mười: đen ×1, nâu ×10, đỏ ×100, cam ×1 000, vàng ×10 000. Vàng khi là hệ số nhân nghĩa là ×0,1, khi là vạch dung sai nghĩa là ±5%. Bạc ở vạch dung sai là ±10%.
+Bảng quy ước màu chữ số: đen 0, nâu 1, đỏ 2, cam 3, vàng 4, lục 5, lam 6, tím 7, xám 8, trắng 9. Hệ số nhân dùng cùng bảng số mũ của 10: đen ×1, nâu ×10, đỏ ×100, cam ×1.000, vàng ×10.000. Riêng màu vàng kim (nhũ vàng) ở vị trí hệ số nhân nghĩa là ×0,1, còn ở vị trí dung sai là ±5%; màu bạc ở vị trí dung sai là ±10%.
 
-Nâu, đen, đỏ, vàng là số đầu tiên bạn nên đọc thành tiếng. Nâu là 1, đen là 0, đỏ nghĩa là ×100:
+Xét ví dụ đầu tiên: **nâu – đen – đỏ – vàng (kim)**. Nâu = 1, đen = 0, đỏ = ×100:
 
 $$
 10 \times 100 = 1000\ \Omega = 1\ \mathrm{k}\Omega
 $$
 
-Vàng nói ±5%, nên khoảng thật là 950 Ω đến 1 050 Ω. Đồng hồ đọc 980 Ω là con tốt, không phải hàng giả.
+Với dung sai ±5%, khoảng giá trị hợp lệ là từ 950 Ω đến 1.050 Ω. Do đó nếu đồng hồ đo được 980 Ω, linh kiện vẫn hoàn toàn đạt chuẩn.
 
-Nâu, lam, cam, vàng là số thứ hai. Nâu là 1, lam là 6, cam nghĩa là ×1 000:
+Xét ví dụ thứ hai: **nâu – lam – cam – vàng (kim)**. Nâu = 1, lam = 6, cam = ×1.000:
 
 $$
 16 \times 1000 = 16000\ \Omega = 16\ \mathrm{k}\Omega
 $$
 
-cũng ±5%, khoảng 15,2 kΩ đến 16,8 kΩ. Lật ngược điện trở và bắt đầu từ vạch vàng thì mã thành vô nghĩa, vì vàng không phải chữ số.
+Khoảng dung sai ±5% tương ứng từ 15,2 kΩ đến 16,8 kΩ. Nếu bạn xoay ngược điện trở và bắt đầu đọc từ vạch vàng kim thì sẽ ra kết quả vô nghĩa vì vàng kim không đại diện cho chữ số có nghĩa.
 
 ![Mã bốn vạch, vạch dung sai nằm bên phải]({{ site.imgurl }}/generated/resistor_color_code.png)
 
-Điện trở năm vạch thêm một chữ số có nghĩa nữa trước hệ số nhân, vạch cuối vẫn là dung sai. Nâu-đen-đen-đỏ-nâu là 1, 0, 0, ×100, ±1%:
+Điện trở **5 vạch** bổ sung thêm một chữ số có nghĩa thứ ba trước hệ số nhân, còn vạch cuối cùng vẫn là dung sai. Ví dụ **nâu – đen – đen – đỏ – nâu** tương ứng 1, 0, 0, ×100, ±1%:
 
 $$
 100 \times 100 = 10\ \mathrm{k}\Omega
 $$
 
-trong khoảng ±1%. Không cần cả ngăn kéo năm vạch mới ráp được xe. Cần nhận ra khi một con có bốn vạch chữ số và vạch dung sai thứ năm, vì đọc nó như bốn vạch sẽ lệch hệ số nhân một bậc mười. Đếm vạch trước khi nhân.
+với sai số ±1%. Bạn không bắt buộc phải mua bộ điện trở 5 vạch để làm robot, nhưng cần tạo thói quen đếm tổng số vạch trước khi đọc, bởi nếu đọc nhầm một con 5 vạch theo quy tắc 4 vạch thì hệ số nhân sẽ bị lệch hẳn một bậc mười.
 
-## Mã SMD, kể cả chữ cái không cần học thuộc
+## Mã điện trở dán SMD
 
-Mã điện trở SMD ba chữ số là cùng ý ấy, in bằng mực. Hai số đầu là phần có nghĩa. Số thứ ba là luỹ thừa của mười. Vậy 103 là $10 \times 10^3 = 10\ \mathrm{k}\Omega$, và 472 là $47 \times 10^2 = 4700\ \Omega = 4{,}7\ \mathrm{k}\Omega$. Mã 100 là $10 \times 10^0 = 10\ \Omega$, không phải 100 Ω. Số 0 đứng cuối là số mũ, không phải một chữ số để viết thêm vào đuôi.
+Mã SMD 3 chữ số hoạt động theo cùng nguyên lý nhưng được in trực tiếp bằng số: hai chữ số đầu là phần có nghĩa, chữ số thứ ba là số mũ của 10. Ví dụ `103` là $10 \times 10^3 = 10\ \mathrm{k}\Omega$, còn `472` là $47 \times 10^2 = 4700\ \Omega = 4{,}7\ \mathrm{k}\Omega$. Đặc biệt lưu ý mã `100` là $10 \times 10^0 = 10\ \Omega$, không phải 100 Ω — chữ số 0 cuối cùng là số mũ (nghĩa là thêm không chữ số 0).
 
-Khi giá trị dưới 10 Ω, chữ R đứng chỗ dấu phẩy. R22 nghĩa là 0,22 Ω. 4R7 nghĩa là 4,7 Ω. Chữ R dễ mất trên thân tối, và nó quan trọng: con 0,22 Ω dùng làm điện trở LED từ 3,3 V gần như là một ngắn mạch.
+Đối với trị số nhỏ hơn 10 Ω, chữ cái `R` đóng vai trò dấu phẩy thập phân: `R22` nghĩa là 0,22 Ω và `4R7` nghĩa là 4,7 Ω. Chữ `R` rất nhỏ trên thân linh kiện tối màu nhưng mang ý nghĩa sống còn: dùng nhầm một điện trở 0,22 Ω làm điện trở hạn dòng LED trên 3,3 V gần như tương đương ngắn mạch.
 
-Mã bốn số kéo cùng quy tắc ra ba chữ số có nghĩa: 4701 là $470 \times 10^1 = 4{,}7\ \mathrm{k}\Omega$. Hệ EIA-96 thì khác. Nó in hai chữ số cộng một chữ cái, và hai chữ số là chỉ số tra bảng chứ không phải chính điện trở. Bạn sẽ gặp trên hàng SMD 1%. Đừng học thuộc bảng. Thấy hai số và một chữ thì tra, hoặc đo. Đoán bừa biến chỉ số "01" thành một điện trở một ôm mà không phải một ôm.
+Mã SMD 4 chữ số mở rộng lên ba chữ số có nghĩa cộng một chữ số mũ: ví dụ `4701` là $470 \times 10^1 = 4{,}7\ \mathrm{k}\Omega$. Riêng chuẩn **EIA-96** (thường gặp trên điện trở dán sai số 1%) gồm hai chữ số và một chữ cái, trong đó hai chữ số là mã tra bảng chứ không phải trị số trực tiếp. Bạn không cần học thuộc bảng EIA-96; khi thấy ký hiệu gồm hai số kèm một chữ cái, hãy tra bảng hoặc đo bằng đồng hồ thay vì đoán theo kiểu "01 là 1 Ω".
 
 ![Một hộp hỗn hợp: vạch, thân, và công suất không phải cùng một thông tin]({{ site.imgurl }}/wikimedia/resistors_assortment.jpg)
 
-Cỡ thân gợi ý công suất, không gợi ý điện trở. Trụ xuyên lỗ 1/4 W là mặc định của chương này. Thân sứ to hơn có thể là 1 W trở lên và có thể xếp vạch khác. Phép tính LED ở bài đầu tản khoảng 0,011 W, nên 1/4 W ở đó là thoải mái. Nó không biến một con 10 Ω, 1/4 W thành tải giả an toàn cho mô-tơ đang kẹt.
+Kích thước thân điện trở phản ánh khả năng tản công suất chứ không cho biết trị số điện trở. Điện trở xuyên lỗ 1/4 W là cỡ mặc định trong chương này; các thân sứ lớn hơn thường chịu 1 W trở lên. Như đã tính ở bài 01, mạch LED chỉ tỏa khoảng 0,012 W nên cỡ 1/4 W rất thoải mái — nhưng điều đó không có nghĩa bạn có thể dùng một điện trở 10 Ω công suất 1/4 W làm tải giả cho động cơ đang kẹt.
 
-## Ví dụ: năm mã, rồi cửa sổ của đồng hồ
+## Ví dụ: giải mã năm trị số và đối chiếu đồng hồ
 
-Giải những mã này trước khi đụng núm vặn.
+Hãy tự giải năm mã sau trước khi xoay núm đồng hồ:
 
-1. Nâu, đen, đỏ, vàng → $10 \times 100 = 1\ \mathrm{k}\Omega$, ±5%, cửa sổ 950 Ω đến 1 050 Ω.
-2. Nâu, lam, cam, vàng → $16 \times 1000 = 16\ \mathrm{k}\Omega$, ±5%, cửa sổ 15,2 kΩ đến 16,8 kΩ.
-3. Đỏ, đỏ, nâu, vàng → $22 \times 10 = 220\ \Omega$, ±5%, khoảng 209 Ω đến 231 Ω. Đây là điện trở đèn thay thế khi thiếu 180 Ω.
-4. SMD 103 → $10 \times 10^3 = 10\ \mathrm{k}\Omega$.
-5. SMD R22 → 0,22 Ω. Chữ R là dấu phẩy, không phải một màu.
+1. Nâu – đen – đỏ – vàng (kim) → $10 \times 100 = 1\ \mathrm{k}\Omega \pm 5\%$, khoảng hợp lệ 950 Ω đến 1.050 Ω.
+2. Nâu – lam – cam – vàng (kim) → $16 \times 1000 = 16\ \mathrm{k}\Omega \pm 5\%$, khoảng hợp lệ 15,2 kΩ đến 16,8 kΩ.
+3. Đỏ – đỏ – nâu – vàng (kim) → $22 \times 10 = 220\ \Omega \pm 5\%$, khoảng hợp lệ 209 Ω đến 231 Ω (phương án thay thế cho 180 Ω ở mạch LED).
+4. SMD `103` → $10 \times 10^3 = 10\ \mathrm{k}\Omega$.
+5. SMD `R22` → 0,22 Ω (`R` là dấu thập phân).
 
-Đưa mục 3 vào công thức đèn của bài 1, $V_f = 2{,}0\ \mathrm{V}$ trên rail 3,3 V:
+Thay trị số mục 3 (220 Ω) vào công thức đèn báo bài 01 ($V_f = 2{,}0\ \mathrm{V}$ trên nguồn 3,3 V):
 
 $$
 I = \frac{3.3 - 2.0}{220} = \frac{1.3}{220} \approx 5.9\ \mathrm{mA}
 $$
 
-Công suất trên điện trở đó là $P = I^2 R \approx (0{,}0059)^2 \times 220 \approx 0{,}008\ \mathrm{W}$, vẫn là một phần nhỏ của 1/4 W. Cùng công thức với nâu-đen-cam bị đọc nhầm (10 kΩ) cho 0,13 mA và một đèn bạn sẽ gọi là chết. Cùng công thức với R22 cho $I = 1{,}3 / 0{,}22 \approx 6\ \mathrm{A}$, dòng mà cả LED lẫn GPIO đều không sống nổi. Mã không phải gợi ý.
+Công suất trên điện trở lúc này là $P = I^2 R \approx (0{,}0059)^2 \times 220 \approx 0{,}008\ \mathrm{W}$, rất nhỏ so với mức 0,25 W. Nếu đọc nhầm sang nâu-đen-cam (10 kΩ), dòng tụt xuống 0,13 mA khiến đèn gần như không sáng; còn nếu nhầm sang `R22` (0,22 Ω), dòng lý thuyết lên tới $I = 1{,}3 / 0{,}22 \approx 6\ \mathrm{A}$, vượt xa khả năng chịu đựng của cả LED lẫn chân GPIO.
 
-Trên đồng hồ, con sai số 5% phải rơi trong cửa sổ của nó. Đọc thấp 2% vẫn là con tốt. Hai hiệu ứng hay lừa ở đầu thang thấp. Hơi tay trên điện trở màng làm giá trị trôi một chút khi bạn kẹp thân; giữ chân, đừng kẹp viên, hoặc buông ra vài giây. Với con dưới vài ôm, chính que và dây đo cũng vài phần mười ôm. Chập hai que, ghi độ lệch đó, rồi trừ đi trước khi kết tội mã R22. Đừng "zero" đồng hồ bằng cách đo một điện trở còn hàn trên board đang có điện.
+Khi đo kiểm trên đồng hồ, điện trở dung sai 5% chỉ cần rơi trong khoảng hợp lệ là đạt (ví dụ lệch thấp 2% vẫn là linh kiện tốt). Ở dải đo nhỏ, cần chú ý hai yếu tố gây sai số: thứ nhất, nhiệt độ tay người khi kẹp trực tiếp lên thân điện trở màng có thể làm số đo trôi nhẹ, nên chỉ giữ một chân hoặc đặt linh kiện trên mặt bàn; thứ hai, với điện trở dưới vài ôm, bản thân dây và que đo đồng hồ đã có điện trở vài phần mười ôm — hãy chập hai que đo để ghi nhận giá trị nền rồi trừ ra trước khi kết luận về một điện trở như `R22`. Tuyệt đối không hiệu chuẩn đồng hồ bằng cách đo linh kiện trên mạch đang có điện.
 
 ## Thực hành
 
-1. Lấy năm điện trở trong kit, hoặc dùng năm mã ở ví dụ nếu kit chưa về. Viết cách đọc vạch hoặc mã SMD và số ôm bạn khẳng định, kèm cửa sổ ± với hàng có vạch.
-2. Nguồn tắt. Không có gì cắm vào điện trở. Que đỏ ở ổ điện áp/ôm, đen ở COM, núm ở thang ôm. Đồng hồ chọn thang tay thì bắt đầu ở thang cao hơn giá trị bạn chờ.
-3. Đo từng con. Viết số đồng hồ cạnh giá trị đã giải. Con 5% phải nằm trong cửa sổ. Nếu không, kiểm tra xem bạn có bắt đầu từ vạch vàng không, và có đếm nhầm năm vạch thành bốn không.
-4. Con nào dưới khoảng 10 Ω thì chập que trước, ghi điện trở đó, rồi trừ.
-5. Tuỳ chọn: đặt con 180 Ω hoặc 220 Ω lại vào vòng LED của bài 1, chỉ đo trong mạch khi nguồn đã rút. Nói xem linh kiện bên cạnh có thể song song với nó không. Không chắc thì nhấc một chân.
+1. Chọn năm điện trở bất kỳ trong bộ kit (hoặc dùng năm ví dụ ở trên nếu kit chưa giao tới). Ghi rõ dãy vạch màu hoặc mã SMD, trị số danh định và khoảng dung sai cho phép ra giấy.
+2. Đảm bảo mạch hoàn toàn mất nguồn và điện trở nằm rời ngoài mạch. Kiểm tra que đen ở COM, que đỏ ở lỗ V/Ω, vặn núm sang thang đo Ω (nếu đồng hồ chỉnh thang thủ công, bắt đầu từ thang lớn hơn trị số dự kiến).
+3. Đo lần lượt từng điện trở và ghi kết quả bên cạnh giá trị đã giải mã. Nếu điện trở 5% rơi ngoài khoảng dung sai, kiểm tra lại xem bạn có đọc ngược từ vạch vàng kim hoặc đếm nhầm 5 vạch thành 4 vạch không.
+4. Với bất kỳ điện trở nào dưới khoảng 10 Ω, chập hai que đo trước để ghi điện trở dây đo rồi trừ phần chênh lệch đó khỏi kết quả.
+5. (Tùy chọn) Lắp lại điện trở 180 Ω hoặc 220 Ω vào mạch LED của bài 01 và đo trong mạch khi đã ngắt nguồn; nhận xét xem có nhánh linh kiện nào mắc song song ảnh hưởng đến số đo không (nếu không chắc chắn, hãy nhấc một chân điện trở lên khỏi breadboard để đo độc lập).
 
-Bạn sẽ thấy số đo nằm trong dung sai với những con còn lành và được đọc đúng. Con 1 kΩ ±5% đọc 1,02 kΩ là đạt. Thang thông mạch có lẽ im với cả năm con, và đó không phải lỗi của điện trở.
+**Kết quả kỳ vọng:** Các điện trở tốt và đọc đúng mã sẽ cho số đo nằm gọn trong khoảng dung sai (ví dụ 1 kΩ ±5% đo được 1,02 kΩ là đạt). Nếu bạn thử ở thang thông mạch, đồng hồ sẽ không kêu với cả năm con — điều đó là hoàn toàn bình thường.
 
-| Bạn thấy | Nguyên nhân hay gặp | Cách xử lý |
+| Hiện tượng quan sát | Nguyên nhân thường gặp | Cách khắc phục |
 | --- | --- | --- |
-| Đồng hồ ra khoảng 10 lần hoặc 0,1 lần giá trị đã giải | Đọc vạch từ đầu sai, hoặc năm vạch bị đọc như bốn | Đặt vàng hoặc bạc bên phải và đếm lại vạch. |
-| Con "1 kΩ" đọc gần 10 kΩ | Vạch nhân bị thấy là đỏ trong khi nó là cam, hoặc ngược lại | Soi vạch thứ ba dưới đèn. Cam và đỏ là cặp hay lẫn. |
-| Con ôm thấp luôn cao hơn 0,4 Ω | Điện trở của que và dây | Trừ số đo khi hai que chập nhau. |
-| Số ôm trôi trong khi board còn nguồn | Nguồn chưa rút | Rút. Thang ôm không dành cho rail đang sống. |
-| Thông mạch im trên con 220 Ω | Thông mạch không phải thang ôm | Chuyển sang Ω. Im ở đây là đúng. |
+| Kết quả đo gấp ~10 lần hoặc bằng ~0,1 lần giá trị đọc | Đọc ngược chiều từ vạch dung sai, hoặc đọc nhầm 5 vạch thành 4 vạch | Xoay vạch vàng kim/bạc về bên phải và đếm lại tổng số vạch |
+| Điện trở tưởng là 1 kΩ nhưng đo gần 10 kΩ | Nhầm màu vạch hệ số nhân giữa đỏ và cam | Soi kỹ vạch thứ ba dưới ánh sáng trắng tốt (đỏ và cam rất dễ lẫn) |
+| Điện trở trị số nhỏ luôn đo dư thêm ~0,4 Ω | Cộng thêm điện trở của chính cặp dây que đo | Chập hai que đo để ghi điện trở dây rồi trừ đi |
+| Số đo điện trở nhảy loạn khi đặt trên board | Mạch vẫn đang được cấp nguồn | Ngắt hoàn toàn nguồn điện trước khi đo thang Ω |
+| Thang thông mạch im lặng trên điện trở 220 Ω | Nhầm thang thông mạch với thang đo Ω | Chuyển núm xoay sang thang Ω; việc không kêu ở đây là đúng |
 
-An toàn: không đo ôm trên rail có điện, trên pin, hoặc trên chân VM của driver. Pin 2S không phải điện trở. Que đỏ không nằm ở ổ dòng, để lần đo áp sau trên chân 3,3 V không thành một ngắn mạch.
+**Lưu ý an toàn:** Không đo thang Ω trên đường nguồn đang có điện, trên pin hay chân VM của mạch lái; luôn giữ que đỏ ở lỗ V/Ω để tránh ngắn mạch khi chuyển sang đo áp trên chân 3,3 V sau đó.
 
 ## Video tham khảo
 
-- **Xem trước:** [Resistor Color Code Chart Tutorial Review - Physics](https://www.youtube.com/watch?v=G1mZutobxDU) — The Organic Chemistry Tutor, tiếng Anh. Bốn vạch màu ra giá trị và dung sai. Đối chiếu với đồng hồ, đừng tin mỗi bảng màu.
-- [How to Read Resistor Color Codes | 4-Band Resistor Values and Tolerance](https://www.youtube.com/watch?v=GLD7AgAYqwA) — Engineering Technology Simulation Learning Videos, tiếng Anh. Một điện trở bốn vạch, đọc chậm từng vạch. Dùng làm đối chứng cho bài lab.
+- **Xem trước:** [Resistor Color Code Chart Tutorial Review - Physics](https://www.youtube.com/watch?v=G1mZutobxDU) — The Organic Chemistry Tutor, tiếng Anh. Hướng dẫn cách đọc điện trở 4 vạch màu và tính dung sai; hãy luôn đối chiếu lại bằng đồng hồ vạn năng.
+- [How to Read Resistor Color Codes | 4-Band Resistor Values and Tolerance](https://www.youtube.com/watch?v=GLD7AgAYqwA) — Engineering Technology Simulation Learning Videos, tiếng Anh. Giải mã chậm từng vạch màu trên điện trở 4 vạch, phù hợp làm đối chứng cho bài thực hành.
 
 ## Bài tập
 
-1. Giải vàng-tím-nâu-vàng, cam-cam-đỏ-vàng, và lam-xám-đen-vàng. Cho giá trị danh định và cửa sổ ±5%.
-2. Có người đọc một điện trở thành vàng-cam-tím-đỏ. Họ đã làm gì, và cách đọc bốn vạch hợp lệ là gì nếu các màu đó là đỏ, tím, cam, vàng?
-3. Giải SMD 222, 510, 4R7 và 1003. Cái nào, nếu có, là 10 kΩ?
-4. Con 1 kΩ ±5% đo được 980 Ω khi mất nguồn. Giữ hay loại? 980 Ω lệch bao nhiêu phần trăm so với 1 000 Ω?
-5. Điện trở kéo lên của nút trên GPIO 3,3 V lẽ ra là 10 kΩ. Con đang cắm là nâu-đen-đỏ-vàng. Ước lượng dòng khi nút ngắn chân xuống mass, và nói chân vui hơn với con này hay với kéo lên 10 kΩ thật.
+1. Giải mã các điện trở 4 vạch sau (nêu trị số danh định và khoảng dung sai ±5%): vàng-tím-nâu-vàng(kim), cam-cam-đỏ-vàng(kim), và lam-xám-đen-vàng(kim).
+2. Một người đọc một điện trở thành vàng(kim)-cam-tím-đỏ. Họ đã mắc lỗi gì, và trị số đúng là bao nhiêu khi đọc theo thứ tự đỏ-tím-cam-vàng(kim)?
+3. Giải mã các điện trở SMD sau: `222`, `510`, `4R7` và `1003`. Mã nào trong số này (nếu có) có giá trị 10 kΩ?
+4. Một điện trở 1 kΩ ±5% đo ngoài mạch được 980 Ω. Linh kiện này đạt hay loại, và độ lệch so với 1.000 Ω là bao nhiêu phần trăm?
+5. Điện trở kéo lên (pull-up) cho nút nhấn trên chân GPIO 3,3 V theo thiết kế là 10 kΩ, nhưng thực tế bị cắm nhầm điện trở nâu-đen-đỏ-vàng(kim). Hãy tính dòng điện khi nhấn nút nối chân xuống mass và so sánh với khi dùng đúng 10 kΩ.
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Vàng-tím-nâu-vàng là $47 \times 10 = 470\ \Omega$, khoảng 447 Ω đến 494 Ω. Cam-cam-đỏ-vàng là $33 \times 100 = 3{,}3\ \mathrm{k}\Omega$, khoảng 3,14 kΩ đến 3,47 kΩ. Lam-xám-đen-vàng là $68 \times 1 = 68\ \Omega$, khoảng 65 Ω đến 71 Ω.
-2. Vàng bị đặt bên trái. Vàng là dung sai nên phải ở bên phải. Cách đọc đúng là đỏ-tím-cam-vàng: $27 \times 1000 = 27\ \mathrm{k}\Omega$, ±5%.
-3. 222 là $22 \times 10^2 = 2{,}2\ \mathrm{k}\Omega$. 510 là $51 \times 10^0 = 51\ \Omega$. 4R7 là 4,7 Ω. 1003 là $100 \times 10^3 = 100\ \mathrm{k}\Omega$. Không cái nào là 10 kΩ. Mã ba số của 10 kΩ là 103.
-4. 980 Ω nằm trong 950 Ω đến 1 050 Ω. Sai số $20/1000 = 2\%$, trong băng 5%. Giữ.
-5. Nâu-đen-đỏ-vàng là 1 kΩ, nên $I = 3{,}3 / 1000 = 3{,}3\ \mathrm{mA}$ khi nút bị giữ. Kéo lên 10 kΩ chỉ lấy $3{,}3 / 10000 = 0{,}33\ \mathrm{mA}$. Cả hai đều trong ngân sách GPIO thô 12 mA đến 40 mA, và 10 kΩ dịu hơn. Con 1 kΩ là họ hàng của điện trở đèn, không phải điện trở nút tốt hơn.
+1. Vàng-tím-nâu-vàng(kim): $47 \times 10 = 470\ \Omega$, khoảng 446,5 Ω đến 493,5 Ω (làm tròn 447 Ω đến 494 Ω). Cam-cam-đỏ-vàng(kim): $33 \times 100 = 3{,}3\ \mathrm{k}\Omega$, khoảng 3,14 kΩ đến 3,47 kΩ. Lam-xám-đen-vàng(kim): $68 \times 1 = 68\ \Omega$, khoảng 65 Ω đến 71 Ω.
+2. Họ đã đặt vạch dung sai (vàng kim) ở bên trái thay vì bên phải. Đọc đúng chiều đỏ-tím-cam-vàng(kim) cho $27 \times 1000 = 27\ \mathrm{k}\Omega \pm 5\%$.
+3. `222` là $22 \times 10^2 = 2{,}2\ \mathrm{k}\Omega$; `510` là $51 \times 10^0 = 51\ \Omega$; `4R7` là 4,7 Ω; `1003` là $100 \times 10^3 = 100\ \mathrm{k}\Omega$. Không mã nào là 10 kΩ (mã 3 chữ số của 10 kΩ là `103`).
+4. 980 Ω nằm gọn trong khoảng 950 Ω đến 1.050 Ω, với sai số $20/1000 = 2\% < 5\%$, nên giữ lại dùng bình thường.
+5. Nâu-đen-đỏ-vàng(kim) là 1 kΩ, nên khi nhấn giữ nút, dòng qua điện trở là $I = 3{,}3 / 1000 = 3{,}3\ \mathrm{mA}$. Với điện trở kéo lên 10 kΩ, dòng chỉ là $3{,}3 / 10000 = 0{,}33\ \mathrm{mA}$. Dù cả hai đều nằm trong giới hạn an toàn, mức 10 kΩ tiêu thụ ít dòng hơn gấp 10 lần và phù hợp hơn cho mạch kéo lên nút nhấn.
 
 </details>
 
 ## Đọc thêm
 
-Bài điện trở của SparkFun gồm vạch màu, công suất, và mắc nối tiếp song song mà bạn đã dùng cho LED: [Resistors](https://learn.sparkfun.com/tutorials/resistors). Vạch nào tối nghĩa dưới đèn xấu thì máy tính nhanh hơn một lần đoán thứ hai: [máy tính mã màu điện trở của Digi-Key](https://www.digikey.com/en/resources/conversion-calculators/conversion-calculator-resistor-color-code). Dùng để tự kiểm, rồi vẫn đặt con lên đồng hồ.
+Bài hướng dẫn của SparkFun tổng hợp đầy đủ mã màu, công suất và cách mắc điện trở: [Resistors](https://learn.sparkfun.com/tutorials/resistors). Khi màu vạch khó phân biệt dưới ánh sáng yếu, bạn có thể tra nhanh bằng [máy tính mã màu điện trở của Digi-Key](https://www.digikey.com/en/resources/conversion-calculators/conversion-calculator-resistor-color-code) rồi kiểm chứng lại trên đồng hồ vạn năng.
 
 ## Mua ở Việt Nam
 
-Cả giỏ hàng nằm ở [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Bài này chỉ thêm một bộ điện trở.
+Toàn bộ bộ kit robot nằm ở bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Bài này chỉ cần thêm một bộ điện trở xuyên lỗ.
 
-Lúc viết trang này, tìm "điện trở" trên Hshop không ra bộ 1/4 W. Dùng trang tìm kiếm, đừng đoán slug sản phẩm: [Shopee, tìm bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W). URL đó là trang tìm kiếm. Đọc listing xem có ghi 1/4 W và 5% hoặc 1% không, ưu tiên bộ có 180 Ω hoặc 220 Ω cùng 1 kΩ và 10 kΩ. Xem giá đúng ngày đặt. Điện trở lẻ ở quầy linh kiện như [Thế Giới IC](https://www.thegioiic.com/) hoặc [IC Đây Rồi](https://icdayroi.com/) cũng được nếu túi có nhãn, và bạn vẫn đo năm con trong bài lab.
+Do thời điểm khảo sát Hshop không hiển thị bộ điện trở 1/4 W phổ thông, bạn có thể tìm mua qua trang tìm kiếm: [Shopee, tìm bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W). Hãy đọc kỹ mô tả để chọn loại 1/4 W, sai số 5% hoặc 1%, ưu tiên bộ có sẵn các trị số 180 Ω hoặc 220 Ω cùng 1 kΩ và 10 kΩ. Ngoài ra, bạn có thể mua điện trở lẻ có dán nhãn trị số tại các cửa hàng linh kiện như [Thế Giới IC](https://www.thegioiic.com/) hoặc [IC Đây Rồi](https://icdayroi.com/), và vẫn đo kiểm tra lại bằng đồng hồ trong bài thực hành.

@@ -11,56 +11,58 @@ lesson_type: required
 draft: false
 ---
 
-Buck đã ở 5,0 V. Đây là lần đầu bánh được quay bằng điện: xe kê lên, từng motor một, cho đến khi PWM dương làm cả hai lốp lăn về phía mũi.
+Mạch buck đã được chỉnh ổn định ở 5,0 V. Đây là lần đầu tiên bánh xe quay bằng nguồn điện: đặt xe lên giá kê sao cho bánh rời khỏi mặt bàn, chạy thử từng động cơ một cho tới khi lệnh PWM dương làm cả hai lốp quay tiến về phía mũi xe.
 
 ## Mục tiêu học
 
-1. Kê robot lên hộp cho cả hai lốp rời mặt bàn, và quay từng motor với PWM giữ trong 60–80 nấc trên 255.
-2. Kéo STBY của TB6612 lên cao trước khi đổ lỗi cho sketch, rồi ghi cặp chân IN làm bánh trái tiến và cặp làm bánh phải tiến.
-3. Bánh quay ngược thì đảo hai dây motor đó, hoặc đánh dấu sẽ đảo dấu trong firmware, và không làm cả hai.
-4. Đo dòng không tải, stall chỉ trong một giây, và dừng nếu driver có mùi hoặc không chạm được vào lá tản nhiệt.
+1. Kê khung robot lên hộp sao cho cả hai lốp rời hoàn toàn mặt bàn, và chạy thử từng động cơ riêng lẻ với mức PWM giới hạn trong khoảng 60–80 trên thang 255.
+2. Kéo chân STBY của TB6612 lên mức cao trước khi tìm lỗi phần mềm, sau đó ghi lại cặp mức logic IN làm bánh trái tiến và cặp làm bánh phải tiến.
+3. Nếu một bánh quay ngược chiều, xử lý bằng cách đảo hai dây động cơ đó **hoặc** ghi chú đảo dấu trong firmware — tuyệt đối không làm cả hai cùng lúc.
+4. Đo dòng không tải, chỉ thử giữ kẹt (stall) tối đa 1 giây nếu cần đo, và ngắt nguồn ngay nếu mạch driver có mùi khét hoặc tản nhiệt quá nóng không chạm tay được.
 
 ## Kiến thức cần có
 
-Bài 07-01 để lại đất chung, cầu chì trên cực dương, và buck 5,0 V đã đo trước khi gắn ESP32. Chương 05 là bảng sự thật của cầu H: một cặp tiến, một cặp lùi, và cả hai khóa trên một nhánh là chập. Bạn nhận được TB6612 (STBY, PWMA, PWMB, AIN, BIN) hoặc L298N (ENA, ENB, INx, tản nhiệt, jumper 5 V). Chương 06 cho $$b$$, $$r$$, và định nghĩa tiến là hướng mũi. Yaw dương ở chương ấy là bánh phải nhanh hơn bánh trái. Dấu bạn tìm hôm nay là dấu mà PID chương 08 và topic chương 09 sẽ kế thừa. Lab này không có node ROS.
+Bài 07-01 đã hoàn thiện mass chung, cầu chì trên cực dương và mạch buck 5,0 V đo trước khi gắn ESP32. Chương 05 đã trình bày bảng sự thật của cầu H: một cặp mức logic cho chiều tiến, cặp ngược lại cho chiều lùi, và không để ngắn mạch trên cùng một nhánh. Bạn cần phân biệt được các chân của TB6612 (`STBY`, `PWMA`, `PWMB`, `AIN`, `BIN`) hoặc L298N (`ENA`, `ENB`, `INx`, tản nhiệt, jumper 5 V). Chương 06 cung cấp $$b$$, $$r$$ và quy ước chiều tiến là hướng mũi xe, quay trái (yaw dương) khi bánh phải nhanh hơn bánh trái. Quy ước dấu xác định hôm nay sẽ được dùng xuyên suốt cho bộ điều khiển PID ở Chương 08 và các topic ROS ở Chương 09. Bài này chưa dùng ROS.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-`geometry_msgs/Twist` sau này có `linear.x` là tiến và `angular.z` là yaw. Hai trường ấy thành lệnh trái và lệnh phải. Nếu "dương" của bánh phải trên thực tế là lùi, mọi `linear.x` dương thành vòng quay, và PID chương 08 sẽ cố triệt một lỗi đi dây. Tìm dấu ở đây, bánh trên không, nơi lốp ngược không kéo được robot khỏi bàn. Bài 03 chỉ đặt tên cho hai số. Chúng chưa phải mét trên giây.
+Về sau, thông điệp `geometry_msgs/Twist` gửi `linear.x` (vận tốc tiến) và `angular.z` (vận tốc quay yaw), rồi bộ điều khiển tách thành lệnh cho bánh trái và bánh phải. Nếu chiều “dương” của bánh phải thực tế lại làm xe chạy lùi, mọi lệnh `linear.x` dương sẽ biến thành cú xoay tại chỗ, và vòng PID ở Chương 08 sẽ không thể sửa nổi lỗi đấu dây này. Việc kiểm tra dấu chiều quay ngay khi bánh được kê trên không đảm bảo an toàn, tránh việc xe lao khỏi bàn. Ở Bài 03, chúng ta mới đặt tên cho hai con số lệnh này (dưới dạng nấc PWM, chưa phải đơn vị m/s).
 
 ## Một kênh, duty nhỏ, STBY phải thức
 
-Kê khung lên hộp hoặc chồng sách. Cả hai lốp ở trên không. Lốp còn trên bàn ở PWM đầu tiên là cách robot rời mặt bàn.
+Đặt khung xe lên một chiếc hộp hoặc chồng sách sao cho cả hai lốp treo lơ lửng, không chạm hộp lẫn mặt bàn. Cấp PWM lần đầu khi bánh đang chạm bàn rất dễ làm robot vọt rơi khỏi bàn.
 
-Ra lệnh một motor. Motor kia PWM 0. Duty đầu là 60, 70, hoặc cùng lắm 80 trên 255, không phải 255. Pack đang $$7{,}6~\mathrm{V}$$:
+Chỉ cấp lệnh cho từng động cơ một trong khi động cơ kia giữ PWM bằng 0. Mức duty ban đầu chỉ nên nằm trong khoảng 60–80 trên thang 255, không mở tối đa 255. Với điện áp pack đang ở $$7{,}6~\mathrm{V}$$:
 
 $$
 D = \frac{70}{255} \approx 0{,}275, \qquad V_{avg} \approx 0{,}275 \times 7{,}6~\mathrm{V} \approx 2{,}09~\mathrm{V}
 $$
 
-trước sụt áp cầu. TB6612 là cầu MOSFET, đưa gần hết 2 V ấy tới chổi than, nên lốp quay chậm và bạn thấy hướng. L298N có thể sụt $$1{,}5$$–$$2~\mathrm{V}$$ và cùng duty chỉ bò; đó là lý do chọn TB6612, không phải lý do mở full thang. Nếu L298N buộc phải tăng duty mới thấy chuyển động, tăng từng nấc nhỏ và giữ luật stall bên dưới.
+(chưa tính sụt áp trên mạch cầu). TB6612 dùng cầu MOSFET có sụt áp rất nhỏ nên truyền gần trọn 2 V tới chổi than, giúp lốp quay chậm vừa đủ để quan sát chiều quay. Trong khi đó, L298N dùng cặp transistor Darlington bị sụt khoảng $$1{,}5$$–$$2~\mathrm{V}$$ nên ở cùng mức duty, động cơ có thể quay rất chậm hoặc chưa thắng nổi ma sát. Đó là lý do TB6612 được ưu tiên hơn; nếu dùng L298N và phải tăng duty mới thấy bánh quay, hãy tăng từng nấc nhỏ và tuân thủ chặt chẽ quy tắc an toàn dòng kẹt bên dưới.
 
-Trên TB6612, STBY phải cao, nếu không cả hai cầu ngủ dù IN và PWM có nói gì. STBY nổi là lỗi quen "sketch đúng mà bánh đứng im". Nối nó lên VCC cho lab này, hoặc để GPIO kéo cao ở bài 04. Trên L298N, bẫy tương ứng là ENA hoặc ENB còn thấp, hoặc jumper 5 V đã rút mà chân logic không có 5 V nào khác.
+Trên TB6612, chân `STBY` bắt buộc phải kéo lên mức cao; nếu để thấp hoặc bỏ nổi, cả hai kênh đều bị khóa ở trạng thái ngủ bất kể tín hiệu `IN` và `PWM`. Chân `STBY` bỏ nổi là nguyên nhân phổ biến nhất của tình trạng “code đúng nhưng bánh đứng im”. Bạn có thể nối trực tiếp `STBY` lên VCC trong bài thực hành này, hoặc điều khiển bằng một chân GPIO ở Bài 04. Trên L298N, lỗi tương tự xảy ra khi `ENA`/`ENB` đang ở mức thấp hoặc đã rút jumper 5 V mà chưa cấp nguồn 5 V ngoài cho chân logic.
 
 ![Tiến là một đường chéo của chữ H; đường kia là lùi]({{ site.imgurl }}/generated/hbridge_concept.png)
 
 ![Module L298N: vít motor, tản nhiệt trên cặp Darlington]({{ site.imgurl }}/wikimedia/Dosmotorsl298n.jpg)
 
-Nhìn lốp trái so với mũi xe. Ghi cặp IN làm nó tiến, rồi làm bánh phải, vẫn một mình. Ví dụ bạn phải thay bằng số của mình: trái tiến là AIN1 cao, AIN2 thấp, PWMA 70; phải tiến là BIN1 cao, BIN2 thấp, PWMB 70. Bánh phải lùi với mẫu ấy thì đảo hai vít của motor đó một lần, hoặc giữ vít và đảo dấu phải trong firmware bài 04. Không làm cả hai. Hai lần đảo triệt nhau, và lệnh thẳng ở bài 05 thành vòng quay.
+Quan sát chiều quay của lốp trái so với hướng mũi xe và ghi lại cặp mức `IN` giúp bánh quay tiến; sau đó lặp lại riêng cho bánh phải. Ví dụ mẫu (cần thay bằng kết quả thực tế trên xe của bạn): bánh trái tiến khi `AIN1` cao, `AIN2` thấp, `PWMA = 70`; bánh phải tiến khi `BIN1` cao, `BIN2` thấp, `PWMB = 70`. Nếu bánh phải quay lùi với mẫu này, bạn có thể đảo hai đầu dây motor phải trên cầu đấu vít **hoặc** giữ nguyên dây và đảo dấu lệnh bên phải trong firmware ở Bài 04 — chỉ chọn **một** trong hai cách. Thực hiện cả hai sẽ làm hai lần đảo triệt tiêu nhau và khiến lệnh đi thẳng ở Bài 05 lại biến thành xoay tròn.
 
 ## Dòng không tải, và stall không được giữ
 
-Một lốp trên không ở PWM 70, motor TT vàng thường hút cỡ $$0{,}10$$–$$0{,}20~\mathrm{A}$$. Ghi số đồng hồ của bạn, nối tiếp motor đó hoặc ở dây pin khi motor kia tắt. Hai motor sau này cộng lại. Chúng không nhân dòng stall vào số không tải.
+Khi bánh treo trên không ở mức PWM 70, một động cơ TT vỏ vàng thường tiêu thụ dòng không tải khoảng $$0{,}10$$–$$0{,}20~\mathrm{A}$$. Hãy mắc ampe kế nối tiếp vào nhánh động cơ đó (hoặc trên dây nguồn pin khi động cơ kia đang tắt) và ghi lại số đo. Khi chạy đồng thời hai động cơ, dòng tiêu thụ sẽ cộng lại.
 
 ![Dòng không tải là đầu thấp của đường cong; stall là đầu cao]({{ site.imgurl }}/generated/stall_current.png)
 
-Nếu cần một điểm stall, kẹp lốp một giây, đọc đồng hồ, rồi thả. Stall người bán ghi $$1{,}2~\mathrm{A}$$ tại $$6~\mathrm{V}$$ là bậc độ lớn, không phải giá trị để giữ. Ở PWM 70, dòng stall thấp hơn stall đủ điện áp, và vẫn nóng cuộn dây lẫn lá tản. Có mùi, hoặc không đặt ngón lên lá L298N hay thân TB6612, thì ngắt công tắc. Câu cho bài sau: với bảng IN của bạn, PWM dương làm cả hai lốp tiến, PWM âm đảo chiều, PWM 0 là dừng. Đó là bảng dấu.
+Nếu muốn ghi nhận một điểm dòng kẹt (stall), chỉ giữ chặt bánh tối đa 1 giây để đọc đồng hồ rồi thả ngay. Thông số dòng kẹt $$1{,}2~\mathrm{A}$$ tại $$6~\mathrm{V}$$ mà người bán ghi chỉ là bậc độ lớn tham khảo, không phải mức dòng cho phép duy trì liên tục. Ngay cả ở PWM 70, dòng kẹt tuy thấp hơn mức toàn áp nhưng vẫn làm nóng nhanh cuộn dây động cơ và tản nhiệt driver. Nếu ngửi thấy mùi khét hoặc không thể chạm ngón tay vào lá tản nhiệt L298N (hay thân IC TB6612), hãy ngắt công tắc nguồn ngay.
+
+Kết thúc bước này, bạn chốt bảng dấu cho các bài sau: với cấu hình chân `IN` đã ghi, PWM dương làm cả hai lốp quay tiến, PWM âm làm lùi và PWM 0 là dừng.
 
 ## Lab
 
 ### An toàn
 
-Lốp rời mặt bàn. Lần quay đầu chỉ một motor. PWM nằm trong 60–80 trên 255 cho đến khi hướng rõ. Công tắc pin là nút giết, và tay với tới được. Đo stall một giây. Lá nóng hoặc có mùi thì kết thúc. Dòng motor vẫn từ pin có chì, không từ USB. Ngón tay tránh bánh răng.
+Hai lốp phải rời hoàn toàn mặt bàn. Lần chạy thử đầu tiên chỉ cấp điện cho một động cơ với mức PWM giới hạn trong 60–80 trên 255 cho tới khi xác định rõ chiều quay. Công tắc nguồn pin đóng vai trò nút dừng khẩn cấp và phải luôn nằm trong tầm với. Nếu đo dòng kẹt, chỉ giữ tối đa 1 giây; ngừng thí nghiệm ngay nếu mạch quá nóng hoặc có mùi khét. Dòng động cơ bắt buộc lấy từ pin qua cầu chì (không lấy từ USB), và giữ ngón tay tránh xa bánh răng.
 
 ### BOM
 
@@ -75,15 +77,15 @@ Lốp rời mặt bàn. Lần quay đầu chỉ một motor. PWM nằm trong 60�
 
 ### Các bước
 
-1. Hộp dưới khung. Cả hai lốp không chạm hộp và không chạm bàn.
-2. STBY cao trên TB6612, hoặc ENA/ENB sẵn trên L298N. PWM 0. Bật pin.
-3. Chỉ motor trái. PWM 70. Thử hai cách IN không phải cả hai cao. Ghi cặp nào làm lốp lăn về mũi.
-4. Lặp cho motor phải. Bánh ngược thì đảo hai vít motor đó, hoặc ghi "đảo trong firmware", không cả hai.
-5. Đo dòng không tải ở PWM 70 từng motor. Tùy chọn: stall một giây rồi thả. Viết "PWM dương → cả hai bánh tiến" bằng tên chân của bạn.
+1. Đặt khung robot lên hộp kê sao cho cả hai bánh treo tự do, không chạm hộp lẫn mặt bàn.
+2. Kéo `STBY` lên cao (trên TB6612) hoặc đảm bảo `ENA`/`ENB` sẵn sàng (trên L298N), đặt PWM về 0 rồi bật công tắc pin.
+3. Chạy thử riêng động cơ trái ở PWM 70, thử lần lượt hai cặp mức logic `IN` khác nhau (không để cả hai cùng cao) và ghi lại cặp làm bánh lăn về phía mũi xe.
+4. Lặp lại quy trình tương tự cho động cơ phải. Nếu bánh quay ngược, đảo hai dây động cơ đó trên cầu vít hoặc ghi chú “đảo dấu trong firmware” (chỉ chọn một cách).
+5. Đo dòng không tải của từng động cơ ở PWM 70 (tùy chọn: giữ kẹt 1 giây để đọc dòng rồi thả ngay). Ghi rõ kết luận “PWM dương → cả hai bánh tiến” kèm tên chân thực tế vào sổ.
 
 ### Kết quả mong đợi
 
-Một bảng dấu có mức chân, dòng không tải từng motor (dạng ví dụ: trái $$0{,}12~\mathrm{A}$$, phải $$0{,}15~\mathrm{A}$$ tại PWM 70 — số của bạn sẽ khác), và một dòng nói STBY hoặc enable đã cao. Cả hai mảnh băng, nhìn từ đuôi xe, đi về phía mũi khi lệnh dương. Ghi chú không được nói đã sửa bằng cách vừa đảo dây vừa đảo code.
+Một bảng dấu ghi rõ mức logic từng chân, dòng không tải của từng động cơ (ví dụ: trái $$0{,}12~\mathrm{A}$$, phải $$0{,}15~\mathrm{A}$$ tại PWM 70 — giá trị thực tế có thể khác) và xác nhận `STBY` (hoặc `ENA`/`ENB`) đã ở mức cao. Khi nhìn từ đuôi xe và gửi lệnh dương, mảnh băng dính dán trên cả hai lốp đều quay hướng về mũi xe. Sổ tay xác nhận không xảy ra lỗi đảo kép (vừa đảo dây vừa đảo code).
 
 ### Lỗi thường gặp
 
@@ -97,7 +99,7 @@ Một bảng dấu có mức chân, dòng không tải từng motor (dạng ví 
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Bạn đáng lẽ đã có driver. Nếu bài 07-01 còn motor mà chưa có cầu, mua TB6612 trước. L298N dùng tạm được và nóng hơn; giữ tản nhiệt, và ESP32 vẫn ăn buck. Giá đổi. Khoảng 2026: module TB6612 25.000–70.000 đồng, motor TT 25.000–45.000 một cái, L298N khoảng 45.000 trên trang đã kiểm bên dưới. DRV8833 hợp motor nhỏ hơn nhiều, yếu nếu cặp TT bị stall.
+Thông thường bạn đã có mạch driver từ Bài 07-01; nếu chưa có, hãy ưu tiên mua TB6612. Mạch L298N có thể dùng thay thế tạm thời nhưng tỏa nhiệt nhiều hơn (cần giữ nguyên lá tản nhiệt và vẫn cấp nguồn ESP32 qua mạch buck). Giá tham khảo khoảng năm 2026 (có thể thay đổi): module TB6612 25.000–70.000 đồng, động cơ TT 25.000–45.000 đồng/chiếc, L298N khoảng 45.000 đồng. Lưu ý module DRV8833 chỉ phù hợp với động cơ rất nhỏ, dễ bị quá tải nếu hai động cơ TT gặp tình huống kẹt bánh.
 
 - L298N đã kiểm, khoảng 45.000 đồng: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - [Hshop TB6612](https://hshop.vn/search?q=TB6612), [motor TT](https://hshop.vn/search?q=motor%20TT)
@@ -107,20 +109,24 @@ Bạn đáng lẽ đã có driver. Nếu bài 07-01 còn motor mà chưa có c�
 
 ## Video tham khảo
 
-- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Đưa PWM và chiều vào TB6612, motor quay. Làm bánh kê lên, đúng bring-up của lab.
-- [Driving DC motors, part 3/3:  H-bridges (Kevin Lynch)](https://www.youtube.com/watch?v=fVgnUWIWzZ8) — Northwestern Robotics, tiếng Anh. Nếu motor quay ngược so với bảng, sửa một cặp công tắc trong cầu H, không sửa cả hai chỗ.
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Minh họa cách cấp PWM và tín hiệu chiều quay cho TB6612; thực hiện khi bánh kê lên khỏi bàn đúng quy trình bài này.
+- [Driving DC motors, part 3/3:  H-bridges (Kevin Lynch)](https://www.youtube.com/watch?v=fVgnUWIWzZ8) — Northwestern Robotics, tiếng Anh. Giải thích nguyên lý đảo chiều trên cầu H để sửa đúng một chỗ khi động cơ quay ngược.
 
 ## Bài tập
 
-1. VM $$8{,}0~\mathrm{V}$$, lệnh đầu 80 nấc trên 255. Tính $$D$$ và $$V_{avg}$$ trước sụt cầu. Nếu L298N sụt thêm $$1{,}8~\mathrm{V}$$, chổi than còn bao nhiêu?
-2. Không tải ở PWM 70 là $$0{,}14~\mathrm{A}$$. Kẹp một giây được $$0{,}95~\mathrm{A}$$. Vì sao cả hai số hợp đường stall, và vì sao phải thả?
-3. STBY nổi, AIN1 cao, AIN2 thấp, PWM 80. Lốp vẫn đứng. Sợi dây đầu tiên cần thêm là gì?
-4. Bánh phải quay ngược. Bạn đảo dây của nó và còn nhân lệnh phải với $$-1$$ trong sketch sắp viết. PWM dương trên sàn sẽ làm gì?
-5. Trái tiến là AIN1 = 1, AIN2 = 0. Phải tiến, trước khi sửa, là BIN1 = 0, BIN2 = 1. Viết câu bảng dấu mà bài 04 phải làm, không đảo thêm lần nữa.
+1. Với nguồn VM là $$8{,}0~\mathrm{V}$$ và mức lệnh ban đầu là 80 trên thang 255, tính hệ số duty $$D$$ và điện áp trung bình $$V_{avg}$$ trước sụt áp cầu. Nếu L298N sụt thêm $$1{,}8~\mathrm{V}$$, điện áp còn lại đặt lên chổi than là bao nhiêu?
+2. Dòng không tải ở PWM 70 đo được $$0{,}14~\mathrm{A}$$, còn khi giữ kẹt 1 giây lên tới $$0{,}95~\mathrm{A}$$. Giải thích vì sao hai số đo này phù hợp với đặc tuyến động cơ và tại sao phải thả tay ngay.
+3. Trên TB6612, chân `STBY` đang bỏ nổi, `AIN1` mức cao, `AIN2` mức thấp, PWM 80 nhưng bánh vẫn đứng yên. Cần bổ sung kết nối nào đầu tiên?
+4. Bánh phải quay ngược chiều tiến. Bạn vừa đảo hai dây động cơ đó vừa nhân thêm $$-1$$ vào lệnh bánh phải trong firmware. Khi gửi lệnh PWM dương trên sàn, robot sẽ chuyển động thế nào?
+5. Bánh trái quay tiến khi `AIN1 = 1, AIN2 = 0`, còn bánh phải quay tiến (trước khi chỉnh sửa) khi `BIN1 = 0, BIN2 = 1`. Hãy viết quy ước bảng dấu cho firmware Bài 04 mà không cần đảo thêm dây.
 
 ### Gợi ý đáp án
 
-1. $$D = 80/255 \approx 0{,}314$$, $$V_{avg} \approx 0{,}314 \times 8{,}0 \approx 2{,}51~\mathrm{V}$$. Sau sụt $$1{,}8~\mathrm{V}$$, chổi than còn khoảng $$0{,}7~\mathrm{V}$$, có thể không thắng ma sát. Đó là lý do TB6612, không phải lý do mở 255. 2. Không tải là đầu dòng thấp, sức phản điện gần triệt nguồn. Kẹp lốp làm sức phản điện sụp và dòng tiến về stall. Một giây rồi thả; lá nóng hoặc có mùi thì dừng hẳn. 3. Kéo STBY lên cao. Chân ấy chưa cao thì TB6612 ngủ, cặp IN không có tiếng nói. 4. Hai lần đảo triệt nhau. PWM dương vẫn làm lốp ấy lùi, sổ nói đã "sửa", và lệnh thẳng thành vòng quay. Chỉ làm một trong hai cách. 5. Lệnh trái dương: AIN1 cao, AIN2 thấp. Lệnh phải dương: BIN1 thấp, BIN2 cao. Âm thì đảo từng cặp. Không đảo thêm vít bên phải.
+1. $$D = 80/255 \approx 0{,}314$$ và $$V_{avg} \approx 0{,}314 \times 8{,}0 \approx 2{,}51~\mathrm{V}$$. Sau khi trừ sụt áp $$1{,}8~\mathrm{V}$$ trên L298N, điện áp đặt lên chổi than chỉ còn khoảng $$0{,}7~\mathrm{V}$$, thường chưa đủ thắng ma sát tĩnh. Đây là lý do nên ưu tiên TB6612 thay vì vội tăng PWM lên 255.
+2. Khi chạy không tải, sức phản điện động (back-EMF) gần cân bằng nguồn nên dòng điện nhỏ. Khi kẹp giữ bánh, tốc độ về 0 làm sức phản điện động biến mất và dòng vọt về gần dòng kẹt; chỉ giữ tối đa 1 giây để tránh quá nhiệt cuộn dây và mạch cầu.
+3. Kéo chân `STBY` lên mức cao (VCC hoặc GPIO mức cao), vì nếu `STBY` thấp hoặc bỏ nổi thì TB6612 ở trạng thái ngủ.
+4. Hai lần đảo chiều triệt tiêu lẫn nhau nên bánh phải vẫn quay lùi khi nhận lệnh dương, khiến robot xoay tròn thay vì chạy thẳng. Chỉ được thực hiện một trong hai cách sửa.
+5. Lệnh trái dương: `AIN1 = 1, AIN2 = 0`; lệnh phải dương: `BIN1 = 0, BIN2 = 1`. Khi lệnh âm, đảo ngược mức logic từng cặp tương ứng và giữ nguyên đấu dây trên cầu vít.
 
 ## Đọc thêm
 

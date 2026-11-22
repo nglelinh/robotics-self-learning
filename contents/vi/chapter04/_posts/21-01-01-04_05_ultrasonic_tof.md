@@ -11,95 +11,95 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **80–100 phút**. Đây là lab đo khoảng cách: một thước mét, một tấm bìa, và một bảng sai số. Bánh xe không lên bàn.
+Thời lượng: **80–100 phút**. Đây là bài thực hành đo khoảng cách với thước mét, tấm bìa phẳng và bảng đánh giá sai số; không gắn bánh xe trong bài này.
 
 ## Mục tiêu học
 
-Bạn tính khoảng cách từ độ rộng xung echo bằng $$d = vt/2$$ với $$343~\mathrm{m/s}$$, và bằng lối tắt micro giây $$d_{\mathrm{cm}} \approx t_{\mu\mathrm{s}} \times 0{,}01715$$. Bạn hạ echo 5 V của HC-SR04 xuống khoảng 3,33 V trước khi nó chạm chân ESP32, và bạn nói được echo mất hút nghĩa là không biết, không phải 0 cm. Bạn giải thích vì sao hai board VL53L0X chưa sửa, cùng địa chỉ `0x29`, không sống chung một bus, và bạn điền bảng sai số 20 / 40 / 80 cm so với thước, hoặc một tờ dry-run vẫn chứa ví dụ 5,8 ms và cầu chia điện áp.
+Sau bài này, bạn tính được khoảng cách từ độ rộng xung Echo theo công thức $$d = vt/2$$ với vận tốc âm $$343~\mathrm{m/s}$$, cũng như công thức rút gọn theo micro giây $$d_{\mathrm{cm}} \approx t_{\mu\mathrm{s}} \times 0{,}01715$$. Bạn biết hạ mức Echo 5 V của HC-SR04 xuống khoảng 3,33 V trước khi đưa vào ESP32 và hiểu rõ việc mất tín hiệu Echo (timeout) nghĩa là không xác định được khoảng cách chứ không phải 0 cm. Bạn giải thích được vì sao hai module VL53L0X mặc định (cùng địa chỉ `0x29`) không thể hoạt động song song nếu chưa đổi địa chỉ, đồng thời hoàn thành bảng sai số tại ba mốc 20 / 40 / 80 cm so với thước đo (hoặc bản chuẩn bị dry-run kèm phép tính 5,8 ms và cầu chia áp).
 
 ## Kiến thức cần có
 
-Bài 04-02 đã nhận diện hai ống nhôm và cửa sổ đen nhỏ, kể cả điện áp và loại bus. Bài 04-01 là lần quét I2C bạn sẽ cần nếu trên bàn có VL53L0X. Chương 03 đo được độ rộng xung, hoặc ít nhất in được một số từ thư viện bạn đã đọc. Chương 01 là đồng hồ kẹp lên chân echo. Chưa cần chương động cơ, và bạn không nên cầm bánh xe trong lab này.
+Bạn đã nhận diện được HC-SR04 và VL53L0X ở Bài 04-02, biết quét địa chỉ I2C từ Bài 04-01 (nếu có VL53L0X), biết đo độ rộng xung hoặc đọc thư viện từ Chương 03 và có đồng hồ vạn năng để kiểm tra điện áp chân Echo. Chưa cần động cơ hay mạch cầu H.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Firmware teleop Chương 07 chỉ được phép chạy vì có thứ bảo nó dừng. Trên Capstone A, thứ đó là một lần so khoảng cách trong cùng vòng lặp với lệnh motor: quá gần, hoặc không có số đọc, thì PWM về không. Con số trong phép so đó sinh ra ở đây, cạnh thước mét, không sinh ra trong một node ROS.
+Firmware teleop ở Chương 07 chỉ an toàn khi có điều kiện tự dừng: trong cùng vòng lặp điều khiển động cơ, nếu khoảng cách quá gần hoặc không đọc được tín hiệu hợp lệ, hệ thống phải đưa PWM về 0. Ngưỡng dừng đó được kiểm chứng trực tiếp bằng thước đo trong bài này.
 
-Sau này cùng số đọc đó là một `sensor_msgs/Range`: `radiation_type` là siêu âm hoặc hồng ngoại, `min_range` và `max_range` lấy từ khoảng bạn thực sự tin, `range` tính bằng mét. Số 0 trong trường đó không được hiểu là “tường đang chạm cản” nếu code HC-SR04 dùng 0 cho timeout. Ghi ký hiệu đặc biệt đó ngay bây giờ. Hai VL53L0X thành hai topic khoảng cách chỉ sau khi XSHUT đã cho chúng hai địa chỉ. Camera không thay lab này. Robot phải dừng được trước khi nó nhìn.
+Ở các chương ROS 2 sau này, kết quả đo sẽ được xuất thành bản tin `sensor_msgs/Range` với loại bức xạ (`radiation_type`: siêu âm hoặc hồng ngoại), giới hạn tin cậy `min_range`, `max_range` và giá trị `range` tính bằng mét. Không được để giá trị 0 của trạng thái timeout bị hiểu nhầm thành "khoảng cách 0 cm"; cần quy ước ký hiệu lỗi rõ ràng ngay từ bây giờ. Nếu dùng hai cảm biến VL53L0X, phải dùng chân `XSHUT` tách địa chỉ trước khi xuất thành hai topic riêng biệt.
 
 ![Thời gian echo đi và về, và số ToF đã là milimét ngay trong chip]({{ site.imgurl }}/generated/range_echo_tof.png)
 
-## Âm thanh đi và về
+## Thời gian bay của sóng âm
 
-Chùm của HC-SR04 đi tới bia rồi quay lại, nên khoảng cách là một nửa quãng đường:
+Chùm sóng siêu âm của HC-SR04 đi từ đầu phát đến vật cản rồi phản xạ ngược về đầu thu, nên khoảng cách bằng một nửa tổng quãng đường truyền:
 
 $$
 d = \frac{v t}{2}.
 $$
 
-Ở nhiệt độ phòng lấy $$v \approx 343~\mathrm{m/s}$$. Echo giữ mức cao trong $$5{,}8~\mathrm{ms} = 0{,}0058~\mathrm{s}$$ cho
+Ở nhiệt độ phòng ($20\,^\circ\mathrm{C}$), lấy $$v \approx 343~\mathrm{m/s}$$. Nếu xung Echo ở mức cao trong $$5{,}8~\mathrm{ms} = 0{,}0058~\mathrm{s}$$, khoảng cách là:
 
 $$
 d = \frac{343 \times 0{,}0058}{2} = 343 \times 0{,}0029 = 0{,}995~\mathrm{m} \approx 99{,}5~\mathrm{cm}.
 $$
 
-Chia $$343 / 2$$ cho $$10^{6}$$ để làm việc bằng micro giây và centimét:
+Quy đổi sang đơn vị centimét và micro giây (chia $$343 / 2$$ cho $$10^{4}$$ hay chia mét cho $$10^{6}$$ rồi đổi ra cm):
 
 $$
 d_{\mathrm{cm}} \approx t_{\mu\mathrm{s}} \times 0{,}01715.
 $$
 
-Kiểm cùng xung đó: $$5800 \times 0{,}01715 = 99{,}5~\mathrm{cm}$$. Một centimét tầm tương ứng khoảng $$58~\mu\mathrm{s}$$ echo. Timer jitter $$100~\mu\mathrm{s}$$ đã đẩy số đọc khoảng $$1{,}7~\mathrm{cm}$$. Đó là cỡ sai số đáng nhớ khi mốc 40 cm lệch một centimét và bạn đang muốn đổ lỗi cho thước.
+Kiểm tra lại với cùng xung trên: $$5800 \times 0{,}01715 = 99{,}5~\mathrm{cm}$$. Mỗi 1 cm tương ứng khoảng $$58~\mu\mathrm{s}$$ độ rộng xung; do đó sai lệch định thời (jitter) cỡ $$100~\mu\mathrm{s}$$ đã làm kết quả lệch khoảng $$1{,}7~\mathrm{cm}$$.
 
-Tốc độ âm tăng khoảng $$0{,}6~\mathrm{m/s}$$ mỗi độ C. Số 343 là số của 20 °C. Ở 30 °C, $$v \approx 349~\mathrm{m/s}$$, và công thức vẫn nhân 0,01715 sẽ đọc một bia 80 cm thật hơi ngắn. Bài tập cuối bắt bạn tính ngắn bao nhiêu. Trong lab này cứ dùng 343, và ghi nhiệt độ phòng cạnh bảng nếu bạn biết.
+Vận tốc âm trong không khí tăng khoảng $$0{,}6~\mathrm{m/s}$$ cho mỗi độ C. Ở $30\,^\circ\mathrm{C}$, $$v \approx 349~\mathrm{m/s}$$, nên nếu firmware vẫn cố định hệ số 0,01715 thì số đo sẽ ngắn hơn thực tế một chút. Trong bài lab này cứ dùng 343 m/s và ghi chú thêm nhiệt độ phòng cạnh bảng nếu biết.
 
-## HC-SR04, xung, và chân không được chạm
+## HC-SR04: xung kích, góc mở và hạ áp Echo
 
-VCC là 5 V. Bạn kéo TRIG lên khoảng $$10~\mu\mathrm{s}$$. Module phát một chùm 40 kHz ngắn và kéo ECHO lên cho đến khi echo trở về. Trên board phổ biến, ECHO mức cao là 5 V. GPIO của ESP32 không phải ngõ vào 5 V. Cầu chia với $$1~\mathrm{k}\Omega$$ từ ECHO tới chân và $$2~\mathrm{k}\Omega$$ từ chân xuống mass đặt
+Module cấp nguồn `VCC = 5 V`. Khi tạo xung kích mức cao khoảng $$10~\mu\mathrm{s}$$ ở chân `TRIG`, module phát chùm sóng 40 kHz và giữ chân `ECHO` ở mức cao cho tới khi nhận sóng phản hồi. Trên bản phổ biến, mức cao của `ECHO` là 5 V, cần hạ áp qua cầu chia $$1~\mathrm{k}\Omega$$ (từ `ECHO` tới GPIO) và $$2~\mathrm{k}\Omega$$ (từ GPIO xuống mass):
 
 $$
 V_{\mathrm{pin}} = 5 \times \frac{2}{3} \approx 3{,}33~\mathrm{V}.
 $$
 
-Nón âm khoảng 15 độ. Ở 80 cm, bán kính vệt khoảng $$80 \tan 7{,}5^\circ \approx 10~\mathrm{cm}$$, nên khung cửa nằm trong vệt sẽ trả lời thay cho tấm bìa bạn đang nhắm. Vải mềm nuốt 40 kHz và echo không về. Góc tường phản xạ nhiều lần. Khoảng mù khoảng 2 cm. Số bạn sẽ tin trên robot này nằm dưới khoảng 1 m, dù tin đăng có nói 4 m. Bốn mét là tường cứng, phòng yên, và nguồn 5 V còn khỏe.
+Chùm sóng âm có góc mở khoảng $15^\circ$: tại khoảng cách 80 cm, bán kính vùng quét đã đạt $$80 \tan 7{,}5^\circ \approx 10~\mathrm{cm}$$, nên các vật gần bên như chân ghế hay khung cửa có thể phản xạ trước tấm bìa mục tiêu. Bề mặt vải mềm hấp thụ sóng 40 kHz khiến không có tín hiệu phản hồi, còn góc tường có thể gây phản xạ nhiều lần. Khoảng mù tối thiểu khoảng 2 cm. Dù thông số quảng cáo ghi tới 4 m (trong điều kiện tường cứng, phòng yên tĩnh và nguồn 5 V ổn định), trên robot thực tế chỉ nên tin cậy vùng đo dưới khoảng 1 m.
 
-ECHO không lên thì thư viện thường trả 0. Số 0 đó nghĩa là “tôi không biết”, và cách dừng ở Chương 05 sẽ coi “không biết” là tắt motor. Đừng kẹp timeout thành 400 cm cho số trông hiền.
+Khi quá thời gian chờ (timeout) mà không nhận được xung phản hồi, nhiều thư viện trả về giá trị 0. Giá trị 0 này mang nghĩa "không xác định được khoảng cách" — logic an toàn phải coi đó là trạng thái dừng động cơ chứ không gán bừa thành 400 cm.
 
-## VL53L0X: milimét, chip đã tính xong
+## VL53L0X: đo trực tiếp theo milimét qua I2C
 
-VL53L0X đo thời gian bay của laser 940 nm ngay trên đế và đưa milimét qua I2C, địa chỉ mặc định `0x29`. Góc nhìn khoảng 25 độ. Tấm trắng đọc được cỡ 1,2–2 m; vải đen và kính dưới nắng tệ hơn. Nắng thêm photon mà chip không gửi. Kính trả về tấm kính, không phải hành lang phía sau. Đường thứ hai trên hình là cảm biến này: không có chân echo để bạn tự canh thời gian.
+VL53L0X đo thời gian bay của tia laser hồng ngoại 940 nm ngay bên trong cảm biến và trả kết quả theo milimét qua bus I2C tại địa chỉ mặc định `0x29`. Góc nhìn khoảng $25^\circ$; trên bề mặt trắng có thể đo được khoảng 1,2–2 m, nhưng hiệu năng giảm rõ trên vật liệu màu đen, mặt kính hoặc dưới ánh nắng mạnh (vì ánh sáng mặt trời chứa bức xạ hồng ngoại gây nhiễu).
 
-Hai board chưa sửa đều trả lời ở `0x29`. Chúng ACK đè lên nhau và lần quét thấy một địa chỉ hoặc một bus chết. Chân XSHUT để bạn giữ một chip ở trạng thái reset, gán địa chỉ mới cho chip kia, rồi thả chip đầu. Mua module thứ hai mà không dành một GPIO cho XSHUT thì chưa mua được tầm thứ hai.
+Hai module VL53L0X mặc định đều dùng địa chỉ `0x29` nên sẽ xung đột nếu nối song song trực tiếp. Cần dành riêng một chân GPIO nối vào `XSHUT` để giữ một cảm biến ở trạng thái reset trong lúc đổi địa chỉ I2C cho cảm biến còn lại, sau đó mới bật lại cảm biến thứ nhất.
 
-## Lab: ba khoảng cách, một bia
+## Lab: đo kiểm tại ba mốc khoảng cách
 
 ### An toàn
 
-Bìa cứng, không phải người, không phải cửa kính. Đừng nhìn vào lỗ VL53L0X và đừng đặt ống kính điện thoại hay kính lúp phía trước. Laser công suất thấp 940 nm là lý do để cư xử nhàm chán, không phải lý do để nhìn. VCC của HC-SR04 là 5 V từ nguồn chịu nổi dòng đó; đừng đổ 5 V ấy vào chân 3,3 V của ESP32. Bánh không thuộc bố trí này. Driver motor nếu đã nối thì để mất nguồn.
+Chỉ dùng tấm bìa cứng làm vật cản, không hướng vào người hay cửa kính. Dù VL53L0X dùng laser 940 nm công suất thấp, vẫn tuân thủ nguyên tắc an toàn: không nhìn trực tiếp vào lỗ phát và không đặt ống kính hay kính lúp chắn sát phía trước. Cấp nguồn 5 V đúng chuẩn cho HC-SR04, tuyệt đối không để 5 V chạm vào đường 3,3 V của ESP32. Không cấp nguồn cho động cơ trong bài thực hành này.
 
 ### BOM
 
 | Món | Vai trò |
 |------|---------|
-| HC-SR04 | Echo bạn sẽ đo thời gian |
-| 1 kΩ và 2 kΩ | Cầu chia trên ECHO |
-| ESP32 hoặc Pico | TRIG ra, ECHO vào qua cầu chia |
-| Thước mét và bìa cỡ A4 trở lên | Sự thật và bia |
-| Mạch VL53L0X | Cột thứ hai, nếu có |
-| `lab-notes.md` | Bảng sai số |
+| HC-SR04 | Cảm biến siêu âm đo thời gian Echo |
+| Điện trở 1 kΩ và 2 kΩ | Cầu chia áp bảo vệ chân GPIO |
+| ESP32 hoặc Pico | Xuất `TRIG`, đọc `ECHO` qua cầu chia |
+| Thước mét và tấm bìa cứng cỡ A4 trở lên | Mốc chuẩn và bia phản xạ |
+| Module VL53L0X | Cột đo đối chiếu (nếu có) |
+| `lab-notes.md` | Bảng ghi sai số |
 
 ### Các bước
 
-1. Dựng cầu chia trước khi ECHO chạm GPIO. Đo mức cao tại chân nếu bắt được xung, hoặc ít nhất đo điện trở phía dưới thực sự về GND.
-2. TRIG nhận xung 10 µs. In thời gian echo theo micro giây và khoảng cách theo centimét với 0,01715. In cả hai, để thang sai hiện ra ngay.
-3. Dán thước lên bàn. Dựng bìa ở 20 cm, rồi 40 cm, rồi 80 cm, đo tới mặt ống nhôm, không đo tới mép breadboard. Giữ yên. Ghi năm lần đọc và lấy lần ở giữa.
-4. Lấy số cảm biến trừ số thước. Cột sai số có dấu mới là kết quả. Một chữ “khá gần” không tính.
-5. Nếu có VL53L0X, cấp đúng điện áp logic mà mạch cho phép, xác nhận `0x29`, thêm một cột ở cùng ba mốc. Chưa có thì bảng siêu âm là cả lab. Dry-run khi hàng còn trên đường vẫn phải tính echo 5,8 ms (99,5 cm) và cầu chia (3,33 V) trên cùng trang với bảng để trống.
-6. Thêm một bia: vải gấp ở 40 cm. Ghi siêu âm đọc thành gì. Dòng này được phép là “không có echo”.
+1. Lắp hoàn chỉnh cầu chia áp trước khi nối chân `ECHO` vào GPIO; kiểm tra chắc chắn điện trở 2 kΩ nối đúng về `GND`.
+2. Xuất xung `TRIG` 10 µs và in đồng thời cả độ rộng xung theo micro giây lẫn khoảng cách tính bằng hệ số 0,01715 để dễ phát hiện lỗi quy đổi.
+3. Cố định thước mét trên bàn, lần lượt đặt tấm bìa vuông góc tại 20 cm, 40 cm và 80 cm (đo tính từ mặt đầu thu phát siêu âm). Tại mỗi mốc, ghi 5 lần đọc liên tiếp và lấy giá trị trung vị.
+4. Tính cột sai số có dấu (số cảm biến trừ số thước). Ghi số cụ thể, không mô tả chung chung.
+5. Nếu có VL53L0X, xác nhận địa chỉ `0x29` và bổ sung cột đo ToF tại cùng ba mốc. Nếu linh kiện chưa giao tới, thực hiện bản dry-run gồm bảng để trống kèm hai phép tính tay: Echo 5,8 ms (99,5 cm) và cầu chia áp (3,33 V).
+6. Đặt thêm một tấm vải gấp ở mốc 40 cm và ghi nhận kết quả siêu âm (có thể ghi "không có echo" nếu bị hấp thụ).
 
 ### Kết quả mong đợi
 
-Một bảng dạng này, điền số của bạn:
+Điền đầy đủ bảng theo mẫu sau vào `lab-notes.md`:
 
 | Thước (cm) | Siêu âm (cm) | Sai số (cm) | ToF (cm), nếu có |
 |-----------:|-------------:|------------:|-----------------:|
@@ -107,28 +107,28 @@ Một bảng dạng này, điền số của bạn:
 | 40 |  |  |  |
 | 80 |  |  |  |
 
-Trên bìa phẳng, HC-SR04 còn khỏe thường lệch vài centimét ở 40 cm và tệ hơn một chút ở 80 cm. Sai số giải thích được (nhắm, nón âm, vải, VCC sụt còn 4,6 V) vẫn qua. Thiếu một mốc thì không. Timeout in ra 0 phải ghi “timeout”, không ghi “cách tường 0,0 cm”.
+Trên tấm bìa phẳng, HC-SR04 hoạt động tốt thường sai lệch vài centimét ở mốc 40 cm và tăng nhẹ ở mốc 80 cm. Các trường hợp timeout trả về 0 phải ghi rõ là `timeout`, không ghi `0,0 cm`.
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Thường là |
-|----------|-----------|
-| GPIO ấm, số đọc đứng cứng | ECHO 5 V, không cầu chia |
-| Mốc 20 cm đọc khoảng 40 cm | Quên chia đôi |
-| Nhảy số gần chân ghế | Nón 15 độ bắt vật gần hơn |
-| Vải không đọc hoặc đọc gấp đôi | Hấp thụ, hoặc phản xạ yếu nhiều đường |
-| Hai board VL53, một địa chỉ | Cả hai vẫn `0x29`; dùng XSHUT |
-| Trong nhà mà lúc nào cũng 0 | Timeout, không phải va chạm. Đừng chạy theo số 0 đó |
+| Hiện tượng | Nguyên nhân thường gặp |
+|------------|------------------------|
+| Chân GPIO nóng, số đọc treo cứng | Đưa thẳng `ECHO` 5 V không qua cầu chia áp |
+| Mốc 20 cm đọc ra khoảng 40 cm | Quên chia đôi thời gian đi và về |
+| Số đo nhảy bất thường gần đồ vật | Chùm sóng $15^\circ$ bắt phải vật cản gần hơn ở bên cạnh |
+| Đo vải không ra số hoặc sai gấp đôi | Sóng bị hấp thụ hoặc phản xạ đa đường yếu |
+| Hai cảm biến VL53L0X chỉ hiện một địa chỉ | Trùng địa chỉ `0x29`, chưa dùng chân `XSHUT` |
+| Luôn báo 0 khi đo trong phòng | Trạng thái timeout, không phải vật cản chạm sát |
 
-## Mua ở Việt Nam / Where to buy in Vietnam
+## Mua ở Việt Nam
 
-Module siêu âm là món Capstone A không nên khởi hành khi thiếu. Board ToF là cảm biến thứ hai đáng tiền nếu còn ngân sách, không phải món bắt buộc phải đợi. Giá thay đổi.
+Cảm biến siêu âm HC-SR04 là lựa chọn tối thiểu cần có trước Capstone A; VL53L0X là lựa chọn bổ sung hữu ích nếu ngân sách cho phép.
 
 | Món | Từ khóa | Khoảng giá (VND) | Thay thế |
 |------|---------|------------------|----------|
-| HC-SR04 | `cảm biến siêu âm HC-SR04` | 15.000–40.000 | [Hshop HC-SR04](https://hshop.vn/cam-bien-sieu-am-srf04) từng niêm yết khoảng 20.000. US-100 chỉ thay được sau khi bạn đọc chân đó là GPIO hay UART. |
-| VL53L0X | `VL53L0X ToF` | 35.000–90.000 | [Hshop VL53L0X](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x). VL53L1X là thư viện khác và tầm xa hơn. |
-| 1 kΩ, 2 kΩ | `điện trở 1k 2k` | 10.000–20.000 một vỉ | Đừng bỏ qua chỉ vì module “đã chạy một lần” |
+| HC-SR04 | `cảm biến siêu âm HC-SR04` | 15.000–40.000 | [Hshop HC-SR04](https://hshop.vn/cam-bien-sieu-am-srf04) từng niêm yết khoảng 20.000. Chỉ thay bằng US-100 khi đọc rõ chế độ GPIO/UART. |
+| VL53L0X | `VL53L0X ToF` | 35.000–90.000 | [Hshop VL53L0X](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x). Lưu ý VL53L1X dùng thư viện khác. |
+| 1 kΩ, 2 kΩ | `điện trở 1k 2k` | 10.000–20.000 một vỉ | Bắt buộc dùng cho đường Echo 5 V. |
 
 - [Hshop: HC-SR04](https://hshop.vn/search?q=HC-SR04)
 - [Shopee: VL53L0X](https://shopee.vn/search?keyword=VL53L0X)
@@ -137,24 +137,28 @@ Module siêu âm là món Capstone A không nên khởi hành khi thiếu. Board
 
 ## Video tham khảo
 
-- **Xem trước:** [Using the HC-SR04 Ultrasonic Distance Sensor with Arduino - Everything you need to know!](https://www.youtube.com/watch?v=6F1B_N6LuKw) — DroneBot Workshop, tiếng Anh. HC-SR04: xung echo đổi thành khoảng cách. Video dài; dừng ở cách tính từ thời gian bay của âm.
-- [VL53l0x: Time-of-Flight Distance Sensor (ESP32 + Arduino series)](https://www.youtube.com/watch?v=SWBI6_rxmT8) — Simply Explained, tiếng Anh. VL53L0X đo thời gian bay của ánh sáng, ra số trên I2C, không có chân echo.
+- **Xem trước:** [Using the HC-SR04 Ultrasonic Distance Sensor with Arduino - Everything you need to know!](https://www.youtube.com/watch?v=6F1B_N6LuKw) — DroneBot Workshop, tiếng Anh. Giải thích chi tiết cách đổi thời gian Echo sang khoảng cách (tập trung vào phần tính toán thời gian bay của âm thanh).
+- [VL53l0x: Time-of-Flight Distance Sensor (ESP32 + Arduino series)](https://www.youtube.com/watch?v=SWBI6_rxmT8) — Simply Explained, tiếng Anh. Minh họa cảm biến VL53L0X đo thời gian bay của ánh sáng và đọc kết quả trực tiếp qua I2C.
 
 ## Bài tập
 
-1. ECHO cao trong 5,8 ms. Tìm $$d$$ theo mét và theo centimét, với $$343~\mathrm{m/s}$$.
-2. Mốc 40 cm cho echo $$2320~\mu\mathrm{s}$$. $$t \times 0{,}01715$$ báo bao nhiêu centimét?
-3. ECHO lên 5 V và chân nhận là GPIO của ESP32. Không cầu chia thì chân chịu bao nhiêu vôn, và với 1 kΩ phía trên, 2 kΩ xuống mass thì bao nhiêu?
-4. Hai VL53L0X mắc song song, không dùng XSHUT. Vì sao lần quét không ra hai cảm biến, và chân nào gỡ được?
-5. Phòng 30 °C nên $$v \approx 349~\mathrm{m/s}$$. Khoảng cách thật 80 cm. Echo dài bao lâu, và firmware dùng hằng số 0,01715 cm/µs sẽ báo bao nhiêu?
+1. Chân `ECHO` giữ mức cao trong 5,8 ms. Tính khoảng cách $$d$$ theo mét và centimét với $$v = 343~\mathrm{m/s}$$.
+2. Tại mốc 40 cm, cảm biến trả về xung Echo dài $$2320~\mu\mathrm{s}$$. Công thức $$t \times 0{,}01715$$ cho kết quả bao nhiêu centimét?
+3. Chân `ECHO` ở mức cao 5 V nối về GPIO của ESP32. Khi không có cầu chia áp thì chân chịu bao nhiêu vôn, và khi mắc cầu chia 1 kΩ (phía trên) / 2 kΩ (xuống mass) thì điện áp tại chân là bao nhiêu?
+4. Hai cảm biến VL53L0X nối song song mà không dùng `XSHUT`. Vì sao quét I2C không thấy đủ hai cảm biến và xử lý bằng chân nào?
+5. Ở nhiệt độ phòng $30\,^\circ\mathrm{C}$, vận tốc âm $$v \approx 349~\mathrm{m/s}$$. Với khoảng cách thật 80 cm, xung Echo kéo dài bao lâu, và firmware dùng hằng số cố định 0,01715 cm/µs sẽ báo kết quả bao nhiêu?
 
 ### Gợi ý đáp án
 
-1. $$d = 0{,}995~\mathrm{m} \approx 99{,}5~\mathrm{cm}$$; $$5800 \times 0{,}01715 = 99{,}5$$. 2. $$2320 \times 0{,}01715 \approx 39{,}8~\mathrm{cm}$$. 3. 5 V khi không chia; $$5 \times 2/3 \approx 3{,}33~\mathrm{V}$$ khi có cầu chia. 4. Cả hai xuất xưởng ở `0x29` và trả lời cùng lúc; giữ một con ở reset bằng XSHUT, đổi địa chỉ con kia, rồi thả. 5. $$t = 2 \times 0{,}80 / 349 \approx 4{,}58~\mathrm{ms} = 4585~\mu\mathrm{s}$$, và $$4585 \times 0{,}01715 \approx 78{,}6~\mathrm{cm}$$, ngắn khoảng 1,4 cm.
+1. $$d = 0{,}995~\mathrm{m} \approx 99{,}5~\mathrm{cm}$$ (kiểm tra lại: $$5800 \times 0{,}01715 = 99{,}5~\mathrm{cm}$$).
+2. $$2320 \times 0{,}01715 \approx 39{,}8~\mathrm{cm}$$.
+3. Không cầu chia: 5 V; có cầu chia 1 kΩ / 2 kΩ: $$5 \times 2/3 \approx 3{,}33~\mathrm{V}$$.
+4. Cả hai đều có địa chỉ mặc định `0x29` nên trả lời đè lên nhau; dùng chân `XSHUT` để giữ một chip ở trạng thái reset, đổi địa chỉ chip còn lại rồi bật lại chip đầu.
+5. $$t = 2 \times 0{,}80 / 349 \approx 4{,}58~\mathrm{ms} = 4585~\mu\mathrm{s}$$; nhân với 0,01715 cho $$78{,}6~\mathrm{cm}$$, ngắn hơn thực tế khoảng 1,4 cm.
 
 ## Đọc thêm
 
-- [Datasheet HC-SR04 (bản SparkFun)](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — độ rộng TRIG, echo, và nguồn 5 V.
-- [Datasheet ST VL53L0X](https://www.st.com/resource/en/datasheet/vl53l0x.pdf) — đo bằng milimét, góc nhìn, và địa chỉ.
-- [Mạch Pololu VL53L0X](https://www.pololu.com/product/2490) — XSHUT và mức logic, vẫn hữu ích khi bạn mua breakout khác.
-- [`sensor_msgs/Range`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/Range.html) — message Chương 09 sẽ xuất từ bảng lab này.
+- [Datasheet HC-SR04 (bản SparkFun)](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — thông số xung `TRIG`, `ECHO` và nguồn 5 V.
+- [Datasheet ST VL53L0X](https://www.st.com/resource/en/datasheet/vl53l0x.pdf) — chi tiết phép đo milimét, góc nhìn và địa chỉ I2C.
+- [Mạch Pololu VL53L0X](https://www.pololu.com/product/2490) — tài liệu về `XSHUT` và chuyển mức logic.
+- [`sensor_msgs/Range`](https://docs.ros.org/en/jazzy/p/sensor_msgs/msg/Range.html) — định dạng bản tin ROS 2 cho dữ liệu khoảng cách ở Chương 09.

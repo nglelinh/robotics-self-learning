@@ -11,188 +11,190 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **75–90 phút**. Phần lớn thời gian là một vòng quay tay cho đúng vạch, rồi đổi số đếm đó ra mét.
+Thời lượng: **75–90 phút**. Phần lớn thời gian dành cho việc tự quay bánh bằng tay đúng một vòng để đo số xung thực tế, rồi quy đổi sang quãng đường theo mét.
 
 ## Mục tiêu học
 
-Hết bài này, bạn nhìn hai sóng vuông của encoder quadrature (hai kênh lệch pha, thường gọi A và B) và chỉ được kênh nào lên trước, tức là phân biệt được tiến và lùi. Bạn không lấy số “PPR” trên trang bán làm chân lý cho đến khi tự đếm số xung trên một vòng trục ra của bánh, đúng cách giải mã mà firmware sẽ dùng. Bạn đổi số đếm thành cung tròn với bánh đường kính 65 mm, rồi từ quãng đường hai bánh suy ra một bước dead reckoning (ước lượng vị trí bằng cách cộng dồn): tâm trục đi được bao nhiêu mét, và hướng quay bao nhiêu radian. Hai số đó chính là phần lõi của `nav_msgs/Odometry` sau này.
+Sau bài này, bạn đọc được hai sóng vuông lệch pha (quadrature) của encoder hai kênh A và B để xác định kênh nào dẫn trước, từ đó phân biệt chiều tiến và chiều lùi. Bạn không tin mù quáng vào thông số "PPR" trên trang bán hàng mà tự đo số xung thực tế trên một vòng trục ra của bánh theo đúng chế độ giải mã trong firmware. Bạn quy đổi được số đếm thành cung tròn với bánh đường kính 65 mm, rồi từ quãng đường hai bánh tính được một bước ước lượng vị trí (dead reckoning): quãng đường tịnh tiến của tâm trục và góc quay theo radian — nền tảng trực tiếp của `nav_msgs/Odometry`.
 
 ## Kiến thức cần có
 
-Bạn đã đếm được cạnh xung trên GPIO và in ra màn hình (Chương 03), và đã phân biệt được đĩa Hall trên hộp số TT vàng với đĩa xẻ rãnh (Bài 04-02). Encoder thô không phải thiết bị I2C của Bài 04-01; UART chỉ là đường đưa số đếm ra khỏi board. Dùng đồng hồ Chương 01 đo mức cao của encoder trước khi cho dây đó chạm GPIO. Bài này chưa cần ROS, cũng chưa cần cấp nguồn cho bánh.
+Bạn đã biết đếm cạnh xung trên GPIO và in ra màn hình serial (Chương 03), đồng thời phân biệt được đĩa từ Hall trên hộp số TT vàng với đĩa quang có rãnh (Bài 04-02). Encoder tín hiệu số không dùng I2C như Bài 04-01; UART chỉ dùng để gửi số đếm lên máy tính. Luôn dùng đồng hồ vạn năng đo mức cao của tín hiệu encoder trước khi nối vào GPIO 3,3 V. Bài này chưa cần ROS và không cần cấp điện cho động cơ ở bước đo chính.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Capstone A ở Chương 07 là teleop robot vi sai qua cổng serial, hết thời gian im lặng thì dừng động cơ. Bản demo đó chạy được dù không có encoder. Nhật ký nghiệm thu chắc hơn nếu cùng lượt chạy đó có thêm số đếm bánh, vì “nó có chạy” trở thành một con số đem so với thước. Công thức hôm nay là công thức của dòng nhật ký đó.
+Capstone A ở Chương 07 chạy teleop xe vi sai qua cổng serial và tự dừng khi hết hạn lệnh. Bản chạy thử đó vẫn hoạt động được khi chưa có encoder, nhưng nhật ký kiểm thử sẽ đáng tin cậy hơn nhiều khi có thêm số đếm bánh để đối chiếu trực tiếp với thước đo thực tế.
 
-`diff_drive_controller` không nghĩ ra một hình học mới. Firmware, hoặc hardware interface của ros2_control, đổi số đếm thành góc bánh bằng $$N$$, tức số xung trên một vòng sau khi giải mã. Controller đổi góc đó thành mét bằng tham số `wheel_radius` (chính là $$r$$ của bài này) và thành góc yaw bằng `wheel_separation` (khẩu độ $$b$$). Nó xuất `nav_msgs/Odometry`. Nhân đôi $$N$$ thì odometry báo một nửa hành lang dù bán kính đã đúng. `sensor_msgs/JointState` là cùng số đếm đó, viết dưới dạng vị trí bánh tính bằng radian. Lấy $$N$$ từ bánh đang cầm trên tay, không lấy từ tiêu đề sản phẩm.
+Trong ROS 2, `diff_drive_controller` áp dụng đúng các công thức hình học này: firmware hoặc lớp giao tiếp phần cứng (`ros2_control`) đổi số xung thành góc quay bánh nhờ hằng số $$N$$ (số xung trên một vòng trục ra sau giải mã); bộ điều khiển đổi góc quay thành mét qua tham số `wheel_radius` ($$r$$) và thành góc quay hướng (yaw) qua `wheel_separation` (khẩu độ $$b$$), rồi xuất bản tin `nav_msgs/Odometry` (còn `sensor_msgs/JointState` mang chính vị trí góc bánh theo radian). Nếu khai báo $$N$$ lớn gấp đôi thực tế, odometry sẽ báo quãng đường chỉ bằng một nửa thực tế dù bán kính bánh hoàn toàn đúng. Vì vậy, luôn đo $$N$$ trực tiếp trên bánh thật thay vì chép từ tiêu đề quảng cáo.
 
 ![Hai kênh quadrature A và B: cạnh nào lên trước thì đó là chiều]({{ site.imgurl }}/generated/encoder_quadrature.png)
 
-## Hai sóng vuông
+## Hai sóng vuông lệch pha
 
-Encoder quadrature phát hai sóng vuông A và B, lệch nhau khoảng một phần tư chu kỳ. Chiều quay là cạnh nào dẫn trước. Một quy ước bạn vẫn phải kiểm trên mạch của mình: A lên trong khi B còn thấp thì tính một bước tiến; B lên trong khi A còn thấp thì tính lùi. Đảo hai dây là đảo dấu. Đó là chuyện nối dây, không phải chuyện bộ lọc.
+Encoder quadrature xuất hai chuỗi sóng vuông A và B lệch nhau khoảng một phần tư chu kỳ ($90^\circ$). Chiều quay được xác định bởi kênh nào chuyển mức trước: theo một quy ước thường dùng (cần kiểm chứng lại trên mạch thực tế), nếu cạnh lên của A xuất hiện khi B đang ở mức thấp thì tính là chiều tiến, còn nếu cạnh lên của B xuất hiện khi A đang ở mức thấp thì tính là chiều lùi. Đảo hai dây A và B sẽ làm đảo dấu bộ đếm.
 
-Một kênh đơn không có bạn đồng hành. Tốc độ suy từ chân đó chỉ đáng tin khi lệnh động cơ đã cho sẵn dấu, và nó nói dối khi bánh trôi hoặc trục giật ngược lúc phanh.
+Ngược lại, encoder một kênh chỉ đếm được số xung mà không tự biết chiều quay; việc suy đoán dấu theo lệnh điều khiển động cơ sẽ sai lệch khi bánh bị trôi quán tính hoặc giật ngược lúc phanh.
 
-## Chữ “PPR” dễ hiểu nhầm
+## Tránh hiểu nhầm thông số "PPR"
 
-Có lúc PPR nghĩa là số chu kỳ trên một vòng của một kênh: một nhịp cao và một nhịp thấp, một rãnh. Có lúc nó nghĩa là số đếm sau khi giải mã. Giải mã bốn lần (4×) đếm mọi cạnh của cả hai kênh, nên
+Trên các trang bán linh kiện, "PPR" (Pulses Per Revolution) có thể chỉ số chu kỳ mỗi vòng của một kênh, nhưng đôi khi lại chỉ tổng số cạnh sau khi giải mã. Khi dùng chế độ giải mã 4× (đếm cả cạnh lên và cạnh xuống của cả hai kênh A và B):
 
 $$
 N \approx 4 \times (\text{số chu kỳ trên một vòng của một kênh}).
 $$
 
-Nhiều động cơ TT vàng đặt đĩa từ trên trục motor, phía sau hộp số. Người bán hay ghi 11 xung nhân tỉ số hộp số, hoặc “số xung Hall trên một vòng trục” mà không nói trục nào. Mười một cạnh lên trên một vòng trục motor, đếm 1×, qua hộp số 1:48, cho
+Ngoài ra, nhiều động cơ TT vàng gắn đĩa nam châm trực tiếp lên trục động cơ (phía trước hộp số). Nếu đĩa tạo 11 cạnh lên mỗi vòng trục động cơ (đếm 1×) đi qua hộp số tỉ số 1:48, thì số xung trên một vòng trục ra gắn bánh là:
 
 $$
-N = 11 \times 48 = 528
+N = 11 \times 48 = 528.
 $$
 
-xung trên một vòng trục ra. Đem 11 thế vào công thức quãng đường thì mọi mét bạn công bố dài gấp 48 lần. $$N$$ đứng đắn là một vạch trên lốp, quay bằng tay, qua đúng bộ đếm mà code đang chạy.
+Nếu lấy nhầm số 11 thay vào công thức quãng đường, mọi khoảng cách tính ra sẽ bị phóng đại gấp 48 lần. Cách chắc chắn nhất để xác định $$N$$ là vạch dấu trên lốp, quay tay đúng một vòng và đọc trực tiếp từ bộ đếm của chính firmware đang chạy.
 
-## Quãng đường trên mỗi xung
+## Quãng đường ứng với mỗi xung
 
-Không trượt thì một vòng đưa vết tiếp xúc đi hết chu vi $$2\pi r$$:
+Giả sử bánh không trượt, mỗi vòng quay đưa tâm bánh đi một đoạn đúng bằng chu vi $$2\pi r$$, nên với $$\Delta c$$ xung đếm được:
 
 $$
 \Delta s = \frac{2\pi r}{N}\Delta c.
 $$
 
-Bánh đường kính 65 mm có $$r = 0{,}0325~\mathrm{m}$$ và chu vi
+Với bánh đường kính 65 mm, bán kính $$r = 0{,}0325~\mathrm{m}$$ và chu vi là:
 
 $$
 2\pi r \approx 2 \times 3{,}1416 \times 0{,}0325 = 0{,}2042~\mathrm{m}.
 $$
 
-Nếu đây là đĩa rãnh đơn giản và firmware đếm $$N = 20$$ cạnh trên một vòng trục ra, một xung là
+Nếu dùng đĩa quang đơn giản với firmware đếm $$N = 20$$ xung trên một vòng trục ra, mỗi xung tương ứng:
 
 $$
 \frac{0{,}2042}{20} = 0{,}01021~\mathrm{m} \approx 1{,}021~\mathrm{cm}.
 $$
 
-Một trăm bốn mươi xung tương ứng
+Khi đếm được 140 xung, quãng đường là:
 
 $$
 \Delta s = 140 \times 0{,}01021 \approx 1{,}43~\mathrm{m}.
 $$
 
-$$N = 20$$ là đĩa để học, không phải lời hứa của một tin đăng TT. Vòng quay tay của bạn in ra 360, 528 hay 1440 thì số đó thay cho 20.
+Lưu ý $$N = 20$$ chỉ là ví dụ cho đĩa rãnh học tập; nếu lần quay tay thực tế trên động cơ của bạn cho ra 360, 528 hay 1440, hãy thay đúng con số đó vào công thức.
 
-## Một bước dead reckoning
+## Một bước ước lượng vị trí (dead reckoning)
 
-Cùng một cặp công thức sẽ gặp lại ở Chương 06 và trong controller:
+Cặp công thức động học vi sai sau sẽ được dùng lại ở Chương 06 và trong bộ điều khiển:
 
 $$
 \Delta s = \frac{\Delta s_r + \Delta s_l}{2}, \qquad \Delta \theta = \frac{\Delta s_r - \Delta s_l}{b}.
 $$
 
-$$b$$ là khoảng cách giữa hai vết bánh, không phải đường kính bánh. Với $$\Delta s_r = 0{,}10~\mathrm{m}$$, $$\Delta s_l = 0{,}06~\mathrm{m}$$ và $$b = 0{,}15~\mathrm{m}$$,
+Trong đó $$b$$ là khoảng cách giữa tâm hai vết bánh (wheel separation), không phải đường kính bánh. Ví dụ với $$\Delta s_r = 0{,}10~\mathrm{m}$$, $$\Delta s_l = 0{,}06~\mathrm{m}$$ và $$b = 0{,}15~\mathrm{m}$$:
 
 $$
 \Delta s = \frac{0{,}10 + 0{,}06}{2} = 0{,}08~\mathrm{m}, \qquad \Delta \theta = \frac{0{,}04}{0{,}15} = 0{,}267~\mathrm{rad} \approx 15{,}3^\circ.
 $$
 
-Tâm trục bò 8 cm và quay khoảng 15 độ về phía bánh chậm hơn. Công thức không chứa trượt. Đảo A và B chỉ ở encoder bánh phải thì sổ ghi $$\Delta s_r = -0{,}10~\mathrm{m}$$ trong khi lốp đã đi tới. Bài tập bắt bạn tính xem sai dấu nặng đến đâu.
+Tâm trục xe dịch chuyển 8 cm và quay khoảng $15{,}3^\circ$ về phía bánh chậm hơn (bánh trái). Công thức chưa tính đến độ trượt của bánh. Nếu chỉ đảo nhầm dây A và B ở encoder bánh phải, sổ ghi sẽ nhận $$\Delta s_r = -0{,}10~\mathrm{m}$$ dù bánh thực tế đi tới, làm sai lệch hoàn toàn cả $$\Delta s$$ lẫn $$\Delta \theta$$.
 
-## Lab: một vòng, cầm trên tay
+## Lab: quay tay một vòng để đo $$N$$
 
 ### An toàn
 
-Lượt đếm không cấp điện cho motor. Bánh TT trên mặt bàn sẽ tự bò. Nếu bạn đã có driver và muốn thử chiều khi có điện, kê bánh lên không, xung thật ngắn, tay tránh nan hoa. Mức cao của Hall đo được 5 V thì phải có cầu chia 1 kΩ / 2 kΩ như echo ở Bài 04-02 trước khi chạm GPIO của ESP32. Đo mức cao trước.
+Thực hiện phép đếm khi **không cấp điện** cho động cơ. Nếu đã có mạch cầu H và muốn thực hiện bước tùy chọn kiểm tra chiều khi cấp điện, bắt buộc kê bánh xe nhấc khỏi bàn, chỉ cấp xung ngắn và giữ tay tránh xa nan hoa. Nếu đo thấy mức logic cao của cảm biến Hall là 5 V, phải lắp cầu chia áp 1 kΩ / 2 kΩ (tương tự chân Echo ở Bài 04-02) trước khi nối vào GPIO của ESP32.
 
 ### BOM
 
 | Món | Vai trò |
 |------|---------|
-| Một động cơ hộp số có encoder, hoặc một đĩa rãnh rời | Trục bạn sẽ quay |
-| ESP32 hoặc Pico | Bộ đếm cạnh |
-| Bút | Vạch mốc trên lốp |
-| Sổ | $$N$$, bán kính, mét trên mỗi xung |
-| Driver và pin | Chỉ cho bước thử chiều tùy chọn, bánh trên không |
+| Một động cơ giảm tốc có encoder, hoặc đĩa quang rãnh rời | Trục cần đo số xung |
+| ESP32 hoặc Pico | Đọc và đếm cạnh xung |
+| Bút đánh dấu | Kẻ vạch mốc trên lốp và vỏ hộp số |
+| Sổ tay | Ghi $$N$$, bán kính và mét trên mỗi xung |
+| Mạch cầu H và pin | Chỉ dùng cho bước kiểm tra chiều tùy chọn (bánh nhấc khỏi bàn) |
 
 ### Các bước
 
-1. Đánh dấu lốp và một điểm tương ứng trên hộp số. Hai vạch đó là một vòng.
-2. Không cấp điện motor. Xóa bộ đếm.
-3. Quay trục ra bằng tay đúng một vòng, về lại vạch. Ghi số đếm. Làm lại hai lần. Ba số nên lệch nhau không quá một xung.
-4. Số đó là $$N$$ của cách giải mã vừa chạy. Tính $$2\pi r / N$$ với đúng chiếc lốp đã đánh dấu. Con số 1,021 cm chỉ xuất hiện khi $$N = 20$$ và đường kính 65 mm.
-5. Vẫn không cấp điện, xem kênh nào lên trước khi bạn quay lốp theo chiều robot sẽ tiến. Máy phân tích logic là đẹp nhất. In “A lên” và “B lên” là đủ. Chỉ một kênh thì ghi “dấu chỉ đến từ lệnh động cơ”.
-6. Tùy chọn, bánh trên không: một nhịp có điện ngắn phải làm cùng kênh đó dẫn trước. Nếu không, đảo A và B trong sổ rồi thử lại một lần.
+1. Kẻ một vạch mốc trên lốp và một vạch tương ứng trên vỏ hộp số để xác định chính xác một vòng quay.
+2. Không cấp nguồn động cơ; đưa bộ đếm về 0.
+3. Quay tay trục ra đúng một vòng trở lại vạch mốc rồi ghi số đếm. Lặp lại ba lần; ba kết quả nên lệch nhau không quá 1 xung.
+4. Giá trị thu được chính là $$N$$ cho chế độ giải mã đang chạy. Tính $$2\pi r / N$$ theo đúng bán kính chiếc lốp đã đo.
+5. Vẫn không cấp điện động cơ, quay bánh theo chiều tiến của robot và xác định kênh nào lên trước (dùng máy phân tích logic hoặc in sự kiện "A lên", "B lên" ra serial). Nếu chỉ có encoder một kênh, ghi rõ: "một kênh, chiều phụ thuộc lệnh động cơ".
+6. *(Tùy chọn, bánh nhấc khỏi bàn)* Cấp một xung điện ngắn theo chiều tiến và xác nhận cùng kênh đó dẫn trước; nếu ngược dấu, đảo hai dây A và B rồi kiểm tra lại.
 
 ### Kết quả mong đợi
 
-Ba vòng quay tay, một $$N$$ thống nhất, quãng đường trên mỗi xung tính bằng mét, và một câu nói kênh nào dẫn khi robot tiến. Dán khối đó vào `lab-notes.md`. Dòng kiểu “140 xung, khoảng 1,43 m” ở Chương 07 chỉ được viết khi $$N$$ đo được đúng là 20.
+Ba lần quay tay cho kết quả $$N$$ thống nhất, giá trị quãng đường trên mỗi xung tính theo mét và ghi chú kênh dẫn trước khi đi tiến được lưu đầy đủ vào `lab-notes.md`.
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Thường là |
-|----------|-----------|
-| Số đếm nhân đôi sau khi đổi chế độ giải mã | Đã chuyển từ 1× sang 2× hoặc 4× mà giữ $$N$$ cũ |
-| Tin đăng ghi 40 PPR, quay tay được 20 | Trang bán đếm những cạnh mà code của bạn không đếm |
-| Lệnh tiến làm số đếm giảm | A và B đảo, hoặc dây motor ngược; mỗi lần chỉ sửa một thứ |
-| Bánh đứng yên mà số vẫn tăng | Dội xung, chân để nổi, hoặc không chung mass |
-| Quãng đường dài gấp vài chục lần | $$N$$ là xung trên vòng trục motor; quên hộp số |
+| Hiện tượng | Nguyên nhân thường gặp |
+|------------|------------------------|
+| Số đếm đột ngột tăng gấp đôi | Đổi chế độ giải mã từ 1× sang 2× hoặc 4× nhưng quên cập nhật $$N$$ |
+| Trang bán ghi 40 PPR nhưng quay tay ra 20 | Trang bán tính tổng số cạnh nhiều hơn số cạnh mã nguồn đang đếm |
+| Ra lệnh tiến nhưng số đếm giảm | Đảo hai dây A/B hoặc đảo ngược cực dây động cơ (chỉ sửa từng thứ một) |
+| Bánh đứng yên nhưng số đếm vẫn tăng | Nhiễu/dội tín hiệu, chân để nổi hoặc chưa nối chung mass |
+| Quãng đường tính ra dài gấp vài chục lần thực tế | Dùng nhầm số xung của trục động cơ mà quên nhân tỉ số hộp số |
 
-## Cùng PWM, sao xe lại vòng?
+## Cùng mức PWM, vì sao xe vẫn chạy lệch?
 
-Cùng một đoạn code, cùng một số PWM gửi sang hai bánh, xe vi sai vẫn thường vòng. Hai motor hộp số TT vàng không giống nhau từng chiếc: khe bánh răng, ma sát và dung sai làm một trục quay nhanh hơn vài phần trăm. Điều khiển vòng hở không nhìn thấy việc đó; nó chỉ giữ nguyên lệnh.
+Ngay cả khi gửi cùng một mức PWM cho cả hai bánh, xe vi sai vẫn thường bị lệch sang một bên. Hai động cơ giảm tốc TT vàng không bao giờ đồng nhất tuyệt đối: độ rơ bánh răng, ma sát và sai số chế tạo khiến một trục quay nhanh hơn trục kia vài phần trăm. Điều khiển vòng hở không có phản hồi nên không thể tự bù sai lệch này.
 
-Encoder là mắt. Đĩa rãnh 20 khe với cặp quang, đúng ví dụ $$N = 20$$ ở trên, đủ để học cách đếm. Trên robot của khóa, hãy dùng encoder Hall đã gắn trên motor TT, đếm bằng ESP32 hoặc Pico, và lái bằng TB6612. Clip minh họa bên dưới dùng Arduino và L298N; đó không phải kit mặc định.
+Encoder cung cấp tín hiệu phản hồi tốc độ để thấy ngay độ lệch đó. Đĩa quang 20 rãnh (ví dụ $$N = 20$$) đủ để học nguyên lý đếm, còn trên robot Capstone A nên dùng cặp động cơ TT có sẵn encoder Hall đọc bằng ESP32/Pico và lái bằng TB6612 (lưu ý các video minh họa dùng Arduino và L298N không phải bộ kit mặc định của khóa học).
 
-Khi đếm cả hai bánh cùng lúc, lệch hiện ra ngay. Ví dụ sau một khoảng chạy: trái 519, phải 552. Phải đi trước $$552 - 519 = 33$$ xung, tức
+Ví dụ khi đếm đồng thời hai bánh trong cùng một khoảng chạy: bánh trái đạt 519 xung, bánh phải đạt 552 xung. Bánh phải nhanh hơn bánh trái $$552 - 519 = 33$$ xung, tương đương:
 
 $$
-\frac{33}{519} \approx 6{,}4\%
+\frac{33}{519} \approx 6{,}4\%.
 $$
 
-nhanh hơn bánh trái. Cùng PWM mà một bánh đã bỏ xa bánh kia thì lệnh “đi thẳng” thành một cung.
+Với độ lệch này, lệnh "đi thẳng" ở vòng hở sẽ tạo thành quỹ đạo cong. Bạn có thể thử nhanh (nhấc bánh khỏi bàn): xuất cùng một mức duty vừa phải cho hai kênh trong 3 giây, so sánh hai bộ đếm và ghi cặp số vào `lab-notes.md`.
 
-Thử nhanh, bánh trên không: cùng một duty vừa phải trên cả hai kênh, chạy trong ba giây, rồi so hai số đếm. Ghi cặp số vào `lab-notes.md`. Đừng để bánh chạm bàn; motor TT sẽ tự bò.
-
-Sửa đúng không phải chỉnh tay một hệ số PWM rồi quên. Đó là vòng kín tốc độ từng bánh, PID ở [bài 08-03]({% multilang_post_url contents/chapter08/08_03_pid_tuning %}), và vì sao “lệnh đi thẳng lại thành vòng” được ghi trong [bài 08-04]({% multilang_post_url contents/chapter08/08_04_diff_kinematics %}).
+Giải pháp căn cơ không phải chỉnh tay một hệ số bù cố định rồi bỏ đó, mà là điều khiển vòng kín tốc độ từng bánh bằng PID ở [bài 08-03]({% multilang_post_url contents/chapter08/08_03_pid_tuning %}) và phân tích động học vi sai ở [bài 08-04]({% multilang_post_url contents/chapter08/08_04_diff_kinematics %}).
 
 Xem thêm: video ngắn của LPPS - 1 Robotics Team, [cùng PWM, sao xe không đi thẳng](https://www.facebook.com/reel/1851960802892543).
 
-## Mua ở Việt Nam / Where to buy in Vietnam
+## Mua ở Việt Nam
 
-Mua một cặp động cơ TT đã có encoder Hall, để hai bánh cùng một kiểu hộp số. Giá thay đổi.
+Nên mua theo cặp động cơ TT có sẵn encoder Hall để hai bánh đồng bộ về tỉ số truyền hộp số.
 
 | Món | Từ khóa | Khoảng giá (VND) | Thay thế |
 |------|---------|------------------|----------|
-| Động cơ TT có encoder Hall | `động cơ TT encoder Hall` | 40.000–90.000 một cái | N20 có encoder nếu lỗ bắt và trục (3 mm hoặc 4 mm) khớp khung |
-| Đĩa rãnh và cặp quang | `đĩa encoder quang` | 15.000–40.000 | Đủ để học $$N$$, khó làm truyền động Capstone |
-| 1 kΩ và 2 kΩ | `điện trở 1k 2k` | 10.000–20.000 một vỉ | Chỉ khi mức cao của Hall đo được 5 V |
+| Động cơ TT có encoder Hall | `động cơ TT encoder Hall` | 40.000–90.000 một cái | Động cơ N20 có encoder nếu khớp lỗ gá và trục (3 mm hoặc 4 mm) |
+| Đĩa rãnh và cặp quang | `đĩa encoder quang` | 15.000–40.000 | Phù hợp để học cách đo $$N$$, ít chắc chắn hơn cho khung Capstone |
+| 1 kΩ và 2 kΩ | `điện trở 1k 2k` | 10.000–20.000 một vỉ | Chỉ cần khi mức cao của cảm biến Hall đo được 5 V |
 
 - [Hshop: động cơ encoder](https://hshop.vn/search?q=dong%20co%20encoder)
 - [Shopee: động cơ TT encoder](https://shopee.vn/search?keyword=dong%20co%20TT%20encoder)
 - [Lazada: encoder Hall TT](https://www.lazada.vn/catalog/?q=encoder%20Hall%20TT)
 - [Thế Giới IC: encoder](https://www.thegioiic.com/search?q=encoder)
 
-Đọc kỹ vòng quay trong tin đăng là vòng của trục nào. Rồi kiểm bằng một vòng quay tay.
+Cần đọc kỹ thông số xung là tính trên trục động cơ hay trục ra, sau đó luôn kiểm chứng lại bằng cách tự quay tay một vòng.
 
 ## Video tham khảo
 
-- **Xem trước:** [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Hai kênh A và B, chiều quay nằm ở thứ tự cạnh. Đó là số đếm bài này cộng dồn.
-- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Odometry là tổng các bước encoder thành tư thế. Chương 08 sẽ viết công thức; video này là bức tranh.
+- **Xem trước:** [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Giải thích hai kênh A, B và cách thứ tự cạnh xác định chiều quay.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Tổng quan cách tích hợp các bước đếm encoder thành tư thế robot (sẽ triển khai chi tiết ở Chương 08).
 
 ## Bài tập
 
-Lấy $$r = 0{,}0325~\mathrm{m}$$ và chu vi $$\approx 0{,}2042~\mathrm{m}$$ nếu đề không nói khác.
+Lấy $$r = 0{,}0325~\mathrm{m}$$ và chu vi $$\approx 0{,}2042~\mathrm{m}$$ nếu đề không nêu khác.
 
-1. $$N = 20$$ xung trên một vòng trục ra. Bánh lăn bao xa sau 140 xung?
-2. Cùng firmware đó, quay tay một vòng được 20 xung, nhưng bạn gõ “40 PPR” của người bán vào công thức. Họ báo quãng đường bao nhiêu cho 140 xung, và quãng đường đúng là bao nhiêu?
-3. Lốp thật sự đi $$\Delta s_r = 0{,}10~\mathrm{m}$$ và $$\Delta s_l = 0{,}06~\mathrm{m}$$, $$b = 0{,}15~\mathrm{m}$$. A và B của encoder phải bị đảo, sổ ghi $$-0{,}10~\mathrm{m}$$ và $$+0{,}06~\mathrm{m}$$. Tính $$\Delta s$$ và $$\Delta \theta$$ mà sổ báo, so với giá trị đúng $$0{,}08~\mathrm{m}$$ và $$0{,}267~\mathrm{rad}$$.
-4. Một kênh đếm 80 cạnh lên lúc đi tới và 80 cạnh nữa lúc lăn về vạch xuất phát. Với kênh đó $$N = 20$$. Quadrature báo quãng đường thực bao nhiêu, và nếu cộng cả 160 cạnh như thể toàn đi tới thì được bao nhiêu?
-5. Động cơ TT cho 11 cạnh lên trên một vòng trục motor, hộp số 1:48, code đếm các cạnh đó (1×) ở đầu ra gắn bánh. $$N$$ bằng bao nhiêu? Dùng 11 thì mọi quãng đường bị phóng bao nhiêu lần?
+1. Với $$N = 20$$ xung trên một vòng trục ra, bánh xe lăn được bao xa sau 140 xung?
+2. Cùng firmware đó, quay tay một vòng thu được 20 xung nhưng bạn lại nhập thông số "40 PPR" của người bán vào công thức. Chương trình sẽ báo quãng đường bao nhiêu cho 140 xung, so với quãng đường đúng?
+3. Bánh xe thực tế đi được $$\Delta s_r = 0{,}10~\mathrm{m}$$ và $$\Delta s_l = 0{,}06~\mathrm{m}$$ với khẩu độ $$b = 0{,}15~\mathrm{m}$$. Do đảo dây A và B ở encoder bánh phải, sổ ghi nhận $$-0{,}10~\mathrm{m}$$ và $$+0{,}06~\mathrm{m}$$. Tính $$\Delta s$$ và $$\Delta \theta$$ sai lệch so với giá trị đúng ($$0{,}08~\mathrm{m}$$ và $$0{,}267~\mathrm{rad}$$).
+4. Một kênh đếm 80 cạnh lên khi đi tới và 80 cạnh lên nữa khi lăn lùi về đúng vạch xuất phát (với $$N = 20$$). Encoder quadrature báo quãng đường thực bằng bao nhiêu, còn nếu cộng dồn 160 cạnh như chỉ đi tới thì kết quả là bao nhiêu?
+5. Một động cơ TT phát 11 cạnh lên trên mỗi vòng trục động cơ, qua hộp số 1:48, mã nguồn đếm 1× ở trục ra. Hỏi $$N$$ bằng bao nhiêu, và nếu dùng nhầm 11 thì quãng đường tính ra sai lệch gấp mấy lần?
 
 ### Gợi ý đáp án
 
-1. $$0{,}01021~\mathrm{m}$$ mỗi xung, nhân 140, được $$1{,}43~\mathrm{m}$$. 2. $$N = 40$$ báo $$0{,}715~\mathrm{m}$$, bằng một nửa của $$1{,}43~\mathrm{m}$$. 3. Sổ báo $$\Delta s = -0{,}02~\mathrm{m}$$ và $$\Delta \theta = -1{,}067~\mathrm{rad}$$ (khoảng $$-61^\circ$$), thay vì $$+0{,}08~\mathrm{m}$$ và $$+15{,}3^\circ$$. 4. Quadrature có tổng xung bằng 0 nên quãng đường thực bằng 0. Coi 160 cạnh là đi tới thì được $$1{,}63~\mathrm{m}$$. 5. $$N = 528$$. Dùng 11 thì mọi quãng đường dài gấp 48 lần.
+1. Mỗi xung tương ứng $$0{,}01021~\mathrm{m}$$; sau 140 xung được $$1{,}43~\mathrm{m}$$.
+2. Với $$N = 40$$, chương trình báo $$0{,}715~\mathrm{m}$$, chỉ bằng một nửa giá trị đúng $$1{,}43~\mathrm{m}$$.
+3. Sổ báo $$\Delta s = -0{,}02~\mathrm{m}$$ và $$\Delta \theta = -1{,}067~\mathrm{rad}$$ (xấp xỉ $$-61^\circ$$), thay vì $$+0{,}08~\mathrm{m}$$ và $$+15{,}3^\circ$$.
+4. Encoder quadrature có tổng đại số bằng 0 nên quãng đường thực bằng 0; nếu cộng dồn cả 160 cạnh sẽ ra $$1{,}63~\mathrm{m}$$.
+5. $$N = 11 \times 48 = 528$$; dùng nhầm 11 sẽ làm mọi quãng đường phóng đại gấp 48 lần.
 
 ## Đọc thêm
 
-- [SparkFun: nối rotary encoder](https://learn.sparkfun.com/tutorials/rotary-encoder-breakout-hookup-guide/all) — cạnh nào dẫn trước, và vì sao một kênh chỉ là gợi ý tốc độ.
-- [Pololu: cặp encoder từ](https://www.pololu.com/product/3081) — datasheet ghi số xung trên vòng trục motor; bạn vẫn phải nhân với hộp số.
-- [`nav_msgs/Odometry`](https://docs.ros.org/en/jazzy/p/nav_msgs/msg/Odometry.html) — tư thế là tổng các bước dead reckoning như bước ở trên.
-- [`diff_drive_controller`](https://control.ros.org/jazzy/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html) — `wheel_radius` và `wheel_separation` là $$r$$ và $$b$$; $$N$$ nằm ở hardware interface đưa vị trí bánh vào controller.
+- [SparkFun: nối rotary encoder](https://learn.sparkfun.com/tutorials/rotary-encoder-breakout-hookup-guide/all) — giải thích thứ tự cạnh và giới hạn của encoder một kênh.
+- [Pololu: cặp encoder từ](https://www.pololu.com/product/3081) — ví dụ thực tế về việc datasheet ghi số xung theo trục động cơ và cần nhân tỉ số hộp số.
+- [`nav_msgs/Odometry`](https://docs.ros.org/en/jazzy/p/nav_msgs/msg/Odometry.html) — chuẩn bản tin ROS 2 tổng hợp từ các bước ước lượng dead reckoning.
+- [`diff_drive_controller`](https://control.ros.org/jazzy/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html) — cách `wheel_radius` ($$r$$) và `wheel_separation` ($$b$$) kết hợp với số đếm đã quy đổi từ $$N$$.

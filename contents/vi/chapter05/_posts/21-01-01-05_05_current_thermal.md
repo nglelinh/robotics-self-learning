@@ -11,121 +11,119 @@ lesson_type: required
 draft: false
 ---
 
-Datasheet motor có hai dòng quan trọng trên một robot nhỏ, và chúng không gần nhau. Dòng không tải là thứ bạn đo khi bánh ở trên không. Dòng stall là thứ đồng sẽ hút khi trục dừng và suất điện động ngược sụp. Bài này biến số stall ấy thành watt, thành tản nhiệt của driver, thành cầu chì trên dây pin, và thành cú brownout làm robot bỏ chạy.
+Thông số động cơ có hai mức dòng điện rất khác nhau: dòng không tải đo khi bánh quay tự do trên không, và dòng kẹt trục (stall) khi rô-to đứng yên khiến suất điện động ngược bằng 0. Bài này giúp bạn quy đổi dòng stall thành công suất tỏa nhiệt trên động cơ và mạch cầu H, chọn cỡ cầu chì phù hợp trên dây dương pin và xử lý tình huống sụt áp (brownout) như một lỗi điều khiển.
 
 ## Mục tiêu học
 
-Hết bài, bạn phân biệt dòng không tải với dòng stall, và dùng dòng stall để chọn cỡ driver cùng cầu chì. Từ điện áp định mức và dòng stall, bạn ước lượng điện trở cuộn và số watt tiêu tán trong motor đang stall. Bạn ước lượng nhiệt trong L298N từ sụt áp của nó, và nói vì sao TB6612 mát hơn ở cùng dòng. Bạn đặt cầu chì trên dây dương của pin, và coi một nguồn sụt làm reset vi điều khiển là lỗi điều khiển.
+Sau bài này, bạn phân biệt rõ dòng không tải với dòng stall và dùng dòng stall làm cơ sở chọn mạch cầu H cũng như cầu chì. Từ điện áp định mức và dòng stall, bạn ước lượng được điện trở cuộn dây và công suất nhiệt tỏa ra trong động cơ khi bị kẹt. Bạn tính được nhiệt tỏa trên L298N từ mức sụt áp của chip và giải thích vì sao TB6612 mát hơn ở cùng dòng tải. Bạn cũng biết vị trí lắp cầu chì trên dây dương pin và lý do phải coi hiện tượng sụt nguồn reset vi điều khiển là một sự cố điều khiển cần chặn bằng phần mềm.
 
 ## Kiến thức cần có
 
-Định luật Ohm và $$P = I^2 R$$ là toàn bộ hộp công cụ toán. Câu chuyện suất điện động ngược (back-EMF) ở bài 05-01 là lý do dòng stall lớn. Việc nhận diện driver ở bài 05-02 cho bạn biết nhiệt đang rơi vào Darlington có tản nhiệt bắt vít, hay vào cầu MOSFET. Bạn cần nguồn bàn có núm dòng, hoặc một ampe kế mắc nối tiếp, nếu sẽ đo motor thật. Nhánh số học vẫn mở nếu bạn không stall an toàn được.
+Bạn chỉ cần vận dụng định luật Ohm, công thức công suất $$P = I^2 R$$, khái niệm suất điện động ngược (bài 05-01) và đặc tính các mạch cầu H (bài 05-02). Để đo thực tế, cần nguồn bàn có giới hạn dòng hoặc ampe kế mắc nối tiếp; nếu không có thiết bị giới hạn dòng an toàn, bạn thực hiện nhánh tính toán từ thông số datasheet.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Chương 07 đặt pin và cầu chì lên khung vì một cổng USB không nuôi nổi hai motor TT đang stall. Một cặp 18650 yếu cũng sụt khi cả hai bánh khởi động cùng lúc. Nếu vi điều khiển reset, các chân GPIO đi lại qua lúc boot, và một cầu H mới khởi tạo một nửa có thể đẩy bánh trước khi code tới dòng đặt PWM về không. Brownout là lỗi điều khiển, không chỉ lỗi nguồn. ROS 2 về sau sẽ phát `cmd_vel` như thể đế đang thức. Firmware vẫn phải fail-safe khi nguồn sụt hoặc tác vụ cảm biến dừng: motor tắt, và ở tắt, cho đến khi một lần `setup` mới đã chạy. Các con số trong bài này là cách bạn chọn cầu chì sống sót lúc chạy bình thường và vẫn đứt khi dây chập.
+Chương 07 bắt buộc dùng pin kèm cầu chì vì cổng USB không đủ dòng cho hai động cơ TT khi kẹt trục. Ngay cả bộ pin 18650 yếu cũng có thể bị sụt áp mạnh khi hai bánh khởi động đồng thời: mạch giám sát sụt áp (brownout) của ESP32 sẽ reset chip, các chân GPIO trở về trạng thái khởi động và một mạch cầu H chưa được khóa chặt có thể làm robot giật chạy trước khi chương trình kịp đưa PWM về 0. Vì vậy, firmware phải luôn đặt `PWM = 0` ngay những dòng đầu tiên của `setup()` và giữ trạng thái dừng an toàn cho đến khi nhận lệnh hợp lệ mới.
 
-## Hai dòng trên một đường cong
+## Dòng không tải và dòng kẹt trục (stall)
 
-Hình của bài phác dòng theo tốc độ. Lúc không tải trục quay nhanh, suất điện động ngược triệt phần lớn nguồn, dòng nhỏ: thường vài trăm miliampe hoặc ít hơn với motor TT vàng, đôi khi chỉ vài chục miliampe với motor trần. Lúc stall, tốc độ bằng không, suất điện động ngược bằng không, và
+Khi bánh quay tự do (không tải), suất điện động ngược triệt tiêu phần lớn điện áp nguồn nên dòng rất nhỏ (thường vài chục đến vài trăm miliampe với động cơ TT vàng). Khi trục bị kẹt đứng yên, tốc độ bằng 0, suất điện động ngược bằng 0 và dòng vọt lên cực đại:
 
 $$
 I_{stall} \approx \frac{V}{R}
 $$
 
-Dòng stall trên datasheet, ở điện áp định mức, là con số bạn đưa cho driver và cầu chì. Dòng khi chạy trên sàn phẳng nằm giữa hai đầu, gần không tải cho đến khi bạn leo, đẩy, hoặc đụng mép thảm. Hộp số kẹt vào chân ghế về mặt điện là một lần stall, dù PWM vẫn nói “tiến”.
+Khi chạy trên sàn phẳng, dòng tiêu thụ nằm giữa hai cực trị này nhưng sẽ tăng vọt ngay khi xe leo dốc, đẩy vật cản hoặc kẹt bánh vào chân bàn. Do đó, mọi tính toán chọn mạch cầu H và cầu chì đều phải xét đến dòng stall.
 
-## Watt trong cái vỏ bằng ngón tay cái
+## Công suất nhiệt trong động cơ bị kẹt
 
-Những watt đó thoát thành nhiệt trong cuộn. Motor stall gần như không có công cơ, nên gần như toàn bộ $$I \times V$$ đốt đồng và chổi than. Một hai giây đo là một điểm dữ liệu. Giữ trục “để cảm mô-men” nửa phút sẽ nấu men cách điện. Hai motor stall cùng lúc hút khoảng gấp đôi dòng stall của một motor, trước tổn hao trên dây. Cổng USB giới hạn gần 0,5 A không cấp nổi mức đó. Cổng gập, vi điều khiển reset, và bạn học brownout với bánh vẫn trên bàn nếu may.
+Khi động cơ bị kẹt, công cơ học sinh ra gần như bằng 0 nên toàn bộ công suất điện $$P = I \times V$$ chuyển thành nhiệt đốt nóng cuộn dây và chổi than. Chỉ nên giữ thử stall khoảng 1–2 giây nếu có giới hạn dòng; giữ lâu hàng chục giây sẽ làm chảy lớp men cách điện. Hai động cơ kẹt đồng thời sẽ hút khoảng gấp đôi dòng stall của một động cơ, vượt xa giới hạn ~0,5 A của cổng USB máy tính và lập tức gây sụt nguồn reset bo mạch.
 
-## Nhiệt ở driver và sụt áp của pack
+## Nhiệt trên mạch cầu H và hiện tượng sụt áp pin
 
-L298N sụt khoảng 2 V ở 1 A. Chip, không phải motor, tiêu tán khoảng
+Với mức sụt áp khoảng 2 V ở dòng 1 A, mỗi kênh của L298N tỏa nhiệt trực tiếp trên chip khoảng:
 
 $$
 P \approx 2~\mathrm{V} \times 1~\mathrm{A} = 2~\mathrm{W}
 $$
 
-trên kênh đó. Hai kênh làm việc nặng có thể gấp đôi. Tản nhiệt bắt vít là đồ bắt buộc, và module vẫn cần không khí. TB6612 sụt ít hơn nhiều ở cùng dòng, nên board mát hơn, và nó vẫn có giới hạn nhiệt cùng giới hạn dòng. Mát hơn không có nghĩa là vô hạn. Nếu vỏ TB6612 đau khi chạm, motor đang stall hoặc định mức liên tục (khoảng 1,2 A mỗi kênh) đã bị bỏ qua.
+Chạy nặng cả hai kênh sẽ tăng gấp đôi lượng nhiệt đó, đòi hỏi tấm tản nhiệt kim loại thông thoáng. TB6612 dùng MOSFET nên sụt áp nhỏ hơn nhiều và chạy mát hơn hẳn, nhưng vẫn có giới hạn dòng liên tục khoảng 1,2 A mỗi kênh — nếu vỏ chip nóng rát tay thì động cơ đang bị quá tải hoặc kẹt trục.
 
-Một cặp 18650 mệt có điện trở trong. Khi cả hai motor khởi động, VM sụt. Buck nuôi vi điều khiển sụt theo nếu chúng chung pack. Mạch phát hiện brownout của ESP32 reset chip. Trong lúc reset, các chân motor chưa phải giá trị an toàn của bạn. Firmware đặt PWM về 0 như hành động đầu tiên trong `setup`, và từ chối bật lại cầu cho đến một khoảng trễ đã biết cùng một trạng thái ngõ vào đã biết, sẽ biến brownout thành một cú dừng. Firmware để enable nổi sẽ biến brownout thành một cú lao ngắn xuyên phòng.
+Khi bộ pin 18650 yếu hoặc có nội trở cao, dòng khởi động làm `VM` sụt mạnh; nếu mạch hạ áp nuôi vi điều khiển dùng chung pin, nguồn logic cũng sụt theo gây brownout reset. Để tránh robot lao đi sau reset, hàm `setup()` phải kéo PWM về 0 và đặt chân hướng an toàn trước mọi thao tác khởi tạo khác.
 
-## Cầu chì là cuộc nói chuyện với mạch chập
+## Vai trò của cầu chì trên dây dương pin
 
-Đặt cầu chì trên dây dương của pin, gần pack, để một mạch chập bất kỳ phía sau đều phải đi qua nó. Cầu chì 2–3 A trên một pack 2S nhỏ là một cuộc nói chuyện để bắt đầu, không phải luật. Nó phải nằm trên dòng chạy bình thường của cả hai motor cộng logic, và nó phải đứt khi chập chết. Nếu mỗi motor TT chạy gần 0,3 A và logic gần 0,2 A, cầu chì 2 A còn dư cho lúc chạy và vẫn sẽ bàn chuyện một lần stall cứng hoặc một dây bị kẹp. Polyfuse chấp nhận được: nó ấm, mở, rồi hồi sau khi nguội. Hãy cho nó thời gian nguội đó. Đừng quấn băng trong một hộp nóng rồi vẫn trông chờ dòng giữ in trên túi.
+Lắp cầu chì nối tiếp ngay trên dây dương sát bộ pin để mọi sự cố ngắn mạch phía sau đều được ngắt kịp thời. Với robot nhỏ dùng pin 2S và hai động cơ TT, cầu chì cỡ 2–3 A là điểm khởi đầu hợp lý: đủ cao hơn tổng dòng chạy bình thường (ví dụ mỗi động cơ 0,3 A + logic 0,2 A = 0,8 A) nhưng vẫn kịp đứt khi xảy ra ngắn mạch hoặc kẹt trục kéo dài. Có thể dùng cầu chì tự phục hồi (polyfuse/PTC): khi quá dòng nó nóng lên để ngắt mạch và tự nối lại sau khi nguội — cần để thoáng khí, không bọc kín băng keo cách nhiệt làm sai lệch dòng cắt.
 
-## Ví dụ tính
+## Ví dụ tính tay
 
-Người bán ghi motor 6 V với dòng stall 1,2 A. Điện trở cuộn khoảng
+Giả sử nhà sản xuất công bố động cơ 6 V có dòng stall 1,2 A. Điện trở cuộn dây xấp xỉ:
 
 $$
 R \approx \frac{6}{1.2} = 5~\Omega
 $$
 
-Lúc stall ở điện áp định mức ấy, đồng tiêu tán
+Công suất tỏa nhiệt trong cuộn dây khi kẹt ở 6 V là:
 
 $$
 P = I^2 R = (1.2)^2 \times 5 = 1.44 \times 5 = 7.2~\mathrm{W}
 $$
 
-Bạn kiểm cùng kết quả bằng $$P = I \times V = 1.2 \times 6 = 7.2~\mathrm{W}$$. Bảy watt trong một motor cỡ ngón tay cái là lý do bài thử stall chỉ khoảng một giây rồi thả. Hai motor như vậy stall cùng lúc khoảng 2,4 A trước tổn hao trên dây. Cổng USB ở 0,5 A sẽ brownout hoặc reset board. Đó là lý do Chương 07 dùng pin và cầu chì.
+Kiểm tra lại bằng $$P = I \times V = 1.2 \times 6 = 7.2~\mathrm{W}$$. Mức 7,2 W trong một thân động cơ nhỏ giải thích vì sao chỉ được phép đo stall tối đa một giây. Hai động cơ như vậy kẹt cùng lúc sẽ đòi tới 2,4 A — lớn hơn nhiều so với giới hạn 0,5 A của cổng USB. Nếu đồng hồ đo dòng không tải ở PWM vừa chỉ khoảng 0,15 A, khoảng cách từ 0,15 A đến 1,2 A cho thấy độ dự phòng mà driver và cầu chì phải chịu được khi xe chạm tường.
 
-Nếu sau này đồng hồ của bạn chỉ 0,15 A không tải ở một PWM vừa phải, hãy giữ cả hai số. Khoảng cách giữa 0,15 A và 1,2 A là phần dư mà cầu chì và driver phải sống sót khi bánh dừng vào tường.
-
-## Hình
+## Hình minh họa
 
 ![Dòng stall theo tốc độ: dòng nhỏ khi đang quay, dòng lớn khi trục dừng]({{ site.imgurl }}/generated/stall_current.png)
 
-Đọc phía trái đường cong là số stall trên datasheet, phía phải là dòng không tải bạn được phép đo lâu hơn một giây.
+Phía trái đồ thị ứng với tốc độ bằng 0 (dòng stall lớn nhất), phía phải ứng với tốc độ không tải (dòng nhỏ nhất).
 
 ![Đồng hồ mắc nối tiếp hoặc màn hình dòng của nguồn, dùng cho một motor với bánh trên không]({{ site.imgurl }}/wikimedia/Digital_Multimeter_Aka.jpg)
 
-Nếu bạn cắm đồng hồ vào mạch, dùng lỗ dòng lớn, bắt đầu ở PWM 0, và đừng stall motor qua một cầu chì đồng hồ mà bạn không đủ tiền thay. Số đọc dòng của chính nguồn bàn là dụng cụ điềm tĩnh hơn.
+Khi đo bằng đồng hồ vạn năng, phải cắm que vào lỗ đo dòng lớn (10 A), bắt đầu ở `PWM = 0` để tránh đứt cầu chì đồng hồ; sử dụng bộ nguồn bàn có đồng hồ dòng tích hợp sẽ an toàn và thuận tiện hơn.
 
 ## Lab
 
 ### An toàn
 
-Bánh trên không, tháo khỏi khung, mỗi lần một motor. Stall một giây chỉ được phép khi giới hạn dòng của nguồn đặt gần 2 A, để một lỗi dây không thành lửa. Nếu bạn không có một giới hạn mình tin, đừng stall: dùng dòng stall của người bán và tính watt. Đừng cầm bánh răng nhỏ đang quay. Đừng nuôi motor từ USB. Mass chung nếu vi điều khiển đang phát PWM.
+Tháo động cơ khỏi khung (hoặc nhấc bánh khỏi bàn) và chỉ thử từng động cơ một. Chỉ thực hiện bước đo stall 1 giây khi có nguồn bàn đặt giới hạn dòng khoảng 2 A; nếu không có giới hạn dòng đáng tin cậy, hãy bỏ qua bước kẹt trục thật và tính công suất từ thông số nhà sản xuất. Không cấp nguồn động cơ từ USB và luôn nối chung mass nếu dùng vi điều khiển phát PWM.
 
 ### BOM
 
 | Món | Vai trò |
 |------|------|
-| Một motor chổi than | Linh kiện đang thử |
-| Nguồn bàn có giới hạn dòng, hoặc pin cộng ampe kế nối tiếp | Nguồn và số đọc |
-| Cầu H hoặc dây nguồn trực tiếp | Đặt một điện áp đã biết |
-| Đồng hồ vạn năng | Volt, và ampe nếu đó là cách của bạn |
-| Sổ | Ampe không tải, và ampe stall hoặc watt đã tính |
+| Một động cơ DC chổi than | Đối tượng kiểm thử |
+| Nguồn bàn có giới hạn dòng, hoặc pin kèm ampe kế nối tiếp | Cấp nguồn và đo dòng |
+| Mạch cầu H hoặc dây nguồn trực tiếp | Đặt điện áp xác định |
+| Đồng hồ vạn năng | Đo điện áp và dòng điện |
+| Sổ tay | Ghi dòng không tải, dòng stall hoặc công suất tính tay |
 
 ### Các bước
 
-1. Đặt giới hạn dòng của nguồn gần 2 A nếu có. Đặt điện áp bằng điện áp định mức của motor, hoặc bằng một giá trị vừa phải mà bạn ghi lại.
-2. Chạy motor không tải ở PWM vừa (hoặc thẳng từ nguồn). Ghi điện áp và dòng sau một giây. Đó là không tải ở điện áp ấy.
-3. Tùy chọn: stall trục khoảng một giây thôi, đọc dòng, thả. Nếu giới hạn gập ngay, viết “nguồn đã giới hạn” rồi dừng. Đừng lặp.
-4. Nếu bạn bỏ qua stall, chép dòng stall của người bán, tính $$R \approx V/I_{stall}$$ và $$P = I^2 R$$, rồi gắn nhãn chúng là ước lượng từ datasheet.
-5. Viết một câu về cầu chì bạn sẽ đặt trên dây dương pin cho hai motor này, và vì sao nó nằm trên dòng chạy.
+1. Đặt giới hạn dòng khoảng 2 A trên nguồn bàn (nếu có) và chỉnh điện áp bằng điện áp định mức (hoặc mức vừa phải, ghi rõ vào sổ).
+2. Cho động cơ chạy không tải, ghi điện áp và dòng điện sau 1 giây.
+3. *(Tùy chọn, chỉ khi có nguồn giới hạn dòng)* Giữ kẹt trục tối đa 1 giây, đọc dòng rồi thả ngay; nếu nguồn lập tức cắt dòng thì ghi "nguồn đã giới hạn" và dừng, không lặp lại.
+4. Nếu bỏ qua bước đo stall trực tiếp, lấy dòng stall từ datasheet để tính $$R \approx V/I_{stall}$$ và $$P = I^2 R$$, ghi rõ là số ước lượng từ tài liệu.
+5. Viết một câu chọn giá trị cầu chì trên dây dương pin cho hai động cơ và giải thích vì sao giá trị đó cao hơn dòng chạy bình thường.
 
 ### Kết quả mong đợi
 
-Hai số trong `lab-notes.md`: một dòng không tải đã đo, và hoặc một dòng stall một giây đã đo, hoặc công suất stall đã tính từ số của người bán. Một câu cầu chì có dòng (2 A hoặc 3 A là điểm bắt đầu hợp lý cho robot TT 2S nhỏ) và ước lượng dòng chạy nằm dưới nó.
+Sổ `lab-notes.md` có đầy đủ dòng không tải đo được, dòng stall 1 giây (hoặc công suất stall tính từ datasheet) và câu chọn cầu chì (thường 2 A hoặc 3 A cho robot TT chạy 2S) kèm so sánh với tổng dòng chạy.
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Cần kiểm |
-|--------------|----------------|
-| Dòng đọc gần 0 mà trục vẫn quay | Đồng hồ đang mắc song song với motor, hoặc đang ở lỗ điện áp trong khi bạn tưởng đang đo ampe. |
-| Điện áp nguồn sụp và MCU reset | USB hoặc một pack tí hon đang nuôi stall. Chuyển sang pin và một giới hạn, bánh trên không. |
-| Tản nhiệt L298N nóng không chạm được sau một lần chạy ngắn | Sụt áp nhân dòng là vài watt. Stall ngắn hơn, thêm gió, hoặc đổi TB6612. |
-| Polyfuse mở và giữ mở hàng phút | Nó đang làm việc. Để nguội. Đừng nâng điểm cắt cho đến khi mạch chập đã hết. |
-| Robot giật sau một lần reset | `setup` chưa ép PWM về 0 và một chiều đã biết trước mọi việc khác. |
+| Hiện tượng | Cần kiểm tra |
+|------------|--------------|
+| Đồng hồ dòng báo gần 0 dù trục đang quay | Mắc đồng hồ song song thay vì nối tiếp, hoặc cắm nhầm lỗ đo áp |
+| Sụt nguồn và vi điều khiển reset | Đang lấy nguồn động cơ từ USB hoặc pin yếu; chuyển sang pin đủ dòng có bảo vệ |
+| Tản nhiệt L298N nóng rát sau thời gian ngắn | Công suất sụt áp lớn; giảm thời gian tải nặng, tăng thoáng khí hoặc đổi TB6612 |
+| Polyfuse ngắt và giữ trạng thái hở nhiều phút | Cầu chì đang bảo vệ mạch; chờ nguội và xử lý điểm chập trước khi thử lại |
+| Robot giật chạy sau khi reset | `setup()` chưa ép `PWM = 0` ngay từ đầu |
 
-## Mua ở Việt Nam / Where to buy in Vietnam
+## Mua ở Việt Nam
 
-Chỗ còn thiếu là một cầu chì và, nếu bạn vẫn chưa có, một driver cùng một motor TT. Cầu chì lưỡi, cầu chì thủy tinh, hoặc polyfuse gần 2–3 A, cộng một đế bạn hàn hoặc cắm được, là đủ. Giá chạy. Khoảng thô: cầu chì nhỏ và đế khoảng 5.000–25.000 VND, motor TT khoảng 25.000–45.000 VND, module L298N khoảng 35.000–70.000 VND.
+Chỉ cần chuẩn bị thêm cầu chì 2–3 A (cầu chì thủy tinh, cầu chì lưỡi hoặc polyfuse kèm đế) nếu bộ kit chưa có; giá tham khảo thay đổi theo thời điểm (cầu chì và đế khoảng 5.000–25.000 VND, động cơ TT khoảng 25.000–45.000 VND, L298N khoảng 35.000–70.000 VND):
 
-- Trang L298N đã kiểm, khoảng 45.000 VND: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
+- Trang L298N đã kiểm tra, khoảng 45.000 VND: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - HShop: [cầu chì](https://hshop.vn/search?q=cau%20chi), [motor TT](https://hshop.vn/search?q=motor%20TT), [TB6612](https://hshop.vn/search?q=TB6612)
 - Shopee: [cầu chì](https://shopee.vn/search?keyword=cau%20chi), [polyfuse](https://shopee.vn/search?keyword=polyfuse), [motor TT](https://shopee.vn/search?keyword=motor%20TT)
 - Lazada: [cầu chì](https://www.lazada.vn/catalog/?q=cau%20chi), [motor TT](https://www.lazada.vn/catalog/?q=motor%20TT)
@@ -133,23 +131,27 @@ Chỗ còn thiếu là một cầu chì và, nếu bạn vẫn chưa có, một 
 
 ## Video tham khảo
 
-- **Xem trước:** [Do you know how to Test Stall Current?](https://www.youtube.com/watch?v=7KbEVKZ2JhA) — SoundTraxx, tiếng Anh. Đo dòng khi trục bị giữ. Motor trong video không phải TT; phép đo stall là cùng một đại lượng.
-- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Dòng stall phải gặp cầu chì trước khi gặp nhiệt. Video cầu chì đứng cạnh bài toán dòng của bài.
+- **Xem trước:** [Do you know how to Test Stall Current?](https://www.youtube.com/watch?v=7KbEVKZ2JhA) — SoundTraxx, tiếng Anh. Minh họa kỹ thuật đo dòng khi giữ kẹt trục (áp dụng tương tự cho động cơ TT).
+- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Giải thích nguyên lý hoạt động và cách chọn cầu chì bảo vệ mạch.
 
 ## Bài tập
 
-1. Motor 6 V stall ở 1,2 A. $$R$$ và watt stall là bao nhiêu?
-2. Hai motor đó stall cùng lúc. Bạn tính dòng bao nhiêu, và vì sao cổng USB 0,5 A là nguồn sai?
-3. Một kênh L298N sụt 2 V khi mang 0,8 A. Kênh đó nóng bao nhiêu watt?
-4. Cả hai bánh chạy ở 0,35 A và logic hút 0,15 A. Cầu chì 2 A trên dây dương pin có nằm trên tổng chạy đó không?
-5. ESP32 reset khi motor khởi động, rồi robot bò. Bạn đổi gì ở phần cứng và ở các dòng đầu của `setup`?
+1. Một động cơ 6 V có dòng stall 1,2 A. Tính điện trở cuộn $$R$$ và công suất tỏa nhiệt khi stall.
+2. Hai động cơ trên kẹt trục cùng lúc sẽ hút tổng dòng bao nhiêu, và vì sao cổng USB 0,5 A không thể cấp nguồn cho chúng?
+3. Một kênh L298N sụt 2 V ở dòng tải 0,8 A. Kênh này tỏa bao nhiêu watt nhiệt?
+4. Khi chạy bình thường, mỗi bánh hút 0,35 A và mạch logic hút 0,15 A. Cầu chì 2 A trên dây dương pin có phù hợp (lớn hơn tổng dòng chạy) không?
+5. ESP32 bị reset mỗi khi động cơ khởi động và khiến robot tự trôi đi. Cần thay đổi gì ở phần cứng và những dòng đầu tiên của hàm `setup()`?
 
 ### Gợi ý đáp án
 
-$$R \approx 5~\Omega$$ và $$P = 7.2~\mathrm{W}$$. Hai motor khoảng 2,4 A lúc stall, cao hơn nhiều cổng USB 0,5 A, nên Chương 07 dùng pin và cầu chì. Một kênh L298N ở 2 V và 0,8 A nóng khoảng 1,6 W. Tổng chạy là $$0.35 + 0.35 + 0.15 = 0.85~\mathrm{A}$$, nên cầu chì 2 A nằm trên mức chạy bình thường. Phần cứng cần một pack cứng hơn và một cầu chì; `setup` phải kéo PWM về 0 và một chiều an toàn trước khi cầu được phép cử động.
+1. $$R \approx 6 / 1.2 = 5~\Omega$$ và $$P = 1.2^2 \times 5 = 7.2~\mathrm{W}$$.
+2. Tổng dòng khoảng 2,4 A, vượt xa mức 0,5 A của cổng USB nên phải dùng pin và cầu chì riêng.
+3. $$P = 2~\mathrm{V} \times 0.8~\mathrm{A} = 1.6~\mathrm{W}$$.
+4. Tổng dòng chạy là $$0.35 + 0.35 + 0.15 = 0.85~\mathrm{A}$$, nhỏ hơn nhiều so với 2 A nên cầu chì 2 A phù hợp.
+5. Phần cứng: tách nguồn động cơ sang pin khỏe hơn kèm cầu chì; phần mềm: đặt `PWM = 0` và cấu hình chân hướng an toàn ngay đầu `setup()`.
 
 ## Đọc thêm
 
-- SparkFun, motor và con số dòng stall: [https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all](https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all)
-- Datasheet ST L298, về sụt áp thành nhiệt: [https://www.st.com/resource/en/datasheet/l298.pdf](https://www.st.com/resource/en/datasheet/l298.pdf)
-- Mạch mang TB6612FNG của Pololu, một cầu mát hơn ở dòng TT: [https://www.pololu.com/product/713](https://www.pololu.com/product/713)
+- SparkFun — động cơ và thông số dòng stall: [https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all](https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all)
+- Datasheet ST L298 (sụt áp và công suất tỏa nhiệt): [https://www.st.com/resource/en/datasheet/l298.pdf](https://www.st.com/resource/en/datasheet/l298.pdf)
+- Mạch mang TB6612FNG của Pololu (hiệu suất cao hơn cho dòng động cơ TT): [https://www.pololu.com/product/713](https://www.pololu.com/product/713)

@@ -11,118 +11,105 @@ lesson_type: required
 draft: false
 ---
 
-Đây là cửa ra của Chương 00. Dành 60–90 phút, chủ yếu kiểm bằng chứng từ bài 00-01 tới 00-06. Một dấu tick không có file, ảnh, hoặc dòng đã dán thì không tính. Chương 01 sẽ bảo bạn đo linh kiện thật. Đừng bắt đầu chương đó bằng cảm giác.
+Đây là bài kiểm tra đầu ra của Chương 00. Hãy dành 60–90 phút để rà soát toàn bộ bằng chứng bạn đã tạo từ bài 00-01 đến 00-06. Một dấu đánh dấu hoàn thành nhưng không có tệp, ảnh chụp hay dòng log kèm theo sẽ không được tính. Chương 01 sẽ bước vào đo đạc linh kiện thực tế, nên bạn cần đảm bảo mọi điều kiện an toàn và dụng cụ đều đã được kiểm chứng rõ ràng.
 
 ## Mục tiêu học
 
-Bạn sẽ **rà** bàn lab bằng một thủ tục viết ra, từng mục một. Bạn sẽ **gắn** bằng chứng vào mỗi mục: một tổng trong `bom.csv`, tiếng bíp của đồng hồ trên ngắn đã biết, một cổng serial hoặc một kế hoạch rõ nếu board chưa tới, một câu lộ trình A hoặc B, ảnh cục sạc hoặc ghi chú chưa mua cell, và thẻ lên nguồn từ bài 00-03. Bạn sẽ **tách** dụng cụ thiếu làm Chương 01 không an toàn khỏi khung xe thiếu thì chưa sao. Bạn sẽ **dự đoán** dòng thiếu nào khiến bài điện đầu tiên mất an toàn. Bạn sẽ **liệt kê** chỉ những chỗ thiếu sẽ mua, dùng bài 00-05 làm giỏ chứ không lập giỏ mới.
+Sau bài học này, bạn sẽ **rà soát** bàn lab theo một quy trình văn bản từng bước và **gắn** bằng chứng cụ thể cho từng hạng mục: tổng ngân sách trong `bom.csv`, tiếng bíp thông mạch của đồng hồ trên mối nối đã biết, tên cổng serial thực tế (hoặc kế hoạch kiểm tra rõ ràng nếu mạch chưa về), phát biểu Lộ trình A hoặc B, ảnh nhãn bộ sạc (hoặc ghi chú chưa mua pin), và thẻ quy trình cấp nguồn từ bài 00-03. Bạn cũng sẽ **phân biệt** được những dụng cụ thiếu gây mất an toàn cho Chương 01 với những món Đợt 2 chưa cần gấp như khung xe, **nhận diện** mục thiếu nào khiến bài đo điện đầu tiên trở nên rủi ro, và **lập danh sách** chỉ gồm các món còn thiếu dựa trên bài 00-05 thay vì dựng thêm giỏ hàng mới.
 
 ## Cần có trước
 
-Bạn cần sổ, câu lộ trình, thẻ lên nguồn, ảnh kiểm kê Sóng 1, và `bom.csv` mà bài 00-05 bảo bạn lập. Nếu một thứ bị bỏ, buổi rà ghi sự bỏ đó. Chưa cần robot chạy, ROS 2, hay mối hàn. Bạn cần sẵn sàng để một ô không được tick.
+Bạn cần chuẩn bị đầy đủ sổ lab, câu lộ trình, thẻ quy trình cấp nguồn, ảnh kiểm kê Đợt 1 và tệp `bom.csv` từ bài 00-05. Nếu còn hạng mục nào bỏ dở, buổi kiểm tra sẽ ghi nhận trung thực tình trạng đó. Lúc này vẫn chưa cần robot chạy, chưa cần ROS 2 hay mối hàn nào; điều quan trọng nhất là sẵn sàng để trống những ô chưa thực sự đạt yêu cầu.
 
-## Vì sao việc này dính tới Capstone
+## Vì sao bài này gắn liền với Capstone
 
-Capstone A dừng bánh khi lệnh im khoảng 300 ms. Hành vi đó cần một bàn phân biệt được mass với một điều ước. Topic ROS 2 sau này sẽ mô tả cùng robot đó. Chúng sẽ không sửa một buổi Chương 01 đo ohm trên ray đang sống, hay một cell lithium tới mà không có quyết định về cục sạc. Cửa này tìm, khi đồ còn trong túi, bằng chứng thiếu nào sẽ làm chương sau mất an toàn.
+Capstone A yêu cầu dừng bánh xe khi mất lệnh quá khoảng 300 ms — hành vi này chỉ tin cậy trên một bàn làm việc mà bạn phân biệt rõ điểm mass chung với các phỏng đoán cảm tính. Tầng ROS 2 về sau cũng không thể khắc phục hậu quả của việc đo ohm trên mạch đang cấp điện ở Chương 01, hay việc nhận cell lithium mà chưa kiểm tra bộ sạc. Buổi rà soát này giúp phát hiện sớm các lỗ hổng an toàn ngay khi linh kiện còn đang trong túi.
 
 ![Thứ tự trên thẻ lên nguồn là một mục buổi rà này phải thấy]({{ site.imgurl }}/generated/power_order.png)
 
-Nếu không tìm thấy thẻ, đừng vẽ lại từ trí nhớ giữa buổi rà rồi gọi là thẻ cũ. Làm lại trang của bài 00-03 rồi chụp. Hình nhắc thứ tự: mass chung, logic, tín hiệu, nguồn motor cuối, bánh nhấc.
+Nếu làm thất lạc thẻ quy trình, đừng tự vẽ lại từ trí nhớ giữa buổi kiểm tra rồi coi như thẻ cũ; hãy mở lại bài 00-03, viết lại cẩn thận và chụp ảnh lưu vào sổ. Thứ tự bắt buộc luôn là: mass chung, nguồn logic, tín hiệu điều khiển, và nguồn động cơ VM sau cùng khi bánh xe đã nhấc khỏi bàn.
 
-## Cái gì được tính là bằng chứng
+## Tiêu chuẩn nào được tính là bằng chứng
 
-Một dấu tick là lời khẳng định một hiện vật cụ thể tồn tại. Hiện vật phải là thứ bạn đưa được cho một bạn khác.
+Mỗi dấu tick chỉ hợp lệ khi đi kèm một bằng chứng cụ thể mà người khác có thể kiểm tra trực tiếp:
 
-**Hóa đơn vật tư** tính khi `bom.csv` (hoặc cùng bảng trong sổ) có một tổng bạn tự viết, kèm ngày. Ảnh chụp trang chủ một shop không có tổng thì không phải tổng. Nếu bài 00-05 chưa xong, dòng này mở, và bạn làm xong bài đó trước khi giả vờ Chương 00 đã đóng.
+- **Bảng vật tư (`bom.csv`):** đạt khi tệp `bom.csv` (hoặc bảng tương đương trong sổ) có con số tổng chi phí tự tính kèm ngày khảo sát giá. Ảnh chụp trang chủ một cửa hàng không được tính là bảng tổng hợp. Nếu bài 00-05 chưa xong, hạng mục này vẫn ở trạng thái `mở`.
+- **Đồng hồ vạn năng:** đạt khi sổ ghi nhận kết quả chạm hai que đo có tiếng bíp thông mạch (hoặc ghi rõ lỗi thực tế như `không bíp; cần kiểm tra cầu chì hoặc pin`). Ảnh đồng hồ trong giỏ hàng không chứng minh nó hoạt động. Nếu chưa có đồng hồ, hạng mục này vẫn `mở` và các bài đo thông mạch Chương 01 phải chờ.
+- **Cáp USB truyền dữ liệu:** đạt theo một trong hai cách: đã cắm mạch thấy tên cổng serial xuất hiện (dán vào sổ) và biến mất khi rút; hoặc nếu mạch chưa giao tới, sổ đã có kế hoạch rõ ràng: "chỉ cắm USB, không nối VM, ghi nhận tên cổng rồi rút". Cáp chỉ làm sáng đèn nguồn trên mạch chưa đủ chứng minh khả năng truyền dữ liệu — hãy ghi `chưa chứng minh` thay vì đánh dấu đạt.
+- **Câu lộ trình:** đạt khi nêu rõ Lộ trình A hoặc B, loại vi điều khiển (ESP32 hoặc Pico 2) và cam kết không mua LiDAR trước khi đạt Capstone A. Một câu chung chung kiểu "tôi muốn học robot" không đạt yêu cầu.
+- **Bộ sạc pin:** đạt khi có ảnh chụp đọc rõ nhãn thông số (Li-ion, 4,2 V, sạc từng cell), hoặc sổ ghi rõ `chưa mua cell`. Có cell pin trần nhưng không có ghi chú là một rủi ro an toàn đang mở; ảnh TP4056 đang kẹp lên đế 2S là bằng chứng của một lỗi sai, không phải điều kiện đạt.
+- **Thẻ quy trình cấp nguồn:** đạt khi ảnh chụp hoặc bản giấy thể hiện đủ thứ tự: mass chung, nguồn logic USB, tín hiệu, nguồn VM cuối cùng, nhấc bánh khỏi bàn, quy tắc dừng PWM 300 ms, và lệnh cấm đưa nguồn động cơ hay echo 5 V vào GPIO 3,3 V. Thẻ viết sai thứ tự (đặt pin lên đầu) sẽ không đạt dù đã viết ra giấy.
+- **Không gian làm việc:** đạt khi các thư mục từ bài 00-06 đã tồn tại đầy đủ và nhật ký cài đặt ghi rõ số phiên bản hoặc trạng thái `chưa cài`. Một thư mục `ros_ws/` trống kèm lý do trung thực là đạt; ngược lại, thư mục chứa nhiều mã nguồn tải về chưa dùng cần được dọn gọn trước khi đánh dấu hoàn thành.
 
-**Đồng hồ** tính khi sổ nói hai que đã chạm nhau và đồng hồ kêu, hoặc khi sổ ghi sự thất bại ("không bíp; cầu chì hoặc pin"). Ảnh đồng hồ trong giỏ hàng không kêu. Nếu đồng hồ chưa tới, dòng vẫn mở. Việc thông mạch của Chương 01 bị chặn tới khi dòng đóng. Đó là kết quả đúng, không phải một lần thương lượng.
+## Quy trình rà soát từng bước
 
-**Cáp USB** tính theo một trong hai cách. Một cổng serial hiện khi board được cắm, tên được dán vào sổ, và cổng mất khi bạn rút. Hoặc board chưa tới, và sổ có kế hoạch viết ra: chỉ USB, không nguồn motor, ghi cổng, rút. Cáp chỉ thắp LED thì chưa chứng minh dữ liệu. Viết `chưa chứng minh` thay vì tick dòng.
+Hãy thực hiện lần lượt theo đúng thứ tự dưới đây, không bỏ qua các mục bạn nghĩ mình đã làm tốt:
 
-**Câu lộ trình** tính khi nó nêu lộ trình A hoặc B, MCU (ESP32 hoặc Pico 2), và sự từ chối mua LiDAR trước Capstone A. "Tôi thích robot" không phải lộ trình.
+1. Mở sổ lab, tạo mục `Cửa ra Chương 00` và liệt kê đủ 7 hạng mục bằng chứng trên để đánh dấu trạng thái `đạt` hoặc `mở`.
+2. Kiểm tra `bom.csv`, ghi lại tổng chi phí bằng VND và ngày khảo sát giá; nếu chưa có tệp thì đánh `mở`. Mở ảnh kiểm kê Đợt 1 từ bài 00-04 và đối chiếu từng món: đồng hồ, mỏ hàn, giá đỡ, thiếc hàn, kìm cắt, breadboard, dây cắm, cáp dữ liệu, vi điều khiển, LED và nút nhấn (ghi `có` hoặc `thiếu`). Khung xe và mạch lái thuộc Đợt 2 nên thiếu chúng không làm trượt Chương 00, nhưng có sẵn chúng cũng không bù đắp được việc thiếu đồng hồ.
+3. Kiểm tra lại tiếng bíp thông mạch của đồng hồ ngay cả khi tuần trước bạn đã thử: đặt thang thông mạch trên thiết bị không cấp điện, chạm hai que đo vào nhau và ghi nhận kết quả. Nếu tiếng bíp thất bại, tuyệt đối không chuyển sang đo ohm trên cổng USB đang có điện.
+4. Kiểm tra bằng chứng cáp USB: nếu đã có mạch trên bàn, cắm cáp (không nối pin động cơ), dán tên cổng serial vào sổ rồi rút ra. Nếu chưa có mạch, đọc lại kế hoạch đã viết để chắc chắn có điều khoản cấm nối VM ở lần cắm đầu. Thiếu cả tên cổng lẫn kế hoạch thì đánh `mở`.
+5. Đọc lại câu lộ trình để xác nhận có quy tắc dừng 300 ms và chọn TB6612FNG (không phải L298N nếu bảng đã có dòng mạch lái). Nếu bảng vẫn để L298N, hãy đánh `mở` dòng mạch lái vì quy tắc sụt áp ở bài 00-05 chưa được áp dụng.
+6. Kiểm tra bằng chứng bộ sạc: nhãn trên ảnh phải khớp chuẩn sạc từng cell 4,2 V, hoặc ghi chú xác nhận `chưa mua cell`. Nếu thấy TP4056 đang nối với đế 2S, hãy ngắt kết nối ngay và giữ mục này ở trạng thái `mở`.
+7. Đối chiếu thẻ quy trình cấp nguồn với hình minh họa đầu bài; nếu nguồn VM không nằm ở bước cuối cùng, hãy viết lại và chụp ảnh bản mới.
+8. Mở thư mục `firmware/` và `ros_ws/README.md` để xác nhận nhật ký cài đặt khớp với chiếc máy tính trước mặt; không ghi đã cài Jazzy nếu đang dùng Windows.
 
-**Cục sạc** tính khi ảnh cho thấy nhãn bạn đọc được (Li-ion, 4,2 V, một cell), hoặc khi sổ nói `chưa mua cell`. Một cell trần không ghi chú là mục an toàn đang mở, không phải trung lập. Ảnh TP4056 đang kẹp qua đế 2S là bằng chứng của một lỗi, không phải một dấu tick.
+**Dấu hiệu buổi kiểm tra đạt chuẩn:** Mọi hạng mục đều được đánh `đạt` hoặc `mở` dựa trên bằng chứng thực tế. Với mỗi mục còn `mở`, bạn ghi rõ bài học cần quay lại để hoàn thiện (bài 00-04 nếu thiếu giá đỡ mỏ hàn, 00-05 nếu thiếu tổng BOM, 00-03 nếu thiếu thẻ cấp nguồn, 00-06 nếu thiếu cây thư mục).
 
-**Thẻ lên nguồn** tính khi ảnh hoặc chính trang giấy cho thấy mass chung, logic USB, tín hiệu, VM cuối, bánh nhấc, dừng PWM 300 ms, và lệnh cấm điện áp motor cùng echo 5 V vào GPIO 3,3 V. Thẻ bắt đầu bằng pin thì trượt mục dù giấy có tồn tại.
-
-**Không gian làm việc** từ bài 00-06 tính khi các thư mục tồn tại và nhật ký cài có phiên bản hoặc chữ `chưa cài`. Một `ros_ws/` trống với sự thành thật đó là đạt. Một `ros_ws/` đầy clone bạn không định giữ là đống bạn dọn trước khi tick.
-
-## Thủ tục rà
-
-Làm theo thứ tự. Đừng nhảy tới mục bạn biết mình đã đạt.
-
-Mở sổ và thêm đề mục `Cửa ra Chương 00`. Chép bảy mục bằng chứng ở trên thành các dòng bạn sẽ đánh `đạt` hoặc `mở`.
-
-Đọc `bom.csv` và viết tổng bằng đồng lên đề mục cửa ra, kèm ngày giá được chép. Nếu không thấy file, đánh `mở` và ngừng nhận bài mua sắm đã xong. Mở ảnh Sóng 1 từ bài 00-04 và đối với các dòng: đồng hồ, mỏ, giá, thiếc, kìm, breadboard, dây cắm, cáp dữ liệu, MCU, LED, nút. Mỗi dòng `có` hoặc `thiếu`. Khung xe và driver là Sóng 2. Vắng chúng không làm trượt Chương 00. Có chúng không tha cho một đồng hồ thiếu.
-
-Làm lại bài bíp, dù tuần trước đã làm. Hai que chạm, đồng hồ ở thông mạch, mạch không có điện. Viết "bíp" hoặc chuyện thực sự xảy ra. Nếu bạn sắp đo ray USB đang nuôi bằng thang ohm vì bài bíp thất bại, dừng. Đó là lỗi mà quy tắc tồn tại để chặn.
-
-Kiểm bằng chứng USB. Nếu board ở trên bàn, cắm không có pin motor, dán tên cổng, rồi rút. Nếu board không ở trên bàn, đọc kế hoạch đã viết và xác nhận nó cấm VM ở lần cắm đầu. Không kế hoạch và không cổng thì mục mở.
-
-Đọc câu lộ trình thành tiếng. Xác nhận nó nhắc dừng 300 ms và nêu TB6612FNG chứ không phải L298N nếu driver đã có trong bảng. Nếu bảng nói L298N, phép sụt áp của bài mua sắm chưa được áp. Đánh dòng driver `mở` dù phần còn lại của câu nghe tự tin.
-
-Nhìn bằng chứng cục sạc. Hoặc nhãn trên ảnh khớp một cell ở 4,2 V, hoặc ghi chú nói chưa mua cell. Nếu đế 2S và TP4056 cùng ảnh và đang nối, ngắt chúng trước khi rà tiếp, và đừng tick dòng.
-
-Tìm thẻ lên nguồn. So với hình đầu bài này. Nếu VM không đứng cuối, viết lại thẻ. Chụp bản bạn sẽ thực sự làm theo.
-
-Mở thư mục firmware và `ros_ws/README.md`. Xác nhận nhật ký cài khớp máy trước mặt. Đừng xóa thứ bạn còn cần, nhưng bỏ lời nhận Jazzy đã cài nếu máy là Windows.
-
-**Khi cửa thành thật.** Đề mục cửa ra liệt kê đạt hoặc mở cho mọi mục. Tổng, tiếng bíp, cổng hoặc kế hoạch, câu lộ trình, quyết định cell, và thẻ, mỗi cái là một hiện vật thật. Mục mở nêu bài sẽ đóng nó: 00-04 cho thiếu giá, 00-05 cho thiếu tổng, 00-03 cho thiếu thẻ, 00-06 cho thiếu thư mục.
-
-**Khi có người đang vội.** Mọi dòng đều đạt, và phần đính kèm duy nhất là "trông ổn". Đặt lại `mở` cho mọi dòng bạn không chỉ ra được trong một phút.
+**Dấu hiệu làm vội:** Đánh dấu `đạt` cho tất cả các dòng nhưng chỉ kèm nhận xét "trông ổn". Với bất kỳ mục nào không tìm thấy bằng chứng trong vòng một phút, hãy chuyển ngay về trạng thái `mở`.
 
 ## Ví dụ làm sẵn
 
-Ghi chú cửa ra của My, viết sau khi cô thực sự nhìn, như sau. Tổng `bom.csv` 1.620.000 ₫, giá ngày 23 tháng 9 năm 2026, file trong `notes/`. Đồng hồ: bíp trên ngắn đã biết, làm lại hôm nay. USB: board chưa tới; kế hoạch là "chỉ USB, không VM, dán cổng, rút; cáp trong ngăn kéo chưa chứng minh tới khi cổng đó hiện". Lộ trình: "A, ESP32, TB6612FNG, không LiDAR trước teleop bánh nhấc với dừng 300 ms. B trên máy Ubuntu lab sau Chương 07". Cell: `chưa mua`. Thẻ lên nguồn: đã chụp, VM cuối, có dòng bánh nhấc. Nhật ký cài: Arduino IDE chưa cài trên laptop, Jazzy chưa cài, Gazebo Harmonic chỉ được gọi tên.
+Ghi chú kiểm tra đầu ra của My sau khi đối chiếu thực tế như sau: tổng `bom.csv` là 1.620.000 ₫ (giá ngày 23 tháng 9 năm 2026, lưu trong `notes/`); đồng hồ kêu bíp rõ khi chập que (đã thử lại hôm nay); cáp USB ghi nhận mạch chưa về kèm kế hoạch "chỉ cắm USB, không nối VM, ghi tên cổng rồi rút; cáp hiện có ở trạng thái chưa chứng minh cho tới khi hiện cổng"; câu lộ trình là "Lộ trình A, ESP32, TB6612FNG, không mua LiDAR trước khi đạt teleop nhấc bánh có dừng 300 ms; Lộ trình B trên máy Ubuntu phòng lab sau Chương 07"; pin ghi `chưa mua`; thẻ cấp nguồn đã chụp ảnh đầy đủ bước VM cuối và nhấc bánh; nhật ký cài đặt ghi rõ chưa cài Arduino IDE trên laptop, chưa cài Jazzy và chỉ ghi tên Gazebo Harmonic.
 
-Cô tick kế hoạch đã viết, không tick cáp đã chứng minh, và để `cáp chưa chứng minh` hiện. Chỗ thiếu: một cái giá (40000 ₫ trên snapshot 23 tháng 9 năm 2026) và dây cắm. Khung xe thiếu là Sóng 2 và không chặn Chương 01. Thiếu giá thì chặn việc hàn, nên mỏ nóng ở ngoài bàn. Đo và nhận diện linh kiện thì được bắt đầu.
+My chỉ đánh dấu đạt cho kế hoạch USB chứ không đánh dấu đạt cho cáp dữ liệu, giữ nguyên dòng `cáp chưa chứng minh`. Những món còn thiếu của cô là giá đỡ mỏ hàn (40.000 ₫ theo giá ngày 23 tháng 9 năm 2026) và dây cắm. Khung xe thuộc Đợt 2 nên chưa chặn tiến độ Chương 01; thiếu giá đỡ chỉ tạm chặn phần thực hành hàn (không bật mỏ hàn), còn các bài đo và nhận diện linh kiện vẫn có thể bắt đầu bình thường.
 
-Một bạn khác, Khoa, có tiếng bíp, có thẻ, có câu lộ trình, và cũng có ảnh TP4056 nối qua hai cell vì "giắc vừa". Dòng cục sạc của anh là `mở`, và ảnh là bằng chứng lỗi, không phải sự sẵn sàng. Anh ngắt module, viết mỗi cell sẽ được sạc riêng tới 4,2 V hoặc không sạc, rồi mới được xem lại dấu tick. `bom.csv` của anh không có tổng. Anh quay lại bài 00-05 trước khi gọi cửa là đạt. Một stack nhắn tin trên Ubuntu sẽ không bắt được cả hai sơ suất.
+Trong khi đó, Khoa có đủ tiếng bíp đồng hồ, thẻ quy trình và câu lộ trình, nhưng ảnh chụp lại cho thấy mạch TP4056 đang kẹp qua đế hai cell pin vì "thấy vừa giắc". Mục bộ sạc của anh bị đánh `mở` vì bức ảnh là bằng chứng lỗi an toàn. Anh phải ngắt kết nối ngay, viết cam kết chỉ sạc riêng từng cell tới 4,2 V rồi mới được rà soát lại. Ngoài ra, tệp `bom.csv` của Khoa chưa có dòng tổng, nên anh cần quay lại bài 00-05 hoàn thiện trước khi chốt Chương 00.
 
 ## Video tham khảo
 
-- **Xem trước:** [EEVblog 1636 - Ultimate Multimeter Beginners Guide!](https://www.youtube.com/watch?v=52w3xeXrMU8) — EEVblog, tiếng Anh. Trước khi tick bàn đã sẵn sàng: đo thử một điện áp và một điện trở trên đồng hồ.
+- **Xem trước:** [EEVblog 1636 - Ultimate Multimeter Beginners Guide!](https://www.youtube.com/watch?v=52w3xeXrMU8) — EEVblog, tiếng Anh. Ôn lại cách đo điện áp và điện trở trên đồng hồ vạn năng trước khi xác nhận bàn lab đã sẵn sàng.
 
 ## Bài tập
 
-Các câu này hỏi bạn tìm chỗ thiếu mất an toàn. Chúng nói về buổi rà của bạn, hoặc các buổi rà dưới đây, không phải nhắc lại chương.
+Các tình huống dưới đây yêu cầu bạn chỉ ra thiếu sót gây mất an toàn trong buổi rà soát:
 
-1. Bài đo đầu của Chương 01 đòi thông mạch và điện áp một chiều. Mục mở nào trong danh sách cửa ra của bạn làm bài đó không thành thật hoặc không an toàn, và bằng chứng nào sẽ đóng nó?
-2. Một bạn tick "cáp USB đã chứng minh" vì LED board sáng. Không có tên cổng. Vì sao dấu tick sai, và Chương 02 có thể hỏng thế nào nếu họ giữ dấu đó?
-3. Thẻ lên nguồn bị thiếu, và bạn đó nói Chương 01 không có motor nên thẻ có thể chờ. Nêu một việc của Chương 01 (đo, hàn, hoặc một cell lithium đã ở trên kệ) mà thẻ lẽ ra phải ràng buộc.
-4. `bom.csv` liệt kê L298N và một đế 2S, tổng để trống, và câu lộ trình nói "ROS trước". Sự thật nào trong ba cái đó làm một bài thử motor sau này mất an toàn dù bài điện trở Chương 01 vẫn ổn? Giải thích bằng sụt khoảng 2 V hoặc bằng quy tắc cục sạc.
-5. Chưa mua cell, đồng hồ kêu, thẻ có, và `ros_ws/` trống trên Windows với sự thật đó đã được viết. Bạn này có được bắt đầu các bài nhận diện không cấp nguồn của Chương 01 không? Họ vẫn bị cấm làm gì?
+1. Bài đo đầu tiên của Chương 01 sử dụng thang thông mạch và điện áp một chiều. Nếu mục nào trong danh sách đầu ra còn `mở` sẽ khiến bài đo đó thiếu tin cậy hoặc mất an toàn, và bằng chứng nào giúp đóng mục đó?
+2. Một sinh viên đánh dấu "cáp USB đã chứng minh" chỉ vì thấy đèn LED nguồn trên mạch sáng, mà không có tên cổng serial. Dấu tick này sai ở đâu, và sẽ gây ra rắc rối gì khi sang Chương 02?
+3. Một bạn chưa viết thẻ quy trình cấp nguồn với lý do "Chương 01 chưa dùng động cơ nên để sau". Hãy nêu ít nhất một hoạt động ngay trong Chương 01 (đo đạc, hàn hoặc bảo quản cell lithium đang có sẵn) vẫn chịu sự ràng buộc trực tiếp của tấm thẻ này.
+4. Tệp `bom.csv` liệt kê L298N cùng đế pin 2S, bỏ trống dòng tổng, và câu lộ trình viết "học ROS trước". Hãy phân tích vì sao các yếu tố này làm mất an toàn hoặc gây sai lệch cho bài thử động cơ về sau (dựa trên mức sụt áp ~2 V và quy tắc sạc pin).
+5. Một sinh viên chưa mua pin, đã có tiếng bíp đồng hồ, đủ thẻ cấp nguồn, và giữ `ros_ws/` trống trên Windows kèm lý do rõ ràng. Bạn này đã được phép bắt đầu các bài nhận diện linh kiện không cấp nguồn của Chương 01 chưa, và vẫn bị cấm làm những gì?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Dòng đồng hồ đang mở: không bíp trên ngắn đã biết nghĩa là mọi "0 Ω" hoặc "3,3 V" sau này không đáng tin, và người rồi đo dòng hoặc ohm bừa có thể ngắn một cổng. Đóng bằng một tiếng bíp, hai que chạm, viết vào sổ. Thiếu khung xe không gây hư kiểu này.
-2. LED chỉ cho thấy điện đã tới. Cáp chỉ sạc không bao giờ hiện cổng serial, nên lần nạp Chương 02 thất bại theo kiểu trông như board hỏng. Dấu tick cần tên cổng hiện và mất theo phích, hoặc một kế hoạch chưa chứng minh viết rõ.
-3. Hàn vẫn cần giá, kính, và thông gió. Cell trên kệ vẫn cần dòng "từng cell, 4,2 V, không qua 2S". Đo USB 5 V khi que đỏ nằm ở lỗ dòng là cùng họ tai nạn.
-4. L298N sẽ rơi khoảng 2 V và khiến motor yếu trông như lỗi phần mềm, còn đế 2S cạnh một cục sạc không tên là cách TP4056 bị kẹp qua 8,4 V. "ROS trước" bỏ timeout lẽ ra phải đưa PWM về 0. Một trong ba cái là đủ để gọi bài thử motor mất an toàn. Tổng trống nghĩa là họ cũng không biết mình tưởng đã mua gì.
-5. Được, cho nhận diện không cấp nguồn và cho thông mạch trên chi tiết không nối nguồn, miễn tiếng bíp là thật. Họ vẫn bị cấm hàn khi chưa có giá, cấm nối nguồn motor, cấm sạc lithium, và cấm coi `ros_ws/` trống là lý do bỏ bàn lab sau này.
+1. Nếu mục đồng hồ vạn năng còn `mở` (chưa có tiếng bíp trên mối nối ngắn đã biết), mọi số đo "0 Ω" hay "3,3 V" về sau đều không đáng tin cậy, thậm chí dễ dẫn đến cắm nhầm lỗ đo dòng gây ngắn mạch nguồn. Cần đóng mục này bằng kết quả chạm hai que kêu bíp ghi rõ trong sổ. Thiếu khung xe không gây rủi ro này.
+2. Đèn LED sáng chỉ chứng tỏ cáp có cấp nguồn 5 V. Cáp chỉ sạc sẽ không bao giờ tạo cổng serial, khiến buổi nạp firmware Chương 02 thất bại theo cách rất dễ nhầm thành lỗi hỏng mạch. Bằng chứng hợp lệ phải là tên cổng xuất hiện/biến mất theo thao tác cắm rút, hoặc một kế hoạch kiểm tra ghi rõ `chưa chứng minh`.
+3. Thực hành hàn ở Chương 01 vẫn bắt buộc có giá đỡ, kính bảo hộ và thông gió; nếu đã có cell lithium trên kệ vẫn phải tuân thủ quy tắc sạc từng cell 4,2 V và không kẹp TP4056 qua đế 2S; ngoài ra việc đo nguồn USB 5 V khi quên que đỏ ở lỗ đo dòng cũng là tai nạn cùng nhóm.
+4. L298N gây sụt khoảng 2 V khiến động cơ yếu và dễ nhầm sang lỗi phần mềm; đế 2S không đi kèm quy chuẩn sạc rõ ràng dễ dẫn đến kẹp TP4056 vào bộ pin 8,4 V; còn "học ROS trước" bỏ qua lớp timeout ngắt PWM 300 ms. Bỏ trống dòng tổng cũng cho thấy chưa kiểm soát được cấu hình đã đặt mua.
+5. Được phép bắt đầu các bài nhận diện linh kiện không cấp nguồn và đo thông mạch trên mạch đã ngắt điện. Tuy nhiên, bạn này vẫn không được hàn khi chưa có giá đỡ, không được cấp nguồn động cơ, không được sạc pin lithium khi chưa kiểm tra bộ sạc, và không được lấy việc `ros_ws/` trống làm lý do trì hoãn thực hành phần cứng.
 
 </details>
 
 ## Đọc thêm
 
-Cửa này không thêm một bài lý thuyết mới. Mở lại các trang này chỉ cho dòng vẫn còn mở.
+Bài kiểm tra đầu ra không bổ sung lý thuyết mới; chỉ mở lại các tài liệu sau cho những hạng mục đang ở trạng thái `mở`:
 
-- [Cách dùng đồng hồ](https://learn.sparkfun.com/tutorials/how-to-use-a-multimeter) — nếu bài bíp thất bại và bạn cần vạch cùng các lỗ được giải thích lại.
-- [Mức logic](https://learn.sparkfun.com/tutorials/logic-levels) — nếu lệnh cấm 5 V trên thẻ là dòng bạn vừa viết lại.
-- [Cài ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Installation.html) — chỉ để xác nhận bạn không cài nó trên hệ điều hành sai. Một `ros_ws/` trống trên Windows là kết quả đúng của Chương 00.
+- [Cách dùng đồng hồ](https://learn.sparkfun.com/tutorials/how-to-use-a-multimeter) — xem lại nếu phép thử thông mạch không kêu và cần đối chiếu vị trí núm vặn, lỗ cắm que đo.
+- [Mức logic](https://learn.sparkfun.com/tutorials/logic-levels) — xem lại nếu bạn vừa phải bổ sung lệnh cấm đưa mức 5 V vào chân 3,3 V trên thẻ quy trình.
+- [Cài ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Installation.html) — chỉ dùng để đối chiếu yêu cầu hệ điều hành Ubuntu 24.04; giữ `ros_ws/` trống trên Windows là kết quả đúng của Chương 00.
 
 ## Mua ở Việt Nam
 
-Mua các chỗ thiếu buổi rà đã viết, rồi dừng. Giỏ chính là [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Các trang dụng cụ dưới đây là snapshot Hshop ngày **23 tháng 9 năm 2026**. URL tìm kiếm là trang tìm kiếm.
+Chỉ mua bổ sung những món còn thiếu từ buổi rà soát, không mua dư. Danh sách vật tư chính vẫn nằm tại [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Bảng giá dụng cụ dưới đây được ghi nhận từ Hshop ngày **23 tháng 9 năm 2026**:
 
-| Nếu buổi rà nói thiếu cái này | Snapshot | Link |
+| Hạng mục còn thiếu theo buổi rà soát | Giá tham khảo | Đường dẫn |
 | --- | ---: | --- |
-| Không đồng hồ, hoặc đồng hồ không bíp và bạn thay | 285000 ₫ hoặc 185000 ₫ | [UT33D+](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang), [Wadfow WDM1501](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms) |
-| Không mỏ | 75000 ₫ | [Wadfow 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) |
-| Không giá | 40000 ₫ | [giá](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) |
-| Không thiếc 0,8 mm | 24000 ₫ | [dây Sn63](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire) |
-| Không kìm cắt | 35000 ₫ | [kìm 170](https://hshop.vn/kim-cat-day-dien-nho-170-cat-chan-linh-kien-dien-tu) |
-| Không breadboard | 35000 ₫ | [board 830 điểm](https://hshop.vn/test-board-cammb-102) |
+| Chưa có đồng hồ (hoặc đồng hồ không bíp cần thay mới) | 285.000 ₫ hoặc 185.000 ₫ | [UT33D+](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang), [Wadfow WDM1501](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms) |
+| Thiếu mỏ hàn | 75.000 ₫ | [Wadfow 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) |
+| Thiếu giá đỡ mỏ hàn | 40.000 ₫ | [giá đỡ](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) |
+| Thiếu thiếc hàn 0,8 mm | 24.000 ₫ | [dây Sn63](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire) |
+| Thiếu kìm cắt chân | 35.000 ₫ | [kìm 170](https://hshop.vn/kim-cat-day-dien-nho-170-cat-chan-linh-kien-dien-tu) |
+| Thiếu breadboard | 35.000 ₫ | [board 830 lỗ](https://hshop.vn/test-board-cammb-102) |
 
-Một đồng hồ, không phải cả hai. Dây cắm và cáp dữ liệu, nếu đó là các dòng mở: [Shopee, cáp USB data](https://shopee.vn/search?keyword=c%C3%A1p%20usb%20data) và [Lazada, dây jumper](https://www.lazada.vn/catalog/?q=d%C3%A2y%20jumper). Kính nếu thẻ nói còn thiếu: [Shopee, kính bảo hộ](https://shopee.vn/search?keyword=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99). [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/) là trang chủ cửa hàng, hữu ích khi bạn đứng tại quầy với danh sách thiếu trong tay. Đừng thêm LiDAR, Pi, hay oscilloscope để đóng Chương 00.
+Chỉ cần chọn một mẫu đồng hồ vạn năng. Nếu thiếu dây cắm, cáp USB truyền dữ liệu hoặc kính bảo hộ, bạn có thể tìm qua các trang tìm kiếm: [Shopee, cáp USB data](https://shopee.vn/search?keyword=c%C3%A1p%20usb%20data), [Lazada, dây jumper](https://www.lazada.vn/catalog/?q=d%C3%A2y%20jumper) và [Shopee, kính bảo hộ](https://shopee.vn/search?keyword=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99). Ngoài ra, [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/) là hai địa chỉ cửa hàng linh kiện thuận tiện nếu bạn đến mua trực tiếp theo danh sách thiếu. Không cần mua thêm LiDAR, Raspberry Pi hay máy hiện sóng để hoàn thành Chương 00.

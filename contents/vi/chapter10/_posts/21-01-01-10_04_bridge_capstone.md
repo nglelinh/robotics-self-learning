@@ -15,51 +15,51 @@ Thời lượng: **~90 phút**.
 
 ## Mục tiêu
 
-Bạn chạy một node `rclpy` subscribe `/cmd_vel`, đổi `linear.x` và `angular.z` thành tốc độ vành trái và phải với khẩu độ $$L = 0.16$$ m, rồi ánh xạ các tốc độ đó sang số nguyên chương 08. Bạn ghi tỉ lệ ở một chỗ, 0,5 m/s vành thành số 100, và chỉ ra lệnh thẳng 0,2 m/s thành payload `V,40,40`. Bạn viết payload đó thành khung có độ dài: `STX 0xAA`, độ dài, payload ASCII, XOR, `0x0A`, và ép `V,0,0` lên dây khi 0,3 s không có Twist. Bạn chứng minh node bằng một cặp PTY `socat` và một parser nhỏ, nên lab không cần robot. Bạn nói được cái gì vẫn dừng động cơ nếu chính tiến trình cầu bị giết, và giữ bánh trên không nếu driver thật đang nối.
+Sau bài học này, bạn sẽ chạy được một node `rclpy` đăng ký nhận `/cmd_vel`, chuyển đổi `linear.x` và `angular.z` thành vận tốc dài vành bánh trái và bánh phải với khoảng cách hai bánh $$L = 0.16$$ m, rồi ánh xạ sang dải số nguyên của chương 08. Bạn khai báo tập trung hệ số quy đổi (0,5 m/s tương ứng số nguyên 100) để kiểm chứng rằng lệnh chạy thẳng 0,2 m/s tạo ra payload `V,40,40`, đóng gói thành khung dữ liệu chuẩn (`STX 0xAA`, byte độ dài, payload ASCII, byte kiểm tra XOR và `0x0A`), đồng thời tự động gửi `V,0,0` khi quá 0,3 s không nhận được `Twist` mới. Bạn kiểm thử toàn bộ node mà không cần robot thật thông qua cặp cổng giả lập PTY (`socat`) cùng một bộ giải mã (parser) nhỏ, phân biệt được cơ chế nào vẫn dừng động cơ nếu tiến trình cầu nối bị tắt đột ngột, và luôn nhấc bánh xe khỏi mặt đất khi thử với phần cứng thật.
 
 ## Kiến thức cần trước
 
-Khung bài 08-01 và timeout firmware 300 ms, động học nghịch bài 08-04, và một shell Jazzy có `rclpy`. Gói Python `pyserial` lấy từ apt dưới tên `python3-serial`, để nó ở cùng trình thông dịch với ROS. `socat` tạo cổng serial giả. Không cần Gazebo đang chạy, và đừng để agent serial micro-ROS giữ cổng. Capstone thật là tùy chọn và để cuối, bánh nhấc lên.
+Nắm lại cấu trúc khung serial và watchdog firmware 300 ms ở bài 08-01, động học nghịch ở bài 08-04 và có sẵn môi trường Jazzy cài `rclpy`. Cài đặt thư viện `pyserial` qua `apt` (`python3-serial`) để dùng chung trình thông dịch Python với ROS, cùng công cụ `socat` để tạo cặp cổng serial ảo. Bài này không cần chạy Gazebo và không để micro-ROS serial agent chiếm giữ cổng. Thử nghiệm với xe Capstone thật là bước tùy chọn ở cuối bài (bắt buộc nhấc bánh khỏi sàn).
 
 ## Vì sao bài này nằm trên lộ trình
 
-Node này là lần đầu đồ thị ROS và firmware Capstone dùng chung một lệnh. Mô phỏng đã nghe `/cmd_vel`. Nav2, và một policy học về sau, nên xuất bản đúng kiểu đó. Cả hai không biết `0xAA` nghĩa là gì, và firmware ESP32 hiện tại không biết Twist là gì. Cầu nối là chỗ duy nhất mét trên giây thành số nguyên −100…100. micro-ROS chỉ được phép sau khi file này chạy: cùng tên topic, cùng tỉ lệ, cùng câu chuyện watchdog, với log parser làm bằng chứng.
+Node cầu nối này là điểm giao nhau đầu tiên giữa đồ thị ROS 2 và firmware Capstone A. Mô phỏng Gazebo đã lắng nghe `/cmd_vel`; về sau, cả Nav2 lẫn các mô hình học máy cũng xuất bản đúng kiểu message này mà không cần biết đến khung byte `0xAA`, trong khi firmware ESP32 hiện tại không hiểu `Twist`. Cầu nối đóng vai trò điểm chuyển đổi duy nhất từ vận tốc mét/giây sang số nguyên −100…100. Chỉ sau khi cầu nối này chạy ổn định với log kiểm chứng từ parser (đúng tên topic, đúng hệ số quy đổi và đúng hành vi watchdog), bạn mới nên chuyển sang micro-ROS.
 
 ![Twist đi vào, khung chương 08 đi ra, telemetry quay lại]({{ site.imgurl }}/generated/ch10_serial_bridge.png)
 
 ## Khái niệm
 
-`geometry_msgs/Twist` mang một vectơ tuyến tính và một vectơ góc. Khung vi sai chỉ tôn trọng hai trong sáu số đó. Tốc độ tiến $$v$$ là `linear.x`, mét trên giây. Tốc độ yaw $$\omega$$ là `angular.z`, radian trên giây, dương là cua trái theo REP-103. `linear.y` sẽ là trượt ngang. Cơ cấu không làm được việc đó, nên callback bỏ `linear.y` thay vì trộn trộm vào bánh.
+Message `geometry_msgs/Twist` chứa một vector vận tốc dài và một vector vận tốc góc, nhưng khung xe vi sai chỉ sử dụng hai trong sáu thành phần đó: vận tốc tiến $$v$$ là `linear.x` (m/s) và vận tốc góc yaw $$\omega$$ là `angular.z` (rad/s, dương khi quay sang trái theo REP-103). Thành phần `linear.y` biểu thị chuyển động trượt ngang mà cơ cấu vi sai không thực hiện được, nên hàm callback sẽ bỏ qua trường này thay vì trộn vào lệnh bánh xe.
 
-Bản đồ nghịch từ bài 08-04, khẩu độ $$L$$ tính bằng mét:
+Áp dụng công thức động học nghịch từ bài 08-04 với khoảng cách hai bánh $$L$$ (m):
 
 $$
 v_R = v + \omega \frac{L}{2}, \qquad v_L = v - \omega \frac{L}{2}
 $$
 
-Khung khóa học dùng $$L = 0.16$$, nên $$L/2 = 0.08$$. $$v_L$$ và $$v_R$$ là tốc độ vành, mét trên giây, dương là tiến. Chúng không phải PWM, và không phải số nguyên trên dây.
+Với khung xe khóa học có $$L = 0.16$$ m ($$L/2 = 0.08$$ m), $$v_L$$ và $$v_R$$ là vận tốc tiếp tuyến của hai bánh (m/s, dương khi tiến), chưa phải giá trị PWM hay số nguyên truyền trên dây.
 
-Dây vẫn là số nguyên chương 08, −100…100. Một hằng tỉ lệ nối hai thế giới. Bài này định full scale là 0,5 m/s vành:
+Để đưa về dải số nguyên −100…100 của chương 08, ta định nghĩa hằng số quy đổi toàn thang (full scale) bằng 0,5 m/s:
 
 $$
 n = \mathrm{clip}\left(\mathrm{round}\left(v_{\mathrm{wheel}} \cdot \frac{100}{0.5}\right), -100, 100\right)
 $$
 
-Vậy 0,5 m/s thành 100, và 0,2 m/s thành 40. Hằng số 0,5 là một lựa chọn viết ở đầu file. Phép quay chương 07 cho tốc độ vành khác tại số 100 thì đổi hằng số và chú thích cùng lúc, cả hai phía. Ép mét thành `int` trước khi nhân tỉ lệ là lỗi khác: `int(0.2)` bằng 0, robot ngồi im trong khi topic trông đúng.
+Theo đó, 0,5 m/s tương ứng 100 và 0,2 m/s tương ứng 40. Hằng số `0.5` được khai báo rõ ở đầu tệp; nếu phép đo thực tế ở chương 07 cho tốc độ vành bánh khác tại mức 100, hãy cập nhật đồng thời hằng số và ghi chú ở cả hai phía. Tránh lỗi ép kiểu `int` trước khi nhân tỉ lệ (`int(0.2)` bằng `0`), vì khi đó robot sẽ đứng yên dù dữ liệu trên topic hoàn toàn đúng.
 
-Payload là ASCII, `V,{left},{right}`, bánh trái trước. Khung quanh nó không đổi: byte `0xAA`, một byte độ dài bằng độ dài payload, payload, một XOR của mọi byte payload, và `0x0A`.
+Payload có định dạng ASCII `V,{left},{right}` (bánh trái đứng trước), bọc trong khung cố định gồm byte mở đầu `0xAA`, một byte độ dài payload, chuỗi payload, một byte checksum XOR trên toàn bộ payload và byte kết thúc `0x0A`:
 
 $$
 c = b_0 \oplus b_1 \oplus \cdots \oplus b_{n-1}
 $$
 
-Cầu lặp khung mới nhất khoảng 20 lần một giây. Timeout firmware là 300 ms không có khung tốt, nên một khung rồi im sẽ dừng board kể cả khi ROS vẫn muốn chuyển động. Một timer thứ hai trong cầu nhìn Twist. 0,3 s không có Twist thì lệnh lặp lại thành `V,0,0`.
+Cầu nối gửi lặp lại khung lệnh mới nhất ở tần số khoảng 20 Hz. Do firmware có timeout 300 ms, việc chỉ gửi một khung duy nhất rồi ngừng sẽ khiến mạch tự dừng dù ROS vẫn muốn xe tiếp tục chạy. Đồng thời, một timer bên trong cầu nối theo dõi thời điểm nhận `Twist` gần nhất: nếu quá 0,3 s không có lệnh mới, khung gửi đi sẽ tự động chuyển thành `V,0,0`.
 
-Cần cả hai cái dừng. Teleop chết mà cầu còn sống thì cầu là bên gửi số không. Cầu chết hoặc cáp USB rời thì watchdog firmware là cái dừng còn lại, và chỉ khi firmware có implement. Khối `finally` không chạy khi tiến trình bị giết hoặc cáp bị rút. Hãy thử publisher im, và đừng nhận là đã thử tiến trình bị giết.
+Cả hai lớp bảo vệ đều bắt buộc phải có: nếu node teleop tắt nhưng cầu nối vẫn chạy, cầu nối chịu trách nhiệm gửi `V,0,0`; nếu chính cầu nối bị tắt đột ngột hoặc cáp USB bị rút, watchdog trên firmware sẽ dừng động cơ (khối `finally` của Python sẽ không kịp chạy khi tiến trình bị ngắt cưỡng bức hoặc mất cáp). Khi kiểm thử, cần phân biệt rõ phép thử dừng publisher với phép thử rút cáp.
 
-Telemetry có thể trở về dạng chữ. Node publish nó thành `std_msgs/String` trên `/capstone_telem` khi có byte, không thì chỉ log. Đừng chặn nhịp 20 Hz để đợi một dòng. Parser chạy khô không trả lời, nên bằng chứng là dòng `OK` của parser.
+Dữ liệu telemetry phản hồi dạng văn bản từ MCU (nếu có) sẽ được node đọc không chặn và xuất bản thành `std_msgs/String` lên `/capstone_telem`, đảm bảo không làm trễ nhịp gửi 20 Hz. Trong bước chạy thử nghiệm với `socat`, parser chỉ đọc một chiều nên bằng chứng kiểm thử là các dòng `OK` in ra trên terminal parser.
 
-Lưu node thành `capstone_bridge.py`. Tham số là `port` và `baud`, như hướng dẫn tham số Jazzy. Buổi chạy khô trỏ `port` vào một PTY. Board thật dùng `/dev/ttyUSB0` sau khi user ở nhóm `dialout`. Để `use_sim_time` không đặt, để phép kiểm 0,3 s dùng đồng hồ tường. Thời gian mô phỏng mà không có `/clock` sẽ đông cứng phép kiểm đó.
+Lưu mã nguồn sau thành `capstone_bridge.py`. Hai tham số cấu hình là `port` và `baud`: khi chạy thử không có xe, trỏ `port` vào một đầu PTY; khi nối mạch thật, trỏ vào `/dev/ttyUSB0` (sau khi đã thêm user vào nhóm `dialout`). Giữ `use_sim_time` ở mặc định (`False`) để phép đo timeout 0,3 s chạy theo đồng hồ thực thay vì bị treo chờ `/clock`.
 
 ```python
 #!/usr/bin/env python3
@@ -157,11 +157,11 @@ if __name__ == "__main__":
     main()
 ```
 
-Lệnh thẳng không bắt được đảo trái/phải, vì hai số nguyên trùng nhau. `angular.z` dương phải cho số nguyên bánh phải lớn hơn bánh trái. Đó là phép kiểm dấu trong lab.
+Lưu ý rằng lệnh đi thẳng không phát hiện được lỗi đảo chiều trái/phải vì hai bánh có cùng giá trị; cần kiểm tra thêm bằng lệnh quay với `angular.z` dương (giá trị bánh phải phải lớn hơn bánh trái).
 
 ## Ví dụ làm từng bước
 
-Đi thẳng, $$v = 0.2$$, $$\omega = 0$$, $$L = 0.16$$:
+Khi chạy thẳng ($$v = 0.2$$, $$\omega = 0$$, $$L = 0.16$$):
 
 $$
 v_L = v_R = 0.2
@@ -171,7 +171,7 @@ $$
 n = \mathrm{round}\left(0.2 \cdot \frac{100}{0.5}\right) = 40
 $$
 
-Payload `V,40,40`. Một cú cua trái nhẹ, $$v = 0$$, $$\omega = +0.5$$:
+Payload thu được là `V,40,40`. Khi quay trái tại chỗ ($$v = 0$$, $$\omega = +0.5$$):
 
 $$
 v_L = -0.5 \times 0.08 = -0.04, \qquad v_R = 0.04
@@ -181,16 +181,16 @@ $$
 n_L = \mathrm{round}(-0.04 \times 200) = -8, \qquad n_R = 8
 $$
 
-Payload `V,-8,8`. Parser hiện `V,8,-8` thì thứ tự trả về trong `wheel_ints` bị ngược, robot sẽ cua sai chiều trên sàn.
+Payload thu được là `V,-8,8`. Nếu parser hiển thị ngược thành `V,8,-8`, thứ tự trả về trong `wheel_ints` đang bị đảo và xe sẽ quay sai chiều trên thực tế.
 
-Dây chạy khô là một cặp pseudo-terminal:
+Tạo cặp cổng serial ảo bằng `socat`:
 
 ```bash
 sudo apt install socat python3-serial
 socat -d -d pty,raw,echo=0 pty,raw,echo=0
 ```
 
-`socat` in hai đường, ví dụ `/dev/pts/3` và `/dev/pts/4`. Tham số `port` của cầu là một trong hai. Parser lấy từ bài 08-01 nghe đầu kia. Lưu thành `pty_parser.py`:
+`socat` sẽ in ra hai đường dẫn PTY (ví dụ `/dev/pts/3` và `/dev/pts/4`). Trỏ cầu nối vào một đầu và dùng parser từ bài 08-01 lắng nghe ở đầu kia. Lưu mã parser thành `pty_parser.py`:
 
 ```python
 import serial, sys
@@ -225,16 +225,20 @@ while True:
         print("OK", payload.decode())
 ```
 
+Chạy parser trên đầu PTY thứ hai:
+
 ```bash
 python3 pty_parser.py /dev/pts/4
 ```
+
+Chạy cầu nối trên đầu PTY thứ nhất:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 python3 capstone_bridge.py --ros-args -p port:=/dev/pts/3
 ```
 
-Rồi từ shell thứ tư:
+Mở terminal thứ tư và gửi một lệnh `Twist`:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -242,66 +246,66 @@ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
   "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 ```
 
-Parser phải in `OK V,40,40` vài lần, khoảng 20 Hz, và trong khoảng một giây im phải in `OK V,0,0`. Log cầu phải hiện cùng hai chuỗi khi số nguyên đổi. Cặp đó là lab.
+Parser phải in ra `OK V,40,40` vài lần ở nhịp 20 Hz, sau đó (trong vòng chưa đầy một giây kể từ khi ngừng gửi) tự chuyển sang `OK V,0,0`. Log của node cầu nối cũng hiển thị chính xác hai chuỗi này khi giá trị thay đổi.
 
 ## Lab
 
-1. Cài `socat` và `python3-serial`. Source Jazzy. Xác nhận `printenv ROS_DISTRO` là `jazzy`.
-2. Bật `socat` như ví dụ. Ghi cả hai đường PTY. Để `socat` chạy.
-3. Bật `pty_parser.py` trên đường thứ hai.
-4. Bật `capstone_bridge.py` với `-p port:=` trỏ đường thứ nhất. Node phải đứng vững. Traceback lúc mở nghĩa là bạn đảo đường hoặc `socat` đã thoát.
-5. Xuất bản một Twist với `linear.x` 0,2 và `angular.z` 0, bằng lệnh ở trên. Nhìn parser.
-6. Đợi khoảng một giây không xuất bản nữa. Parser phải chuyển từ `V,40,40` sang `V,0,0` dù tiến trình cầu vẫn sống.
-7. Xuất bản `angular.z` 0,5 với `linear.x` 0. Xác nhận `OK V,-8,8`. Thấy `V,8,-8` thì sửa `wheel_ints` trước khi động cơ thật quay.
-8. Chỉ khi Capstone ở trên bàn: bánh nhấc khỏi mặt đất, driver ăn pack robot, USB chỉ để serial. Thêm user vào `dialout` nếu `python3` không mở được `/dev/ttyUSB0`, rồi đăng xuất và đăng nhập lại. Chạy cùng node với `-p port:=/dev/ttyUSB0`. Cả hai bánh phải nhích tiến cho lệnh thẳng và im sau khi bạn ngừng xuất bản. Rút cáp là phép thử riêng, làm một lần, bánh trên không: rút USB và xác nhận firmware, không phải cầu, là bên đưa PWM về không.
+1. Cài `socat` và `python3-serial`, nạp môi trường Jazzy và xác nhận `printenv ROS_DISTRO` là `jazzy`.
+2. Khởi chạy `socat` như ví dụ, ghi lại hai đường dẫn PTY và giữ tiến trình hoạt động.
+3. Chạy `pty_parser.py` trên đường dẫn PTY thứ hai.
+4. Chạy `capstone_bridge.py` với `-p port:=` trỏ vào đường dẫn PTY thứ nhất. Nếu gặp traceback khi mở cổng, kiểm tra xem bạn có nhập nhầm đường dẫn hay `socat` đã thoát chưa.
+5. Xuất bản một message `Twist` với `linear.x = 0.2` và `angular.z = 0`, theo dõi đầu ra của parser.
+6. Chờ khoảng một giây không gửi thêm lệnh nào: parser phải chuyển từ `V,40,40` về `V,0,0` trong khi cầu nối vẫn chạy bình thường.
+7. Xuất bản `angular.z = 0.5` với `linear.x = 0` và xác nhận parser in `OK V,-8,8` (nếu hiện `V,8,-8`, sửa ngay hàm `wheel_ints` trước khi thử với động cơ thật).
+8. *(Tùy chọn với phần cứng thật)* Đặt xe Capstone lên bàn với hai bánh nhấc khỏi mặt đất, cấp nguồn động cơ từ pin riêng và chỉ dùng cáp USB cho serial. Nếu Python báo lỗi quyền mở `/dev/ttyUSB0`, thêm user vào nhóm `dialout` rồi đăng xuất/đăng nhập lại. Chạy cầu nối với `-p port:=/dev/ttyUSB0`: hai bánh phải nhích tiến khi có lệnh thẳng rồi dừng ngay sau khi ngừng gửi. Kiểm tra thêm một lần tình huống rút cáp USB (vẫn giữ bánh trên không) để xác nhận watchdog firmware tự đưa PWM về 0.
 
 **Kết quả mong đợi**
 
-Sau lần xuất bản thẳng, parser in:
+Ngay sau lệnh chạy thẳng, parser in:
 
 ```text
 OK V,40,40
 ```
 
-Khoảng một giây sau khi publisher im, cầu vẫn sống:
+Khoảng một giây sau khi ngừng gửi (cầu nối vẫn hoạt động):
 
 ```text
 OK V,0,0
 ```
 
-Phép kiểm yaw in `OK V,-8,8`. Trên board thật, cả hai bánh quay tiến trong thời gian ngắn hơn một giây rồi dừng. Chúng không được quay tiếp sau khi publisher đã dừng.
+Phép kiểm tra góc quay in `OK V,-8,8`. Khi thử trên phần cứng thật, cả hai bánh chỉ quay tiến trong chưa đầy một giây rồi dừng hẳn, không được tiếp tục quay sau khi publisher kết thúc.
 
-**Khi hỏng thì thường vì**
+**Các lỗi thường gặp**
 
-| Bạn thấy | Nguyên nhân hay gặp |
+| Hiện tượng | Nguyên nhân thường gặp |
 | --- | --- |
-| `OK V,8,-8` khi yaw dương | Trái và phải bị đảo trong `wheel_ints` hoặc trong thứ tự payload |
-| `OK V,0,0` trong lệnh 0,2 m/s, hoặc `V,20,20` | Mét bị ép thành int, hoặc full scale là 1,0 m/s thay vì 0,5 m/s |
-| Parser giữ `V,40,40` sau khi bạn ngừng xuất bản | Watchdog của cầu không nằm trong tick ghi khung; firmware cũng sẽ chạy tiếp nếu timeout của nó thiếu |
-| Bánh chạy tiếp sau khi bạn giết cầu | Watchdog firmware là cái dừng còn lại, và nó chưa có hoặc chậm hơn nhiều so với 300 ms |
-| `Permission denied` trên `/dev/ttyUSB0` | User không ở nhóm `dialout`, hoặc phiên đăng nhập có trước lúc đổi nhóm |
-| Parser không in gì, cầu vẫn sống | Hai chương trình cùng một PTY, hoặc `socat` thiếu `echo=0` và một reader khác lấy mất byte |
+| In `OK V,8,-8` khi `angular.z` dương | Bị đảo thứ tự trái/phải trong `wheel_ints` hoặc trong chuỗi payload |
+| In `OK V,0,0` (hoặc `V,20,20`) cho lệnh 0,2 m/s | Ép vận tốc mét/giây sang `int` quá sớm, hoặc đặt sai hệ số full scale là 1,0 m/s thay vì 0,5 m/s |
+| Parser tiếp tục in `V,40,40` sau khi ngừng gửi | Logic watchdog của cầu nối không nằm trong vòng `tick` gửi khung (và firmware cũng sẽ chạy mãi nếu thiếu timeout) |
+| Bánh vẫn quay sau khi tắt cầu nối | Watchdog trên firmware chưa hoạt động hoặc có ngưỡng thời gian lớn hơn 300 ms |
+| Báo `Permission denied` khi mở `/dev/ttyUSB0` | Tài khoản chưa thuộc nhóm `dialout` hoặc chưa đăng nhập lại sau khi cập nhật nhóm |
+| Parser không in gì dù cầu nối đang chạy | Mở nhầm cùng một đường PTY, hoặc `socat` thiếu `echo=0` / có tiến trình khác đang đọc chung cổng |
 
 ## Mua ở Việt Nam
 
-Không có linh kiện mới. Buổi chạy khô là `socat` và Python. Bản phần cứng dùng Capstone và cáp USB bạn đã có. Chỉ tìm “ESP32” trên [hshop.vn](https://hshop.vn/) nếu board đó đã chết. DevKit thay trên Shopee là `ESP32 DevKit V1 30 chân`, khoảng 2026 khoảng 80.000–180.000 đồng, kiểm tra trước khi trả. Đừng nuôi động cơ từ cáp USB đó.
+Bài thực hành không cần mua thêm linh kiện mới: phần chạy thử dùng `socat` và Python, phần kiểm thử thật dùng xe Capstone và cáp USB sẵn có. Chỉ cần tìm mua thay thế bo "ESP32" trên [hshop.vn](https://hshop.vn/) hoặc `ESP32 DevKit V1 30 chân` trên Shopee (giá tham khảo 2026 khoảng 80.000–180.000 đồng) nếu mạch cũ bị hỏng. Tuyệt đối không nuôi động cơ từ nguồn cổng USB.
 
 ## Video tham khảo
 
-- **Xem trước:** [How to start develop micro-ROS on ESP32 quickly!](https://www.youtube.com/watch?v=48SxC6LBVs8) — stepbystep-robotics, tiếng Anh. Đường từ firmware ESP32 lên graph ROS 2. Capstone A là phía MCU của cây đó.
-- [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Topic cmd_vel phải có người nhận. Nhìn graph trước khi đổ lỗi cho motor.
+- **Xem trước:** [How to start develop micro-ROS on ESP32 quickly!](https://www.youtube.com/watch?v=48SxC6LBVs8) — stepbystep-robotics (tiếng Anh). Minh họa kết nối giữa firmware ESP32 và đồ thị ROS 2, tương ứng với phía vi điều khiển của Capstone A.
+- [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade (tiếng Anh). Nhắc lại cơ chế truyền nhận topic `/cmd_vel`, giúp kiểm tra đồ thị trước khi nghi ngờ lỗi động cơ.
 
 ## Bài tập
 
-1. Tính số nguyên trên dây cho $$v = 0.2$$ m/s và $$\omega = 0.5$$ rad/s với $$L = 0.16$$ và tỉ lệ 0,5 m/s. Gợi ý: vành trái 0,16 m/s thành 32, vành phải 0,24 m/s thành 48, nên payload là `V,32,48`.
-2. Publisher dừng, tiến trình cầu vẫn sống, một giây trôi qua. Payload trên dây là gì, và timer nào đặt nó lên đó? Gợi ý: `V,0,0` từ watchdog Twist 0,3 s của cầu, không phải từ firmware, vì khung vẫn đang tới.
-3. Tiến trình cầu bị giết khi động cơ đã cấp và bánh trên không. Cái gì dừng chúng, và theo hạn nào? Gợi ý: watchdog firmware chương 08, khoảng 300 ms sau khung tốt cuối, vì khối `finally` của cầu không chạy.
-4. `ls -l /dev/ttyUSB0` hiện nhóm `dialout` và Python ném `Permission denied`. Bạn đổi gì, và vì sao phải đăng nhập lại? Gợi ý: thêm user vào `dialout`; tư cách nhóm được áp lúc đăng nhập, nên shell mới trong phiên cũ là chưa đủ.
-5. Một Twist tới với `linear.y = 0.3` và `linear.x = 0`. Bạn gửi số nguyên nào, và bỏ thành phần nào? Gợi ý: gửi số không chỉ từ $$v$$ và $$\omega$$; `linear.y` là trượt ngang mà khung vi sai không tạo được.
+1. Tính cặp số nguyên truyền trên dây khi $$v = 0.2$$ m/s, $$\omega = 0.5$$ rad/s với $$L = 0.16$$ m và hệ số toàn thang 0,5 m/s. *Gợi ý:* vận tốc vành trái là 0,16 m/s (tương ứng 32), vành phải là 0,24 m/s (tương ứng 48), nên payload là `V,32,48`.
+2. Sau khi publisher dừng một giây trong khi cầu nối vẫn chạy, payload nào đang được truyền trên dây và bộ định thời nào phát ra nó? *Gợi ý:* `V,0,0`, phát ra từ watchdog 0,3 s theo dõi `Twist` trong cầu nối (không phải từ firmware, vì các khung serial vẫn đến đều ở 20 Hz).
+3. Nếu tiến trình cầu nối bị tắt đột ngột khi động cơ đang quay (bánh nhấc trên không), cơ chế nào sẽ dừng bánh và sau bao lâu? *Gợi ý:* watchdog trên firmware chương 08 sẽ ngắt sau khoảng 300 ms kể từ khung hợp lệ cuối cùng, vì khối `finally` của cầu nối không kịp thực thi.
+4. Lệnh `ls -l /dev/ttyUSB0` hiển thị nhóm `dialout` nhưng Python vẫn báo `Permission denied`. Bạn cần xử lý thế nào và vì sao phải đăng nhập lại? *Gợi ý:* thêm user vào nhóm `dialout`; danh sách nhóm của người dùng chỉ được nạp lại khi bắt đầu phiên đăng nhập mới nên mở terminal mới trong phiên cũ chưa có tác dụng.
+5. Khi nhận một `Twist` có `linear.y = 0.3` và `linear.x = 0`, cầu nối sẽ gửi giá trị số nguyên nào và bỏ qua thành phần nào? *Gợi ý:* gửi `0, 0` vì chỉ tính từ $$v$$ và $$\omega$$; thành phần `linear.y` bị bỏ qua do cơ cấu vi sai không thể trượt ngang.
 
 ## Đọc thêm
 
-- [Tham số Jazzy](https://docs.ros.org/en/jazzy/How-To-Guides/Using-ros2-param.html) là giao diện đằng sau `-p port:=` và `declare_parameter`.
-- [REP-103](https://www.ros.org/reps/rep-0103.html) chốt dấu của `angular.z` mà `wheel_ints` thực hiện.
-- [REP-105](https://www.ros.org/reps/rep-0105.html) là cách đặt tên frame bạn giữ khi cùng Twist này được dùng trong mô phỏng và trên cầu.
-- [micro-ROS](https://micro.ros.org/) là đường truyền về sau. Quay lại chỉ sau khi parser này hiện `OK V,40,40` và dòng watchdog.
+- [Tham số Jazzy](https://docs.ros.org/en/jazzy/How-To-Guides/Using-ros2-param.html) — hướng dẫn chi tiết đằng sau cờ `-p port:=` và `declare_parameter`.
+- [REP-103](https://www.ros.org/reps/rep-0103.html) — chuẩn quy ước dấu của `angular.z` được cài đặt trong `wheel_ints`.
+- [REP-105](https://www.ros.org/reps/rep-0105.html) — chuẩn tên frame giữ thống nhất khi dùng chung `Twist` giữa mô phỏng và cầu nối thực tế.
+- [micro-ROS](https://micro.ros.org/) — giải pháp thay thế cầu nối về sau, chỉ nên quay lại sau khi parser đã xác nhận `OK V,40,40` và hành vi watchdog.

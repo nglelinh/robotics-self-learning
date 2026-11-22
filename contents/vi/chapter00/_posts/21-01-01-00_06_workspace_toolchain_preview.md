@@ -11,31 +11,29 @@ lesson_type: required
 draft: false
 ---
 
-Dành khoảng 70 phút trên đúng máy bạn sẽ dùng cho firmware. Bạn cần câu lộ trình từ bài 00-02. Chưa cần robot, Ubuntu, hay một lần biên dịch thành công. Mục tiêu là cây thư mục và một nhật ký cài nói thật thứ gì đã được cài hôm nay.
+Hãy dành khoảng 70 phút thực hiện bài học này trên chính chiếc máy tính bạn sẽ dùng để lập trình firmware. Bạn cần mở lại phát biểu lộ trình từ bài 00-02. Lúc này chưa cần có robot, chưa cần Ubuntu và cũng chưa cần biên dịch thành công một chương trình nào; mục tiêu duy nhất là dựng cây thư mục chuẩn và ghi một bản nhật ký cài đặt trung thực với tình trạng hiện tại của máy.
 
 ## Mục tiêu học
 
-Bạn sẽ **tạo** không gian làm việc với `notes/`, hoặc `firmware/esp32/` hoặc `firmware/pico/`, và một `ros_ws/` trống có câu giải thích vì sao trống. Bạn sẽ **chọn** đường ESP32 (Arduino IDE 2.x hoặc PlatformIO, lớp board `esp32dev`, serial 115200, cáp USB dữ liệu) hoặc đường Pico 2 (BOOTSEL, file UF2 MicroPython, Thonny hoặc `mpremote`). Bạn sẽ **ghi** phiên bản bạn thực sự thấy, kể cả dòng thành thật "chưa cài". Bạn sẽ **giải thích** vì sao ROS 2 Jazzy là bản cài Ubuntu 24.04 và vì sao Windows Subsystem cho Linux chưa phải lab robot. Bạn sẽ **gọi tên** Gazebo Harmonic mà không cài, và **ước lượng** một byte serial nhỏ thế nào so với timeout teleop 300 ms.
+Sau bài học này, bạn sẽ **khởi tạo** không gian làm việc gồm `notes/`, một trong hai thư mục `firmware/esp32/` hoặc `firmware/pico/`, và một thư mục `ros_ws/` trống kèm lời giải thích lý do. Bạn sẽ **chọn** công cụ lập trình phù hợp cho hướng ESP32 (Arduino IDE 2.x hoặc PlatformIO, nhóm board `esp32dev`, tốc độ serial 115200, cáp USB truyền dữ liệu) hoặc hướng Pico 2 (chế độ BOOTSEL, tệp UF2 MicroPython, Thonny hoặc `mpremote`). Bạn sẽ **ghi nhận** chính xác phiên bản phần mềm đang có (hoặc ghi thẳng `chưa cài`), **giải thích** vì sao ROS 2 Jazzy yêu cầu Ubuntu 24.04 và Windows Subsystem for Linux (WSL) chưa thay thế được bàn lab robot. Cuối cùng, bạn sẽ **nhận diện** vai trò của Gazebo Harmonic mà chưa cần cài đặt, đồng thời **ước lượng** thời gian truyền một byte serial nhỏ đến mức nào so với ngưỡng timeout teleop 300 ms.
 
 ## Cần có trước
 
-Bạn tạo được thư mục và dán chữ vào `notes/lab-notes.md`. Bài 00-01 tới 00-04 đã cho bạn các trường sổ, lộ trình, thẻ lên nguồn, và ảnh kiểm kê dụng cụ. Bài 00-05, hóa đơn vật tư, nên đã có dạng `bom.csv` hoặc một ghi chú có ngày; nếu chưa, viết `thiếu bom.csv` trong nhật ký cài thay vì bịa giá. Chưa cần đã hàn.
+Bạn chỉ cần biết tạo thư mục và cập nhật nội dung vào `notes/lab-notes.md`. Các bài từ 00-01 đến 00-04 đã chuẩn bị sẵn cấu trúc sổ lab, lộ trình, thẻ cấp nguồn và ảnh kiểm kê dụng cụ. Tệp `bom.csv` (hoặc ghi chú ngân sách có ngày) từ bài 00-05 nên đã hoàn thiện; nếu chưa xong, hãy ghi `thiếu bom.csv` vào nhật ký thay vì tự điền giá ước đoán. Hiện tại vẫn chưa cần kỹ năng hàn.
 
-## Vì sao việc này dính tới Capstone
+## Vì sao bài này gắn liền với Capstone
 
-Timeout của Chương 07 sống trong firmware bạn build lại được, trên board mà cổng serial bạn đã thấy xuất hiện. Topic ROS 2, sau này, là lớp nhắn tin trên hành vi đó. Nếu `ros_ws/` là đống gói cài dở trên laptop Windows, bạn sẽ sửa lỗi apt trong khi chân PWM còn chưa được thử. Một thư mục trống kèm lý do viết ra là bạn lab tốt hơn một tutorial bạn không làm xong. Gazebo Harmonic có thể chờ tới khi có robot mà hành vi im lặng bạn đã tin đủ để mô phỏng.
+Cơ chế timeout 300 ms của Chương 07 nằm trong firmware mà bạn có thể biên dịch lại bất cứ lúc nào trên một mạch đã nhận đúng cổng serial. Các topic ROS 2 về sau chỉ là lớp truyền thông đặt lên trên nền tảng đó. Nếu thư mục `ros_ws/` trên laptop Windows chứa đầy các gói cài đặt dang dở, bạn sẽ mất thời gian sửa lỗi phần mềm trong khi chân PWM chưa từng được kiểm tra. Một thư mục `ros_ws/` trống kèm lý do rõ ràng luôn hữu ích hơn một hướng dẫn cài đặt bỏ dở. Gazebo Harmonic hoàn toàn có thể chờ đến khi robot thực tế đã có hành vi dừng tin cậy để mô phỏng.
 
-## Thư mục, và mỗi thư mục được chứa gì
+## Cấu trúc thư mục và quy ước lưu trữ
 
-Đặt thư mục khóa ở chỗ bạn sẽ tìm lại. Các tên dưới đây là hợp đồng.
+Hãy đặt thư mục gốc của khóa học ở nơi dễ tìm trên máy tính và tuân thủ đúng tên các thư mục con sau:
 
-`notes/` giữ `lab-notes.md` và, khi bài 00-05 xong, một bản hoặc một đường chỉ tới `bom.csv`. Ảnh có thể nằm cạnh markdown hoặc trong `notes/img/`. Thư mục này không phải chỗ để thư viện bạn tải "phòng khi".
+- `notes/`: lưu tệp `lab-notes.md` và tệp `bom.csv` (khi hoàn thành bài 00-05). Ảnh chụp thực hành có thể để cùng thư mục hoặc đặt trong `notes/img/`. Không dùng thư mục này để lưu các thư viện tải sẵn "phòng khi dùng".
+- `firmware/esp32/` hoặc `firmware/pico/`: chứa mã nguồn cho vi điều khiển bạn đã chọn theo câu lộ trình. Nếu vẫn đang cân nhắc, hãy tạo thư mục khớp với lựa chọn ở bài 00-02 kèm ghi chú `chưa chốt — xem lại trước khi trả tiền`. Tránh tạo cả hai thư mục nếu bạn không thực sự dùng song song hai loại mạch.
+- `ros_ws/`: không gian làm việc cho ROS 2. Ở thời điểm hiện tại, thư mục này chỉ chứa duy nhất một tệp `README.md` nêu rõ hệ điều hành máy tính cùng trạng thái "Jazzy chưa cài ở đây" (hoặc "Jazzy đã cài trên Ubuntu 24.04 này" kèm chuỗi phiên bản cụ thể). Không sao chép sẵn kho mã nguồn Nav2, driver LiDAR hay tệp bản đồ Gazebo vào đây.
 
-`firmware/esp32/` hoặc `firmware/pico/` giữ chương trình cho vi điều khiển bạn đã chọn. Tạo cái khớp câu lộ trình. Nếu vẫn đang phân vân, tạo cái bạn đã viết ở bài 00-02 và thêm dòng `chưa chốt — xem lại trước khi trả tiền`. Đừng tạo cả hai rồi gọi đó là kế hoạch, trừ khi bạn đã có cả hai board và đã nói board nào lái motor.
-
-`ros_ws/` là workspace ROS 2. Hôm nay nó chứa một `README` và không gì khác. README nêu hệ điều hành của máy này và câu "Jazzy chưa cài ở đây" hoặc "Jazzy đã cài trên máy Ubuntu 24.04 này, chuỗi phiên bản ở dưới". Nó không chứa một bản clone Nav2, driver LiDAR, hay world Gazebo giải nén dở.
-
-Cây ngắn cho sinh viên ESP32 trên Windows trông như sau.
+Cây thư mục mẫu cho người học dùng ESP32 trên Windows có dạng như sau:
 
 ```text
 robot-course/
@@ -45,57 +43,57 @@ robot-course/
   ros_ws/README.md
 ```
 
-Sinh viên Pico dùng `firmware/pico/`. Tên nhàm có chủ đích. Các bài sau sẽ bảo bạn mở file nào.
+Nếu dùng Raspberry Pi Pico, bạn thay `firmware/esp32/` bằng `firmware/pico/`. Cách đặt tên đơn giản và cố định giúp bạn dễ theo dõi chỉ dẫn ở các chương sau.
 
 ![Toolchain đang nói chuyện với cái gì: USB, ổn áp, chân 3,3 V, mass]({{ site.imgurl }}/generated/pcb_mcu_anatomy.png)
 
-Hình giải phẫu là board như một tập việc. USB mang nguồn và đường serial. Ổn áp tạo 3,3 V. Chân GPIO nói logic. Mass là nút chung từ bài an toàn. Việc duy nhất của toolchain hôm nay là nói với đường USB đó, hoặc thú nhận board chưa có ở đây.
+Hãy hình dung cấu tạo mạch theo chức năng từng khối: cổng USB truyền dữ liệu serial và cấp nguồn vào, mạch ổn áp tạo ra đường 3,3 V, các chân GPIO đảm nhiệm tín hiệu logic, và mass là điểm tham chiếu chung từ bài an toàn. Ở bước hôm nay, nhiệm vụ duy nhất của bộ công cụ (toolchain) là giao tiếp được với đường USB đó — hoặc ghi nhận rõ rằng bạn chưa có mạch trên bàn.
 
 ![Module ESP32 trên board nhỏ, não có Wi-Fi]({{ site.imgurl }}/wikimedia/ESP32_on_Lolin32_Lite_clone_board_cropped.jpg)
 
 ![Raspberry Pi Pico, board MicroPython bắt đầu bằng USB]({{ site.imgurl }}/wikimedia/Raspberry_Pi_Pico.jpg)
 
-Hai bức ảnh là hai não hợp lệ, không phải lựa chọn thứ ba bạn phải mua. Board loại ESP32 là board làm teleop Wi-Fi sau được. Board loại Pico, kể cả Pico 2 nếu bài 00-05 bán cho bạn cái đó, là board bắt đầu như thiết bị USB chạy MicroPython. Khớp ảnh với câu của bạn. Đừng khớp với listing đang giảm giá tối nay.
+Hai bức ảnh trên đại diện cho hai lựa chọn vi điều khiển chính của khóa học. Mạch ESP32 thuận tiện nếu bạn định triển khai teleop qua Wi-Fi về sau, còn mạch dòng Pico (bao gồm Pico 2) phù hợp để bắt đầu ngay với MicroPython qua kết nối USB. Hãy chọn đúng theo mục tiêu đã viết trong lộ trình thay vì chạy theo sản phẩm đang giảm giá.
 
-## Đường ESP32, xem trước và chưa làm xong
+## Nhánh ESP32: tổng quan công cụ
 
-Hai công cụ là hợp lệ. **Arduino IDE 2.x** là cái có giao diện, trình quản lý board, và serial monitor. **PlatformIO** là cái sống trong trình soạn như VS Code và ghim phiên bản trong một file. Chọn một cái cho nhật ký. Bạn được đổi sau. Bạn không được viết "cái nào cũng được" rồi để nhật ký trống.
+Có hai môi trường phát triển phù hợp cho ESP32. **Arduino IDE 2.x** trực quan với giao diện đồ họa, trình quản lý board tích hợp và cửa sổ Serial Monitor sẵn có. **PlatformIO** hoạt động trong trình soạn thảo như VS Code và cho phép cố định phiên bản thư viện trong tệp cấu hình. Bạn có thể chọn một trong hai để ghi vào nhật ký (và hoàn toàn có thể đổi sau này), nhưng không nên viết chung chung "cái nào cũng được" rồi bỏ trống nhật ký.
 
-Khi gói hỗ trợ board đã cài, mục board bạn muốn cho DevKit thông dụng thuộc lớp **`esp32dev`**: trong Arduino IDE thường ghi "ESP32 Dev Module"; trong PlatformIO id board là `esp32dev`. Nhãn menu đổi giữa các phiên bản gói. Id mới là thứ cần ghi. Baud serial monitor cho các sketch đầu của khóa là **115200**. Cáp chỉ sạc sẽ thắp đèn trên board và không bao giờ hiện cổng. Bằng chứng cáp dữ liệu là một thiết bị serial mới khi bạn cắm, và sự biến mất của nó khi bạn rút.
+Sau khi cài gói hỗ trợ ESP32, cấu hình phổ biến cho các mạch DevKit thông dụng thuộc nhóm **`esp32dev`** (trong Arduino IDE thường hiển thị là "ESP32 Dev Module", còn trong PlatformIO mã board là `esp32dev`). Tên hiển thị trên menu có thể thay đổi theo từng phiên bản gói, nhưng mã nhận diện thì ổn định nên cần ghi lại. Tốc độ baud mặc định của Serial Monitor cho các chương trình đầu tiên trong khóa là **115200**. Lưu ý rằng cáp USB chỉ sạc vẫn có thể làm sáng đèn nguồn trên mạch nhưng không bao giờ tạo ra cổng serial; bằng chứng duy nhất của cáp dữ liệu là một cổng serial mới xuất hiện khi cắm và biến mất khi rút.
 
-Bạn không bắt buộc biên dịch blink hôm nay. Nếu IDE đã cài, ghi chuỗi phiên bản từ hộp About hoặc từ `pio --version`. Nếu chưa cài, viết `chưa cài Arduino IDE` hoặc `chưa cài PlatformIO` và lý do. "Tôi đang trên máy lab tôi không được quyền cài" là một lý do. "Tôi chán" cũng là một lý do, và nó nên hiện để tuần sau thành thật.
+Hôm nay bạn chưa bắt buộc phải biên dịch chương trình nhấp nháy LED. Nếu IDE đã được cài đặt, hãy ghi chính xác phiên bản lấy từ mục About hoặc từ lệnh `pio --version`. Nếu chưa cài, hãy ghi `chưa cài Arduino IDE` hoặc `chưa cài PlatformIO` kèm lý do thực tế (ví dụ: đang dùng máy phòng lab chưa có quyền cài).
 
-Một byte trên đường serial 8N1 khoảng 10 lần bit. Ở 115200 bit/s,
+Trên đường truyền serial cấu hình 8N1, mỗi byte cần khoảng 10 chu kỳ bit. Ở tốc độ 115200 bit/s, thời gian truyền một byte là:
 
 $$
 t_{\mathrm{byte}} \approx \frac{10}{115200}\,\mathrm{s} \approx 87\,\mu\mathrm{s}.
 $$
 
-Một lệnh ngắn bốn ký tự là dưới nửa mili giây. Timeout Chương 07 khoảng 300 ms, lớn hơn hàng trăm lần. Baud serial không phải công tắc người chết. Lệnh bị mất mới là. Biết điều đó bây giờ ngăn bạn "sửa" timeout bằng cách đổi baud sau này.
+Một lệnh điều khiển ngắn gồm 4 ký tự chỉ mất chưa tới nửa mili giây — nhỏ hơn hàng trăm lần so với ngưỡng timeout 300 ms của Chương 07. Nói cách khác, tốc độ baud không phải là cơ chế tự dừng khi mất tín hiệu (dead-man switch); nguyên nhân kích hoạt timeout là việc mất gói lệnh. Nắm rõ tỷ lệ này ngay từ đầu giúp bạn tránh việc "sửa" lỗi timeout bằng cách đổi tốc độ baud về sau.
 
-## Đường Pico, xem trước và chưa làm xong
+## Nhánh Pico: tổng quan công cụ
 
-Giữ nút **BOOTSEL**, cắm board vào cáp USB dữ liệu, rồi thả nút. Một ổ hiện ra, kiểu USB. Bạn chép một file **UF2 MicroPython** vào ổ đó. Board khởi động lại vào trình thông dịch MicroPython. **Thonny** là trình soạn đơn giản tìm được board. **`mpremote`** là công cụ dòng lệnh làm cùng việc từ terminal. Chọn một và ghi vào nhật ký.
+Với dòng Raspberry Pi Pico, bạn giữ nút **BOOTSEL**, cắm cáp USB truyền dữ liệu vào máy tính rồi thả nút ra để máy nhận diện mạch như một ổ đĩa USB. Sau đó, bạn sao chép tệp **UF2 MicroPython** vào ổ đĩa này; mạch sẽ tự khởi động lại vào môi trường MicroPython. Để lập trình và tương tác, bạn có thể chọn **Thonny** (trình soạn thảo đơn giản, tự nhận mạch) hoặc **`mpremote`** (công cụ dòng lệnh trên terminal). Hãy chọn một công cụ và ghi vào nhật ký.
 
-Nếu không có ổ, nghi cáp trước, rồi nút, rồi cổng. Nếu board chưa tới, viết các bước thành kế hoạch và đừng tải UF2 ngẫu nhiên "cho sẵn" mà không ghi ngày và nguồn Raspberry Pi chính thức. UF2 từ một thread diễn đàn là cách người ta nạp nhầm chip.
+Nếu ổ đĩa không xuất hiện, hãy kiểm tra lần lượt cáp USB, thao tác giữ nút BOOTSEL và cổng USB trên máy tính. Khi chưa có mạch, bạn chỉ cần ghi lại các bước này thành kế hoạch; không tải sẵn tệp UF2 từ các diễn đàn không rõ nguồn gốc vì rất dễ nạp nhầm phiên bản cho sai dòng chip. Hãy luôn lấy tệp từ trang tài liệu MicroPython chính thức của Raspberry Pi.
 
-Đường Pico không dùng `esp32dev` và không bắt buộc 115200 cho REPL của MicroPython, dù một UART bạn tự nối sau này có thể dùng baud đó. Đừng trộn hai nhật ký. Sinh viên chọn Pico vẫn để `ros_ws/` trống vì cùng lý do với sinh viên ESP32.
+Nhánh Pico không sử dụng mã `esp32dev` và không bắt buộc đặt tốc độ 115200 cho giao diện REPL của MicroPython (dù các kết nối UART tự đấu về sau vẫn có thể dùng tốc độ này). Không trộn lẫn ghi chú của hai nhánh, và người học Pico vẫn để trống `ros_ws/` với cùng lý do như nhánh ESP32.
 
-## ROS 2 Jazzy và Gazebo Harmonic, chỉ gọi tên
+## ROS 2 Jazzy và Gazebo Harmonic: chỉ ghi nhận tên
 
-**ROS 2 Jazzy** là bản phân phối khóa này dùng, và bản cài desktop được hỗ trợ là **Ubuntu 24.04**. Nếu máy này là Windows, đừng giả vờ Windows Subsystem cho Linux là lab robot. WSL có thể là chỗ đọc tài liệu. Nó không phải chỗ bạn cắm mass của driver và nhìn một bánh. Viết việc cài là **sau**, trên máy Ubuntu 24.04: máy của bạn, nếu có, hoặc máy lab, như trong bài lộ trình. Trang cài là [docs.ros.org/en/jazzy/Installation.html](https://docs.ros.org/en/jazzy/Installation.html). Làm theo hôm nay chỉ được khi hệ điều hành thực sự là Ubuntu 24.04, và chỉ như một buổi song song, không thay thư mục firmware.
+**ROS 2 Jazzy** là bản phân phối chính thức của khóa học, với hệ điều hành desktop được hỗ trợ là **Ubuntu 24.04**. Nếu bạn đang dùng Windows, đừng coi Windows Subsystem for Linux (WSL) là môi trường thực hành robot; WSL có thể hỗ trợ đọc tài liệu, nhưng không phù hợp để kết nối phần cứng và quan sát chuyển động thực tế. Hãy ghi kế hoạch cài đặt là **để sau** trên máy chạy Ubuntu 24.04 (máy cá nhân hoặc máy phòng lab). Đường dẫn cài đặt chính thức là [docs.ros.org/en/jazzy/Installation.html](https://docs.ros.org/en/jazzy/Installation.html); bạn chỉ nên cài đặt song song hôm nay nếu máy tính thực sự đang chạy Ubuntu 24.04 và vẫn ưu tiên thư mục firmware.
 
-**Gazebo Harmonic** là bộ mô phỏng đi với stack đó. Tên của nó vào README. Gói của nó không được cài hôm nay. Một file world bạn không nối được với robot bạn chưa lắp là một dự án thứ hai.
+**Gazebo Harmonic** là bộ mô phỏng đồng bộ với ROS 2 Jazzy. Ở bài này bạn chỉ cần ghi tên công cụ vào `README.md` chứ chưa cài đặt gói phần mềm; xây dựng một không gian mô phỏng khi chưa lắp khung xe thực tế rất dễ biến thành một dự án lạc hướng.
 
-micro-ROS, khi tới, là firmware trên cùng board ESP32 hoặc loại Pico cộng một agent trên máy Ubuntu. Nó thuộc về sau khi `firmware/` đã chứa chương trình đưa PWM về 0. `ros_ws/` trống là cách bạn nhớ thứ tự đó.
+Tương tự, **micro-ROS** (gồm firmware trên ESP32/Pico và agent trên máy Ubuntu) chỉ nên triển khai sau khi thư mục `firmware/` đã có chương trình biết đưa PWM về 0 an toàn. Giữ `ros_ws/` trống là cách nhắc nhở trực quan nhất về trình tự này.
 
-## Lab: thư mục, README, nhật ký cài
+## Thực hành: tạo cây thư mục, README và nhật ký cài đặt
 
-Tạo cây ở mục trước. Trong `firmware/esp32/README.md` hoặc `firmware/pico/README.md`, viết ba dòng: lộ trình (A, hoặc B-sau-A), MCU đã chọn bằng lời, và công cụ bạn sẽ dùng (Arduino IDE 2.x, PlatformIO, Thonny, hoặc mpremote). Nếu công cụ chưa cài, nói vậy trong cùng file.
+Khởi tạo cây thư mục như hướng dẫn ở trên. Trong `firmware/esp32/README.md` hoặc `firmware/pico/README.md`, viết ngắn gọn ba thông tin: lộ trình đã chọn (A, hoặc B sau khi xong A), loại vi điều khiển, và công cụ lập trình dự kiến (Arduino IDE 2.x, PlatformIO, Thonny hoặc `mpremote`), kèm trạng thái đã cài hay chưa.
 
-Tạo `ros_ws/README.md` với tên hệ điều hành và câu rằng Jazzy cùng Gazebo Harmonic chưa cài hôm nay, hoặc chuỗi phiên bản nếu bạn đang trên Ubuntu 24.04 và đã cài Jazzy. Đừng dán transcript `apt` của một tutorial bạn không chạy.
+Tạo tệp `ros_ws/README.md` ghi rõ hệ điều hành hiện tại của máy tính và khẳng định ROS 2 Jazzy cùng Gazebo Harmonic chưa được cài hôm nay (hoặc ghi rõ chuỗi phiên bản nếu bạn đang dùng Ubuntu 24.04 và đã cài Jazzy). Không sao chép log cài đặt `apt` từ các hướng dẫn mà bạn chưa thực sự chạy.
 
-Thêm mục **nhật ký cài** vào mục sổ hôm nay. Mỗi dòng là một công cụ, một phiên bản hoặc `chưa cài`, và một ngày. Các dòng ví dụ, bạn phải sửa cho khớp máy mình:
+Thêm mục **Nhật ký cài đặt** vào sổ lab hôm nay. Mỗi dòng gồm tên công cụ, phiên bản thực tế (hoặc `chưa cài`) và ngày ghi nhận. Dưới đây là mẫu tham khảo để bạn điều chỉnh cho đúng với máy của mình:
 
 ```text
 2026-09-23  OS: Windows 11
@@ -106,47 +104,47 @@ Thêm mục **nhật ký cài** vào mục sổ hôm nay. Mỗi dòng là một 
 2026-09-23  Gazebo Harmonic: chỉ gọi tên
 ```
 
-Nhật ký Pico ghi BOOTSEL và UF2 thay cho `esp32dev`. Dán nhật ký vào trường serial nếu bạn chưa có board, để trường không trống. Nếu cổng đã hiện, dán tên cổng phía trên nhật ký.
+Nếu theo nhánh Pico, hãy ghi rõ kế hoạch BOOTSEL và UF2 thay cho `esp32dev`. Bạn có thể dán trực tiếp nhật ký này vào trường đoạn serial trong sổ lab khi chưa có mạch để tránh để trống trường; nếu mạch đã nhận cổng serial, hãy dán tên cổng lên phía trên nhật ký.
 
-**Bạn sẽ thấy gì.** Ba thư mục tồn tại. README firmware nêu lộ trình và MCU. README của ROS không nhận Ubuntu bạn không có. Nhật ký có ngày và chữ `chưa cài` ở chỗ đó là sự thật.
+**Kết quả cần đạt:** Đủ ba thư mục theo đúng quy ước; tệp README trong `firmware/` nêu rõ lộ trình và vi điều khiển; tệp README trong `ros_ws/` phản ánh trung thực hệ điều hành; nhật ký có ngày cụ thể và ghi thẳng `chưa cài` ở các mục chưa thực hiện.
 
-**Khi lệch.** Bạn tạo `ros_ws/src` đầy clone vì một video bắt đầu như vậy. Xóa các clone cho tới khi README là file duy nhất; bạn clone lại khi Chương 09 bảo. Bạn viết "WSL Ubuntu" như thể đó là lab robot. Sửa README: WSL không phải bàn lab. Bạn đặt baud 9600 vì một sketch Arduino cũ. Serial monitor của khóa cho sketch ESP32 là 115200. Bạn chép UF2 từ link ngẫu nhiên. Thay kế hoạch bằng tài liệu MicroPython chính thức của Raspberry Pi và đừng nạp cho tới khi nói được file đó dành cho chip nào.
+**Cách xử lý khi lệch chuẩn:** Nếu bạn đã tạo `ros_ws/src` và tải sẵn nhiều kho mã nguồn theo video hướng dẫn, hãy xóa bớt để giữ lại duy nhất tệp README cho tới Chương 09. Nếu bạn đang ghi "WSL Ubuntu" như môi trường thực hành chính, hãy sửa lại vì WSL không thay thế được máy Ubuntu thực tế. Nếu đặt tốc độ baud 9600 theo thói quen Arduino cũ, hãy chuyển về 115200 cho các bài ESP32 của khóa. Nếu đã tải tệp UF2 từ nguồn không rõ ràng, hãy xóa và chuyển sang dùng đường dẫn tài liệu MicroPython chính thức của Raspberry Pi.
 
 ## Ví dụ làm sẵn
 
-Trang dùng Windows, lộ trình A, ESP32, trần tiền đã chốt ở bài 00-02. Cô tạo `firmware/esp32/` và `ros_ws/`. Cô không cài IDE trong buổi này vì máy lab ở trường đã có Arduino IDE 2.3 và cô muốn học một lần cài. Nhật ký ghi `Arduino IDE: không có trên laptop này; máy lab trường, xác nhận phiên bản thứ Năm`. README firmware nói "Lộ trình A, ESP32, teleop Wi-Fi sau, công cụ Arduino IDE 2.x, lớp board esp32dev, serial 115200". Cô tính thời gian một byte, khoảng 87 µs, và viết "timeout 300 ms khoảng 3000 lần thời gian byte; baud không phải lớp an toàn". `ros_ws/README.md` của cô nói "Laptop này là Windows 11. Jazzy chờ máy lab Ubuntu 24.04. Gazebo Harmonic chưa cài. WSL sẽ không được dùng làm lab robot".
+Trang dùng máy Windows, chọn Lộ trình A với ESP32 và đã chốt ngân sách ở bài 00-02. Cô tạo hai thư mục `firmware/esp32/` và `ros_ws/`. Cô chưa cài IDE trên laptop cá nhân vì máy phòng lab ở trường đã cài sẵn Arduino IDE 2.3 và cô muốn dùng chung một môi trường trước; nhật ký ghi rõ `Arduino IDE: chưa cài trên laptop cá nhân; sẽ kiểm tra phiên bản trên máy lab trường vào thứ Năm`. Tệp README trong thư mục firmware ghi: "Lộ trình A, ESP32, mở rộng teleop Wi-Fi sau, công cụ Arduino IDE 2.x, nhóm board esp32dev, serial 115200". Cô tính thời gian truyền một byte khoảng 87 µs và ghi nhận: "ngưỡng timeout 300 ms lớn gấp hơn 3000 lần thời gian truyền một byte, nên tốc độ baud không phải lớp bảo vệ an toàn". Tệp `ros_ws/README.md` nêu rõ: "Máy chạy Windows 11. ROS 2 Jazzy chờ máy lab Ubuntu 24.04. Chưa cài Gazebo Harmonic. Không dùng WSL làm môi trường lab robot".
 
-Một bạn trên Ubuntu 24.04 có thể cài Jazzy ở giờ khác và dán chuỗi phiên bản thật. Bạn đó vẫn nợ cùng thư mục firmware. Trang không chép một phiên bản cô không chạy.
+Một bạn khác dùng Ubuntu 24.04 có thể cài Jazzy ở buổi riêng và ghi chuỗi phiên bản thực tế vào sổ, nhưng vẫn phải chuẩn bị đầy đủ thư mục `firmware/` tương tự. Trang không bao giờ sao chép số phiên bản từ máy khác vào nhật ký của mình.
 
 ## Video tham khảo
 
-- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. PlatformIO là toolchain ESP32 mà chương 02 sẽ cài. Xem một project mở và nạp được.
-- [Breadboard tutorial: How to use a breadboard (for beginners)](https://www.youtube.com/watch?v=W6mixXsn-Vc) — LeftyMaker, tiếng Anh. Breadboard là mặt bàn của các lab đầu. Hàng lỗ nào thông nhau.
+- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. Giới thiệu nhanh quy trình mở dự án và nạp chương trình ESP32 bằng PlatformIO — bộ công cụ sẽ cài đặt ở Chương 02.
+- [Breadboard tutorial: How to use a breadboard (for beginners)](https://www.youtube.com/watch?v=W6mixXsn-Vc) — LeftyMaker, tiếng Anh. Giải thích cấu tạo hàng lỗ thông nhau trên breadboard phục vụ các bài thực hành đầu tiên.
 
 ## Bài tập
 
-1. Câu lộ trình của bạn nói Pico 2 và MicroPython. Bạn tạo thư mục nào, BOOTSEL phải làm gì trước khi có file được chép, và hai công cụ nào hợp lệ cho REPL?
-2. LED board sáng nhờ cáp USB, và không có cổng serial. Bạn nghi vật nào, và bằng chứng nào sẽ đổi ý bạn?
-3. Bạn đang trên Windows và một blog bảo cài Jazzy trong WSL tối nay. Bạn viết gì trong `ros_ws/README.md`, và hệ điều hành nào thực sự được yêu cầu?
-4. Ở 115200 bit/s, 8N1, ước lượng thời gian một byte và một lệnh 4 byte. Thời gian đó có phải một phần đáng kể của 300 ms không?
-5. Nhật ký cài nói "PlatformIO latest" không phiên bản không ngày. Bạn thêm gì để dòng đó thành bằng chứng?
+1. Nếu lộ trình của bạn chọn Pico 2 và MicroPython, bạn cần tạo thư mục firmware nào, thao tác với nút BOOTSEL thực hiện ra sao trước khi chép tệp, và hai công cụ nào hợp lệ để tương tác với REPL?
+2. Khi cắm cáp USB, đèn LED trên mạch phát sáng nhưng máy tính không hiện cổng serial nào. Bạn cần nghi ngờ bộ phận nào trước tiên, và dấu hiệu nào chứng minh cáp đó truyền được dữ liệu?
+3. Bạn đang dùng Windows và thấy một bài viết hướng dẫn cài ROS 2 Jazzy trên WSL ngay tối nay. Bạn nên viết gì vào `ros_ws/README.md`, và hệ điều hành nào thực sự được khuyến nghị?
+4. Ở tốc độ 115200 bit/s (cấu hình 8N1), hãy ước lượng thời gian truyền 1 byte và một lệnh gồm 4 byte. Khoảng thời gian này có chiếm tỷ lệ đáng kể so với ngưỡng 300 ms không?
+5. Một dòng nhật ký ghi "PlatformIO latest" mà không có số phiên bản hay ngày tháng. Bạn cần bổ sung thông tin gì để dòng này trở thành bằng chứng hợp lệ?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Tạo `firmware/pico/`. Giữ BOOTSEL khi cắm cáp dữ liệu để ổ hiện ra, rồi chép UF2 MicroPython. Thonny hoặc `mpremote` nói chuyện với board sau đó.
-2. Nghi cáp chỉ sạc. Cáp dữ liệu được chứng minh khi cổng serial hoặc ổ BOOTSEL hiện và mất theo phích cắm. LED sáng chỉ chứng minh có điện.
-3. Viết rằng Jazzy chưa cài, WSL không phải lab robot, và việc cài chờ Ubuntu 24.04. Đường desktop Jazzy của khóa này là Ubuntu 24.04.
-4. Một byte khoảng $10/115200 \approx 87\,\mu\mathrm{s}$. Bốn byte khoảng $0{,}35\,\mathrm{ms}$. Đó khoảng một phần nghìn của 300 ms. Timeout là về lệnh bị mất, không phải về baud.
-5. Thêm ngày, đầu ra của `pio --version` hoặc chuỗi About của IDE, và `chưa cài` nếu bạn chưa chạy. "Latest" không phải phiên bản.
+1. Tạo thư mục `firmware/pico/`. Giữ nút BOOTSEL trong lúc cắm cáp USB truyền dữ liệu để máy tính nhận diện ổ đĩa rồi chép tệp UF2 MicroPython vào đó. Sau khi mạch khởi động lại, dùng Thonny hoặc `mpremote` để giao tiếp với REPL.
+2. Nghi ngờ cáp USB chỉ có chức năng sạc. Cáp truyền dữ liệu chỉ được chứng minh khi cổng serial (hoặc ổ đĩa BOOTSEL) xuất hiện lúc cắm và biến mất lúc rút; đèn nguồn sáng chỉ chứng tỏ có điện áp 5 V.
+3. Ghi rõ trong `ros_ws/README.md` rằng ROS 2 Jazzy chưa được cài đặt, WSL không thay thế được môi trường thực hành robot, và việc cài đặt sẽ thực hiện sau trên Ubuntu 24.04 (hệ điều hành desktop được khóa học hỗ trợ).
+4. Một byte mất khoảng $10/115200 \approx 87\,\mu\mathrm{s}$, nên 4 byte mất khoảng $0{,}35\,\mathrm{ms}$ — chỉ xấp xỉ một phần nghìn của ngưỡng 300 ms. Điều này cho thấy timeout liên quan đến việc mất lệnh chứ không phải tốc độ baud.
+5. Bổ sung ngày kiểm tra và chuỗi phiên bản cụ thể lấy từ lệnh `pio --version` hoặc hộp thoại About của IDE (hoặc ghi thẳng `chưa cài` nếu chưa cài đặt). Chữ "latest" không mang giá trị truy vết.
 
 </details>
 
 ## Đọc thêm
 
-- [Tài liệu PlatformIO](https://docs.platformio.org/) — đường ESP32 trong trình soạn, kể cả id board `esp32dev`.
-- [Tài liệu Arduino](https://docs.arduino.cc/) — Arduino IDE 2.x và serial monitor.
-- [ESP-IDF cho ESP32](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/) — framework của Espressif. Bạn không bắt buộc dùng nó cho Capstone A. Đó là chỗ tra khi gói hỗ trợ board không khớp blog.
-- [MicroPython cho Pico](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html) — BOOTSEL và UF2 chính thức, kế hoạch nạp duy nhất bài này tin.
-- [Tutorial ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Tutorials.html) — lướt danh sách để thấy nó giả định đã cài. Bản cài đó là Ubuntu 24.04, sau này.
-- [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/) — tên và tài liệu của bộ mô phỏng. Đừng cài từ bài này.
+- [Tài liệu PlatformIO](https://docs.platformio.org/) — hướng dẫn lập trình ESP32 trên trình soạn thảo, bao gồm cấu hình mã board `esp32dev`.
+- [Tài liệu Arduino](https://docs.arduino.cc/) — tài liệu chính thức về Arduino IDE 2.x và công cụ Serial Monitor.
+- [ESP-IDF cho ESP32](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/) — bộ framework gốc của Espressif; chưa bắt buộc cho Capstone A nhưng hữu ích để tra cứu khi gặp sai khác ở gói hỗ trợ board.
+- [MicroPython cho Pico](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html) — hướng dẫn chính thức về BOOTSEL và tệp UF2 cho dòng Raspberry Pi Pico.
+- [Tutorial ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Tutorials.html) — có thể xem lướt để hình dung cấu trúc bài học sau khi cài trên Ubuntu 24.04.
+- [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/) — tài liệu giới thiệu bộ mô phỏng; chưa cần cài đặt từ bài này.

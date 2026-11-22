@@ -11,108 +11,117 @@ lesson_type: required
 draft: false
 ---
 
-Chương 01 khép khi bảy bằng chứng đã ở trong sổ, mỗi bằng chứng hỏng theo một cách chỉ tay được. Dấu tích cạnh câu "tôi hiểu sơ đồ chân" không phải bằng chứng. Bài này là buổi kiểm: thế nào là đạt thật, thế nào là dấu tích cho có, và đường quay lại khi một dòng còn mỏng. Các cổng làm theo thứ tự nào cũng được. Không được lấy ảnh của người khác thế vào chỗ mình thiếu.
+Chương 01 chỉ thực sự hoàn tất khi sổ lab của bạn có đủ **bảy bằng chứng** cụ thể, mỗi bằng chứng đều có tiêu chí kiểm tra rõ ràng. Một dấu tick bên cạnh dòng chữ "tôi đã hiểu sơ đồ chân" không được tính là bằng chứng. Bài học này hướng dẫn bạn tự rà soát: thế nào là đạt thực chất, thế nào là đánh dấu hình thức, và cần quay lại bài nào khi một hạng mục chưa đạt. Bạn có thể hoàn thiện bảy cổng theo bất kỳ thứ tự nào, nhưng tuyệt đối không dùng ảnh của người khác thay thế cho phần mình còn thiếu.
 
 ## Mục tiêu
 
-Bạn chấm bảy cổng bằng hiện vật, không bằng cảm giác đã xong: một phép tính điện trở LED ở 3,3 V, một ảnh sơ đồ rail breadboard, năm điện trở vừa giải mã vừa đo, một lời gọi cực đã xác nhận bằng chế độ diode, một ảnh driver ghi TB6612 hoặc DRV8833 chứ không ghi "cầu H", một ảnh mối hàn hoặc một lịch bù nếu chưa có mỏ, và một đoạn sụt áp có nói pin động cơ riêng. Bạn nhận ra dấu tích cho có, ví dụ dấu xong mà không có số, hoặc ảnh chụp nhầm chip, và bạn gọi tên đúng một bài để sửa. Bạn nhận một trang sổ cẩu thả và nói cổng nào trượt.
+Sau bài học này, bạn sẽ tự đánh giá được đủ bảy cổng đầu ra của Chương 01 dựa trên hiện vật thực tế: phép tính điện trở LED ở 3,3 V, ảnh sơ đồ thanh nguồn breadboard, bảng năm điện trở đã giải mã và đo ngoài mạch, kết quả xác định cực tính bằng thang đo diode, ảnh mạch lái ghi rõ tên chip `TB6612` hoặc `DRV8833` (không ghi chung chung là "cầu H"), ảnh mối hàn (hoặc lịch hẹn làm bù nếu chưa có mỏ hàn), và đoạn phân tích sụt áp có nêu rõ nguồn pin động cơ riêng. Bạn cũng sẽ nhận diện được các dấu tick hình thức (thiếu số đo hoặc chụp nhầm chip) và chỉ ra đúng bài học cần mở lại để khắc phục.
 
 ## Kiến thức cần có
 
-Bài 07 đến 10 tạo ra hiện vật mà trang này soi, bài 01 tạo ra phép tính LED. Thiếu đồ thì danh sách mua là chương 00 bài 05. Cần sổ và ảnh của bạn. Vẫn chưa cần xe chạy. Bánh để trên không. Không nối mô-tơ để ăn mừng.
+Các hiện vật cần kiểm tra được tạo ra từ bài 01 (phép tính LED) và chuỗi bài 07 đến 10. Nếu còn thiếu dụng cụ, xem lại danh sách mua sắm ở Chương 00 bài 05. Bạn chỉ cần chuẩn bị sổ lab và các ảnh chụp của mình; vẫn chưa chạy xe, luôn giữ bánh nhấc khỏi bàn và chưa nối động cơ.
 
 ## Vì sao bài này quan trọng
 
-Capstone là xe dẫn động vi sai trên ESP32 hoặc Pico 3,3 V, một TB6612 hoặc DRV8833, hai mô-tơ TT với pin riêng, và HC-SR04 có echo 5 V. Chương 02 bắt đầu gắn các món ấy. Sơ đồ rail chỉ là ảnh breadboard trống thì LED tối sẽ ngốn một buổi chiều. Ảnh driver chỉ ghi "cầu H" thì STBY không bao giờ được kéo và bánh đứng yên. Đoạn sụt áp chưa được viết thì reset lúc mô-tơ dùng chung USB trông như chương trình bị ma. Buổi kiểm là cách thấy các lỗ ấy khi thứ duy nhất đang "chạy" là cuốn sổ.
+Xe Capstone là hệ dẫn động vi sai dùng ESP32 hoặc Pico 3,3 V, mạch lái TB6612 hoặc DRV8833, hai động cơ TT dùng pin riêng và cảm biến HC-SR04 có chân echo 5 V. Sang Chương 02 bạn sẽ bắt đầu lắp ráp và cấp điện cho các khối này. Nếu sơ đồ breadboard chỉ là ảnh board trống không đánh dấu, bạn dễ tốn cả buổi chiều gỡ lỗi đèn LED không sáng; nếu ảnh driver chỉ ghi "cầu H", rất dễ quên kéo chân `STBY` khiến bánh đứng yên; nếu chưa nắm vững đoạn phân tích sụt áp, hiện tượng mạch reset khi dùng chung nguồn USB sẽ bị nhầm thành lỗi chương trình. Buổi rà soát này giúp bạn phát hiện sớm mọi lỗ hổng ngay trên sổ ghi chép.
 
-## Kiểm một dòng thế nào
+## Cách kiểm tra một hạng mục
 
-Một cổng có hiện vật và một phép thử làm được mà không phải hỏi giảng viên định nói gì. Hiện vật là một phép tính có đơn vị, một ảnh có chữ, hoặc một đoạn có con số. Phép thử là một so sánh: nằm trong cửa sổ dung sai, vạch được gọi là âm, tên chip đọc được, đoạn văn có chữ "pin động cơ riêng". Dấu tích cho có thì có dấu, thiếu phép so sánh. "Xong" mà không có ohm, "đã chụp" một board không chữ, và "đã hiểu sụt áp" mà không có câu, là ba kiểu dấu cho có mà chương này hay gặp. Chúng tính là còn mở. Không tính là gần đạt.
+Mỗi cổng kiểm tra gồm một **hiện vật cụ thể** (phép tính có đơn vị, ảnh chụp có chú thích chữ, đoạn phân tích kèm số đo) và một **tiêu chí đối chiếu** rõ ràng (nằm trong dung sai, vạch tụ được gọi là âm, đọc rõ mã IC, có cụm từ "pin động cơ riêng"). Ngược lại, **dấu tick hình thức** là khi chỉ đánh dấu hoàn thành nhưng thiếu phép đối chiếu — ví dụ ghi "xong" không kèm số ohm, "đã chụp" nhưng ảnh mờ không đọc được tên chip, hay "đã hiểu sụt áp" mà không có phân tích. Mọi mục hình thức đều được tính là `chưa đạt` (còn mở).
 
-Đường sửa thì cố ý ngắn. Mở lại đúng bài ghi trên cổng, làm lại đúng bước tạo ra hiện vật, và ghi ngày file mới. Đừng viết lại cả chương, và đừng bắt đầu cho xe chạy ở chương 02 khi đoạn sụt áp hoặc nhãn driver vẫn là dấu cho có. Hai cổng ấy là chỗ làm hỏng linh kiện hoặc giả dạng lỗi phần mềm. Ngoại lệ là chưa có mỏ: được hẹn một buổi bù, và tờ hẹn là hiện vật cho đến khi mối hàn tồn tại.
+Khi có cổng chưa đạt, hướng xử lý rất gọn: mở lại đúng bài học tương ứng, làm lại đúng bước tạo hiện vật và ghi ngày cập nhật mới (không cần làm lại cả chương). Tuyệt đối không chuyển sang chạy thử động cơ ở Chương 02 khi cổng nhãn driver hoặc cổng phân tích sụt áp vẫn còn mở, vì hai cổng này liên quan trực tiếp đến nguy cơ hỏng phần cứng. Ngoại lệ duy nhất là trường hợp chưa có mỏ hàn: bạn được phép ghi một ngày hẹn cụ thể để thực hành bù và coi lịch hẹn đó là hiện vật tạm thời.
 
-## Bảy cổng
+## Bảy cổng kiểm tra đầu ra
 
-**1. Phép tính LED ở 3,3 V.** Viết số cho LED trạng thái sẽ treo trên GPIO. Chọn một điện áp thuận và cho thấy nó. LED đỏ, $$V_F = 2{,}0\,\mathrm{V}$$ là chấp nhận được nếu bài 10 chưa đo. Với điện trở 220 Ω,
+**1. Phép tính điện trở LED ở 3,3 V.** Trình bày đầy đủ phép tính chọn điện trở cho đèn LED báo trạng thái nối vào chân GPIO, ghi rõ điện áp thuận $V_F$ sử dụng (với LED đỏ, có thể lấy $$V_F = 2{,}0\,\mathrm{V}$$ nếu chưa đo ở bài 10). Ví dụ với điện trở 220 Ω:
 
 $$
 I = \frac{3{,}3 - 2{,}0}{220} = \frac{1{,}3}{220} \approx 5{,}9\,\mathrm{mA}
 $$
 
-Đạt: biểu thức, phép thế, kết quả bằng miliampe, và một câu nói dòng này nằm trong dải 5–10 mA mà LED nhỏ và GPIO 3,3 V sống được. Dùng $$V_F$$ đo ở bài 10 thì tốt hơn, nếu bạn ghi ra. Lấy 3,3 chia điện trở mà quên $$V_F$$ thì trượt, chữ đẹp cũng vậy. Kết quả gần không với LED xanh chỉ đạt nếu bạn nói LED sẽ mờ và chọn màu khác hoặc điện trở nhỏ hơn.
+*Tiêu chí đạt:* Có đủ công thức, bước thay số, kết quả kèm đơn vị mA, và nhận xét dòng này nằm trong dải an toàn 5–10 mA cho LED nhỏ và GPIO 3,3 V (tốt nhất dùng đúng $V_F$ đã đo ở bài 10). Lấy thẳng 3,3 V chia cho điện trở mà bỏ quên $V_F$ sẽ bị tính là trượt. Với LED xanh có $V_F$ cao, kết quả dòng quá nhỏ chỉ đạt nếu bạn nhận xét đèn sẽ mờ và đề xuất đổi màu LED hoặc giảm điện trở phù hợp.
 
-**2. Sơ đồ rail breadboard.** Ảnh hoặc bản phác từ bài 10 cho thấy một nút năm lỗ, rãnh giữa hở, và mỗi rail nguồn liền hay bị chia. Đạt: người khác chỉ nhìn tờ ấy vẫn cắm đúng nút bạn định. Ảnh board trống không chữ thì trượt.
+**2. Sơ đồ thanh nguồn breadboard.** Ảnh chụp hoặc bản vẽ từ bài 10 thể hiện rõ nút năm lỗ, rãnh giữa cách điện và tình trạng từng thanh nguồn (liền mạch hay bị ngắt đôi ở giữa). *Tiêu chí đạt:* Người khác chỉ cần nhìn bản vẽ này vẫn cắm đúng nút bạn định; ảnh chụp breadboard trống không có chú thích sẽ trượt.
 
-**3. Năm điện trở, vừa giải vừa đo.** Năm dòng, mỗi dòng có màu, trị danh định, dung sai, và số đo ngoài mạch, đánh đạt hoặc trượt theo cửa sổ. Có mã màu mà không có số đo thì trượt. Có số đo mà không có màu thì trượt. Đo khi điện trở còn trong mạch thì trượt. Bốn dòng tốt và dòng thứ năm trống không phải "gần xong".
+**3. Bảng năm điện trở (vừa giải mã vừa đo).** Đủ 5 dòng, mỗi dòng có dãy màu vạch, trị số danh định, dung sai và số đo ngoài mạch, kèm kết luận đạt/trượt theo cửa sổ dung sai. Thiếu màu vạch, thiếu số đo, đo khi còn gắn trong mạch hoặc chỉ làm 4 dòng đều bị tính là trượt.
 
-**4. Một lời gọi cực bằng chế độ diode.** LED hoặc diode, có điện áp thuận và một câu dạng "chân này là anode". Đạt: người lạ nối được LED ấy từ 3,3 V qua điện trở của cổng 1, anode về phía GPIO, cathode về mass, không phải hỏi bạn. Ảnh không chữ thì trượt. Nói vạch tụ hóa "chắc là âm" không xong cổng này; cổng này là lời gọi bằng chế độ diode. Vạch tụ vẫn phải có trong sổ bài 10, và bài 09 không chấp nhận tụ VM cắm ngược.
+**4. Xác định cực tính bằng thang đo diode.** Kết quả đo một LED hoặc một diode kèm số điện áp thuận và câu kết luận rõ ràng dạng "chân này là anode". *Tiêu chí đạt:* Người khác có thể nối đúng LED đó từ 3,3 V qua điện trở của cổng 1 (anode về phía GPIO, cathode về mass) mà không cần hỏi thêm. Lưu ý: việc nhận diện vạch cực âm tụ hóa vẫn cần có trong sổ bài 10 và tuân thủ ở bài 09, nhưng không thay thế được phép đo diode của cổng 4.
 
-**5. Ảnh driver, có tên.** Ảnh module lái mô-tơ trên đó bạn đã viết TB6612 hoặc DRV8833, kèm tên chân của đúng chip ấy: với TB6612, ít nhất AIN1, AIN2, PWMA và STBY. "Cầu H", "mạch mô-tơ", hoặc "cái board nhỏ" đều trượt dù ảnh nét. Module chưa về thì dòng này là dry-run có ngày, ghi chip bạn đã đặt. Hình chữ nhật không tên chip là dấu cho có.
+**5. Ảnh mạch lái động cơ có ghi rõ tên chip.** Ảnh chụp module mạch lái trên đó bạn chú thích rõ `TB6612` hoặc `DRV8833` kèm tên các chân điều khiển tương ứng (với TB6612 tối thiểu có `AIN1`, `AIN2`, `PWMA`, `STBY`). Các nhãn chung chung như "cầu H", "mạch động cơ" hay "board nhỏ" đều trượt dù ảnh rất nét. Nếu module chưa về tới, mục này được ghi dạng `dry-run` có ngày và nêu rõ loại chip đã đặt mua.
 
-**6. Mối hàn, hoặc lịch bù.** Ảnh mối của bạn từ bài 08, có ghi thông mạch, đối chiếu vành tốt trong hình mối hàn. Kêu mà thành cục thì trượt. Mối đẹp mà hở thì trượt. Chưa có mỏ thì ghi ngày sẽ làm lab và dòng đế-với-kính bạn sẽ tuân. Lịch đó là sự chậm thật. Ảnh mối nhà máy trên module mua về, nhận là của mình, không phải sự chậm. Đó là trượt.
+**6. Ảnh mối hàn hoặc lịch thực hành bù.** Ảnh mối hàn tập từ bài 08 kèm kết quả đo thông mạch và đối chiếu với hình mối hàn chuẩn. Mối kêu bíp nhưng vo cục, hoặc mối trông bóng nhưng hở mạch đều trượt. Nếu chưa có mỏ hàn, ghi rõ ngày hẹn thực hành bù kèm quy tắc an toàn giá đỡ và kính bảo hộ. Chụp ảnh mối hàn nhà máy có sẵn trên module mua về rồi nhận là bài tập của mình sẽ tính là trượt.
 
-**7. Đoạn sụt áp.** Ghi chú bài 09, có số 5 V và 3,3 V lúc chỉ cắm USB nếu bạn đo được, giả thuyết lần reset sau là mô-tơ kéo sụt rail dùng chung, và cách xử lý: pin động cơ riêng, chỉ chung mass, tụ 100–470 µF trên VM, dây dày, bánh nhắc, PWM về 0 nếu rail sụt hoặc lệnh im khoảng 300 ms. Đoạn cho mô-tơ TT ăn chân 5 V của ESP32 thì trượt dù câu văn gọn. Lệnh cấm echo của HC-SR04, 5 V vào GPIO 3,3 V, được phép ngồi cùng ghi chú; thiếu câu ấy không tự làm trượt cổng này, và có câu ấy không tha cho đoạn thiếu pin.
+**7. Đoạn phân tích sụt áp (brownout).** Ghi chú từ bài 09 có số đo chân 5 V và 3,3 V khi chỉ cắm USB (nếu đã đo được), giả thuyết mạch reset do động cơ kéo sụt đường nguồn dùng chung, và đủ các giải pháp: pin động cơ riêng, chỉ nối chung mass, tụ 100–470 µF đúng cực ngang VM, dây đủ dày, nhấc bánh khỏi bàn, và firmware kéo PWM về 0 khi nguồn sụt hoặc mất lệnh quá khoảng 300 ms. Bất kỳ đoạn viết nào cho phép động cơ TT lấy nguồn từ chân 5 V của ESP32 đều trượt ngay lập tức. Bạn có thể ghi kèm lệnh cấm nối thẳng echo 5 V của HC-SR04 vào GPIO 3,3 V, nhưng câu này không thay thế được phần tách pin động cơ.
 
-## Dấu tích cho có trông thế nào
+## Nhận diện các dấu tick hình thức
 
-Đối chiếu với các cổng. "Điện trở: rồi" trượt cổng 3, vì không giải mã và không đo. "Cực tính ổn" trượt cổng 4, vì không chân nào được gọi là anode và không có điện áp. "Driver: cầu H trong kit" trượt cổng 5, vì chương 02 không tách được STBY khỏi chân sleep của DRV8833. "Đã hiểu hàn" trượt cổng 6, vì không ảnh cũng không ngày. "Sụt áp: mô-tơ ngốn dòng" trượt cổng 7, vì thiếu pin riêng, mass chung, và nhát cắt PWM 300 ms. Sửa không phải là thêm tính từ. Sửa là hiện vật mà cổng đã nêu.
+Đối chiếu với bảy cổng trên: ghi "Điện trở: xong" trượt cổng 3 (thiếu giải mã và số đo); "Cực tính ổn" trượt cổng 4 (không ghi rõ anode và điện áp thuận); "Driver: cầu H trong kit" trượt cổng 5 (sang Chương 02 không phân biệt được `STBY` của TB6612 với `nSLEEP` của DRV8833); "Đã hiểu cách hàn" trượt cổng 6 (không có ảnh lẫn ngày hẹn); "Sụt áp: động cơ ăn nhiều dòng" trượt cổng 7 (thiếu tách pin riêng, mass chung và ngưỡng cắt PWM 300 ms). Cách sửa không phải là viết thêm lời giải thích dài dòng, mà là bổ sung đúng hiện vật cổng yêu cầu.
 
-Khi đồ đã ở trên bàn, sửa gọn trong một buổi. Cổng 3 là đo lại, không phải một chương lý thuyết mới. Cổng 6 chưa có mỏ thì mua theo danh sách bài 08 và ghi ngày, không phải viết lại định nghĩa mối lõm. Cổng 5 ghi sai tên thì mười phút với trang Pololu hoặc trang TI và một nhãn mới. Đừng mở lab cho xe chạy để "theo kịp".
+Khi dụng cụ đã có sẵn, việc bổ sung mỗi cổng trượt rất nhanh: cổng 3 chỉ cần đo lại năm điện trở; cổng 5 chỉ mất vài phút tra trang Pololu/TI để ghi lại đúng tên chân; cổng 6 nếu chưa có mỏ hàn thì đặt mua theo bài 08 và chốt ngày thực hành bù.
 
 ## Thực hành
 
-Buổi này là buổi kiểm. Chỉ dựng mạch mới khi phải thay một hiện vật đã trượt.
+Đây là buổi tự kiểm tra; chỉ lắp lại mạch khi cần tạo lại một hiện vật bị trượt.
 
-1. Mở sổ và kẻ bảy dòng, mỗi cổng một dòng.
-2. Cổng 1: viết lại phép tính LED 3,3 V trên một dòng mới, dù bài 01 đã có dòng tương tự.
-3. Gắn sơ đồ rail, bảng năm điện trở, và dòng cực tính chế độ diode. Dòng nào trượt phép thử thì sửa trước khi chấm.
-4. Ghi tên chip lên ảnh driver. Board chưa có thì viết dry-run và ngày bạn chờ nó về.
-5. Soi lại ảnh mối dưới đèn. Vành thành cục thì làm lại trước khi chấm, hoặc ghi ngày bù nếu vẫn chưa có mỏ.
-6. Đọc đoạn sụt áp một lần và gạch dưới "riêng", "mass chung", và "300 ms". Thiếu chữ nào thì thêm từ bài 09, đừng bịa một câu mềm hơn.
-7. Đánh mỗi cổng đạt hoặc trượt. Ghi ngày trang `ch01-11-audit`. Dòng trượt phải nêu bài sẽ mở lại.
+1. Mở sổ lab và kẻ bảng gồm 7 dòng tương ứng với 7 cổng.
+2. Cổng 1: viết lại đầy đủ phép tính LED 3,3 V trên một dòng mới (ngay cả khi bài 01 đã tính).
+3. Đính kèm sơ đồ breadboard, bảng năm điện trở và kết quả xác định cực tính ở thang diode; sửa ngay bất kỳ mục nào không qua được tiêu chí đối chiếu.
+4. Chú thích rõ mã IC (`TB6612` hoặc `DRV8833`) lên ảnh mạch lái (hoặc ghi `dry-run` kèm ngày dự kiến nhận hàng).
+5. Xem kỹ lại ảnh mối hàn dưới ánh sáng tốt; nếu mối vo cục thì làm lại trước khi chấm, hoặc ghi ngày hẹn bù nếu chưa có mỏ hàn.
+6. Đọc lại đoạn phân tích sụt áp và kiểm tra chắc chắn có đủ ba từ khóa cốt lõi: "pin động cơ riêng", "mass chung" và "300 ms".
+7. Đánh dấu `đạt` hoặc `trượt` cho từng cổng, lưu trang với mã `ch01-11-audit` kèm ngày kiểm tra. Với mỗi cổng trượt, ghi rõ số thứ tự bài học sẽ mở lại để sửa.
 
-Trong buổi kiểm không bánh nào quay.
+Toàn bộ buổi rà soát này không cấp nguồn quay bánh xe.
 
 ## Ví dụ
 
-Một trang ghi: "Điện trở LED xong. Ảnh breadboard đính kèm, không đánh dấu. Đo ba điện trở, hai con trông đúng. Cực tính: vạch chắc là âm. Driver là cầu H. Hàn tuần sau có lẽ. Sụt áp: đừng để mô-tơ kẹt."
+Giả sử một trang sổ ghi như sau: *"Điện trở LED xong. Ảnh breadboard đính kèm, không đánh dấu. Đo ba điện trở, hai con trông đúng. Cực tính: vạch chắc là âm. Driver là cầu H. Hàn tuần sau có lẽ. Sụt áp: đừng để mô-tơ kẹt."*
 
-Cổng 1 trượt, hoặc cùng lắm là dở dang, vì trang không có phép tính. "Xong" là dấu cho có. Cổng 2 trượt: ảnh breadboard không chữ không phải sơ đồ rail. Cổng 3 trượt: ba số đo không phải năm, và "trông đúng" không phải giải mã cộng đồng hồ. Cổng 4 trượt: đoán vạch tụ hóa không phải lời gọi anode bằng chế độ diode. Cổng 5 trượt: "cầu H" là nhãn bị cấm. Cổng 6 chưa đạt; "tuần sau có lẽ" chỉ thành lịch bù khi một ngày thật thay chữ "có lẽ". Cổng 7 trượt: không pin riêng, không mass chung, không tụ, không nhát 300 ms. Trang không đậu nhờ thành thật. Giờ tiếp theo là cổng 1, 3 và 4 trên bàn, cộng đoạn viết lại cho cổng 7. Cổng 2 và 5 cần một cây bút trên ảnh. Cổng 6 cần một ngày.
+Kết quả chấm từng cổng:
+- **Cổng 1 trượt:** chỉ ghi "xong", không có phép tính.
+- **Cổng 2 trượt:** ảnh breadboard trống không chú thích không phải sơ đồ thanh nguồn.
+- **Cổng 3 trượt:** mới đo ba con thay vì năm con, và "trông đúng" không phải đối chiếu giải mã với số đo.
+- **Cổng 4 trượt:** đoán vạch tụ hóa không thay thế được phép đo cực tính bằng thang diode.
+- **Cổng 5 trượt:** nhãn "cầu H" không nêu rõ mã chip và tên chân.
+- **Cổng 6 chưa đạt:** "tuần sau có lẽ" cần đổi thành một ngày cụ thể mới thành lịch bù hợp lệ.
+- **Cổng 7 trượt:** thiếu pin riêng, thiếu mass chung, thiếu tụ đệm và thiếu quy tắc ngắt PWM 300 ms.
+
+Hướng sửa cho buổi kế tiếp: làm lại thực tế trên bàn các cổng 1, 3, 4 và viết lại đoạn cổng 7; bổ sung chú thích lên ảnh cho cổng 2 và 5; chốt một ngày cụ thể cho cổng 6.
 
 ## Video tham khảo
 
-- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. Ôm và công suất là cửa của checklist chương. Đo lại một mạch trước khi tick.
+- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. Ôn lại nhanh định luật Ohm và công suất trước khi chốt checklist Chương 01.
 
 ## Bài tập
 
-Mỗi mục là một mẩu sổ cẩu thả. Nói cổng nào trượt, thiếu gì, và sửa nhỏ nhất là gì.
+Mỗi tình huống dưới đây là một trích đoạn sổ lab chưa đạt. Hãy chỉ ra cổng nào trượt, thiếu thông tin gì và cách sửa gọn nhất:
 
-1. "$$3{,}3 / 180 = 18\,\mathrm{mA}$$, LED sẽ sáng." Cổng nào, và phép tính đã bỏ số hạng nào?
-2. "Năm điện trở: 220, 1k, 10k, 330, 470. Đều tốt." Cổng nào, và nửa bằng chứng nào vắng mặt?
-3. "Chế độ diode: nó kêu, nên cực tính ổn." Cổng nào, và vì sao tiếng kêu là sai chức năng?
-4. "Ảnh lưu driver.jpg. Đây là cầu H mua trên Shopee, chân đấu như video." Cổng nào trượt, và hai từ nào đã đủ cho nhãn đạt?
-5. "Mối trông ổn, không ảnh, mỏ ở shop đến 15h thứ Sáu. Đoạn sụt áp nói cả hai mô-tơ TT dùng chung chân 5 V của ESP32 cho gọn dây, echo cắm thẳng GPIO 4." Cổng nào trượt, cổng nào được là lịch bù, và câu nào nguy hiểm chứ không chỉ thiếu?
+1. *"$$3{,}3 / 180 = 18\,\mathrm{mA}$$, LED sẽ sáng."* — Thuộc cổng nào, và phép tính đã bỏ quên đại lượng nào?
+2. *"Năm điện trở: 220, 1k, 10k, 330, 470. Đều tốt."* — Thuộc cổng nào, và thiếu nửa bằng chứng nào?
+3. *"Chế độ diode: đồng hồ kêu bíp nên cực tính ổn."* — Thuộc cổng nào, và vì sao tiếng kêu chứng tỏ dùng sai chức năng?
+4. *"Ảnh lưu driver.jpg. Đây là cầu H mua trên Shopee, chân đấu như video."* — Cổng nào trượt, và cần ghi rõ tên mã nào để đạt?
+5. *"Mối hàn trông ổn, không có ảnh, mỏ hàn ở tiệm đến 15h thứ Sáu mới lấy. Đoạn sụt áp ghi cả hai mô-tơ TT dùng chung chân 5 V của ESP32 cho gọn dây, chân echo cắm thẳng vào GPIO 4."* — Cổng nào trượt, cổng nào có thể tính là lịch bù, và chi tiết nào thực sự gây nguy hiểm phần cứng?
 
 <details markdown="1">
 <summary>Gợi ý đáp án</summary>
 
-1. Cổng 1 trượt. Điện áp thuận của LED bị bỏ, nên 18 mA không phải dòng qua điện trở. Viết lại $$I = (3{,}3 - V_F) / 180$$ với $$V_F$$ được nêu. $$V_F = 2{,}0\,\mathrm{V}$$ thì dòng khoảng $$7{,}2\,\mathrm{mA}$$, mức đó tin được là đạt.
-2. Cổng 3 trượt. Trị danh định có, số đo thì không. "Đều tốt" không thay năm số ohm đo ngoài mạch.
-3. Cổng 4 trượt. Tiếng thông mạch không phải chế độ diode. Sửa là một điện áp thuận và một anode được gọi tên. Tiếng kêu chỉ nói chân chưa đứt.
-4. Cổng 5 trượt. Nhãn đạt là TB6612 hoặc DRV8833, kèm tên chân của chính chip đó. "Cầu H" và "như video" không chỉ ra STBY hay nSLEEP.
-5. Cổng 6 được tính là lịch bù nếu "15h thứ Sáu" được ghi thành ngày và ảnh mối vẫn còn bị đòi lúc đó. Cổng 7 trượt, và câu ấy nguy hiểm: mô-tơ TT không được ăn chân 5 V của ESP32, echo không được rơi vào GPIO 4. Sửa đoạn theo bài 09 và lệnh cấm echo theo bài 07. Đừng coi câu ấy là suýt đạt.
+1. Cổng 1 trượt do bỏ quên điện áp thuận $V_F$ của LED nên 18 mA không phải dòng thực tế. Sửa lại thành $$I = (3{,}3 - V_F) / 180$$ có nêu rõ $V_F$ (ví dụ với $$V_F = 2{,}0\,\mathrm{V}$$ thì dòng khoảng $$7{,}2\,\mathrm{mA}$$).
+2. Cổng 3 trượt vì mới ghi trị số danh định mà thiếu toàn bộ 5 con số đo thực tế bằng đồng hồ ngoài mạch (và nhận xét dung sai).
+3. Cổng 4 trượt vì tiếng kêu bíp thuộc thang thông mạch chứ không phải thang đo diode. Cần đo lại ở thang diode để ghi điện áp thuận và xác định rõ chân anode.
+4. Cổng 5 trượt. Cần ghi rõ tên chip là `TB6612` hoặc `DRV8833` kèm tên chân tương ứng, bởi "cầu H" và "như video" không phân biệt được chân `STBY` hay `nSLEEP`.
+5. Cổng 6 có thể tính là lịch bù nếu ghi rõ ngày dương lịch cho mốc "15h thứ Sáu" và cam kết bổ sung ảnh mối hàn sau đó. Cổng 7 trượt nặng và rất nguy hiểm: tuyệt đối không cấp nguồn hai động cơ TT từ chân 5 V của ESP32 và không cắm thẳng echo 5 V vào GPIO 4; cần sửa lại theo bài 09 và lệnh cấm ở bài 07.
 
 </details>
 
 ## Đọc thêm
 
-- [Module TB6612FNG của Pololu](https://www.pololu.com/product/713) — nhãn và tên chân mà cổng 5 cần khi chip là TB6612.
-- [TI DRV8833](https://www.ti.com/product/DRV8833) — nhãn hợp lệ còn lại. Đừng trộn tên chân của nó với tờ TB6612.
-- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — giới hạn 3,3 V đứng sau cổng 1 và cổng 7.
-- [Hướng dẫn hàn của Adafruit](https://learn.adafruit.com/adafruit-guide-excellent-soldering) — chuẩn vành thiếc cho cổng 6, đặt cạnh hình mối của khóa này.
+- [Module TB6612FNG của Pololu](https://www.pololu.com/product/713) — đối chiếu tên chip và sơ đồ chân cho cổng 5 nếu dùng TB6612.
+- [TI DRV8833](https://www.ti.com/product/DRV8833) — tài liệu tên chân cho phương án DRV8833 (tránh nhầm với sơ đồ TB6612).
+- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — căn cứ giới hạn 3,3 V đứng sau cổng 1 và cổng 7.
+- [Hướng dẫn hàn của Adafruit](https://learn.adafruit.com/adafruit-guide-excellent-soldering) — tiêu chuẩn hình dạng mối hàn để tự chấm cổng 6.
 
 ## Mua ở Việt Nam
 
-Đừng dựng bộ kit thứ hai. So các cổng còn mở với chương 00, bài 05, [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}), và chỉ mua chỗ thiếu.
+Không cần lập thêm bộ kit mới; chỉ đối chiếu các cổng còn mở với bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}) và mua đúng phần còn thiếu.
 
-Cổng 6, nếu thiếu mỏ, dùng trang bài 08 và giá ngày 23 tháng 9 năm 2026: [mỏ 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) 75.000₫, [đế](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) 40.000₫, và [cuộn Sn63 0,8 mm](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire) 24.000₫. Cổng 2, nếu chưa có breadboard, là [CAMMB-102](https://hshop.vn/test-board-cammb-102) 35.000₫. Thiếu đồng hồ cho cổng 3 và 4 thì [UNI-T UT33D](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang). Điện trở hoặc LED lẻ, không bịa slug mới: [Hshop](https://hshop.vn/), [Thế Giới IC](https://www.thegioiic.com/), [IC Đầy Rồi](https://icdayroi.com/).
+Nếu thiếu dụng cụ hàn cho cổng 6 (giá tham khảo Hshop ngày 23 tháng 9 năm 2026): [mỏ hàn 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) 75.000 ₫, [giá đỡ](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) 40.000 ₫ và [cuộn thiếc Sn63 0,8 mm](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire) 24.000 ₫. Nếu thiếu breadboard cho cổng 2: [CAMMB-102](https://hshop.vn/test-board-cammb-102) 35.000 ₫. Nếu thiếu đồng hồ cho cổng 3 và 4: [UNI-T UT33D+](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang). Điện trở và LED lẻ có thể mua tại [Hshop](https://hshop.vn/), [Thế Giới IC](https://www.thegioiic.com/) hoặc [IC Đây Rồi](https://icdayroi.com/).

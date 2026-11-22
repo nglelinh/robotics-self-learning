@@ -11,25 +11,25 @@ lesson_type: required
 draft: false
 ---
 
-Dành khoảng một giờ. Bạn cần câu Capstone từ bài chào mừng, và một mô tả thật về máy tính bạn đang có. Giá trong bài này là hình dạng của một ngân sách, không phải giỏ hàng. Giỏ hàng là [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
+Hãy dành khoảng một giờ cho bài học này. Bạn cần chuẩn bị sẵn phát biểu Capstone A từ bài chào mừng và thông tin chính xác về máy tính mình đang sử dụng. Các mức giá nêu trong bài chỉ nhằm giúp bạn hình dung khung ngân sách, không phải danh sách mua hàng; danh sách mua sắm chính thức nằm ở [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
 ## Mục tiêu học
 
-Ra khỏi bài này bạn **chọn** được lộ trình A hoặc B trong một câu có hệ điều hành laptop, trần tiền bằng VND, và mục tiêu hai tháng. Bạn **chỉ** được một robot lộ trình A gồm ESP32 hoặc Pico 2, motor bánh răng TT, TB6612FNG chứ không phải L298N, và HC-SR04, không cần Ubuntu để nghiệm thu Capstone A. Bạn **tính** được điện áp mà driver Darlington vứt đi, khoảng 2 V, và nói điều đó làm gì với một pack 7,4 V. Bạn **đặt** Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic và micro-ROS sau khi cùng robot đó đã chạy, Raspberry Pi chỉ là lựa chọn sau. Bạn **từ chối** mua LiDAR trước khi Capstone A được nghiệm thu, và viết sự từ chối đó ra.
+Sau bài học này, bạn sẽ **chọn** được Lộ trình A hoặc Lộ trình B bằng một phát biểu ngắn gọn nêu rõ hệ điều hành máy tính, hạn mức ngân sách bằng VND và mục tiêu trong hai tháng tới. Bạn sẽ **xác định** được cấu hình phần cứng của robot Lộ trình A gồm ESP32 hoặc Pico 2, động cơ giảm tốc TT, mạch lái TB6612FNG (thay vì L298N) và cảm biến HC-SR04 — đủ để nghiệm thu Capstone A mà không cần Ubuntu. Bạn sẽ **tính** được mức sụt áp khoảng 2 V của mạch cầu Darlington và phân tích tác động của nó lên bộ pin 7,4 V. Bạn cũng sẽ **sắp xếp** Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic và micro-ROS vào giai đoạn sau khi robot đã chạy ổn định (Raspberry Pi chỉ là tùy chọn mở rộng về sau), đồng thời **cam kết bằng văn bản** không mua LiDAR trước khi nghiệm thu thành công Capstone A.
 
 ## Cần có trước
 
-Bài 00-01: bạn nói được bài teleop bánh nhấc và quy tắc dừng PWM 300 ms, và đã có sổ với sáu trường. Chưa cần Ubuntu, ROS, hay đơn hàng đã trả tiền. Nếu bạn đã có Raspberry Pi, hoặc laptop dual-boot Linux, bạn vẫn bắt đầu từ cùng một khung xe. Sở hữu máy không phải lý do bỏ robot firmware.
+Từ bài 00-01, bạn đã nắm được yêu cầu của bài teleop nhấc bánh, quy tắc ngắt PWM sau 300 ms và đã tạo sổ lab đủ sáu trường. Hiện tại bạn chưa cần Ubuntu, ROS hay đơn hàng linh kiện nào. Ngay cả khi đã có sẵn Raspberry Pi hoặc laptop cài song song Linux, bạn vẫn bắt đầu từ cùng một khung xe vi sai; có sẵn phần cứng mạnh không phải lý do để bỏ qua phần firmware cơ bản.
 
-## Vì sao việc này dính tới Capstone
+## Vì sao bài này gắn liền với Capstone
 
-Capstone A không link với ROS. Nó cần một vi điều khiển canh được khoảng 300 ms, và một driver nhận PWM rồi buông ra. Nếu tháng đầu chỉ để chia ổ đĩa, dây motor vẫn chưa được thử. Lộ trình B là thật. Đó là đường tới topic Jazzy, Gazebo Harmonic và micro-ROS. Các topic đó là lớp nhắn tin trên vật lý bạn đã tin. Chọn lộ trình bây giờ là cách bạn không để một tab mua hàng chọn hộ, và không để LiDAR tới trước khi timeout tồn tại.
+Capstone A không phụ thuộc vào ROS. Bài nghiệm thu này chỉ cần một vi điều khiển kiểm soát được ngưỡng 300 ms và một mạch lái động cơ đáp ứng đúng tín hiệu PWM rồi ngắt an toàn khi mất lệnh. Nếu tháng đầu tiên chỉ trôi qua với việc phân vùng ổ đĩa cài Linux, bạn vẫn chưa kiểm chứng được dây động cơ. Lộ trình B hoàn toàn thực tế vì nó dẫn tới ROS 2 Jazzy, Gazebo Harmonic và micro-ROS, nhưng các công cụ đó chỉ là tầng truyền thông xây dựng phía trên nền tảng phần cứng đã đáng tin cậy. Chốt lộ trình ngay từ bây giờ giúp bạn tránh mua sắm cảm tính và không rơi vào cảnh mua LiDAR trước khi cơ chế tự dừng tồn tại.
 
-## Hai đường hợp lệ, một robot biết chạy
+## Hai lộ trình hợp lệ trên cùng một khung robot
 
-**Lộ trình A** là đường vi điều khiển tiết kiệm, và đủ cho Capstone A. Não là board ESP32 hoặc Raspberry Pi Pico 2. ESP32 là board bạn chọn khi muốn teleop Wi-Fi sau này: điện thoại hoặc laptop cùng bàn gửi lệnh mà demo cuối không cần cáp USB. Pico 2 là board bạn chọn khi muốn MicroPython và cáp USB trước. Cả hai nói logic 3,3 V. Cả hai chạy được quy tắc dừng 300 ms. Cả hai không đòi Ubuntu.
+**Lộ trình A** là hướng vi điều khiển tiết kiệm và hoàn toàn đủ để vượt qua Capstone A. Bộ xử lý trung tâm là mạch ESP32 hoặc Raspberry Pi Pico 2. Bạn nên chọn ESP32 nếu muốn mở rộng sang điều khiển teleop qua Wi-Fi ở giai đoạn sau (dùng điện thoại hoặc laptop cùng mạng gửi lệnh mà không cần cắm cáp USB). Ngược lại, Pico 2 phù hợp nếu bạn ưu tiên làm việc với MicroPython qua cáp USB ngay từ đầu. Cả hai mạch đều dùng mức logic 3,3 V, đều thực thi tốt quy tắc dừng 300 ms và không yêu cầu Ubuntu.
 
-Cơ khí là motor bánh răng TT trên khung nhỏ, hai bánh dẫn động và một bánh caster. Driver bạn muốn là module **TB6612FNG**, cầu H MOSFET. Module người ta mua vì video dùng nó thường là **L298N**, cầu Darlington. Ở dòng motor, cặp Darlington rơi khoảng 2 V giữa pin và motor. Cầu MOSFET rơi vài phần mười vôn. Với pack hai cell ngồi gần 7,4 V,
+Phần truyền động gồm hai động cơ giảm tốc TT lắp trên khung xe nhỏ cùng một bánh đa hướng (caster). Mạch lái động cơ khuyến nghị là **TB6612FNG** dùng cầu H MOSFET. Nhiều video hướng dẫn thường dùng **L298N** (cầu Darlington), nhưng ở dòng tải của động cơ, tầng Darlington gây sụt áp khoảng 2 V giữa pin và động cơ, trong khi cầu MOSFET chỉ sụt vài phần mười vôn. Với bộ pin hai cell có điện áp danh định gần 7,4 V:
 
 $$
 V_{\mathrm{L298}} \approx 7{,}4\,\mathrm{V} - 2{,}0\,\mathrm{V} = 5{,}4\,\mathrm{V},
@@ -39,90 +39,90 @@ $$
 V_{\mathrm{TB6612}} \approx 7{,}4\,\mathrm{V} - 0{,}3\,\mathrm{V} = 7{,}1\,\mathrm{V}.
 $$
 
-Motor TT vốn đã là hộp số nhỏ, hao. Bớt thêm 2 V là lý do "cùng một pin" thấy yếu trên L298N và bình thường trên TB6612. Carrier TB6612 của Pololu, [sản phẩm 713](https://www.pololu.com/product/713), là lời giải thích công khai rõ nhất về con chip đó nếu bạn muốn một kiểu sơ đồ thứ hai. Bạn được mua module khác dùng cùng chip. Bạn không bắt buộc nhập đúng carrier đó. DRV8833 là MOSFET thay thế nhỏ hơn khi TB6612 hết hàng. Nó vẫn không phải L298N.
+Động cơ TT vốn dùng hộp số nhựa nhỏ và có tổn hao cơ khí; mất thêm 2 V là lý do cùng một bộ pin nhưng xe chạy yếu hẳn trên L298N trong khi hoạt động bình thường trên TB6612FNG. Trang sản phẩm carrier TB6612 của Pololu ([sản phẩm 713](https://www.pololu.com/product/713)) là tài liệu tham khảo rất rõ ràng về con chip này, dù bạn hoàn toàn có thể mua module tương đương dùng cùng IC mà không cần nhập đúng mạch của Pololu. Nếu TB6612 hết hàng, DRV8833 là phương án thay thế dùng MOSFET gọn hơn — và vẫn tốt hơn L298N ở dải điện áp thấp.
 
-Cảm biến khoảng cách trên giỏ đầu tiên là module siêu âm HC-SR04. Chân echo của nó vọt lên 5 V, nên không được cắm thẳng vào GPIO 3,3 V. Bài 00-05 có mạch dịch mức cho sợi dây đó. Lộ trình A không cài Ubuntu. Teleop serial từ Windows, macOS, hoặc Linux bạn đang có là đủ để nghiệm thu.
+Cảm biến khoảng cách trong bộ khởi đầu là module siêu âm HC-SR04. Lưu ý rằng chân echo của cảm biến xuất mức cao khoảng 5 V nên tuyệt đối không cắm trực tiếp vào chân GPIO 3,3 V; bài 00-05 sẽ bổ sung mạch chuyển mức logic cho đường tín hiệu này. Lộ trình A không yêu cầu cài Ubuntu: gửi lệnh teleop qua cổng serial từ Windows, macOS hay Linux hiện có đều đủ để nghiệm thu.
 
-**Lộ trình B** là lộ trình A cộng một tầng phần mềm sau. Robot là cùng khung, cùng driver, cùng timeout. Khi teleop đã đáng tin, bạn dùng máy chạy **Ubuntu 24.04** và cài **ROS 2 Jazzy** ở đó. **Gazebo Harmonic** là bộ mô phỏng đi với bản phát hành đó, và là việc của Chương 10. **micro-ROS** cho vi điều khiển nói ROS 2 với máy đó. Nó là một đường truyền thêm lên trên PWM bạn đã nhìn thấy chạy. Raspberry Pi có thể xuất hiện sau như máy kèm tùy chọn. Nó không phải thiết bị quay motor đầu tiên, và không phải lý do mua LiDAR để Pi "có việc".
+**Lộ trình B** là sự mở rộng của Lộ trình A thêm một tầng phần mềm phía trên, sử dụng đúng khung xe, mạch lái và cơ chế timeout đó. Khi hệ thống teleop đã chạy ổn định, bạn dùng máy tính cài **Ubuntu 24.04** và **ROS 2 Jazzy**. **Gazebo Harmonic** là bộ mô phỏng tương thích với bản phát hành này (triển khai ở Chương 10), còn **micro-ROS** cho phép vi điều khiển giao tiếp trực tiếp với ROS 2 trên máy tính. Raspberry Pi có thể được bổ sung sau như một máy tính đồng hành tùy chọn trên xe, nhưng nó không phải thiết bị dùng để quay động cơ ở bước đầu và cũng không phải lý do để mua LiDAR sớm.
 
-Người cài micro-ROS trên board chưa từng quay bánh sẽ sửa hai lỗi một lúc. Topic không có tin và motor không có điện, nhìn từ ghế, giống hệt nhau. Vì vậy khóa đặt đồ thị tin nhắn sau bàn lab.
+Nếu cài micro-ROS trên một mạch chưa từng quay thử bánh xe, bạn sẽ phải gỡ cùng lúc hai lớp lỗi: một topic không có dữ liệu và một động cơ không có nguồn nhìn từ bên ngoài có biểu hiện giống hệt nhau. Đó là lý do khóa học luôn đặt tầng truyền thông phía sau thực hành bàn lab.
 
 ![Lộ trình A bên trái, lộ trình B là tầng sau trên cùng robot]({{ site.imgurl }}/generated/tracks_mcu_ros.png)
 
-Đọc bên trái hình là robot tháng này, bên phải là phần mềm bạn phải kiếm được. "Không cần Ubuntu" là giấy phép của lộ trình A cho Capstone A. "Chỉ mua LiDAR sau khi Capstone A đáng tin" là luật chi tiêu chung. LiDAR quay là một bài toán nguồn khác, một tutorial ROS khác, và thường là vài triệu đồng. Nó không làm quy tắc 300 ms đúng hơn.
+Hãy đọc sơ đồ theo thứ tự: phần bên trái là robot bạn cần hoàn thiện trong tháng này, phần bên phải là tầng phần mềm mở rộng sau khi phần cứng đã ổn định. Nguyên tắc "không cần Ubuntu" áp dụng cho Lộ trình A đến hết Capstone A, còn "chỉ mua LiDAR sau khi Capstone A đáng tin cậy" là kỷ luật chi tiêu chung cho cả hai lộ trình. Một cảm biến LiDAR quay kéo theo bài toán nguồn riêng, tài liệu ROS phức tạp hơn và chi phí thường lên tới vài triệu đồng, nhưng lại không giúp quy tắc dừng 300 ms chính xác hơn.
 
 ## Bảng quyết định
 
-Dùng bảng này như phiếu. Chép một hàng vào sổ và gạch các hàng kia, hoặc đánh một hàng "của tôi".
+Hãy dùng bảng sau để chọn phương án phù hợp, chép dòng tương ứng vào sổ lab và đánh dấu rõ lựa chọn của bạn:
 
-| Tình huống tháng này | Lộ trình | Làm ngay | Để sau |
+| Tình huống hiện tại | Lộ trình | Làm ngay | Để sau |
 | --- | --- | --- | --- |
-| Hệ điều hành nào cũng được; khoảng 1,5–2,0 triệu VND; mục tiêu là "gõ là nó chạy" | A | ESP32 hoặc Pico 2, motor TT, TB6612FNG, HC-SR04, mạch dịch mức, dụng cụ, kế hoạch pin từ bài 00-05 | Ubuntu, Pi, LiDAR, Nav2, cài Jazzy |
-| Windows hoặc macOS, và bạn muốn ROS về sau | A bây giờ, B sau Chương 07 | Cùng robot đó; viết "máy Ubuntu 24.04 của lab sau" | Đừng xóa ổ laptop; đừng mua LiDAR để biện minh cho một cái Pi tương lai |
-| Bạn đã chạy Ubuntu 24.04 và muốn biết ROS | B, nhưng lắp robot lộ trình A trước | Cùng phần điện; được cài Jazzy song song trên máy đó | Đừng chặn Chương 07 bằng một world Gazebo; đừng bỏ bàn lab |
-| Ngân sách chủ yếu là Pi cộng kit LiDAR từ một video | Dừng và tính lại | Viết lại mục tiêu thành teleop bánh nhấc | Kit đó không thực hiện dừng 300 ms hay sụt áp MOSFET |
+| Hệ điều hành nào cũng được; ngân sách khoảng 1,5–2,0 triệu VND; mục tiêu là "gửi lệnh là xe chạy" | A | ESP32 hoặc Pico 2, động cơ TT, TB6612FNG, HC-SR04, mạch chuyển mức, dụng cụ và kế hoạch pin theo bài 00-05 | Ubuntu, Raspberry Pi, LiDAR, Nav2, cài ROS 2 Jazzy |
+| Đang dùng Windows hoặc macOS và muốn học ROS về sau | A trước, sang B sau Chương 07 | Lắp đúng robot Lộ trình A; ghi chú kế hoạch dùng máy Ubuntu 24.04 sau này | Không chia lại ổ cứng laptop vội; không mua LiDAR chỉ để có việc cho Raspberry Pi |
+| Đã có sẵn máy chạy Ubuntu 24.04 và muốn tiếp cận ROS | B, nhưng vẫn lắp robot Lộ trình A trước | Làm phần điện tương tự Lộ trình A; có thể cài song song Jazzy trên máy đó | Không để mô phỏng Gazebo cản tiến độ Chương 07; không bỏ qua bàn lab |
+| Ngân sách chủ yếu định chi cho Raspberry Pi kèm bộ LiDAR thấy trong video | Dừng lại và cân đối lại | Đặt lại mục tiêu là demo teleop nhấc bánh | Bộ kit đó không tự giải quyết quy tắc dừng 300 ms hay vấn đề sụt áp driver |
 
-Một LiDAR 4.000.000 ₫ cạnh lõi lộ trình A khoảng 800.000 ₫ là
+Một cảm biến LiDAR giá khoảng 4.000.000 ₫ đặt cạnh phần lõi phần cứng Lộ trình A khoảng 800.000 ₫ có tỷ lệ chi phí là:
 
 $$
 \frac{4{.}000{.}000}{800{.}000} = 5
 $$
 
-lần cái lõi, và nó không chớp LED đầu tiên. Tỷ số đó là lý do cấm mua trước nghiệm thu.
+lần, trong khi nó thậm chí không giúp bạn làm nhấp nháy đèn LED đầu tiên. Tỷ lệ này giải thích vì sao khóa học yêu cầu hoãn mua LiDAR cho tới sau nghiệm thu.
 
-Giá phải có ngày. Một con số không ngày là chuyện bàn tán. Bài 00-05 giữ các snapshot Hshop có ngày cho thứ bạn sẽ đặt. Bài này không dựng lại bảng đó. Nếu một board nhảy một trăm nghìn đồng, lộ trình không đổi. Lộ trình chỉ đổi khi hệ điều hành, trần tiền, hoặc mục tiêu đổi.
+Mọi con số về giá đều phải gắn kèm ngày khảo sát. Bài 00-05 lưu các mốc giá Hshop có ghi ngày cụ thể cho từng món bạn cần đặt mua, nên bài này không lặp lại bảng giá đó. Nếu một mạch vi điều khiển tăng hoặc giảm một trăm nghìn đồng, lộ trình học vẫn giữ nguyên; lộ trình chỉ thay đổi khi hệ điều hành, trần ngân sách hoặc mục tiêu học tập của bạn thay đổi.
 
-## Lab: viết câu lộ trình
+## Thực hành: viết cam kết lộ trình
 
-Mở `notes/lab-notes.md`. Dưới ngày hôm nay, viết ba dòng: hệ điều hành laptop, trần tiền VND cho 30 ngày tới, và mục tiêu một câu. Nếu mục tiêu có bản đồ, SLAM hoặc Nav2, thêm mệnh đề "sau Capstone A".
+Mở `notes/lab-notes.md` và ghi ba dòng dưới ngày hôm nay: hệ điều hành máy tính đang dùng, hạn mức ngân sách bằng VND cho 30 ngày tới, và mục tiêu một câu. Nếu mục tiêu có nhắc tới lập bản đồ, SLAM hoặc Nav2, hãy bổ sung cụm "sau Capstone A".
 
-Chọn vi điều khiển bằng lời. Hoặc "board ESP32, teleop Wi-Fi sau, serial USB trước" hoặc "Pico 2, MicroPython, USB trước". Bạn được đổi trước khi trả tiền. Bạn không được để trống.
+Tiếp theo, viết rõ lựa chọn vi điều khiển: chọn "ESP32, ưu tiên serial USB trước và teleop Wi-Fi sau" hoặc "Pico 2, dùng MicroPython qua USB trước". Bạn vẫn có thể đổi ý trước khi đặt mua, nhưng không được để trống lựa chọn này.
 
-Viết câu này và ký tên sau nó: "Tôi sẽ không mua LiDAR trước khi teleop bánh nhấc Capstone A của tôi đạt, kể cả quy tắc dừng PWM 300 ms."
+Chép lại câu cam kết sau và ghi tên mình bên dưới: "Tôi sẽ không mua LiDAR trước khi bài teleop nhấc bánh Capstone A của tôi đạt yêu cầu, bao gồm quy tắc dừng PWM 300 ms."
 
-Thêm một dòng chỉ vào bài 00-05 như danh sách mua duy nhất. Đừng dán một giỏ thứ hai vào đây. Nếu bạn biết mình sẽ dùng máy lab chung cho Ubuntu, ghi tên máy đó là "Ubuntu lab, không phải laptop của tôi".
+Cuối cùng, thêm một dòng ghi chú chỉ về bài 00-05 như danh sách mua sắm duy nhất thay vì tạo thêm giỏ hàng thứ hai. Nếu bạn dự định dùng máy chung ở phòng lab cho Ubuntu về sau, hãy ghi rõ "dùng máy Ubuntu của lab, không dùng laptop cá nhân".
 
-**Bạn sẽ thấy gì.** Người đọc sau biết bạn chọn lộ trình nào, nghiêng về MCU nào, và từ chối những món đắt nào. Ubuntu là "chưa", hoặc "máy lab sau", hoặc "đã cài, bàn lab vẫn trước".
+**Kết quả cần đạt:** Người đọc nhìn vào sổ biết ngay bạn đi lộ trình nào, chọn vi điều khiển gì, từ chối mua món đắt tiền nào, và trạng thái Ubuntu là "chưa cài", "dùng máy lab sau" hay "đã cài nhưng vẫn ưu tiên bàn lab".
 
-**Khi lệch.** Bạn chọn B mà chỉ đặt một cái Pi. Motor vẫn do ESP32 hoặc Pico 2 lái; thêm các dòng đó bằng cách mở bài 00-05, không bịa kit mới. Bạn chọn A rồi cài Jazzy "thử cho biết" trên Windows. Đánh dấu trang cài vào mục "sau Chương 07" và đóng lại. Windows Subsystem cho Linux không phải lab robot. Ngân sách là một số không ngày. Tách "lõi robot" khỏi "dụng cụ" và ghi ngày ước lượng.
+**Cách xử lý khi lệch chuẩn:** Nếu bạn chọn Lộ trình B nhưng chỉ định mua Raspberry Pi, hãy nhớ động cơ vẫn do ESP32 hoặc Pico 2 điều khiển và bổ sung các món đó theo bài 00-05. Nếu bạn chọn Lộ trình A nhưng định cài thử Jazzy trên Windows, hãy lưu trang hướng dẫn vào mục "sau Chương 07" và đóng tab lại vì Windows Subsystem for Linux (WSL) không thay thế được môi trường thực hành robot. Nếu ngân sách chưa ghi ngày, hãy tách rõ phần "lõi robot" với "dụng cụ" kèm ngày ước tính.
 
 ## Ví dụ làm sẵn
 
-Minh có laptop Windows và trần khoảng 1,5–2,0 triệu VND trong tháng. Mục tiêu anh viết lần đầu là "học ROS và SLAM". Anh viết lại thành "lái robot hai bánh từ serial, có dừng 300 ms, rồi mới dùng máy Ubuntu của lab cho Jazzy". Bảng đặt anh vào lộ trình A ngay. Anh chọn ESP32 vì muốn teleop Wi-Fi như một biến thể sau của Chương 07, còn lệnh đầu vẫn là serial USB. Anh không mua thêm Pico 2. Anh không mua LiDAR. Anh ghi lộ trình B sẽ xảy ra trên máy lab trường đã có Ubuntu 24.04, không phải bằng cách chia lại ổ Windows tuần này. Danh sách anh sẽ chép là bài 00-05, không phải kit trên diễn đàn.
+Minh dùng laptop Windows với trần ngân sách khoảng 1,5–2,0 triệu VND trong tháng này. Ban đầu anh đặt mục tiêu là "học ROS và SLAM", sau đó viết lại thành "điều khiển xe hai bánh qua serial có quy tắc dừng 300 ms, rồi mới dùng máy Ubuntu của phòng lab để học Jazzy". Dựa theo bảng quyết định, anh đi theo Lộ trình A trước và chọn ESP32 để sau này mở rộng sang teleop Wi-Fi ở Chương 07, trong khi giai đoạn đầu vẫn dùng serial USB. Anh không mua thêm Pico 2, không mua LiDAR, và không phân vùng lại ổ đĩa Windows tuần này vì sẽ dùng máy Ubuntu 24.04 của trường về sau. Danh sách mua sắm anh sử dụng là bài 00-05.
 
-Một bạn khác, Lan, đã chạy Ubuntu 24.04 trên laptop của mình. Lan được phép làm theo [trang cài Jazzy](https://docs.ros.org/en/jazzy/Installation.html) song song, trong một buổi riêng, và ghi chuỗi phiên bản vào sổ. Lan không được bỏ bàn lab. Robot của Lan vẫn là motor TT, TB6612FNG, HC-SR04, và firmware đưa PWM về 0 khi gói tin dừng. Nếu Jazzy cài sạch mà motor còn trong túi, Lan không đi trước. Lan có lớp nhắn tin và chưa có vật lý. Gazebo Harmonic chỉ được gọi tên, chưa mở, cho tới khi khung xe đã qua teleop bánh nhấc ít nhất một lần. micro-ROS vẫn là một link, [micro.ros.org](https://micro.ros.org/), cho tới khi cùng board đó đã kéo bánh mà không cần nó.
+Một bạn khác là Lan đã cài sẵn Ubuntu 24.04 trên laptop cá nhân. Lan có thể làm theo [trang cài đặt Jazzy](https://docs.ros.org/en/jazzy/Installation.html) trong một buổi riêng song song và ghi phiên bản thực tế vào sổ lab, nhưng không được bỏ qua thực hành phần cứng. Robot của Lan vẫn gồm động cơ TT, TB6612FNG, HC-SR04 và firmware đưa PWM về 0 khi mất lệnh. Nếu Jazzy đã cài xong nhưng linh kiện vẫn nằm nguyên trong túi, Lan chưa hề đi trước tiến độ mà mới chỉ có tầng phần mềm. Gazebo Harmonic chỉ được ghi tên chứ chưa mở cho đến khi khung xe vượt qua bài teleop nhấc bánh, và micro-ROS ([micro.ros.org](https://micro.ros.org/)) cũng chờ đến khi mạch tự quay được bánh xe độc lập.
 
-Minh phác sụt áp Darlington để lựa driver không phải sở thích nhãn. Ở 7,4 V với khoảng 2 V rơi, motor thấy 5,4 V. Sụt MOSFET khoảng 0,3 V còn 7,1 V. Anh viết "TB6612FNG, không L298N" trong câu lộ trình. Cả hai người kết thúc mục bằng câu từ chối LiDAR. Không ai mở bảng tính thứ hai. Bài 00-05 là giỏ hàng.
+Minh tự kiểm tra phép tính sụt áp để việc chọn mạch lái dựa trên cơ sở kỹ thuật thay vì cảm tính: ở nguồn 7,4 V, sụt áp 2 V của Darlington chỉ còn 5,4 V cho động cơ, còn sụt áp khoảng 0,3 V của MOSFET giữ lại 7,1 V. Anh ghi rõ "dùng TB6612FNG, không dùng L298N" vào câu lộ trình. Cả Minh và Lan đều kết thúc ghi chú bằng câu cam kết không mua LiDAR sớm và thống nhất lấy bài 00-05 làm danh sách mua sắm duy nhất.
 
 ## Video tham khảo
 
-- **Xem trước:** [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Đối chiếu ba board với hai lộ trình của bài: MCU trước, máy chạy ROS sau.
-- [ROS 2 Series #1 | Giới thiệu sơ lược về ROS | TeslaEdison](https://www.youtube.com/watch?v=_vovUjZM6os) — TeslaEdison, tiếng Việt. Một giới thiệu ROS 2 bằng tiếng Việt. Giữ tên distro trong video khỏi trộn với Jazzy của khóa.
+- **Xem trước:** [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Đối chiếu ba dòng mạch với hai lộ trình trong bài: làm chủ vi điều khiển trước, máy tính chạy ROS để sau.
+- [ROS 2 Series #1 | Giới thiệu sơ lược về ROS | TeslaEdison](https://www.youtube.com/watch?v=_vovUjZM6os) — TeslaEdison, tiếng Việt. Video giới thiệu tổng quan ROS 2 bằng tiếng Việt; lưu ý không nhầm tên bản phân phối trong video với ROS 2 Jazzy của khóa học.
 
 ## Bài tập
 
-1. Laptop của bạn là Windows, trần 1.800.000 ₫, và bạn muốn robot chạy trong tháng này. Lộ trình nào, MCU nào nếu bạn quan tâm Wi-Fi sau, và driver nào? Ubuntu tuần này bạn làm gì?
-2. Bạn đã có Ubuntu 24.04. Vì sao thứ lắp trước vẫn là khung xe lộ trình A, dù bạn được phép cài Jazzy song song?
-3. Pin 6 V từ bốn viên AA nuôi một L298N rơi khoảng 2 V. Điện áp nào tới motor? Vì sao đó là cặp kém với motor TT, vốn đã yếu khi còn khoảng 4 V?
-4. Một listing thêm LiDAR 3.500.000 ₫ vào kế hoạch lộ trình A "chỉ thêm một chút". Nghiệm thu Capstone A có dễ hơn không? LiDAR đứng ở đâu so với bài nghiệm thu?
-5. micro-ROS đứng ở đâu so với ngày đầu bánh đáp lại lệnh serial? Một repo [linorobot2](https://github.com/linorobot/linorobot2) sẽ dụ bạn bỏ bước nào?
+1. Bạn dùng laptop Windows, trần ngân sách 1.800.000 ₫ và muốn robot chạy trong tháng này. Bạn nên chọn lộ trình nào, vi điều khiển nào (nếu muốn làm Wi-Fi về sau) và mạch lái nào? Với Ubuntu trong tuần này, bạn nên xử lý thế nào?
+2. Nếu máy tính của bạn đã cài sẵn Ubuntu 24.04, vì sao bạn vẫn phải lắp khung xe theo Lộ trình A trước dù được phép cài song song ROS 2 Jazzy?
+3. Một bộ 4 pin AA tạo điện áp 6 V cấp qua L298N bị sụt khoảng 2 V. Điện áp thực tế tới động cơ là bao nhiêu? Vì sao đây là sự kết hợp kém với động cơ TT vốn đã yếu quanh mức 4 V?
+4. Một cửa hàng gợi ý thêm cảm biến LiDAR giá 3.500.000 ₫ vào bộ Lộ trình A. Việc này có giúp nghiệm thu Capstone A dễ hơn không, và LiDAR nên xuất hiện ở giai đoạn nào?
+5. micro-ROS nên được triển khai vào lúc nào so với ngày đầu tiên bánh xe đáp ứng lệnh serial? Nếu mở kho mã nguồn [linorobot2](https://github.com/linorobot/linorobot2) quá sớm, bạn dễ bị cuốn vào việc bỏ qua bước nền tảng nào?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Lộ trình A ngay. Chọn ESP32 nếu teleop Wi-Fi là đích sau; chọn Pico 2 nếu bạn muốn MicroPython qua USB trước và chấp nhận Wi-Fi là việc của người khác lúc này. Driver là TB6612FNG. Ubuntu chờ. Đừng cài Jazzy trên Windows rồi gọi đó là lab.
-2. Jazzy cho thấy topic trên máy tính. Nó không cho thấy dây VM, hành vi stall, và timeout 300 ms chạy trên phần cứng mà sau này các topic sẽ mô tả. Cài song song thì được. Bỏ bàn lab thì không.
-3. $6 - 2 = 4$ V tại motor. Bốn vôn là đầu yếu của hộp số TT nhỏ, ngay cả khi chưa tải. Robot bò hoặc stall, và triệu chứng trông như "motor hỏng".
-4. Nghiệm thu không dễ hơn. LiDAR không thực hiện timeout hay driver MOSFET. Nó thuộc về sau Capstone A, nếu nó thuộc về đâu đó.
-5. micro-ROS đến sau khi bánh đã đáp lại. linorobot2 là bức tranh một robot vi sai được mô tả cho ROS 2. Mở nó trước khi có driver và timeout sẽ dụ bạn sửa URDF trong khi bàn còn trống.
+1. Chọn Lộ trình A ngay từ đầu. Chọn ESP32 nếu có kế hoạch làm teleop Wi-Fi về sau (hoặc Pico 2 nếu muốn dùng MicroPython qua USB trước). Mạch lái là TB6612FNG. Việc cài Ubuntu để sau, không cài Jazzy trên Windows rồi coi đó là thực hành robot.
+2. Jazzy giúp bạn quan sát topic trên máy tính, nhưng không kiểm chứng được đường nguồn VM, hiện tượng kẹt trục (stall) và cơ chế timeout 300 ms trên phần cứng thật. Cài song song để tìm hiểu thì được, nhưng không thể thay thế bàn lab.
+3. Điện áp tại động cơ chỉ còn $6 - 2 = 4$ V. Mức 4 V nằm ở vùng rất yếu của hộp số TT ngay cả khi không tải, khiến xe bò chậm hoặc kẹt trục và dễ bị nhầm là động cơ hỏng.
+4. Không giúp nghiệm thu dễ hơn. LiDAR không thực thi quy tắc timeout và không thay thế mạch lái MOSFET. Nó chỉ nên cân nhắc sau khi Capstone A đã chạy ổn định.
+5. micro-ROS chỉ nên triển khai sau khi bánh xe đã đáp ứng tốt lệnh serial. Kho mã nguồn `linorobot2` mô tả một robot vi sai hoàn chỉnh cho ROS 2; xem nó trước khi có mạch lái và cơ chế timeout rất dễ khiến bạn sa đà vào việc chỉnh sửa tệp URDF trong khi phần cứng thực tế chưa hề được lắp.
 
 </details>
 
 ## Đọc thêm
 
-- [linorobot2](https://github.com/linorobot/linorobot2) — một stack vi sai cụ thể cho ROS 2. Đọc như bức tranh đích của lộ trình B, không phải danh sách linh kiện tháng này.
-- [micro-ROS](https://micro.ros.org/) — nó là gì. Mang tutorial trở lại sau khi khung xe chạy mà không cần nó.
-- [Cài ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Installation.html) — Ubuntu 24.04 là đường được hỗ trợ. Nếu máy hàng ngày là Windows, trang này là việc của máy lab sau.
-- [Pololu TB6612FNG, sản phẩm 713](https://www.pololu.com/product/713) — vì sao một carrier MOSFET là driver để đem so với module Darlington.
+- [linorobot2](https://github.com/linorobot/linorobot2) — một hệ thống phần mềm xe vi sai mẫu cho ROS 2; nên đọc để hình dung đích đến của Lộ trình B thay vì coi là danh sách linh kiện tháng này.
+- [micro-ROS](https://micro.ros.org/) — tài liệu giới thiệu micro-ROS; hãy quay lại thực hành hướng dẫn sau khi khung xe đã vận hành độc lập.
+- [Cài ROS 2 Jazzy](https://docs.ros.org/en/jazzy/Installation.html) — hướng dẫn cài đặt chính thức trên Ubuntu 24.04; nếu bạn đang dùng Windows, hãy để dành cho máy lab về sau.
+- [Pololu TB6612FNG, sản phẩm 713](https://www.pololu.com/product/713) — tài liệu giải thích rõ lý do mạch lái MOSFET vượt trội hơn mạch Darlington ở điện áp thấp.
 
-Việc mua nằm ở [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Đừng dựng lại giỏ từ bốn link này.
+Toàn bộ danh sách mua sắm nằm tại [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}); đừng tự tạo giỏ hàng mới từ bốn liên kết tham khảo trên.

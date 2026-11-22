@@ -11,216 +11,144 @@ lesson_type: required
 draft: false
 ---
 
-Dành khoảng chín mươi phút. Bạn cần một trình soạn thảo và một lịch. Chưa cần robot, cũng chưa cần Ubuntu. Việc của bài này là viết một bản đồ mà bạn vẫn dùng được khi khung xe cuối cùng cũng lăn.
+Hãy dành khoảng 90 phút cho bài học này. Bạn chỉ cần một trình soạn thảo văn bản và một cuốn lịch; hiện tại chưa cần robot hay hệ điều hành Ubuntu. Mục tiêu của bài là giúp bạn lập một lộ trình học tập cụ thể và đủ rõ ràng để sử dụng xuyên suốt cho đến khi khung xe robot lăn bánh.
 
 ## Mục tiêu học
 
-Hết bài này bạn **nêu** được xương sống của khóa, từ việc nhận ra linh kiện, qua teleop Chương 07, tới chỗ đọc các bài robot learning sau này. Bạn **tính** được nhịp 4–6 giờ mỗi tuần trong 12–16 tuần và đặt các mốc chương lên lịch đó. Bạn **mở** một sổ lab với sáu trường: ngày, ảnh, sơ đồ dây, đoạn serial, cái gì hỏng, cái gì sửa được. Bạn **phân biệt** một ghi chú là bằng chứng hay chỉ là cảm giác, bằng cách nhìn chỗ thiếu đoạn serial hoặc thiếu mô tả lỗi. Bạn **tìm** bản tiếng Việt hoặc tiếng Anh của cùng một bài bằng chapter và order, và bạn **hoãn** LiDAR, Nav2, cùng một bản cài ROS 2 đầy đủ, cho tới khi robot vi sai đã dừng khi lệnh im.
+Sau bài học này, bạn sẽ **trình bày** được cấu trúc cốt lõi của khóa học, từ bước nhận diện linh kiện, vượt qua mốc điều khiển từ xa (teleop) ở Chương 07, cho đến việc đọc hiểu các tài liệu về học máy cho robot (robot learning) về sau. Bạn sẽ **tính toán** được nhịp học 4–6 giờ mỗi tuần trong 12–16 tuần và phân bổ các mốc chương lên lịch cá nhân. Bạn cũng sẽ **tạo** sổ lab gồm sáu trường thông tin bắt buộc: ngày, ảnh chụp, sơ đồ dây, đoạn log serial, lỗi gặp phải và cách khắc phục; đồng thời **phân biệt** được ghi chép có bằng chứng với nhận xét cảm tính dựa trên việc có kèm log serial và mô tả lỗi hay không. Cuối cùng, bạn sẽ biết cách **tìm** bản tiếng Việt hoặc tiếng Anh của cùng một bài học theo `chapter` và `order`, và chủ động **hoãn** việc mua LiDAR, dùng Nav2 hay cài đặt ROS 2 đầy đủ cho tới khi xe vi sai biết tự dừng khi mất lệnh điều khiển.
 
 ## Cần có trước
 
-Bạn đọc được một trang kỹ thuật nếu đọc chậm, và tạo được thư mục. Chưa cần đồng hồ, chưa cần mỏ hàn, chưa cần học robot từ trước. Định luật Ohm để Chương 01, lúc đó sẽ đo chứ không học thuộc. Cái cần ngay là ghi lại thứ đã hỏng. Câu "bắt đầu khóa học" không cứu được bạn ở tuần chín.
+Bạn chỉ cần đọc hiểu được tài liệu kỹ thuật ở tốc độ chậm và biết tạo thư mục trên máy tính. Lúc này bạn chưa cần đồng hồ vạn năng, mỏ hàn hay kiến thức nền về robot. Định luật Ohm sẽ được học ở Chương 01 thông qua thực hành đo đạc thay vì học thuộc lòng. Thói quen quan trọng nhất cần rèn ngay từ đầu là ghi chép trung thực những gì gặp lỗi; một dòng nhật ký chung chung như "bắt đầu khóa học" sẽ không giúp ích gì khi bạn cần gỡ lỗi ở tuần thứ chín.
 
-## Vì sao việc này dính tới Capstone
+## Vì sao bài này gắn liền với Capstone
 
-Chương 07 là Capstone A: hai bánh dẫn động và một bánh caster, bạn lái bằng tay khi bánh đang nhấc khỏi mặt bàn. Teleop nghĩa là bạn tự lái, không giao cho robot tự tìm đường. Nếu lệnh ngừng khoảng 300 ms, duty PWM phải về 0. ROS 2 Jazzy đứng sau bài kiểm đó. Một topic là một dòng tin có tên, lớp nhắn tin đặt trên vật lý mà bạn đã tin. Topic không tạo ra mô-men. Gazebo Harmonic và micro-ROS là cùng ý đó trong mô phỏng và trên vi điều khiển. Nếu bây giờ bạn chưa nói được quy tắc 300 ms, mọi lần cài đặt sau này chỉ là cách tránh bàn lab.
+Chương 07 là mốc **Capstone A**: một xe dẫn động vi sai gồm hai bánh chủ động và một bánh đa hướng (caster), được bạn điều khiển thủ công khi bánh xe đang nhấc khỏi mặt bàn. Điều khiển từ xa (teleop) nghĩa là bạn trực tiếp gửi lệnh lái chứ chưa để robot tự tìm đường. Quy tắc an toàn cốt lõi là nếu không có lệnh mới trong hơn 300 ms, chu kỳ xung (duty PWM) phải tự động đưa về 0. ROS 2 Jazzy chỉ xuất hiện sau khi bạn vượt qua bài kiểm tra này. Về bản chất, một topic trong ROS 2 chỉ là một kênh truyền thông điệp có tên nằm phía trên phần cứng mà bạn đã kiểm chứng, chứ bản thân topic không tạo ra mô-men xoắn. Gazebo Harmonic và micro-ROS cũng tuân theo nguyên tắc đó ở tầng mô phỏng và vi điều khiển. Nếu ngay từ bây giờ bạn chưa nắm rõ quy tắc dừng 300 ms, mọi việc cài đặt phần mềm về sau rất dễ trở thành cách né tránh thực hành trên bàn lab.
 
-## Xương sống, theo đúng thứ tự bạn sẽ sống với nó
+## Lộ trình cốt lõi của khóa học
 
-Khóa này là một đường, cuối đường có vài phòng tùy chọn.
+Khóa học được thiết kế theo một tuyến thống nhất, với một số chương mở rộng tùy chọn ở giai đoạn cuối.
 
-Bạn bắt đầu bằng việc nhận ra linh kiện: một hàng breadboard, một board lái động cơ, một cáp USB chỉ sạc, một cell pin mà cục sạc không khớp nhãn. Chương 00 là thói quen trên bàn. Chương 01 biến điện áp, dòng và điện trở thành con số bạn đã đo.
+Bạn sẽ bắt đầu bằng kỹ năng nhận diện phần cứng cơ bản: cấu trúc hàng lỗ trên breadboard, mạch lái động cơ (driver), phân biệt cáp USB chỉ sạc với cáp truyền dữ liệu, và kiểm tra sự tương thích giữa cell pin với bộ sạc. Chương 00 xây dựng thói quen làm việc an toàn trên bàn lab, còn Chương 01 chuyển các khái niệm điện áp, dòng điện và điện trở thành những con số đo đạc thực tế.
 
-Rồi tới firmware trên ESP32 hoặc Raspberry Pi Pico. Chương 02 đưa chương trình vào chip. Chương 03 khiến nó giống mã robot: chân, thời gian, và PWM. PWM, điều chế độ rộng xung, là một chân ở mức cao trong một phần của chu kỳ ngắn. Board lái biến phần đó thành mức motor bị yêu cầu quay mạnh tới đâu.
+Tiếp theo là phần firmware trên ESP32 hoặc Raspberry Pi Pico. Chương 02 hướng dẫn nạp chương trình vào vi điều khiển, còn Chương 03 đưa bạn vào cấu trúc mã nguồn đặc trưng cho robot: chân GPIO, định thời và điều chế độ rộng xung (PWM). PWM là kỹ thuật giữ một chân ở mức logic cao trong một tỷ lệ nhất định của mỗi chu kỳ ngắn, từ đó mạch lái động cơ chuyển đổi thành mức công suất cấp cho động cơ.
 
-Chương 04 tới 06 thêm cảm biến, board lái, và cơ khí của hai bánh dẫn động. Chương 07 là bài nghiệm thu. Bạn gửi tiến, xoay, hoặc dừng, qua serial USB hoặc, sau này, một trang Wi-Fi nhỏ nếu bạn chọn ESP32. Bánh ở trên không. Một bộ đếm nhớ lệnh hợp lệ cuối. Gọi $t_{\mathrm{last}}$ là mốc đó và $t_{\mathrm{now}}$ là thời điểm trong vòng lặp. Khoảng im là
+Từ Chương 04 đến Chương 06, bạn bổ sung cảm biến, mạch lái động cơ và lắp ráp cơ khí cho hệ hai bánh chủ động. Chương 07 là bài nghiệm thu Capstone A: bạn gửi lệnh tiến, xoay hoặc dừng qua cổng serial USB (hoặc qua một trang Wi-Fi đơn giản nếu dùng ESP32) trong trạng thái bánh xe nhấc khỏi mặt bàn. Một bộ đếm thời gian sẽ lưu lại thời điểm nhận lệnh hợp lệ gần nhất. Gọi $t_{\mathrm{last}}$ là mốc thời gian đó và $t_{\mathrm{now}}$ là thời điểm hiện tại trong vòng lặp điều khiển. Khoảng thời gian mất lệnh được tính là:
 
 $$
 t_{\mathrm{silence}} = t_{\mathrm{now}} - t_{\mathrm{last}}.
 $$
 
-Quy tắc dừng của khóa:
+Quy tắc dừng an toàn của khóa học là:
 
 $$
 t_{\mathrm{silence}} > 300\,\mathrm{ms} \implies \text{duty PWM} = 0.
 $$
 
-Dấu lớn hơn là nghiêm: lệnh rơi đúng 300 ms vẫn còn tính là mới. Hôm nay bạn chưa nạp vòng lặp này. Với tốc độ chậm $0{,}3\,\mathrm{m/s}$, robot có thể trườn khoảng 9 cm trong cửa sổ đó:
+Dấu lớn hơn ở đây là bất đẳng thức chặt: lệnh đến đúng mốc 300 ms vẫn được coi là hợp lệ. Hôm nay bạn chưa cần lập trình vòng lặp này, nhưng cần hiểu ý nghĩa vật lý của nó. Ở tốc độ chậm $0{,}3\,\mathrm{m/s}$, robot vẫn có thể trôi thêm khoảng 9 cm trong khoảng thời gian chờ đó:
 
 $$
 s \approx 0{,}3\,\mathrm{m/s} \times 0{,}3\,\mathrm{s} = 0{,}09\,\mathrm{m}.
 $$
 
-Chín centimét cũng đủ giật đứt cáp USB, nên nghiệm thu là bánh nhấc lên.
+Quãng đường 9 cm là đủ để làm giật đứt cáp USB hoặc kéo xe rơi khỏi bàn, vì vậy bài nghiệm thu bắt buộc phải nhấc bánh lên.
 
-Chỉ khi bản demo đó lặp lại được bạn mới thêm lớp nhắn tin. Chương 08 là truyền thông và vòng điều khiển đơn giản trên phần cứng bạn đã thấy chuyển động. Chương 09 cài ROS 2 Jazzy, và chỉ trên Ubuntu 24.04. Một topic vận tốc có ích vì bạn đã biết firmware làm gì khi tin nhắn dừng. Chương 10 gọi tên Gazebo Harmonic, bộ mô phỏng đi với Jazzy, và micro-ROS, cách để chính vi điều khiển đó nói ROS 2. micro-ROS đáng làm sau khi board đã kéo khung xe mà không cần nó. Một topic im và một motor im, nếu không, là cùng một triệu chứng.
+Chỉ khi bản demo teleop hoạt động ổn định và lặp lại được, bạn mới chuyển sang tầng truyền thông. Chương 08 xây dựng giao tiếp và vòng điều khiển đơn giản trên phần cứng đã vận hành. Chương 09 cài đặt ROS 2 Jazzy (chỉ hỗ trợ trên Ubuntu 24.04); lúc này, một topic vận tốc thực sự có ý nghĩa vì bạn đã nắm rõ firmware phản ứng thế nào khi luồng tin nhắn bị ngắt. Chương 10 giới thiệu Gazebo Harmonic (bộ mô phỏng đi kèm Jazzy) và micro-ROS (giải pháp giúp vi điều khiển giao tiếp trực tiếp với ROS 2). Bạn chỉ nên triển khai micro-ROS sau khi vi điều khiển đã lái được khung xe độc lập, bởi nếu không, một topic im lặng và một động cơ mất điện sẽ gây ra triệu chứng giống hệt nhau.
 
-Chương 11 và 12 là tùy chọn và đòi hỏi đọc cẩn thận. LeRobot là thư viện Hugging Face về dữ liệu robot và policy đã học. ACT dự đoán một khúc hành động phía trước. Diffusion policy sinh hành động bằng khử nhiễu từng bước. VLA ánh xạ ảnh và câu lệnh thành hành động. Không cái nào thay board lái biết tắt PWM. Đọc điều được khẳng định, dữ liệu, và giới hạn. Một repository không biến khung xe đầu thành nền tảng nghiên cứu.
+Chương 11 và 12 là hai chương tùy chọn, đòi hỏi đọc tài liệu một cách tỉnh táo. LeRobot là thư viện của Hugging Face dành cho tập dữ liệu robot và các chính sách điều khiển (policy) học từ dữ liệu. ACT dự đoán một chuỗi hành động ngắn phía trước, diffusion policy sinh hành động bằng quá trình khử nhiễu từng bước, còn VLA ánh xạ trực tiếp hình ảnh và câu lệnh thành hành động. Không mô hình nào trong số này thay thế được một mạch lái động cơ biết ngắt PWM an toàn. Khi đọc các tài liệu này, hãy chú ý vào giả thuyết, dữ liệu thực nghiệm và giới hạn của chúng; một kho mã nguồn không thể tự biến khung xe đầu tiên của bạn thành nền tảng nghiên cứu.
 
-Video hay coi vài thứ là bước một. Khóa này hoãn chúng: không LiDAR trong chương này, không Nav2, không cài ROS 2 tuần này trừ khi bạn chỉ đọc trang cài trên máy đã có Ubuntu 24.04. Bàn lab vẫn đi trước. Lăn được một giây không phải tự hành. Điện áp pin motor không lên chân 3,3 V.
+Nhiều video hướng dẫn thường đặt các công cụ phức tạp ở bước đầu tiên, nhưng khóa học này chủ động hoãn chúng lại: chưa dùng LiDAR, chưa dùng Nav2 và chưa cài ROS 2 trong tuần này (trừ khi bạn chỉ đọc trước trang hướng dẫn trên máy đã cài sẵn Ubuntu 24.04). Thực hành trên bàn lab luôn được ưu tiên. Một chiếc xe lăn được vài giây chưa phải là robot tự hành, và điện áp pin động cơ tuyệt đối không được nối vào chân 3,3 V.
 
-## Nhịp: bốn đến sáu giờ, trong mười hai đến mười sáu tuần
+## Nhịp học: 4–6 giờ mỗi tuần trong 12–16 tuần
 
-Tải thiết kế là **4–6 giờ mỗi tuần** trong khoảng **12–16 tuần**. Mười bốn tuần, mỗi tuần năm giờ, là
+Khối lượng học tập thiết kế là **4–6 giờ mỗi tuần** trong khoảng **12–16 tuần**. Với 14 tuần và 5 giờ mỗi tuần, tổng thời gian là:
 
 $$
 5 \times 14 = 70
 $$
 
-giờ. Mười hai tuần nhân sáu giờ là 72. Mười sáu tuần nhân bốn giờ là 64, đủ cho Chương 00 tới 10 nếu mỗi tuần có một buổi chạm bàn lab, hoặc chạm các thủ tục trên giấy trước khi hàng tới. Một tuần năm giờ là khoảng 90 phút đọc, 120 phút trên bàn, và 90 phút dọn ghi chú. Một chủ nhật mười hai giờ rồi ba tuần im sẽ làm bạn quên dây nào lỏng.
+giờ. Tương tự, 12 tuần với 6 giờ/tuần đạt 72 giờ, còn 16 tuần với 4 giờ/tuần đạt 64 giờ. Quỹ thời gian này đủ để hoàn thành từ Chương 00 đến Chương 10, miễn là mỗi tuần bạn đều có ít nhất một buổi thực hành trên bàn lab (hoặc chuẩn bị quy trình trên giấy trước khi linh kiện về). Một tuần 5 giờ có thể chia hợp lý thành khoảng 90 phút đọc tài liệu, 120 phút thực hành và 90 phút hoàn thiện ghi chép. Dồn 12 giờ vào một ngày Chủ nhật rồi bỏ trống ba tuần liền chỉ khiến bạn quên mất sơ đồ dây và trạng thái lỗi của chính mình.
 
-Các mốc chương là xương sống có ngày.
+Bảng dưới đây gắn các mốc chương với bằng chứng đầu ra tương ứng:
 
-| Tuần | Chương | Bằng chứng bạn đưa ra được |
-|-----:|--------|----------------------------|
-| 1–3 | 00 và 01 | Thẻ lên nguồn, đồng hồ kêu trên một mối nối đã biết, và một mục sổ có điện áp hoặc chữ "không có" viết thật |
-| 4–6 | 02 và 03 | Firmware trên ESP32 hoặc Pico, và một đoạn serial dán vào sổ |
-| 7–11 | 04 tới 07 | Teleop bánh nhấc; duty PWM bằng 0 nếu lệnh im hơn khoảng 300 ms |
-| 12–14 | 08 tới 10 | Một topic ROS 2 trên Ubuntu 24.04 mô tả chuyển động bạn đã tin; Gazebo Harmonic và micro-ROS được gọi tên từ sổ lab |
-| Sau, tùy chọn | 11 và 12 | Một ghi chú đọc về LeRobot, ACT, diffusion policy hoặc VLA, nói rõ cái gì được đo trên robot của bạn và cái gì không |
+| Tuần | Chương | Bằng chứng bạn cần hoàn thành |
+|-----:|--------|-------------------------------|
+| 1–3 | 00 và 01 | Thẻ quy trình cấp nguồn, tiếng bíp thông mạch của đồng hồ trên mối nối đã biết, và mục sổ lab ghi số đo điện áp hoặc trạng thái "không có" trung thực |
+| 4–6 | 02 và 03 | Firmware chạy trên ESP32 hoặc Pico kèm đoạn log serial dán vào sổ lab |
+| 7–11 | 04 tới 07 | Demo teleop nhấc bánh; duty PWM tự động về 0 khi mất lệnh quá khoảng 300 ms |
+| 12–14 | 08 tới 10 | Một topic ROS 2 trên Ubuntu 24.04 điều khiển chuyển động đã kiểm chứng; ghi nhận rõ vai trò của Gazebo Harmonic và micro-ROS trong sổ lab |
+| Sau, tùy chọn | 11 và 12 | Ghi chú đọc hiểu về LeRobot, ACT, diffusion policy hoặc VLA, phân biệt rõ phần nào đo được trên robot của bạn và phần nào không |
 
-Nếu một tuần sụp, bạn trượt mốc. Đừng bỏ bài bánh nhấc để "đuổi" Jazzy.
+Nếu bận đột xuất trong một tuần, hãy lùi các mốc kế tiếp lại thay vì cắt bỏ bài kiểm tra nhấc bánh để chạy theo ROS 2 Jazzy.
 
 ## Sổ lab
 
-Giữ một file, `notes/lab-notes.md`. Mỗi mục có sáu trường. **Ngày** là ngày bạn đụng việc. **Ảnh** là tên trong thư viện hoặc ảnh bàn; viết `không có` khi không có gì để chụp. **Sơ đồ dây** có thể là ảnh tờ chì; chưa có mạch thì viết "chưa có mạch". **Đoạn serial** là chữ dán từ serial monitor, shell Thonny, hoặc echo ROS 2 sau này. Chưa cắm board thì ghi `không có — chưa có board`. **Cái gì hỏng** gọi triệu chứng đo được, ví dụ cổng serial mất khi hai motor buộc vào 5 V USB, không phải "motor hỏng". **Cái gì sửa được** gọi tên thay đổi, kể cả "chưa cấp nguồn; tôi viết quy tắc dừng trước khi mua". Trường trống biến mục thành tâm trạng.
+Hãy duy trì một tệp duy nhất là `notes/lab-notes.md`. Mỗi mục ghi chép cần đủ sáu trường thông tin:
+- **Ngày:** thời điểm thực hiện buổi lab.
+- **Ảnh:** tên tệp ảnh chụp bàn làm việc hoặc mạch; ghi `không có` nếu chưa có vật thể để chụp.
+- **Sơ đồ dây:** ảnh chụp bản vẽ tay bằng bút chì; nếu chưa lắp mạch thì ghi `chưa có mạch`.
+- **Đoạn serial:** nội dung sao chép trực tiếp từ Serial Monitor, shell Thonny, hoặc lệnh echo của ROS 2 về sau; nếu chưa có mạch thì ghi `không có — chưa có board`.
+- **Cái gì hỏng:** mô tả triệu chứng đo được cụ thể (ví dụ: cổng serial bị ngắt khi cấp nguồn hai động cơ từ chân 5 V USB), tránh ghi chung chung kiểu "động cơ hỏng".
+- **Cái gì sửa được:** nêu rõ thao tác thay đổi đã thực hiện (kể cả ghi chú như "chưa cấp nguồn; đã viết xong quy tắc dừng 300 ms trước khi đặt mua linh kiện").
 
-Site có hai ngôn ngữ. Công tắc ngôn ngữ khớp **chapter** và **order**, không khớp tiêu đề. Trang này là chapter `00`, order `1`, bản song sinh cũng vậy. Nếu một đoạn rối, chuyển ngôn ngữ cho đúng đoạn đó. Giữ GPIO, PWM, breadboard, Capstone và ROS 2 ổn định ở cả hai thứ tiếng.
+Để trống bất kỳ trường nào đều làm giảm giá trị tra cứu của sổ lab thành ghi chú cảm tính.
 
-## Hình
+Trang web khóa học hỗ trợ song ngữ Việt – Anh. Nút chuyển ngôn ngữ ánh xạ bài học theo **chapter** và **order**, không theo tiêu đề. Bài này thuộc `chapter: "00"`, `order: 1`, và bản tiếng Anh tương ứng cũng dùng đúng cặp giá trị đó. Khi gặp một đoạn khó hiểu, bạn có thể chuyển ngôn ngữ để đối chiếu trực tiếp. Các thuật ngữ kỹ thuật như GPIO, PWM, breadboard, Capstone và ROS 2 được giữ thống nhất ở cả hai ngôn ngữ.
+
+## Hình minh họa
 
 ![Các họ linh kiện và dụng cụ mà khóa sẽ yêu cầu bạn nhận ra]({{ site.imgurl }}/generated/kit_catalog_overview.png)
 
-Bức vẽ là chân dung các họ đồ, không phải giỏ. Hóa đơn là bài 00-05. Mua theo tranh là cách LiDAR tới trước đồng hồ.
+Hình trên minh họa các nhóm linh kiện và dụng cụ sẽ xuất hiện trong khóa học, không phải giỏ hàng mua sắm. Danh sách vật tư cụ thể nằm ở bài 00-05; mua sắm theo hình minh họa rất dễ dẫn đến việc mua LiDAR trước khi có đồng hồ vạn năng.
 
 ![Hai lộ trình học dùng chung một robot]({{ site.imgurl }}/generated/tracks_mcu_ros.png)
 
-Lộ trình A nghiệm thu Capstone A bằng firmware, không cần Ubuntu. Lộ trình B là cùng robot cộng Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic và micro-ROS sau khi khung đã chạy. Chung một bài nghiệm thu. LiDAR ở ngoài cho tới khi bài đó đáng tin.
+Lộ trình A hoàn thành nghiệm thu Capstone A thuần bằng firmware vi điều khiển mà không cần Ubuntu. Lộ trình B sử dụng đúng khung xe đó, sau đó bổ sung tầng phần mềm gồm Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic và micro-ROS khi phần cứng đã chạy ổn định. Cả hai lộ trình đều dùng chung một bài nghiệm thu, và LiDAR chỉ nên cân nhắc sau khi bài kiểm tra đó đạt độ tin cậy.
 
-## Lab: sổ và mười bốn tuần tới
+## Thực hành: mở sổ lab và lập lịch 14 tuần
 
-Tạo thư mục khóa và `notes/lab-notes.md`. Điền đủ sáu trường dưới ngày hôm nay. Ở sơ đồ, viết câu Capstone A: hai bánh dẫn động, bánh nhấc, serial hoặc Wi-Fi đơn giản, duty PWM bằng 0 nếu im quá 300 ms. Ở serial, viết `không có — chưa có board` trừ khi cổng đã hiện. Đừng bịa log.
+Tạo thư mục khóa học cùng tệp `notes/lab-notes.md` và điền đủ sáu trường dưới ngày hôm nay. Ở trường sơ đồ dây, hãy viết rõ phát biểu Capstone A: xe hai bánh chủ động, nhấc bánh khỏi bàn, điều khiển qua serial hoặc trang Wi-Fi đơn giản, đưa duty PWM về 0 nếu mất lệnh quá 300 ms. Ở trường đoạn serial, ghi `không có — chưa có board` nếu chưa có cổng kết nối thực tế; tuyệt đối không tự bịa log.
 
-Đặt ba khối lịch trong bảy ngày tới, cộng 4–6 giờ: Đọc, Bàn, Ghi chú. Khi hàng chưa tới, buổi Bàn có thể là "viết thẻ lên nguồn". Chép bảng mốc và ghi tuần lịch thật cạnh 1–3, 4–6, 7–11, 12–14. Đi vắng thì trượt mốc sau, đừng xóa Chương 07. Ba thứ không mua tháng này: LiDAR, máy tính mua chỉ để học ROS, và cục sạc chưa đọc nhãn. Giỏ hàng là [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
+Tiếp theo, đặt ba khung giờ cố định trong bảy ngày tới với tổng thời lượng 4–6 giờ: Đọc tài liệu, Thực hành bàn lab và Ghi chú. Khi linh kiện chưa về, buổi thực hành có thể dành cho việc viết thẻ quy trình cấp nguồn. Chép bảng mốc chương vào sổ và điền tuần lịch thực tế tương ứng với các giai đoạn 1–3, 4–6, 7–11 và 12–14. Nếu có tuần bận, hãy dịch chuyển mốc lùi lại chứ không bỏ qua Chương 07. Có ba món bạn chưa nên mua trong tháng này: LiDAR, máy tính mua riêng chỉ để học ROS, và bộ sạc chưa đọc rõ nhãn thông số. Danh sách mua sắm chính thức nằm tại [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
-**Bạn sẽ thấy gì.** Người lạ tìm đủ sáu trường trong một phút. Câu có số 300. Lịch có buổi lặp.
+**Kết quả cần đạt:** Người đọc khác có thể tìm thấy đủ sáu trường thông tin trong vòng một phút, thấy rõ con số 300 ms trong phát biểu mục tiêu, và thấy các khung giờ lặp lại trên lịch của bạn.
 
-**Khi lệch.** Trường trống thì ghi `không có`. Tách chủ nhật sáu giờ. Bookmark Nav2 ghi "sau Chương 07". Pin lithium rời chờ bài 00-05 khớp cục sạc với hóa học cell.
+**Cách xử lý khi lệch chuẩn:** Nếu một trường chưa có dữ liệu, hãy điền `không có` thay vì bỏ trống. Nếu bạn đang dồn 6 giờ vào riêng ngày Chủ nhật, hãy tách nhỏ ra nhiều buổi trong tuần. Các trang tài liệu về Nav2 nên được đánh dấu "đọc sau Chương 07", còn việc chọn pin lithium rời hãy chờ đến bài 00-05 để khớp đúng loại sạc với hóa học của cell pin.
 
 ## Ví dụ làm sẵn
 
-Hà bắt đầu tối thứ Tư, laptop Windows, chưa có linh kiện. Kế hoạch 6 giờ mỗi tuần trong 12 tuần là $6 \times 12 = 72$ giờ, nhưng tuần 8 cô đi vắng nên Chương 07 rơi vào tuần không có nhà. Năm giờ mỗi tuần trong 14 tuần là 70 giờ và vẫn xong Chương 00–10 nếu buổi bàn được giữ. Cô ghi mốc: tuần 1–3 Chương 00–01, tuần 4–6 Chương 02–03, tuần 7–11 Chương 04–07, tuần 12–14 Chương 08–10, Chương 11–12 tùy chọn sau khi robot dừng vì im lệnh.
+Hà bắt đầu học vào tối thứ Tư bằng laptop Windows và chưa có linh kiện. Kế hoạch 6 giờ mỗi tuần trong 12 tuần cho tổng $6 \times 12 = 72$ giờ, nhưng đến tuần 8 cô phải đi công tác nên Chương 07 rơi đúng vào tuần không có mặt ở nhà. Cô điều chỉnh sang kế hoạch 5 giờ mỗi tuần trong 14 tuần (tổng 70 giờ), vẫn đủ hoàn thành Chương 00–10 nếu duy trì đều buổi thực hành. Cô ghi rõ các mốc: tuần 1–3 học Chương 00–01, tuần 4–6 học Chương 02–03, tuần 7–11 học Chương 04–07, tuần 12–14 học Chương 08–10, còn Chương 11–12 để tùy chọn sau khi robot đã biết tự dừng khi mất lệnh.
 
-Cô chép quy tắc 300 ms vào cùng mục. Serial ghi `không có — chưa có board`. Ảnh ghi `không có`. Cái gì hỏng: chưa cấp nguồn. Cái gì sửa được: cô viết số tuần trước khi mở tab mua. Thứ Năm 20:00–21:30 là buổi Bàn, nhãn "thẻ an toàn, chưa hàn". File đó là đạt.
-
-Chương 04 tới 06 thêm cảm biến, board lái, và cơ khí của hai bánh dẫn động. Chương 07 là bài nghiệm thu. Bạn gửi tiến, xoay, hoặc dừng, qua serial USB hoặc, sau này, một trang Wi-Fi nhỏ nếu bạn chọn ESP32. Bánh ở trên không. Một bộ đếm nhớ lệnh hợp lệ cuối. Gọi $t_{\mathrm{last}}$ là mốc đó và $t_{\mathrm{now}}$ là thời điểm trong vòng lặp. Khoảng im là
+Trong cùng mục sổ lab, Hà chép lại quy tắc 300 ms. Trường serial ghi `không có — chưa có board`, ảnh ghi `không có`, lỗi ghi `chưa cấp nguồn`, và cách khắc phục ghi `đã chốt lịch theo từng tuần trước khi mở trang mua sắm`. Khung giờ 20:00–21:30 tối thứ Năm được đặt làm buổi thực hành với tiêu đề "viết thẻ an toàn, chưa hàn". Ghi chép như vậy là đạt yêu cầu.
 
 ## Video tham khảo
 
-- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Khung ROS 2 mà nửa sau khóa sẽ dùng: node, topic, và một hệ chạy nhiều tiến trình.
-- [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Ba loại board trên lộ trình. Chọn một board cho các tuần MCU, chưa mua cả bộ.
-
-Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
-$$
-t_{\mathrm{silence}} = t_{\mathrm{now}} - t_{\mathrm{last}}.
-$$
-
-- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Khung ROS 2 mà nửa sau khóa sẽ dùng: node, topic, và một hệ chạy nhiều tiến trình.
-- [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. Ba loại board trên lộ trình. Chọn một board cho các tuần MCU, chưa mua cả bộ.
-
-Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
-
-Dấu lớn hơn là nghiêm: lệnh rơi đúng 300 ms vẫn còn tính là mới. Hôm nay bạn chưa nạp vòng lặp này. Với tốc độ chậm $0{,}3\,\mathrm{m/s}$, robot có thể trườn khoảng 9 cm trong cửa sổ đó:
-
-$$
-s \approx 0{,}3\,\mathrm{m/s} \times 0{,}3\,\mathrm{s} = 0{,}09\,\mathrm{m}.
-$$
-
-Chín centimét cũng đủ giật đứt cáp USB, nên nghiệm thu là bánh nhấc lên.
-
-Chỉ khi bản demo đó lặp lại được bạn mới thêm lớp nhắn tin. Chương 08 là truyền thông và vòng điều khiển đơn giản trên phần cứng bạn đã thấy chuyển động. Chương 09 cài ROS 2 Jazzy, và chỉ trên Ubuntu 24.04. Một topic vận tốc có ích vì bạn đã biết firmware làm gì khi tin nhắn dừng. Chương 10 gọi tên Gazebo Harmonic, bộ mô phỏng đi với Jazzy, và micro-ROS, cách để chính vi điều khiển đó nói ROS 2. micro-ROS đáng làm sau khi board đã kéo khung xe mà không cần nó. Một topic im và một motor im, nếu không, là cùng một triệu chứng.
-
-Chương 11 và 12 là tùy chọn và đòi hỏi đọc cẩn thận. LeRobot là thư viện Hugging Face về dữ liệu robot và policy đã học. ACT dự đoán một khúc hành động phía trước. Diffusion policy sinh hành động bằng khử nhiễu từng bước. VLA ánh xạ ảnh và câu lệnh thành hành động. Không cái nào thay board lái biết tắt PWM. Đọc điều được khẳng định, dữ liệu, và giới hạn. Một repository không biến khung xe đầu thành nền tảng nghiên cứu.
-
-Video hay coi vài thứ là bước một. Khóa này hoãn chúng: không LiDAR trong chương này, không Nav2, không cài ROS 2 tuần này trừ khi bạn chỉ đọc trang cài trên máy đã có Ubuntu 24.04. Bàn lab vẫn đi trước. Lăn được một giây không phải tự hành. Điện áp pin motor không lên chân 3,3 V.
-
-## Nhịp: bốn đến sáu giờ, trong mười hai đến mười sáu tuần
-
-Tải thiết kế là **4–6 giờ mỗi tuần** trong khoảng **12–16 tuần**. Mười bốn tuần, mỗi tuần năm giờ, là
-
-$$
-5 \times 14 = 70
-$$
-
-giờ. Mười hai tuần nhân sáu giờ là 72. Mười sáu tuần nhân bốn giờ là 64, đủ cho Chương 00 tới 10 nếu mỗi tuần có một buổi chạm bàn lab, hoặc chạm các thủ tục trên giấy trước khi hàng tới. Một tuần năm giờ là khoảng 90 phút đọc, 120 phút trên bàn, và 90 phút dọn ghi chú. Một chủ nhật mười hai giờ rồi ba tuần im sẽ làm bạn quên dây nào lỏng.
-
-Các mốc chương là xương sống có ngày.
-
-| Tuần | Chương | Bằng chứng bạn đưa ra được |
-|-----:|--------|----------------------------|
-| 1–3 | 00 và 01 | Thẻ lên nguồn, đồng hồ kêu trên một mối nối đã biết, và một mục sổ có điện áp hoặc chữ "không có" viết thật |
-| 4–6 | 02 và 03 | Firmware trên ESP32 hoặc Pico, và một đoạn serial dán vào sổ |
-| 7–11 | 04 tới 07 | Teleop bánh nhấc; duty PWM bằng 0 nếu lệnh im hơn khoảng 300 ms |
-| 12–14 | 08 tới 10 | Một topic ROS 2 trên Ubuntu 24.04 mô tả chuyển động bạn đã tin; Gazebo Harmonic và micro-ROS được gọi tên từ sổ lab |
-| Sau, tùy chọn | 11 và 12 | Một ghi chú đọc về LeRobot, ACT, diffusion policy hoặc VLA, nói rõ cái gì được đo trên robot của bạn và cái gì không |
-
-Nếu một tuần sụp, bạn trượt mốc. Đừng bỏ bài bánh nhấc để "đuổi" Jazzy.
-
-## Sổ lab
-
-Giữ một file, `notes/lab-notes.md`. Mỗi mục có sáu trường. **Ngày** là ngày bạn đụng việc. **Ảnh** là tên trong thư viện hoặc ảnh bàn; viết `không có` khi không có gì để chụp. **Sơ đồ dây** có thể là ảnh tờ chì; chưa có mạch thì viết "chưa có mạch". **Đoạn serial** là chữ dán từ serial monitor, shell Thonny, hoặc echo ROS 2 sau này. Chưa cắm board thì ghi `không có — chưa có board`. **Cái gì hỏng** gọi triệu chứng đo được, ví dụ cổng serial mất khi hai motor buộc vào 5 V USB, không phải "motor hỏng". **Cái gì sửa được** gọi tên thay đổi, kể cả "chưa cấp nguồn; tôi viết quy tắc dừng trước khi mua". Trường trống biến mục thành tâm trạng.
-
-Site có hai ngôn ngữ. Công tắc ngôn ngữ khớp **chapter** và **order**, không khớp tiêu đề. Trang này là chapter `00`, order `1`, bản song sinh cũng vậy. Nếu một đoạn rối, chuyển ngôn ngữ cho đúng đoạn đó. Giữ GPIO, PWM, breadboard, Capstone và ROS 2 ổn định ở cả hai thứ tiếng.
-
-## Hình
-
-![Các họ linh kiện và dụng cụ mà khóa sẽ yêu cầu bạn nhận ra]({{ site.imgurl }}/generated/kit_catalog_overview.png)
-
-Bức vẽ là chân dung các họ đồ, không phải giỏ. Hóa đơn là bài 00-05. Mua theo tranh là cách LiDAR tới trước đồng hồ.
-
-![Hai lộ trình học dùng chung một robot]({{ site.imgurl }}/generated/tracks_mcu_ros.png)
-
-Lộ trình A nghiệm thu Capstone A bằng firmware, không cần Ubuntu. Lộ trình B là cùng robot cộng Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic và micro-ROS sau khi khung đã chạy. Chung một bài nghiệm thu. LiDAR ở ngoài cho tới khi bài đó đáng tin.
-
-## Lab: sổ và mười bốn tuần tới
-
-Tạo thư mục khóa và `notes/lab-notes.md`. Điền đủ sáu trường dưới ngày hôm nay. Ở sơ đồ, viết câu Capstone A: hai bánh dẫn động, bánh nhấc, serial hoặc Wi-Fi đơn giản, duty PWM bằng 0 nếu im quá 300 ms. Ở serial, viết `không có — chưa có board` trừ khi cổng đã hiện. Đừng bịa log.
-
-Đặt ba khối lịch trong bảy ngày tới, cộng 4–6 giờ: Đọc, Bàn, Ghi chú. Khi hàng chưa tới, buổi Bàn có thể là "viết thẻ lên nguồn". Chép bảng mốc và ghi tuần lịch thật cạnh 1–3, 4–6, 7–11, 12–14. Đi vắng thì trượt mốc sau, đừng xóa Chương 07. Ba thứ không mua tháng này: LiDAR, máy tính mua chỉ để học ROS, và cục sạc chưa đọc nhãn. Giỏ hàng là [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
-
-**Bạn sẽ thấy gì.** Người lạ tìm đủ sáu trường trong một phút. Câu có số 300. Lịch có buổi lặp.
-
-**Khi lệch.** Trường trống thì ghi `không có`. Tách chủ nhật sáu giờ. Bookmark Nav2 ghi "sau Chương 07". Pin lithium rời chờ bài 00-05 khớp cục sạc với hóa học cell.
-
-## Ví dụ làm sẵn
-
-Hà bắt đầu tối thứ Tư, laptop Windows, chưa có linh kiện. Kế hoạch 6 giờ mỗi tuần trong 12 tuần là $6 \times 12 = 72$ giờ, nhưng tuần 8 cô đi vắng nên Chương 07 rơi vào tuần không có nhà. Năm giờ mỗi tuần trong 14 tuần là 70 giờ và vẫn xong Chương 00–10 nếu buổi bàn được giữ. Cô ghi mốc: tuần 1–3 Chương 00–01, tuần 4–6 Chương 02–03, tuần 7–11 Chương 04–07, tuần 12–14 Chương 08–10, Chương 11–12 tùy chọn sau khi robot dừng vì im lệnh.
-
-Cô chép quy tắc 300 ms vào cùng mục. Serial ghi `không có — chưa có board`. Ảnh ghi `không có`. Cái gì hỏng: chưa cấp nguồn. Cái gì sửa được: cô viết số tuần trước khi mở tab mua. Thứ Năm 20:00–21:30 là buổi Bàn, nhãn "thẻ an toàn, chưa hàn". File đó là đạt.
-- [Cơ điện tử học làm robot](https://www.facebook.com/reel/1746806056360278). Chú thích: sinh viên cơ điện tử học làm robot. Đây là cùng việc khóa này giao, từ bàn lab tới một robot chạy được.
+- **Xem trước:** [What Is ROS2? - Framework Overview](https://www.youtube.com/watch?v=7TVWlADXwRw) — Raymond Andrade, tiếng Anh. Giới thiệu tổng quan kiến trúc ROS 2 sẽ dùng ở nửa sau khóa học: node, topic và mô hình chạy nhiều tiến trình.
+- [Raspberry Pi VS Arduino VS ESP32](https://www.youtube.com/watch?v=oJs0cVYuQTw) — TechteamGB, tiếng Anh. So sánh ba dòng mạch phổ biến trên lộ trình để bạn chọn một vi điều khiển phù hợp cho giai đoạn đầu thay vì mua dàn trải.
+- [Cơ điện tử học làm robot](https://www.facebook.com/reel/1746806056360278) — Facebook Reel của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Góc nhìn thực tế về quá trình sinh viên cơ điện tử tự làm robot từ bàn lab đến khi xe vận hành được.
 
 ## Bài tập
 
-1. Viết câu Capstone A của bạn. Phải có hai bánh dẫn động, bánh nhấc, serial hoặc Wi-Fi đơn giản, và PWM bị tắt khi im quá khoảng 300 ms. Rồi ghi khoảng tuần nào câu đó thành một demo bạn quay phim được.
-2. So hai lịch. Kế hoạch P là 4 giờ mỗi tuần trong 16 tuần. Kế hoạch Q là 6 giờ mỗi tuần trong 12 tuần. Tính tổng giờ mỗi kế hoạch. Kế hoạch nào còn chỗ thật cho Chương 11 và 12 mà không lấy mất tuần của bài bánh nhấc?
-3. Một mục sổ có ngày, ảnh LED sáng, và chữ "chạy được". Thiếu đoạn serial và thiếu "cái gì hỏng". Hai sự thật nào một buổi sửa lỗi sau này không lấy lại được từ mục này?
-4. Một người muốn tuần 2 bắt đầu bằng notebook huấn luyện ACT của LeRobot. Mốc nào bị bỏ, và hành vi vật lý nào của robot tương lai chưa được notebook kiểm?
-5. Lệnh gửi mỗi $100\,\mathrm{ms}$. Cần bao nhiêu lệnh mất liên tiếp để $t_{\mathrm{silence}} > 300\,\mathrm{ms}$? Sau đúng ba chu kỳ mất, motor đã bị bắt buộc tắt chưa?
+1. Viết phát biểu Capstone A của riêng bạn, trong đó có đủ các yếu tố: hai bánh chủ động, bánh nhấc khỏi bàn, điều khiển qua serial hoặc Wi-Fi đơn giản, và tắt PWM khi mất lệnh quá khoảng 300 ms. Ghi kèm khoảng tuần dự kiến bạn có thể quay video nghiệm thu demo này.
+2. So sánh hai kế hoạch học: Kế hoạch P là 4 giờ/tuần trong 16 tuần; Kế hoạch Q là 6 giờ/tuần trong 12 tuần. Tính tổng số giờ của mỗi kế hoạch và cho biết kế hoạch nào vẫn giữ được quỹ thời gian hợp lý mà không cắt xén tuần dành cho bài nghiệm thu nhấc bánh.
+3. Một mục sổ lab chỉ có ngày, ảnh đèn LED sáng và dòng chữ "chạy được", thiếu cả đoạn serial lẫn mục "cái gì hỏng". Khi cần gỡ lỗi về sau, bạn sẽ mất hai thông tin thực tế quan trọng nào?
+4. Một người học muốn bắt đầu tuần 2 bằng việc chạy notebook huấn luyện mô hình ACT trong LeRobot. Họ đang bỏ qua những mốc nền tảng nào, và những hành vi vật lý nào của robot chưa hề được notebook đó kiểm chứng?
+5. Giả sử lệnh điều khiển được gửi đều đặn mỗi $100\,\mathrm{ms}$. Cần bao nhiêu chu kỳ mất lệnh liên tiếp để thỏa mãn điều kiện $t_{\mathrm{silence}} > 300\,\mathrm{ms}$? Sau đúng ba chu kỳ mất lệnh, động cơ đã bắt buộc phải dừng chưa?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Một câu chấp nhận được: "Capstone A đạt khi robot vi sai hai bánh của tôi, bánh nhấc khỏi bàn, đi theo teleop từ serial hoặc một trang Wi-Fi đơn giản, và firmware đưa duty PWM về 0 nếu không có lệnh mới trong hơn 300 ms." Demo đó nằm ở tuần 7–11, Chương 07 là cửa.
-2. P là $4 \times 16 = 64$ giờ. Q là $6 \times 12 = 72$ giờ. P có thể để Chương 11 và 12 sau Chương 00–10. Q không có tuần dư trong 12 tuần, nên bài bánh nhấc vẫn sở hữu tuần 7–11.
-3. Không lấy lại được chữ board thực sự in ra, và không lấy lại được thứ đã hỏng trước khi LED sáng. Lần sau "lại hỏng" không có gì để so.
-4. Bỏ firmware, board lái, và Chương 07. Notebook không kiểm tra robot dừng khi teleop im khoảng 300 ms, cũng không kiểm tra điện áp motor có ở ngoài chân 3,3 V hay không.
-5. Ba chu kỳ mất là $300\,\mathrm{ms}$, chưa vượt ngưỡng. Chu kỳ thứ tư thành $400\,\mathrm{ms}$ và PWM phải về 0. Sau đúng ba chu kỳ, motor vẫn được phép chạy.
+1. Một phát biểu đạt yêu cầu: "Capstone A đạt khi xe vi sai hai bánh của tôi, trong trạng thái bánh nhấc khỏi mặt bàn, chạy theo lệnh teleop qua serial hoặc một trang Wi-Fi đơn giản, và firmware tự đưa duty PWM về 0 nếu không nhận được lệnh mới trong hơn 300 ms." Bản demo này nằm trong khoảng tuần 7–11, với mốc nghiệm thu ở Chương 07.
+2. Kế hoạch P có $4 \times 16 = 64$ giờ; Kế hoạch Q có $6 \times 12 = 72$ giờ. Kế hoạch P giãn thời gian rộng hơn nên có thể sắp xếp Chương 11–12 sau khi hoàn tất Chương 00–10. Kế hoạch Q có tổng giờ cao hơn nhưng gói gọn trong 12 tuần nên không có tuần dư, do đó giai đoạn tuần 7–11 vẫn phải dành trọn cho bài nghiệm thu nhấc bánh.
+3. Bạn không biết mạch thực sự đã in ra dữ liệu gì trên cổng serial, và cũng không biết trước khi LED sáng đã từng xảy ra sự cố gì. Nếu lần sau mạch gặp lại lỗi tương tự, bạn không có mốc dữ liệu để đối chiếu.
+4. Người học đã bỏ qua giai đoạn firmware, mạch lái động cơ và bài nghiệm thu Chương 07. Notebook huấn luyện không kiểm chứng được việc robot có tự dừng khi mất lệnh teleop quá 300 ms hay không, cũng không kiểm tra được nguồn động cơ có đang cách ly an toàn khỏi chân logic 3,3 V hay không.
+5. Sau đúng 3 chu kỳ mất lệnh, $t_{\mathrm{silence}} = 300\,\mathrm{ms}$, chưa vượt quá ngưỡng chặt $300\,\mathrm{ms}$ nên động cơ vẫn được phép chạy. Đến chu kỳ mất lệnh thứ tư, $t_{\mathrm{silence}} = 400\,\mathrm{ms} > 300\,\mathrm{ms}$ và duty PWM bắt buộc phải về 0.
 
 </details>
 
 ## Đọc thêm
 
-- [Tài liệu ROS 2 Jazzy](https://docs.ros.org/en/jazzy/) — lớp nhắn tin sau này. Đọc phần giới thiệu nếu bạn muốn hình dung topic. Đừng bắt đầu cài từ bài này.
-- [LeRobot](https://github.com/huggingface/lerobot) — thư viện Chương 11 và 12 sẽ yêu cầu đọc cẩn thận. Clone tuần này không lắp được khung xe.
-- [Tài liệu Duckietown](https://docs.duckietown.com/) — một robot dạy học có stack được công bố, hữu ích như bức tranh về cách người ta viết tài liệu cho xe nhỏ. Không phải hóa đơn của khóa này.
-- [Khóa manipulation của MIT](https://manipulation.mit.edu/) — cách nhìn chặt về thao tác và policy đã học. Coi là đích để đọc sau khi robot của bạn đã biết dừng.
+- [Tài liệu ROS 2 Jazzy](https://docs.ros.org/en/jazzy/) — tầng truyền thông sẽ dùng ở giai đoạn sau. Bạn có thể đọc phần giới thiệu để hình dung về topic, nhưng chưa cần cài đặt từ bài này.
+- [LeRobot](https://github.com/huggingface/lerobot) — thư viện dành cho Chương 11 và 12. Việc tải mã nguồn ngay tuần đầu không giúp lắp ráp khung xe.
+- [Tài liệu Duckietown](https://docs.duckietown.com/) — một hệ thống robot giáo dục có tài liệu công khai đầy đủ, hữu ích để tham khảo cách tổ chức tài liệu cho xe tự hành nhỏ (không phải danh sách mua sắm của khóa này).
+- [Khóa manipulation của MIT](https://manipulation.mit.edu/) — tài liệu chuyên sâu về điều khiển thao tác và chính sách học máy; phù hợp để đọc thêm sau khi robot của bạn đã biết dừng an toàn.

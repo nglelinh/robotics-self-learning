@@ -11,73 +11,70 @@ lesson_type: required
 draft: false
 ---
 
-Đây là biên bản ký cho đế biết chạy lần đầu. Có bằng chứng cho bốn hành vi, hoặc có một chỗ sửa được gọi tên và chưa được vào chương 08.
+Đây là biên bản nghiệm thu cho giai đoạn hoàn thiện khung robot vận hành đầu tiên. Bạn chỉ chuyển sang Chương 08 khi có đủ bằng chứng cho cả bốn nhóm tiêu chí, hoặc ghi rõ một lỗi cụ thể cần khắc phục trước khi tiếp tục.
 
 ## Mục tiêu học
 
-1. Chấm một sổ lab theo bốn dòng xong việc: teleop bốn hướng, dừng khi máy chủ hết hạn, pin được buộc và không có đầu lithium trần, và ghi chú có ảnh, giao thức, bảng dấu, cùng các điện áp.
-2. Đọc một biên bản trượt (xe còn lăn sau khi laptop ngủ, hoặc bánh phải ngược) và gọi tên một chỗ sửa phải xong trước PID hoặc topic ROS.
-3. Tách một lần đạt thật khỏi một sổ có đúng các đề mục mà ô đo thì trống.
-4. Liệt kê chỉ những món còn thiếu để khép capstone này, cùng các cửa hàng của cả chương.
+1. Đánh giá sổ tay `lab-notes.md` theo đủ bốn tiêu chí hoàn thành: điều khiển teleop bốn hướng, dừng an toàn khi máy chủ quá hạn, cố định pin an toàn không có đầu hàn lithium trần, và đầy đủ hồ sơ ghi chú (ảnh đi dây, giao thức, bảng dấu, điện áp).
+2. Phân tích một biên bản trượt (ví dụ xe vẫn trôi sau khi laptop ngủ, hoặc bánh phải ngược chiều) và chỉ rõ đúng một hạng mục bắt buộc phải sửa trước khi học PID hoặc ROS.
+3. Phân biệt rõ một bản nghiệm thu đạt thực sự với một sổ tay chép đủ tiêu đề nhưng bỏ trống số liệu đo.
+4. Liệt kê gọn đúng các linh kiện còn thiếu để hoàn tất Capstone A kèm nguồn mua tham khảo của cả chương.
 
 ## Kiến thức cần có
 
-Bài 07-01 đến 07-05 là bằng chứng: lắp ráp, bảng dấu bánh trên không, `V` và `S`, timeout và bước kéo, log trên sàn. Chương 05 là cầu H, STBY, jumper 7805, và dòng stall đứng sau cầu chì 2–3 A. Chương 06 là $$b$$ và $$r$$ (ví dụ $$0{,}15~\mathrm{m}$$ hoặc $$148~\mathrm{mm}$$ bạn đo, và $$31{,}2~\mathrm{mm}$$). Chương 08 là PID. Chương 09 thay dòng chữ bằng `geometry_msgs/Twist` (`linear.x`, `angular.z`). Không chương nào sửa hộ timeout thiếu hoặc lốp ngược. Checklist này không cài ROS.
+Toàn bộ bằng chứng từ Bài 07-01 đến 07-05: lắp ráp nguồn, bảng dấu trên hộp kê, khung lệnh `V`/`S`, bước kéo PWM và timeout, cùng nhật ký chạy thực địa. Chương 05 cung cấp nền tảng cầu H, chân `STBY`, jumper 7805 và dòng kẹt sau cầu chì 2–3 A; Chương 06 cung cấp $$b$$ và $$r$$ (ví dụ $$b = 0{,}15~\mathrm{m}$$ hoặc $$148~\mathrm{mm}$$ đo thực tế, và $$r = 31{,}2~\mathrm{mm}$$). Chương 08 sẽ xây dựng vòng điều khiển PID và Chương 09 chuyển sang `geometry_msgs/Twist` (`linear.x`, `angular.z`). Không chương sau nào tự sửa hộ lỗi thiếu timeout hay ngược cực động cơ. Bài này chưa cài đặt ROS.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-PID khuếch đại phần bị điều khiển. Bánh phải ngược biến sai số dương thành lệnh sai lớn hơn. Đồ thị topic dính PWM giống cổng serial nếu firmware giữ duty cuối khi bản tin ngừng. Twist chỉ thay dòng chữ sau bốn dòng xong việc bên dưới. Trước chương 08, PWM 80 không phải $$0{,}2~\mathrm{m/s}$$.
+Bộ điều khiển PID khuếch đại phản hồi từ phần cứng: nếu bánh phải bị ngược chiều, sai số dương sẽ biến thành lực đẩy sai hướng ngày càng lớn. Trên ROS, nếu firmware vẫn giữ mức PWM cuối khi mất gói tin, việc phát topic `Twist` cũng gặp đúng rủi ro như cổng serial. Do đó, `Twist` chỉ được phép thay thế giao thức văn bản sau khi toàn bộ bốn tiêu chí dưới đây đều đạt. Đồng thời, trước khi sang Chương 08, tuyệt đối không gán cứng PWM 80 tương đương $$0{,}2~\mathrm{m/s}$$.
 
 ## Định nghĩa xong việc
 
-Cả bốn dòng đều bắt buộc.
+Cả bốn tiêu chí sau đều bắt buộc:
 
-Teleop khớp bảng dấu bài 02. Tiến là hai nấc dương trong $$\pm 180$$, cả hai lốp về mũi. Lùi là cả hai âm. Quay trái là `V -60 60` vì phải nhanh hơn thì yaw trái. Quay phải là `V 60 -60`. Máy chủ gửi lại ít nhất mỗi $$200~\mathrm{ms}$$.
-
-Timeout máy chủ có tác dụng. Sau $$250~\mathrm{ms}$$ không có dòng hợp lệ, target về 0, và bước kéo 15 nấc mỗi $$20~\mathrm{ms}$$ đưa duty xuống. Từ lệnh cuối bằng 60, khoảng $$330~\mathrm{ms}$$, nằm trong $$0{,}5~\mathrm{s}$$ bạn đã đo khi MCU còn ăn buck. Công tắc pin ở trong tay lúc trên sàn. Công tắc không thay timeout, và timeout không thay công tắc.
-
-Pin được buộc giữa trục và caster. Lithium ở trong đế hoặc pack có BMS, không có đầu hàn trần lòng thòng. Cực dương đi công tắc, rồi chì 2–3 A, rồi VM và buck. Buck đã là $$5{,}0~\mathrm{V}$$ trước khi gắn ESP32. Dây motor ở vít. Cực âm pin, GND driver, GND buck và GND MCU là một nút.
-
-`lab-notes.md` có ảnh đi dây, đoạn giao thức (`V`, `S`, 115200 8N1, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), bảng dấu, điện áp pack không tải, đầu ra buck, và $$b$$ cùng $$r$$. Ô trống là số đo còn thiếu.
+1. **Teleop khớp bảng dấu (Bài 02):** Hai nấc dương trong khoảng $$\pm 180$$ đẩy cả hai lốp tiến về phía mũi xe; hai nấc âm làm xe lùi; `V -60 60` quay trái (bánh phải nhanh hơn cho yaw dương); `V 60 -60` quay phải. Máy chủ gửi lặp lại ít nhất mỗi $$200~\mathrm{ms}$$.
+2. **Cơ chế quá hạn (timeout) hoạt động thực sự:** Sau $$250~\mathrm{ms}$$ không nhận dòng hợp lệ, mục tiêu lập tức về 0 và bộ bước kéo (15 nấc mỗi $$20~\mathrm{ms}$$) hạ duty xuống 0 (khoảng $$330~\mathrm{ms}$$ từ lệnh cuối bằng 60, nằm gọn trong $$0{,}5~\mathrm{s}$$ khi ESP32 vẫn ăn nguồn từ mạch buck). Công tắc nguồn pin luôn sẵn sàng trong tay khi chạy trên sàn — công tắc vật lý và timeout bổ trợ cho nhau, cái này không thay thế cái kia.
+3. **Nguồn và pin an toàn:** Pin được cố định chắc chắn giữa trục bánh và bánh caster, đặt trong đế pin hoặc pack có BMS, không để đầu hàn trần lòng thòng. Cực dương đi qua công tắc, cầu chì 2–3 A rồi tách sang VM và mạch buck. Đầu ra buck đã chỉnh $$5{,}0~\mathrm{V}$$ trước khi gắn ESP32; dây động cơ bắt trực tiếp trên cầu đấu vít; cực âm pin, GND driver, GND buck và GND MCU nối chung về một nút.
+4. **Hồ sơ `lab-notes.md` đầy đủ:** Có ảnh đi dây, đặc tả giao thức (`V`, `S`, 115200 8N1, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), bảng dấu, điện áp pack không tải, điện áp đầu ra buck và kích thước $$b$$, $$r$$. Mọi ô để trống đều tính là thiếu bằng chứng.
 
 ## Một sổ trượt, và chỗ sửa chặn chương 08
 
-Đây là log không được ký.
+Dưới đây là một ví dụ nhật ký **không được ký nghiệm thu**:
 
 | Giờ | Lệnh | Robot làm gì | Điện áp | Giả thuyết |
 |-----|------|--------------|---------|------------|
 | 0:10 | `V 80 80` | thẳng 2 s | nghỉ 8,10 V, sau 7,95 V | |
 | 0:20 | gập laptop | còn lăn, chạm băng cuối | 7,9 V | timeout chưa viết; LEDC giữ 80 |
 
-Hàng thẳng có thể ổn trong khi hàng thứ hai là chết. Chương 08 và chương 09 đều rót lệnh từ một máy chủ có quyền chết. Khi phép $$250~\mathrm{ms}$$ chưa có trong sketch, giết máy gửi để duty cuối còn áp. Đưa phép kiểm trở lại, trên hộp xác nhận `V 60 60` chết trong $$0{,}5~\mathrm{s}$$, rồi chạy lại làn. Quen tay rút pin không phải thiết kế.
+Hàng đi thẳng có thể rất tốt, nhưng hàng thứ hai đã đánh trượt toàn bộ biên bản. Cả Chương 08 và Chương 09 đều nhận lệnh từ một máy chủ có thể treo hoặc mất kết nối bất kỳ lúc nào. Nếu thiếu đoạn kiểm tra $$250~\mathrm{ms}$$ trong firmware, thanh ghi LEDC sẽ giữ nguyên mức duty cuối. Bạn cần bổ sung timeout, kiểm chứng lại trên hộp kê rằng `V 60 60` dừng trong $$0{,}5~\mathrm{s}$$ khi ngắt máy gửi rồi mới chạy lại trên sàn; thói quen nhanh tay rút pin không thể thay thế cơ chế an toàn phần mềm.
 
-Lỗi thứ hai: `V 80 80` làm xe quay, và ảnh bánh trên không cho thấy cờ phải đi ngược. Chỉ một lần đảo, hoặc hai vít motor phải, hoặc cực IN phải, và ghi bạn đã làm cách nào. Làm cả hai thì triệt. Bánh ấy là hệ số $$-1$$. PID sẽ cộng lực sai chiều, và chương 09 sẽ publish chiều sai ấy như thể `linear.x` trung thực.
+**Lỗi chặn thứ hai:** Lệnh `V 80 80` làm xe xoay tròn và quan sát trên hộp kê cho thấy bánh phải quay ngược. Cách khắc phục là đảo hai dây động cơ phải **hoặc** đảo cực tính chân `IN` bên phải (chỉ làm một lần và ghi rõ vào sổ). Nếu làm cả hai, dấu $$-1$$ vẫn còn nguyên, khiến PID cộng sai chiều và Chương 09 hiểu sai hướng `linear.x`.
 
-Lỗi thứ ba: hai cell 18650 hàn đầu trần, dán băng lên tấm. Một cú vướng chập phía trước cầu chì bị quên, và timeout không có phiếu bầu. Lắp đế hoặc pack 2S có BMS, một công tắc, và chì 2–3 A, rồi chụp ảnh. TP4056 vẫn là sạc sai: 1S, đầy gần $$4{,}2~\mathrm{V}$$, trong khi pack đầy gần $$8{,}4~\mathrm{V}$$.
+**Lỗi chặn thứ ba:** Hai cell 18650 có đầu hàn trần chỉ dán băng dính lên khung. Một cú chạm chập xảy ra trước cầu chì (hoặc khi không có cầu chì) sẽ vượt ngoài khả năng can thiệp của timeout. Bắt buộc phải lắp đế pin hoặc pack 2S có BMS, công tắc nguồn, cầu chì 2–3 A và chụp ảnh xác nhận. Lưu ý không dùng mạch sạc 1S TP4056 (đầy gần $$4{,}2~\mathrm{V}$$) cho pack 2S (đầy gần $$8{,}4~\mathrm{V}$$).
 
-Ký khi log mới có bốn hướng, dừng trong $$0{,}5~\mathrm{s}$$, điện áp nghỉ trước và sau (phiên ngắn có thể $$8{,}15~\mathrm{V}$$ rồi $$8{,}05~\mathrm{V}$$), ảnh, và hình học. Nếu pack rơi từ $$8{,}20~\mathrm{V}$$ xuống $$6{,}90~\mathrm{V}$$ ở $$0{,}60~\mathrm{A}$$,
+Chỉ ký nghiệm thu khi nhật ký mới ghi đủ bốn hướng, thời gian dừng dưới $$0{,}5~\mathrm{s}$$, điện áp nghỉ trước và sau ổn định (ví dụ $$8{,}15~\mathrm{V}$$ xuống $$8{,}05~\mathrm{V}$$ sau lượt ngắn), ảnh đi dây và số đo hình học. Nếu điện áp pack sụt từ $$8{,}20~\mathrm{V}$$ xuống $$6{,}90~\mathrm{V}$$ ở dòng $$0{,}60~\mathrm{A}$$:
 
 $$
 R \approx \frac{1{,}30}{0{,}60} \approx 2{,}2~\Omega,
 $$
 
-bạn không ký. Sụt ấy là sửa nguồn, không phải giấy miễn cho phần mềm.
+bạn chưa được ký nghiệm thu vì đây là lỗi phần cứng nguồn cần khắc phục ngay.
 
 ## Chương 08 và chương 09 được phép giả định gì
 
-Chương 08 được giả định lệnh trái dương và lệnh phải dương đều lăn tiến, rằng bạn đã thấy PWM 0 dừng xe, và $$b$$ cùng $$r$$ là các số trong ghi chú. Nó xây vòng tốc độ. Nó không đi tìm lại chân IN.
+Chương 08 mặc định rằng lệnh trái dương và lệnh phải dương đều đẩy xe tiến về phía mũi, PWM 0 làm xe dừng và hai thông số $$b$$, $$r$$ đã có sẵn trong sổ tay. Chương 08 tập trung xây dựng vòng điều khiển tốc độ, không quay lại dò chân `IN`.
 
-Chương 09 được giả định đế dừng khi dòng lệnh dừng. Twist sẽ mang `linear.x` và `angular.z` thay cho hai số PWM, đổi bằng phương trình chương 06 và hiệu chuẩn chương 08. Đừng viết "80 nấc = $$0{,}2~\mathrm{m/s}$$" vào biên bản. Đoạn giao thức trong ghi chú là đặc tả mà bộ thích nghi ấy phải vượt: nhìn thấy được, có kẹp, và an toàn khi máy chủ chết.
+Chương 09 mặc định rằng khung xe tự dừng khi luồng lệnh bị ngắt. Thông điệp `Twist` mang `linear.x` và `angular.z` sẽ thay cho hai nấc PWM, quy đổi qua phương trình Chương 06 và phép hiệu chuẩn Chương 08 (không ghi “80 nấc = $$0{,}2~\mathrm{m/s}$$” vào biên bản). Đặc tả giao thức trong sổ tay chính là chuẩn tối thiểu mà lớp tích hợp ROS sau này phải duy trì: quan sát được, có giới hạn an toàn và dừng khi mất kết nối máy chủ.
 
 ![Chỉ chạy khi lệnh còn tươi; im lặng là dừng]({{ site.imgurl }}/generated/teleop_states.png)
 
-Log không chỉ vào ô STOP bằng một số đo thì checklist chưa xong.
+Nếu nhật ký chưa có số đo thực tế chứng minh hệ thống chuyển sang trạng thái `STOP` khi quá hạn thì checklist chưa hoàn thành.
 
 ## Lab
 
 ### An toàn
 
-Chỉ chạy lại chuỗi trên sàn sau khi hàng trượt đã được sửa. Không thì đọc log giấy. Công tắc pin trong tầm tay nếu lốp chạm được sàn. Đừng ký robot chưa từng dừng bằng timeout. Đầu lithium trần thì dừng việc.
+Chỉ chạy lại chuỗi thử nghiệm trên sàn sau khi đã khắc phục xong lỗi bị trượt; nếu không, chỉ rà soát nhật ký trên giấy. Luôn giữ công tắc pin trong tầm với mỗi khi lốp chạm sàn. Không ký nghiệm thu cho robot chưa kiểm chứng dừng bằng timeout và ngừng thao tác ngay nếu phát hiện đầu pin lithium trần.
 
 ### BOM
 
@@ -90,15 +87,15 @@ Chỉ chạy lại chuỗi trên sàn sau khi hàng trượt đã được sửa
 
 ### Các bước
 
-1. Tìm ảnh đi dây: công tắc, chì, dây buộc, đất chung, dây motor trên vít, buck gần $$5{,}0~\mathrm{V}$$ trước khi gắn ESP32.
-2. Ký tắt tiến, lùi, trái, phải chỉ ở hàng nào lời log khớp lệnh.
-3. Tìm hàng timeout: máy gửi bị giết hoặc USB rút, MCU còn ăn buck, dừng trong $$0{,}5~\mathrm{s}$$. Thiếu hàng ấy thì chương chưa xong.
-4. Tìm $$b$$, $$r$$, đoạn giao thức, và các điện áp. Ghi ngày chương 08 được bắt đầu, hoặc gọi tên một chỗ sửa đang chặn.
-5. Lượt chạy lại dùng luật làn của bài 05. Một chỗ sửa, rồi cả chuỗi, rồi một log mới.
+1. Kiểm tra lại ảnh đi dây trong sổ: phải thấy rõ công tắc, cầu chì, dây buộc pin, điểm mass chung, dây động cơ bắt vít và số đo mạch buck xấp xỉ $$5{,}0~\mathrm{V}$$ trước khi gắn ESP32.
+2. Ký xác nhận bốn hướng (tiến, lùi, quay trái, quay phải) chỉ khi dòng nhật ký khớp đúng với lệnh đã gửi.
+3. Đối chiếu hàng kiểm tra timeout: ngắt máy gửi hoặc rút USB trong khi MCU vẫn ăn nguồn buck, xe dừng hẳn trong $$0{,}5~\mathrm{s}$$. Thiếu dòng này đồng nghĩa chương chưa xong.
+4. Rà soát sự có mặt của $$b$$, $$r$$, đặc tả giao thức và các mức điện áp. Ghi rõ ngày đủ điều kiện bắt đầu Chương 08, hoặc ghi tên một lỗi cụ thể đang chặn.
+5. Nếu phải chạy lại, tuân thủ đúng quy trình làn sàn của Bài 05: sửa đúng một nguyên nhân, chạy lại toàn bộ chuỗi và ghi nhật ký mới.
 
 ### Kết quả mong đợi
 
-Một đoạn ký ngắn: bốn hướng đạt ngày nào, thời gian dừng, điện áp pack, $$b$$, $$r$$, và câu "chương 08 được bắt đầu" hoặc một chỗ sửa đang chặn. Bảng trống không tính.
+Một đoạn xác nhận ngắn gọn trong sổ tay gồm: ngày đạt đủ bốn hướng, thời gian dừng timeout đo được, điện áp pack, giá trị $$b$$ và $$r$$, kèm kết luận “đủ điều kiện bắt đầu Chương 08” hoặc tên lỗi cụ thể đang cần xử lý. Các bảng để trống không được tính.
 
 ### Lỗi thường gặp
 
@@ -112,7 +109,7 @@ Một đoạn ký ngắn: bốn hướng đạt ngày nào, thời gian dừng, 
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Chỉ mua dòng còn trống. Giá đổi. Khoảng 2026: khung 60.000–150.000 đồng, motor TT 25.000–45.000 một cái, TB6612 25.000–70.000, LM2596 10.000–25.000, pack 2S hoặc đế 18650 80.000–180.000, công tắc 8.000–20.000, đế chì và chì 2–3 A 10.000–25.000, ESP32 70.000–150.000. L298N thay TB6612 khi hết hàng. TP4056 không phải sạc 2S.
+Chỉ đặt mua đúng các hạng mục còn thiếu trong bảng nghiệm thu. Giá tham khảo khoảng năm 2026 (có thể thay đổi): khung 2WD 60.000–150.000 đồng, động cơ TT 25.000–45.000 đồng/chiếc, TB6612 25.000–70.000 đồng, mạch buck LM2596 10.000–25.000 đồng, pack 2S hoặc đế 18650 80.000–180.000 đồng, công tắc 8.000–20.000 đồng, đế chì kèm chì 2–3 A 10.000–25.000 đồng, ESP32 devkit 70.000–150.000 đồng. Có thể dùng L298N thay TB6612 khi hết hàng; lưu ý không mua TP4056 để sạc pack 2S.
 
 - L298N đã kiểm, khoảng 45.000 đồng: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - [Hshop TB6612](https://hshop.vn/search?q=TB6612), [LM2596](https://hshop.vn/search?q=LM2596), [ESP32](https://hshop.vn/search?q=ESP32)
@@ -122,19 +119,23 @@ Chỉ mua dòng còn trống. Giá đổi. Khoảng 2026: khung 60.000–150.000
 
 ## Video tham khảo
 
-- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Checklist capstone hỏi motor chịu lệnh. Một lần quay có kiểm soát trên driver là bằng chứng tối thiểu.
+- **Xem trước:** [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Ôn lại việc kiểm soát chiều và tốc độ động cơ qua cầu H — yêu cầu nền tảng tối thiểu của checklist Capstone A.
 
 ## Bài tập
 
-1. Log có một `V 80 80` thẳng, rồi xe còn lăn sau khi laptop ngủ. Dòng xong việc nào trượt, và trên hộp điều gì phải đúng trước khi đụng chương 08 hoặc 09?
-2. Bốn hướng đã đạt. Ghi chú bên phải nói đã đảo dây và còn đảo dấu firmware "cho chắc". PWM dương bây giờ làm gì, và bạn gỡ cái nào?
-3. Điện áp nghỉ $$8{,}20~\mathrm{V}$$, có tải $$6{,}90~\mathrm{V}$$ ở $$0{,}60~\mathrm{A}$$, ảnh có đầu cell hàn trần. Dòng nào trượt, và $$R$$ bằng bao nhiêu?
-4. Một bạn đặt PWM 80 bằng $$0{,}20~\mathrm{m/s}$$ rồi nhân `V -60 60` cùng hệ số ấy, $$b = 0{,}15~\mathrm{m}$$. Họ tính nhầm $$\omega$$ bao nhiêu, và vì sao hệ số ấy bất hợp pháp?
-5. Từ lệnh 60, xe mất $$1{,}2~\mathrm{s}$$ mới dừng sau khi máy gửi chết. Bước kéo 15 nấc mỗi $$20~\mathrm{ms}$$, hạn $$250~\mathrm{ms}$$. Thời gian dừng đáng lẽ là bao nhiêu?
+1. Nhật ký ghi nhận lệnh `V 80 80` đi thẳng tốt, nhưng xe vẫn tiếp tục lăn sau khi gập laptop. Tiêu chí hoàn thành nào bị trượt, và cần chứng minh điều gì trên hộp kê trước khi chuyển sang Chương 08 hoặc 09?
+2. Bốn hướng chạy thử trước đó đều đạt, nhưng ghi chú bánh phải cho thấy người lắp vừa đảo dây vừa đảo thêm dấu trong firmware “cho chắc”. Lệnh PWM dương hiện tại sẽ làm bánh phải quay thế nào và cần gỡ bước nào?
+3. Điện áp nghỉ đo được $$8{,}20~\mathrm{V}$$, khi có tải $$0{,}60~\mathrm{A}$$ sụt còn $$6{,}90~\mathrm{V}$$, đồng thời ảnh chụp cho thấy hai cell pin có đầu hàn trần. Tiêu chí nào bị trượt và nội trở ước lượng $$R$$ bằng bao nhiêu?
+4. Một sinh viên tự đặt PWM 80 bằng $$0{,}20~\mathrm{m/s}$$ rồi áp cùng hệ số đó cho lệnh `V -60 60` với $$b = 0{,}15~\mathrm{m}$$. Họ tính ra $$\omega$$ bằng bao nhiêu, và vì sao hệ số quy đổi này không hợp lệ?
+5. Từ lệnh PWM 60, xe mất $$1{,}2~\mathrm{s}$$ mới dừng hẳn sau khi ngắt máy gửi. Với bước kéo 15 nấc mỗi $$20~\mathrm{ms}$$ và hạn timeout $$250~\mathrm{ms}$$, thời gian dừng đúng thiết kế phải là bao nhiêu?
 
 ### Gợi ý đáp án
 
-1. Dòng "dừng khi máy chủ hết hạn" trượt. Trên hộp, `V 60 60` rồi giết máy gửi: cả hai lốp dừng trong $$0{,}5~\mathrm{s}$$ khi MCU còn ăn buck. Sau đó mới chạy lại làn. 2. Hai lần đảo triệt nhau, nên dương vẫn làm lốp ấy lùi. Gỡ một lần, bánh trên không. 3. Đầu trần làm trượt dòng pin, và $$R \approx 1{,}30/0{,}60 \approx 2{,}2~\Omega$$ làm trượt nguồn. Lắp đế hoặc pack BMS, công tắc, và chì 2–3 A. 4. Hệ số $$0{,}20/80 = 0{,}0025$$ m/s mỗi nấc biến trái thành $$-0{,}15$$ và phải thành $$+0{,}15$$, nên $$v = 0$$ và $$\omega = 0{,}30/0{,}15 = 2$$ rad/s. Hệ số chưa từng được đo. 5. Dừng đáng lẽ là $$250 + 4\times 20 = 330~\mathrm{ms}$$. Lăn $$1{,}2~\mathrm{s}$$ nghĩa là hạn thiếu hoặc dài hơn nhiều so với $$250~\mathrm{ms}$$. Đừng ký.
+1. Tiêu chí “dừng khi máy chủ quá hạn” bị trượt. Cần kê xe lên hộp, gửi `V 60 60` rồi ngắt máy gửi và xác nhận cả hai lốp dừng trong $$0{,}5~\mathrm{s}$$ (khi MCU vẫn ăn nguồn buck) trước khi chạy lại trên sàn.
+2. Hai lần đảo triệt tiêu nhau khiến lệnh dương vẫn làm bánh phải quay lùi. Cần kê bánh trên không và gỡ bỏ một trong hai lần đảo.
+3. Đầu hàn trần làm trượt tiêu chí an toàn pin, và tổng trở $$R \approx 1{,}30/0{,}60 \approx 2{,}2~\Omega$$ làm trượt tiêu chí nguồn. Cần lắp đế pin hoặc pack có BMS, công tắc nguồn và cầu chì 2–3 A.
+4. Hệ số $$0{,}20/80 = 0{,}0025$$ m/s mỗi nấc cho $$v_l = -0{,}15$$ m/s và $$v_r = +0{,}15$$ m/s, suy ra $$v = 0$$ và $$\omega = 0{,}30/0{,}15 = 2$$ rad/s. Con số này không hợp lệ vì hệ số quy đổi chỉ là tự gán, chưa hề đo hiệu chuẩn.
+5. Thời gian dừng đúng thiết kế phải là $$250 + 4\times 20 = 330~\mathrm{ms}$$. Việc xe trôi tới $$1{,}2~\mathrm{s}$$ cho thấy cơ chế timeout đang bị thiếu hoặc đặt quá dài — không được ký nghiệm thu.
 
 ## Đọc thêm
 

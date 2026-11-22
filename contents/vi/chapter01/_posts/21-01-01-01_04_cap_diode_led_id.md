@@ -13,127 +13,127 @@ draft: false
 
 ## Mục tiêu
 
-Học xong, bạn chỉ vào vạch trên tụ hoá nhôm và nói đó là chân âm, đồng thời coi tụ gốm đĩa hoặc tụ chip là không phân cực trừ khi thân nó ghi khác. Bạn đọc mã gốm kiểu 104 thành 100 nF. Bạn gọi catot của diode bằng vạch sơn, và kiểm LED bằng thang diode của đồng hồ thay vì chỉ tin chân dài. Bạn cũng giải thích được vì sao tụ 100 µF mắc ngang chân VM của driver làm dịu xung ngắn mà vẫn không thay được nguồn riêng cho hai mô-tơ TT.
+Sau bài học này, bạn sẽ nhận biết được vạch đánh dấu chân âm trên tụ hóa nhôm, đồng thời phân biệt tụ gốm đĩa hoặc tụ dán không phân cực (trừ khi thân linh kiện có ký hiệu cực riêng). Bạn sẽ đọc được mã tụ gốm ba chữ số như `104` thành 100 nF, xác định chân catot của diode qua vạch sơn, và kiểm tra cực tính LED bằng thang đo diode trên đồng hồ thay vì chỉ dựa vào độ dài chân. Bạn cũng sẽ tính toán và giải thích được vì sao một tụ điện 100 µF mắc ngang chân VM của mạch lái giúp làm mượt các xung ngắn nhưng không thể thay thế bộ pin riêng cho hai động cơ TT.
 
 ## Cần có gì trước
 
-Bạn dùng được $V = IR$ và đã chọn điện trở nối tiếp cho LED đỏ trên 3,3 V. Bạn biết thang diode chỉ dùng khi linh kiện mất nguồn, que đỏ không nằm ở ổ dòng. Kit chưa về thì ảnh trong bài vẫn đủ để học cực tính. Phần thực hành là thử diode, không phải thí nghiệm có điện.
+Bạn đã vận dụng được định luật Ohm $V = IR$, biết chọn điện trở hạn dòng cho LED đỏ trên nguồn 3,3 V, và nắm quy tắc chỉ sử dụng thang đo diode trên linh kiện đã ngắt nguồn (que đỏ nằm ở lỗ V/Ω, không ở lỗ đo dòng). Nếu chưa có bộ kit trên tay, các hình minh họa trong bài vẫn đủ để học cách nhận diện cực tính; phần thực hành chỉ dùng phép thử diode không cấp nguồn.
 
-## Chỗ này cứu xe hai bánh khỏi hiểu nhầm "cái tụ là pin"
+## Vì sao cần phân biệt tụ đệm với nguồn pin trên xe hai bánh
 
-ESP32 hoặc Pico chạy 3,3 V. TB6612 lấy điện mô-tơ ở VM, khoảng 4,5 V đến 10 V, và logic ở VCC vui với 3,3 V. Tụ hoá 100 µF mắc ngang VM là bể chứa cục bộ cho xung PWM của mô-tơ TT. Nó không phải pin. Năng lượng trong 100 µF hết trong chưa đầy một mili giây ở dòng kẹt, nên bộ pin vẫn phải có, và vẫn không được nối vào GPIO.
+Trên xe đồ án, ESP32 hoặc Pico hoạt động ở mức 3,3 V; mạch lái TB6612 nhận nguồn động cơ ở chân VM (4,5 V đến 10 V) và nguồn logic ở chân VCC (3,3 V). Một tụ hóa 100 µF mắc ngang chân VM đóng vai trò bộ đệm năng lượng cục bộ cho các xung đóng cắt PWM của động cơ TT, nhưng **không phải là nguồn pin**: lượng năng lượng tích trữ trong tụ 100 µF cạn sạch trong chưa tới một mili giây khi động cơ kẹt trục. Do đó xe vẫn bắt buộc có bộ pin động cơ riêng, cách ly khỏi chân GPIO.
 
-Đèn báo là LED cộng điện trở. Diode hồi tiếp, khi có, là loại cỡ 1N4007 với vạch hướng về đầu dương của mô-tơ. Tụ hoá cắm ngược trên pin đang sống có thể xì. Bài này dạy tách tụ, diode và LED trước khi bất kỳ dây nào trong số đó nóng.
+Ngoài ra, đèn báo trạng thái là LED mắc kèm điện trở, còn diode hồi tiếp (nếu dùng mạch đóng cắt rời) thường là loại 1N4007 với vạch catot hướng về cực dương nguồn động cơ. Việc nhận diện đúng cực tính trước khi lắp mạch giúp tránh tình huống tụ hóa bị cắm ngược cực và xì nổ khi cấp điện.
 
-## Tụ: vạch, mã, và 100 µF làm được đến đâu
+## Tụ điện: vạch cực, mã số và giới hạn năng lượng của tụ 100 µF
 
-Tụ hoá nhôm có cực. Vạch chạy dọc một bên, thường có dấu trừ trong đó, đánh dấu chân âm. Trên nguồn một cực, chân ấy về mass, chân kia lên rail đang cần được giữ cứng. Điện áp ghi trên vỏ phải cao hơn điện áp lớn nhất rail đó sẽ gặp. Pin 2S đầy khoảng 8,4 V, nên 16 V hoặc 25 V là dễ thở, 6,3 V thì không.
+**Tụ hóa nhôm** là linh kiện phân cực. Dải vạch sáng chạy dọc một bên thân vỏ (thường in kèm dấu trừ) đánh dấu **chân âm**. Trên đường nguồn một chiều, chân âm nối về mass (GND), chân còn lại nối lên đường nguồn cần lọc. Điện áp định mức in trên vỏ tụ phải lớn hơn điện áp tối đa mà đường nguồn đạt tới: với pin 2S sạc đầy ở 8,4 V, nên chọn tụ định mức 16 V hoặc 25 V, tuyệt đối không dùng loại 6,3 V.
 
 ![Cực tính tụ hoá: vạch là chân âm]({{ site.imgurl }}/generated/capacitor_polarity.png)
 
 ![Tụ hoá nhôm, vạch đánh dấu phía âm]({{ site.imgurl }}/wikimedia/Electrolytic_capacitor.jpg)
 
-Tụ gốm trong khóa này thường không phân cực. Đĩa không vạch, hoặc miếng SMD nâu không dấu cực, cắm chiều nào cũng được. Đừng bịa cực cho nó chỉ vì tụ hoá bên cạnh có cực. Một số tụ tantali có cực và ký hiệu khác; nếu bạn không mua tantali thì đừng cho rằng mọi hình chữ nhật be là tantali.
+**Tụ gốm** dùng trong khóa học (dạng đĩa không vạch hoặc tụ dán SMD màu nâu không dấu cực) là linh kiện không phân cực, có thể cắm theo chiều nào cũng được. Không nên tự gán cực tính cho tụ gốm chỉ vì tụ hóa bên cạnh có cực. Lưu ý rằng một số tụ tantali có phân cực với quy ước ký hiệu ngược lại; nếu bạn không chủ động mua tụ tantali, đừng mặc định mọi tụ dán hình chữ nhật màu vàng nhạt là tantali.
 
-Tụ gốm xuyên lỗ hay dùng mã ba số theo picofarad. Hai số đầu là chữ số có nghĩa, số thứ ba là luỹ thừa của mười, cùng kiểu mã điện trở SMD nhưng đơn vị là pF. Con ghi 104 là
+Tụ gốm xuyên lỗ thường dùng mã ba chữ số tính theo **picofarad (pF)**, tương tự quy tắc mã điện trở SMD: hai chữ số đầu là phần có nghĩa, chữ số thứ ba là số mũ của 10. Ví dụ tụ ghi `104` có giá trị:
 
 $$
 10 \times 10^{4}\ \mathrm{pF} = 100000\ \mathrm{pF} = 100\ \mathrm{nF} = 0.1\ \mu\mathrm{F}
 $$
 
-Mã 103 là 10 nF. Mã không phải điện dung tính bằng nanofarad. Tụ hoá thường in thẳng, ví dụ 100 µF 16 V, vì 100 µF mà viết bằng mã picofarad thì vô lý.
+Tương tự, mã `103` là 10 nF. Đơn vị gốc của mã là pF chứ không phải nF. Riêng tụ hóa có điện dung lớn nên nhà sản xuất luôn in thẳng giá trị lên vỏ (ví dụ `100 µF 16 V`).
 
-Đây là con số giữ cho câu chuyện tụ trung thực. Năng lượng trong tụ là
+Để thấy rõ giới hạn của tụ 100 µF trên đường nguồn động cơ, ta tính năng lượng tích trữ trong tụ theo công thức:
 
 $$
 E = \frac{1}{2} C V^2
 $$
 
-Với $C = 100\ \mu\mathrm{F} = 100 \times 10^{-6}\ \mathrm{F}$ ở pin danh định 7,4 V,
+Với $C = 100\ \mu\mathrm{F} = 100 \times 10^{-6}\ \mathrm{F}$ ở điện áp pin danh định 7,4 V:
 
 $$
 E = \frac{1}{2} \times 100 \times 10^{-6} \times (7.4)^2 \approx 0.0027\ \mathrm{J}
 $$
 
-Một mô-tơ TT kẹt gần 0,8 A ở 7,4 V là khoảng 6 W. Thời gian 100 µF nuôi nổi công suất đó xấp xỉ $0{,}0027 / 6 \approx 0{,}5\ \mathrm{ms}$. Nửa mili giây năng lượng kẹt có ích với sườn PWM và với điện cảm của dây pin dài. Nó không phải nguồn cho bánh xe. Hai mô-tơ khiến bể chứa càng nhỏ so với tải. Đặt 100 µF ngang VM và GND, vạch về GND, và vẫn cấp cho TB6612 một bộ pin thật. Đừng treo bộ pin đó lên chân 3V3 của Pico hoặc ESP32 rồi gọi tụ là giải pháp.
+Một động cơ TT kẹt trục rút khoảng 0,8 A ở 7,4 V tiêu thụ công suất xấp xỉ 6 W. Thời gian tụ 100 µF duy trì nổi công suất đó chỉ khoảng $0{,}0027 / 6 \approx 0{,}5\ \mathrm{ms}$. Nửa mili giây năng lượng này rất có ích để bù sườn xung PWM và giảm ảnh hưởng điện cảm của dây pin dài, nhưng hoàn toàn không thể thay thế nguồn pin nuôi bánh xe — đặc biệt khi có hai động cơ chạy song song. Hãy đặt tụ 100 µF ngang chân VM và GND (vạch âm về GND) đi kèm một bộ pin thật cho TB6612, không lấy nguồn từ chân 3V3 của Pico hay ESP32.
 
 ## Diode và LED
 
-Diode silic dẫn dễ một chiều và chặn chiều kia. Vạch trên 1N4007 đánh dấu catot, đầu mà dòng quy ước đi ra khi diode phân cực thuận. Đầu kia là anot. LED đỏ trong đèn báo đóng vai tương tự, sụt thuận gần 2 V thay vì khoảng 0,7 V.
+Diode silic cho dòng điện đi qua dễ dàng theo một chiều (phân cực thuận) và chặn dòng ở chiều ngược lại. Vạch sơn quanh một đầu thân của diode 1N4007 đánh dấu **catot** (đầu dòng điện quy ước đi ra khi dẫn thuận); đầu còn lại là **anot**. Đèn LED đỏ hoạt động theo cùng nguyên lý, chỉ khác là điện áp rơi thuận vào khoảng 2 V thay vì ~0,7 V như diode silic thường.
 
-Chân dài của LED thường là anot, vạt phẳng trên vành thường là catot. Chữ "thường" là cả vấn đề. Bộ LED rẻ bị cắt sẵn chân, hoặc người học trước đã tỉa. Hãy tin đồng hồ. Thang diode, trên linh kiện mất nguồn, hiện sụt thuận một chiều và hở chiều kia. Diode silic thường khoảng 0,5 V đến 0,7 V. LED đỏ thường gần 1,6 V đến 2,0 V, và có thể le lói vì đồng hồ đang đẩy một dòng thử nhỏ. Cả hai chiều đều như ngắn thì linh kiện chết. Cả hai chiều đều hở thì chết, hoặc nó không phải diode.
+Theo quy ước sản xuất, chân dài của LED thường là anot và cạnh vát phẳng trên vành nhựa thường là catot. Tuy nhiên, từ "thường" không đảm bảo tuyệt đối vì chân linh kiện có thể đã bị cắt ngắn hoặc lệch chuẩn ở các lô hàng giá rẻ. Cách chắc chắn nhất là dùng **thang đo diode** trên đồng hồ vạn năng khi linh kiện không cấp nguồn: đồng hồ sẽ hiển thị điện áp thuận ở một chiều và báo hở (`OL`) ở chiều đảo ngược. Diode silic thường hiển thị khoảng 0,5 V đến 0,7 V; LED đỏ thường hiển thị khoảng 1,6 V đến 2,0 V kèm ánh sáng mờ do dòng thử nhỏ từ đồng hồ. Nếu cả hai chiều đều gần 0 V (chập) hoặc cả hai chiều đều `OL` (đứt), linh kiện đã hỏng.
 
 ![LED nhiều màu; độ dài chân chỉ là gợi ý]({{ site.imgurl }}/wikimedia/LEDs.jpg)
 
 ![Các vỏ trông giống nhau cho đến khi đọc chữ in]({{ site.imgurl }}/generated/component_lookalikes.png)
 
-Miếng SMD nâu trơn thường là tụ; miếng có mã ba số thường là điện trở. Phải kiểm. Đèn báo là con mắc nối tiếp với khoảng 180 Ω từ 3,3 V. Diode hồi tiếp cạnh một transistor trần có vạch ở đầu dương của mô-tơ, để dòng muốn tiếp tục chạy khi khoá ngắt không đi xuyên transistor. TB6612 đã có sẵn đường đó. Bạn vẫn cần nhận ra 1N4007 khi nó rơi khỏi kit.
+Trên mạch dán, linh kiện SMD màu nâu trơn thường là tụ gốm, còn linh kiện có in mã ba chữ số thường là điện trở — vẫn cần kiểm tra kỹ trước khi kết luận. Với mạch đóng cắt động cơ bằng transistor rời, cần mắc thêm một diode hồi tiếp (như 1N4007) song song động cơ với vạch catot hướng về cực dương nguồn để xả dòng cảm ứng khi khóa ngắt; module TB6612 đã tích hợp sẵn cơ chế bảo vệ này, nhưng bạn vẫn cần nhận diện được 1N4007 khi gặp trong bộ linh kiện.
 
-## Ví dụ: số thang diode bạn nên thấy
+## Ví dụ: kết quả chuẩn ở thang đo diode
 
-Lấy một 1N4007 và một LED đỏ, tháo khỏi mạch, không nguồn. Thang diode cấp dòng nhỏ và hiện điện áp nó cần.
+Chuẩn bị một diode 1N4007 và một LED đỏ rời ngoài mạch (không cấp nguồn). Khi chuyển đồng hồ sang thang đo diode (que đen ở COM, que đỏ ở V/Ω), dòng thử quy ước đi ra từ que đỏ.
 
-Một chiều trên 1N4007 có thể thấy khoảng 0,62 V. Đảo que thì màn hình quá tầm, thường là "OL". Đầu có vạch là catot: số hiện khi que đỏ ở anot (đầu không vạch) và que đen ở vạch. Dòng quy ước trong phép thử diode đi ra từ que đỏ.
+Với diode 1N4007, đặt que đỏ vào đầu không vạch (anot) và que đen vào đầu có vạch (catot), màn hình hiển thị khoảng 0,62 V; đảo ngược hai que thì màn hình báo `OL`.
 
-Một chiều trên LED đỏ có thể thấy khoảng 1,8 V và ánh le. Chiều kia quá tầm. Chân nằm dưới que đỏ lúc đọc 1,8 V là anot. Nếu chân đó cũng là chân dài thì nhà sản xuất và đồng hồ đồng ý. Nếu chúng bất đồng, tin đồng hồ và đánh dấu anot bằng bút trước khi cắt chân.
+Với LED đỏ, ở chiều thuận màn hình hiển thị khoảng 1,8 V và LED hơi phát sáng; đảo ngược hai que thì báo `OL`. Chân đang chạm que đỏ tại thời điểm đọc được 1,8 V chính là **anot**. Nếu kết quả này trái với độ dài chân ban đầu, hãy tin đồng hồ và đánh dấu lại chân anot bằng bút trước khi cắt chân.
 
-LED cần điện trở nối tiếp vì điện áp của nó gần như đứng yên trong khi dòng bỏ chạy. Điện áp trên tụ thì dịch chuyển, nên $E = \tfrac{1}{2}CV^2$ là câu hỏi đúng cho con 100 µF. Không con nào trong hai con đó là mô-tơ để treo lên GPIO.
+Tóm lại, LED luôn cần điện trở nối tiếp vì điện áp rơi trên nó gần như cố định trong khi dòng tăng rất nhanh; còn tụ điện có điện áp thay đổi theo điện tích nên ta đánh giá bằng công thức năng lượng $E = \tfrac{1}{2}CV^2$.
 
 ## Thực hành
 
-Lab này cố ý không cấp nguồn. Bạn sẽ không cắm ngược tụ hoá lên rail đang sống.
+Bài lab này thực hiện hoàn toàn ở trạng thái **không cấp nguồn** để đảm bảo không cắm ngược tụ hóa lên đường nguồn đang có điện.
 
-1. Gom một tụ hoá, một tụ gốm ghi 104 nếu có, một 1N4007 hoặc diode có vạch bất kỳ, và một LED. Mọi pin và cáp USB đều rút.
-2. Trên tụ hoá, tìm vạch. Ghi chân nào là âm. Đọc điện áp định mức. Dưới 16 V thì không hợp pin 8,4 V, dù lab này không cấp pin đó.
-3. Nếu gốm ghi 104, viết $10 \times 10^4\ \mathrm{pF} = 100\ \mathrm{nF}$ trước khi tra cứu.
-4. Thang diode, que đỏ ở ổ điện áp/ôm, đen ở COM. Dò 1N4007 cả hai chiều. Ghi chiều nào ra điện áp gần 0,5 V đến 0,7 V, và xác nhận chiều đó đặt que đen lên vạch.
-5. Dò LED cả hai chiều. Ghi số thuận và chân nào nằm dưới que đỏ. So với độ dài chân và với vạt phẳng, ghi mọi chỗ không khớp.
+1. Chuẩn bị một tụ hóa nhôm, một tụ gốm ghi `104` (nếu có), một diode có vạch (như 1N4007) và một đèn LED. Rút toàn bộ pin và cáp USB khỏi bàn.
+2. Quan sát tụ hóa: xác định vạch chân âm và đọc điện áp định mức trên vỏ. Ghi chú rõ nếu định mức dưới 16 V thì không dùng được cho pin 2S (8,4 V).
+3. Với tụ gốm ghi `104`, tự tính $10 \times 10^4\ \mathrm{pF} = 100\ \mathrm{nF}$ ra giấy trước khi đối chiếu.
+4. Chuyển đồng hồ sang thang đo diode (que đen ở COM, que đỏ ở V/Ω). Đo 1N4007 theo cả hai chiều, ghi lại chiều cho giá trị ~0,5–0,7 V và xác nhận que đen lúc đó đang đặt ở đầu có vạch.
+5. Đo LED theo cả hai chiều, ghi lại điện áp thuận và xác định chân anot ở que đỏ; so sánh với độ dài chân và mặt vát nhựa rồi ghi chú nếu có điểm không khớp.
 
-Mỗi diode phải dẫn một chiều và chặn chiều kia. LED có thể le sáng ở chiều dẫn. Tụ hoá trong lab này được nhận bằng mắt; bạn không nạp nó, và không đo điện dung trừ khi đồng hồ có thang điện dung và linh kiện đã ra khỏi mạch.
+**Kết quả kỳ vọng:** Mỗi diode và LED chỉ dẫn theo đúng một chiều và báo `OL` ở chiều ngược lại; LED đỏ có thể sáng mờ ở chiều thuận. Trong bài này, bạn chỉ nhận diện tụ hóa bằng mắt và không nạp điện cho tụ (chỉ đo điện dung nếu đồng hồ có riêng thang đo tụ và linh kiện nằm ngoài mạch).
 
-| Bạn thấy | Nguyên nhân hay gặp | Cách xử lý |
+| Hiện tượng quan sát | Nguyên nhân thường gặp | Cách khắc phục |
 | --- | --- | --- |
-| Cả hai chiều của diode đều OL | Que không tiếp xúc, hoặc linh kiện đứt | Lau chân và thử lại. Vẫn hở thì để riêng. |
-| Cả hai chiều gần 0 V | Linh kiện chập, hoặc bạn còn ở thang thông mạch trên một sợi dây | Kiểm núm. Diode lành không bíp cả hai chiều. |
-| LED sáng ở thang diode nhưng chân dài lại là catot | Chân đã bị cắt, hoặc lô hàng lạ | Đánh dấu anot theo đồng hồ. Đừng cãi một ánh le. |
-| Muốn "xem phân cực ngược làm gì" với tụ hoá | Đó đúng sự cố lab này từ chối biểu diễn | Dừng. Đọc đoạn dưới. Đừng cấp điện ngược. |
+| Cả hai chiều đo diode đều hiện `OL` | Đầu que tiếp xúc kém hoặc linh kiện bị đứt | Làm sạch chân linh kiện và đo lại; nếu vẫn hở thì loại bỏ |
+| Cả hai chiều đo đều gần 0 V | Linh kiện bị chập, hoặc đang nhầm thang thông mạch trên dây dẫn | Kiểm tra lại vị trí núm vặn; diode tốt không kêu bíp cả hai chiều |
+| LED sáng ở thang diode nhưng chân dài lại là catot | Chân đã bị cắt trước đó hoặc lô sản xuất ngược chuẩn | Đánh dấu lại chân anot theo kết quả đo của đồng hồ |
+| Muốn cấp điện ngược thử xem tụ hóa phản ứng thế nào | Gây nguy hiểm cháy nổ và hỏng linh kiện | Dừng ngay, không thử nghiệm cấp điện ngược cực cho tụ hóa |
 
-Tụ hoá nhôm bị đảo trên rail đang sống không ngồi im. Màng oxit đánh thủng, dòng rò đun chất điện phân, áp suất tăng, vạch xé trên vỏ mở ra hoặc vỏ nổ. Con hỏng thường thành ngắn mạch. Trên pin mô-tơ, ngắn đó xả được cell. Ta mô tả để bạn nhận ra vỏ đã xì. Ta không lắp nó.
+Nếu tụ hóa nhôm bị cấp điện ngược cực trên đường nguồn đang hoạt động, lớp màng oxit cách điện sẽ bị đánh thủng, dòng rò lớn làm sôi chất điện phân, tăng áp suất khiến van xả trên đỉnh vỏ tụ xì bung hoặc nổ, và linh kiện hỏng thường chuyển sang trạng thái ngắn mạch làm xả mạnh nguồn pin. Chúng ta tìm hiểu cơ chế này để phòng tránh và nhận biết tụ đã hỏng, tuyệt đối không lắp thử.
 
-An toàn: chỉ thang diode, linh kiện ra khỏi mạch, USB rút, không nối VM. Đừng xả tụ lớn bằng cách chập nó với ngón tay hoặc với đầu que đang cầm. Tụ 100 µF trong kit là nhỏ; thói quen vẫn quan trọng khi board sau này không nhỏ.
+**Lưu ý an toàn:** Chỉ thao tác ở thang đo diode với linh kiện rời, rút toàn bộ USB và không nối nguồn VM. Không xả tụ dung lượng lớn bằng cách chập trực tiếp bằng tay hay đầu que cầm trần; dù tụ 100 µF trong kit khá nhỏ, việc rèn thói quen an toàn rất cần thiết cho các mạch công suất lớn về sau.
 
 ## Video tham khảo
 
-- **Xem trước:** [Diodes Explained - The basics how diodes work working principle pn junction](https://www.youtube.com/watch?v=Fwj_d3uO5g8) — The Engineering Mindset, tiếng Anh. Diode và cực: chiều nào dẫn. LED là diode phát quang, vẫn có anode và cathode.
-- [Capacitors Explained - The basics how capacitors work working principle](https://www.youtube.com/watch?v=X4EUwTwZ110) — The Engineering Mindset, tiếng Anh. Tụ tích điện và phóng điện. Nhìn ký hiệu và cực trên tụ hóa.
+- **Xem trước:** [Diodes Explained - The basics how diodes work working principle pn junction](https://www.youtube.com/watch?v=Fwj_d3uO5g8) — The Engineering Mindset, tiếng Anh. Giải thích nguyên lý hoạt động và cực tính anot/catot của diode cũng như đèn LED.
+- [Capacitors Explained - The basics how capacitors work working principle](https://www.youtube.com/watch?v=X4EUwTwZ110) — The Engineering Mindset, tiếng Anh. Minh họa quá trình tích phóng điện của tụ và cách nhận biết cực tính trên tụ hóa.
 
 ## Bài tập
 
-1. Một tụ gốm ghi 104, tụ kia ghi 223. Đổi cả hai ra nF.
-2. Tụ 100 µF đang ở 7,4 V. Tính năng lượng tích. Ước lượng $E/P$ cho thấy năng lượng đó nuôi một cú kẹt 6 W được bao lâu?
-3. Thang diode hiện 0,58 V trên 1N4007 khi que đen ở đầu có vạch, và OL khi đảo que. Đầu nào là catot, và que nào đang ở anot lúc đọc 0,58 V?
-4. Bộ LED bị cắt mọi chân bằng nhau. Mô tả phép thử không nguồn vẫn tìm được anot, và nói bạn từ chối làm gì để "cho phép thử rõ hơn".
-5. Một bạn đặt tụ hoá 100 µF ngang chân 3V3 của ESP32 và GND, vạch đúng, rồi nối hai mô-tơ TT vào chính chân 3V3 vì "tụ sẽ cấp dòng kẹt". Lập luận năng lượng sai ở đâu, và VM phải nối vào đâu?
+1. Quy đổi hai mã tụ gốm `104` và `223` sang đơn vị nanofarad (nF).
+2. Một tụ 100 µF được nạp đến 7,4 V. Hãy tính năng lượng tích trữ $E$ và ước lượng thời gian $E/P$ mà tụ có thể duy trì cho một tải động cơ kẹt công suất 6 W.
+3. Ở thang đo diode, đồng hồ hiển thị 0,58 V trên 1N4007 khi que đen đặt ở đầu có vạch và `OL` khi đảo que. Đầu nào là catot, và que nào đang đặt ở anot lúc đọc được 0,58 V?
+4. Giả sử một túi LED bị cắt ngắn hai chân bằng nhau. Hãy mô tả cách tìm chân anot không cần cấp nguồn ngoài, và nêu thao tác cần tránh khi muốn "thử cho sáng rõ hơn".
+5. Một bạn mắc tụ hóa 100 µF đúng cực ngang chân 3V3 và GND của ESP32 rồi đấu hai động cơ TT trực tiếp vào chân 3V3 với suy nghĩ "tụ sẽ gánh giúp dòng kẹt". Lập luận năng lượng này sai ở đâu, và chân VM của TB6612 phải đấu vào nguồn nào?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. 104 là $10 \times 10^4\ \mathrm{pF} = 100\ \mathrm{nF}$. 223 là $22 \times 10^3\ \mathrm{pF} = 22\ \mathrm{nF}$.
-2. $E = \tfrac{1}{2} \times 100 \times 10^{-6} \times 7{,}4^2 \approx 0{,}0027\ \mathrm{J}$. Thời gian khoảng $0{,}0027 / 6 \approx 0{,}45\ \mathrm{ms}$. Đó là một xung, không phải lúc chạy đều.
-3. Đầu có vạch là catot, vì que đen ở đó trong lúc đọc thuận. Que đỏ ở anot.
-4. Thang diode, không nguồn. Anot là chân dưới que đỏ khi bạn thấy sụt thuận và thường là ánh le. Đừng cấp 5 V hoặc GPIO không có điện trở nối tiếp để cho sáng hơn.
-5. Lúc kẹt, tụ giữ chưa tới một mili giây năng lượng, nên ổn áp 3V3 vẫn bị đòi khoảng một ampe và sẽ sụt hoặc hỏng. VM của TB6612 phải thấy pin mô-tơ, trong dải 4,5 V đến 10 V của module, mass chung, GPIO chỉ làm logic.
+1. `104` là $10 \times 10^4\ \mathrm{pF} = 100\ \mathrm{nF}$. `223` là $22 \times 10^3\ \mathrm{pF} = 22\ \mathrm{nF}$.
+2. $E = \tfrac{1}{2} \times 100 \times 10^{-6} \times 7{,}4^2 \approx 0{,}0027\ \mathrm{J}$. Thời gian duy trì khoảng $0{,}0027 / 6 \approx 0{,}45\ \mathrm{ms}$ — chỉ đủ lọc xung ngắn chứ không thể cấp nguồn chạy liên tục.
+3. Đầu có vạch là catot (nơi đặt que đen khi phân cực thuận), còn que đỏ đang đặt ở chân anot.
+4. Dùng thang đo diode ở trạng thái không cấp nguồn; chân chạm que đỏ khi đồng hồ hiện điện áp thuận (và LED có thể sáng mờ) chính là anot. Tuyệt đối không chích thẳng nguồn 5 V hay GPIO không có điện trở hạn dòng để làm LED sáng rõ hơn.
+5. Tụ 100 µF chỉ dự trữ năng lượng trong chưa đầy 1 ms khi động cơ kẹt, nên mạch ổn áp 3V3 vẫn bị rút dòng cỡ ampe và lập tức sụt áp hoặc hỏng. Chân VM của TB6612 phải nối vào pin động cơ riêng (trong dải 4,5–10 V), nối mass chung và chỉ dùng GPIO cho tín hiệu logic.
 
 </details>
 
 ## Đọc thêm
 
-Trang tụ của SparkFun ngắn hơn về cực tính và mã: [Capacitors](https://learn.sparkfun.com/tutorials/capacitors). Trang diode nói về vạch và sụt thuận: [Diodes](https://learn.sparkfun.com/tutorials/diodes). Trang LED là bài bạn đã gặp ở phần điện trở: [Light-emitting diodes](https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds).
+Các bài hướng dẫn ngắn gọn của SparkFun về cực tính và mã đọc: [Capacitors](https://learn.sparkfun.com/tutorials/capacitors), [Diodes](https://learn.sparkfun.com/tutorials/diodes) và [Light-emitting diodes](https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds).
 
 ## Mua ở Việt Nam
 
-Cả giỏ, gồm vi điều khiển, TB6612, và mô-tơ TT — những thứ khiến câu chuyện 100 µF có nghĩa — nằm ở [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Mua những món đó ở đó. Bài này không thêm một driver nữa.
+Toàn bộ danh sách vi điều khiển, TB6612 và động cơ TT nằm ở bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
-Nếu bộ LED chưa có trong giỏ, Hshop niêm yết bộ 3 mm giá 20 000 ₫ ngày 23 tháng 9 năm 2026: [bộ 5 loại LED 3 mm](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led). Xem lại giá.
+Nếu chưa có bộ LED, bạn có thể tham khảo bộ LED 3 mm trên Hshop giá 20.000 ₫ (ghi nhận ngày 23 tháng 9 năm 2026): [bộ 5 loại LED 3 mm](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led).
 
-1N4007 và tụ hoá 100 µF, 16 V hoặc 25 V không có một link sản phẩm Hshop đã kiểm trong danh sách nguồn của bài này. Dùng trang tìm kiếm và tự đọc điện áp định mức: [Shopee, tìm 1N4007](https://shopee.vn/search?keyword=1N4007) và [Shopee, tìm tụ 100uF](https://shopee.vn/search?keyword=t%E1%BB%A5%20100uF). Cả hai là trang tìm kiếm, không phải sản phẩm. [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/) là quầy linh kiện nếu bạn muốn mua hai con lẻ thay vì một bộ. Đừng cấp điện cho chúng trước khi đã ghi vạch tụ và vạch diode ra giấy.
+Với diode 1N4007 và tụ hóa 100 µF (16 V hoặc 25 V), bạn có thể tìm qua trang tìm kiếm và tự kiểm tra điện áp định mức: [Shopee, tìm 1N4007](https://shopee.vn/search?keyword=1N4007) và [Shopee, tìm tụ 100uF](https://shopee.vn/search?keyword=t%E1%BB%A5%20100uF). Nếu chỉ cần mua vài linh kiện lẻ thay vì cả bộ, bạn có thể mua trực tiếp tại [Thế Giới IC](https://www.thegioiic.com/) hoặc [IC Đây Rồi](https://icdayroi.com/). Luôn ghi chú rõ cực tính tụ và vạch diode trước khi lắp mạch.

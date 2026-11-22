@@ -15,57 +15,57 @@ Thời lượng: **~90 phút**.
 
 ## Mục tiêu
 
-Bạn đưa xacro chương 09 vào một world Harmonic đang chạy theo đúng thứ tự: bung mô hình, bật `robot_state_publisher`, launch `empty.sdf -r`, spawn bằng `ros_gz_sim create`, rồi bắc cầu `/clock` một chiều và `/cmd_vel` hai chiều. Bạn đặt tên joint bánh, khoảng cách và bán kính của plugin diff-drive trùng số trong xacro, theo ví dụ khóa học là khẩu độ 0,16 m và bán kính bánh 0,033 m. Bạn xuất bản một `Twist` chậm và nhìn bánh lăn trong chính world Gazebo. Bạn kể được năm kiểu bring-up hỏng để RViz vẫn đẹp trong khi robot mô phỏng không nhúc nhích hoặc rơi xuyên sàn. Bạn giữ `use_sim_time` khớp với đồng hồ đã bắc cầu để timer và TF dùng chung một mốc thời gian.
+Sau bài học này, bạn sẽ đưa được mô hình `xacro` từ chương 09 vào một world Gazebo Harmonic đang chạy theo đúng trình tự: biên dịch `xacro` ra URDF, khởi chạy `robot_state_publisher`, mở `empty.sdf -r`, spawn mô hình bằng `ros_gz_sim create`, rồi bắc cầu `/clock` một chiều và `/cmd_vel` hai chiều. Bạn sẽ cấu hình tên khớp bánh xe, khoảng cách hai bánh (0,16 m) và bán kính bánh (0,033 m) trong plugin diff-drive khớp hoàn toàn với tệp `xacro`, sau đó gửi một lệnh `Twist` chậm để quan sát bánh xe lăn trực tiếp trong Gazebo. Đồng thời, bạn nắm được năm lỗi bring-up phổ biến (khiến RViz vẫn hiển thị bình thường nhưng robot trong mô phỏng đứng yên hoặc rơi xuyên sàn) và biết đồng bộ `use_sim_time` với `/clock` để timer và TF dùng chung một mốc thời gian.
 
 ## Kiến thức cần trước
 
-World trống bài 10-01 launch được và `gz topic -l` có `/clock`. Xacro bài 09-06 còn đó: thân hộp, bánh trụ, joint bánh kiểu `continuous`, có thẻ inertial. Động học nghịch bài 08-04 là nghĩa của `cmd_vel`: $$v$$ tiến và $$\omega$$ quanh $$+z$$. Mỗi terminal mới đều source Jazzy. RViz tối nay là tùy chọn; điều kiện đạt là chuyển động trong bộ mô phỏng.
+Hoàn thành bài 10-01: world trống chạy ổn định và `gz topic -l` hiển thị `/clock`. Tệp `xacro` từ bài 09-06 đã sẵn sàng với thân hộp, hai bánh trụ, khớp `continuous` và đầy đủ thẻ `<inertial>`. Nắm lại phép động học nghịch ở bài 08-04 để hiểu ý nghĩa của `cmd_vel` ($$v$$ tiến và $$\omega$$ quay quanh $$+z$$). Mọi cửa sổ terminal mới đều phải nạp Jazzy; RViz chỉ là tùy chọn vì tiêu chí đạt yêu cầu nằm ở chuyển động thực tế trong Gazebo.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Xacro vừa rồi là bản vẽ và một cây TF. Harmonic là lần đầu bản vẽ đó có khối lượng, tiếp xúc và đồng hồ. Nav2 sau này xuất bản `geometry_msgs/Twist` lên `/cmd_vel`. Trong mô phỏng, bên nghe là hệ diff-drive của Gazebo. Trên Capstone thật, cầu nối serial bài 10-04 là bên nghe thứ hai trên cùng topic. Plugin lệch khẩu độ hoặc bán kính so với xacro thì mọi bag sau kế thừa sai tỉ lệ đó. Thứ tự spawn mới là kỹ năng. Một đống terminal bật ngược trông như lỗi vật lý.
+Ở chương 09, `xacro` mới chỉ cung cấp bản vẽ hình học và cây TF tĩnh; sang Harmonic, mô hình lần đầu tiên có khối lượng, va chạm vật lý và đồng hồ mô phỏng. Về sau, Nav2 sẽ xuất bản `geometry_msgs/Twist` lên `/cmd_vel`: trong mô phỏng, bộ nhận lệnh là plugin diff-drive của Gazebo, còn trên xe Capstone thật là cầu nối serial ở bài 10-04. Nếu thông số khoảng cách hai bánh hoặc bán kính trong plugin lệch với `xacro`, mọi dữ liệu bag ghi lại sau này đều bị sai tỉ lệ. Ngoài ra, thứ tự khởi chạy các tiến trình là kỹ năng cốt lõi vì việc bật ngược trình tự thường tạo ra hiện tượng giống hệt lỗi vật lý.
 
 ![Thứ tự từ xacro tới mô hình lăn trong Harmonic]({{ site.imgurl }}/generated/ch10_sim_bringup.png)
 
 ## Khái niệm
 
-Bring-up là một thứ tự, không phải một lệnh.
+Bring-up là một quy trình theo đúng trình tự, không phải một câu lệnh đơn lẻ.
 
-Thứ nhất, mô tả. `xacro` bung property thành URDF mà cả `robot_state_publisher` và công cụ spawn đọc được. Mô hình khóa học dùng thân hộp, bánh trụ, joint `continuous` tên `left_wheel_joint` và `right_wheel_joint`, và `<inertial>` trên mọi link có va chạm. Khẩu độ 0,16 m, bán kính bánh 0,033 m. Hai số đó sắp được chép sang plugin. Chỉ sửa một chỗ thì hình vẽ và con lăn không còn là một.
+**Bước 1: Tạo mô tả URDF.** Công cụ `xacro` khai triển các thuộc tính thành tệp URDF chuẩn để cả `robot_state_publisher` lẫn công cụ spawn đọc được. Mô hình khóa học gồm thân hộp, hai bánh trụ với khớp `continuous` tên `left_wheel_joint` và `right_wheel_joint`, kèm thẻ `<inertial>` trên mọi link có va chạm. Hai kích thước chuẩn là khoảng cách hai bánh 0,16 m và bán kính bánh 0,033 m; các giá trị này phải đồng bộ giữa `xacro` và plugin để hình dáng hiển thị khớp với động học lăn.
 
-Thứ hai, `robot_state_publisher`. Nó xuất bản cây TF từ URDF. Joint cố định vẫn hiện khi `joint_states` trống. Trong mô phỏng nó phải dùng đồng hồ Gazebo sau khi đồng hồ đã được bắc cầu, nếu không dấu thời gian của nó sống trên trục khác với scan và odometry bạn thêm sau.
+**Bước 2: Chạy `robot_state_publisher`.** Node này xuất bản cây TF từ URDF (các khớp cố định vẫn hiển thị dù `joint_states` chưa có dữ liệu). Trong môi trường mô phỏng, node này cần sử dụng đồng hồ Gazebo sau khi `/clock` đã được bắc cầu, tránh tình trạng dấu thời gian lệch pha so với dữ liệu cảm biến và odometry thêm vào sau này.
 
-Thứ ba, world. Launch `empty.sdf` với `-r` để server đang chạy, không tạm dừng. Tên world trong file đó là `empty`. Nhớ tên này.
+**Bước 3: Mở world mô phỏng.** Khởi chạy `empty.sdf` kèm cờ `-r` để server chạy ngay thay vì tạm dừng. Tên nội bộ của world trong tệp này là `empty`.
 
-Thứ tư, spawn. Công cụ create nhét URDF vào world đã chạy. Đối số world phải đúng tên đó:
+**Bước 4: Spawn mô hình.** Công cụ `create` đưa tệp URDF vào world đang chạy, trong đó tham số `-world` phải khớp chính xác tên world:
 
 ```bash
 ros2 run ros_gz_sim create -world empty -file /tmp/capstone.urdf -name capstone
 ```
 
-`-world shapes` trong khi server đang chạy `empty.sdf` không tạo vũ trụ thứ hai. Nó không tìm thấy world. `-file` cần URDF đã bung, không phải file `.xacro` thô, trừ khi bạn đã bung sẵn. `-name capstone` là tên mô hình bạn sẽ tìm trên GUI.
+Nếu truyền `-world shapes` khi server đang chạy `empty.sdf`, lệnh sẽ báo lỗi không tìm thấy world. Tham số `-file` yêu cầu tệp URDF đã khai triển chứ không nhận trực tiếp tệp `.xacro` thô, còn `-name capstone` là tên mô hình hiển thị trong giao diện Gazebo.
 
-Thứ năm, cầu nối. Hết ghi chú bài 10-01 thì chạy trợ giúp một lần:
+**Bước 5: Bắc cầu topic.** Nếu cần kiểm tra lại ký hiệu chiều truyền từ bài 10-01, chạy:
 
 ```bash
 ros2 run ros_gz_bridge parameter_bridge -h
 ```
 
-Đồng hồ đi từ Gazebo sang ROS và không được đẩy ngược. Dạng README là một chiều, Gazebo sang ROS:
+Đồng hồ chỉ đi một chiều từ Gazebo sang ROS (dùng ký hiệu `[` giữa kiểu ROS và kiểu Gazebo):
 
 ```bash
 ros2 run ros_gz_bridge parameter_bridge /clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock
 ```
 
-Dấu `[` nằm giữa kiểu ROS và kiểu Gazebo. Vận tốc lệnh trong khóa học dùng dạng hai chiều của README, để Twist xuất bản trên đồ thị ROS tới được plugin, và publisher phía Gazebo cũng hiện lên ROS:
+Lệnh vận tốc dùng dạng hai chiều (`@`) để `Twist` phát từ ROS đi tới plugin và dữ liệu từ phía Gazebo cũng phản hồi được về ROS:
 
 ```bash
 ros2 run ros_gz_bridge parameter_bridge /cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist
 ```
 
-Có thể đưa cả hai đối số vào một tiến trình `parameter_bridge`. Đừng bịa chiều ngược cho đồng hồ. Một node ROS xuất bản `/clock` trong khi Gazebo cũng xuất bản nó thì mọi node `use_sim_time` có hai ý kiến.
+Bạn có thể truyền cả hai đối số vào chung một tiến trình `parameter_bridge`. Không bao giờ dùng cầu nối hai chiều cho `/clock` để tránh tình trạng một node ROS khác phát đè mốc thời gian lên đồng hồ của Gazebo.
 
-Plugin biến `/cmd_vel` thành chuyển động bánh là hệ diff-drive của Gazebo Sim, nạp từ mô hình. Đặt một khối ngắn vào xacro và giữ số khớp property. Các trường khóa học dựa vào là tên joint, khoảng cách, bán kính, và trần tốc độ:
+Để chuyển đổi `/cmd_vel` thành chuyển động quay của bánh xe trong Gazebo Sim, ta thêm khối plugin `DiffDrive` vào tệp `xacro` với các thông số khớp hoàn toàn với thuộc tính mô hình:
 
 ```xml
 <gazebo>
@@ -79,38 +79,38 @@ Plugin biến `/cmd_vel` thành chuyển động bánh là hệ diff-drive của
 </gazebo>
 ```
 
-`left_joint` và `right_joint` phải là tên joint trong URDF, không phải tên link. `wheel_separation` là khẩu độ $$L$$ của bài 08-04. `wheel_radius` là bán kính lăn. Bản demo Harmonic đang cài dùng bộ thẻ khác thì chép tên thẻ đó và giữ các nghĩa này. Đừng dán một plugin dài đầy trường odometry bạn chưa đọc.
+Lưu ý `left_joint` và `right_joint` phải là tên **joint** trong URDF (không phải tên link), `wheel_separation` là khoảng cách hai bánh $$L$$ ở bài 08-04, còn `wheel_radius` là bán kính bánh xe. Nếu bản Harmonic bạn cài sử dụng tên thẻ khác đôi chút, hãy giữ nguyên ý nghĩa tương ứng và tránh sao chép thêm các khối cấu hình odometry dài dòng chưa cần thiết.
 
-Động học mà plugin đang xấp xỉ là cùng bản đồ nghịch với cầu nối firmware:
+Plugin tính toán vận tốc hai bánh theo cùng mô hình động học nghịch của cầu nối firmware:
 
 $$
 v_R = v + \omega \frac{L}{2}, \qquad v_L = v - \omega \frac{L}{2}
 $$
 
-với $$L = 0.16$$. Quãng đường một vòng của một bánh là
+với $$L = 0.16$$. Quãng đường đi được sau mỗi vòng quay bánh là:
 
 $$
 s = 2 \pi r
 $$
 
-với $$r = 0.033$$, nên một vòng khoảng 0,207 m vành. `wheel_radius` trong plugin là 0,05 trong khi trụ bạn vẽ là 0,033 thì bánh vẽ và bán kính tiếp xúc là hai vật khác nhau. Robot sẽ không đi đúng quãng đường bạn tính từ URDF.
+với $$r = 0.033$$, tương đương khoảng 0,207 m mỗi vòng. Nếu khai báo `wheel_radius` là 0,05 trong plugin trong khi hình trụ URDF có bán kính 0,033, quãng đường di chuyển thực tế trong mô phỏng sẽ sai lệch hoàn toàn so với tính toán từ URDF.
 
-`use_sim_time` là hợp đồng với `/clock`. Cầu đồng hồ đã lên thì bật `robot_state_publisher` với `-p use_sim_time:=true`, và để cảm biến mô phỏng theo đồng hồ đó. Node còn đồng hồ tường đóng dấu thông điệp mà bộ mô phỏng không chia sẻ: lỗi ngoại suy TF, hoặc robot đã chạy trong Gazebo mà RViz đứng im. Ngược lại, `use_sim_time` đúng trước khi có `/clock` thì timer đông cứng. Bắc cầu đồng hồ, echo một lần, rồi mới bật tham số.
+Tham số `use_sim_time` là cam kết đồng bộ với `/clock`. Sau khi cầu nối `/clock` đã hoạt động, hãy bật `robot_state_publisher` với `-p use_sim_time:=true` để mọi cảm biến mô phỏng dùng chung một trục thời gian. Nếu một node dùng đồng hồ thực trong khi Gazebo dùng thời gian mô phỏng, bạn sẽ gặp lỗi ngoại suy TF hoặc thấy xe chạy trong Gazebo nhưng đứng yên trên RViz. Ngược lại, nếu bật `use_sim_time:=true` trước khi `/clock` tồn tại, mọi timer sẽ bị đứng chờ. Do đó luôn bắc cầu `/clock`, kiểm tra bằng `echo` rồi mới dùng tham số này.
 
-RViz là camera, không phải đối tượng vật lý. RobotModel vẽ URDF kể cả khi spawn thất bại. Điều kiện đạt là mô hình trong cửa sổ Gazebo, bánh quay khi có `/cmd_vel`. Không có màn hình thì dùng topic odometry mà `gz topic -l` hiện và xác nhận vị trí đổi trong lúc Twist được gửi. Đừng bắt RViz chứng minh vật lý.
+Cần phân biệt rõ: RViz chỉ là công cụ hiển thị, không phải bộ mô phỏng vật lý — `RobotModel` vẫn vẽ URDF bình thường ngay cả khi quá trình spawn vào Gazebo thất bại. Tiêu chí kiểm chứng của bài là robot thực sự lăn bánh trong cửa sổ Gazebo (hoặc nếu chạy headless, kiểm tra topic odometry từ `gz topic -l` thấy vị trí thay đổi khi gửi `Twist`).
 
-Va chạm và quán tính giữ thân trên mặt sàn. Link chỉ có visual thì không chạm sàn. Link có collision mà không có inertia bị từ chối hoặc làm nổ bước thời gian. Khung và mỗi bánh đều cần cả hai, vì bánh là vết tiếp xúc.
+Cuối cùng, va chạm và quán tính là hai yếu tố giữ robot đứng vững trên mặt sàn. Một link chỉ có `visual` sẽ rơi xuyên qua sàn; một link có `collision` nhưng thiếu `<inertial>` sẽ bị bộ mô phỏng từ chối hoặc gây mất ổn định số học. Do đó cả thân xe và hai bánh đều bắt buộc có đủ hai thẻ này.
 
 ## Ví dụ làm từng bước
 
-Giả sử xacro bài 09-06 nằm ở `~/ros2_ws/src/capstone_description/urdf/capstone.urdf.xacro`, đã thêm khối plugin, `track` 0,16 và `wheel_r` 0,033. Bung ra:
+Giả sử tệp `xacro` ở bài 09-06 đặt tại `~/ros2_ws/src/capstone_description/urdf/capstone.urdf.xacro`, đã bổ sung khối plugin `DiffDrive` với `track = 0.16` và `wheel_r = 0.033`. Khai triển ra URDF:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 xacro ~/ros2_ws/src/capstone_description/urdf/capstone.urdf.xacro > /tmp/capstone.urdf
 ```
 
-Terminal A, mô tả, dùng đồng hồ Gazebo:
+Terminal A — chạy `robot_state_publisher` với đồng hồ mô phỏng:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -119,21 +119,21 @@ ros2 run robot_state_publisher robot_state_publisher --ros-args \
   -p robot_description:="$(cat /tmp/capstone.urdf)"
 ```
 
-Terminal B, world:
+Terminal B — khởi chạy world trống:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 ros2 launch ros_gz_sim gz_sim.launch.py gz_args:="empty.sdf -r"
 ```
 
-Terminal C, sau khi cửa sổ hoặc log server đã lên:
+Terminal C — sau khi cửa sổ hoặc log server đã sẵn sàng, spawn mô hình:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 ros2 run ros_gz_sim create -world empty -file /tmp/capstone.urdf -name capstone
 ```
 
-Bạn phải thấy hộp và hai trụ trong world, nằm trên mặt phẳng, không lún. Rồi cầu nối, một tiến trình, đồng hồ đứng trước trong danh sách đối số để bạn nhớ ký hiệu nào là một chiều:
+Bạn sẽ thấy khối hộp thân xe cùng hai bánh trụ xuất hiện và đứng vững trên mặt phẳng mà không bị lún. Tiếp theo, bật cầu nối `parameter_bridge` (đặt `/clock` trước để dễ nhớ ký hiệu một chiều `[`):
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -142,37 +142,37 @@ ros2 run ros_gz_bridge parameter_bridge \
   /cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist
 ```
 
-Kiểm đồng hồ từ một shell nữa:
+Mở một terminal khác kiểm tra đồng hồ:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 ros2 topic echo /clock --once
 ```
 
-Trường giây phải lớn hơn không vì có `-r`. Bằng không thì world đang tạm dừng.
+Trường giây (`sec`) phải lớn hơn 0 nhờ cờ `-r`; nếu bằng 0 nghĩa là world vẫn đang tạm dừng.
 
-Một lệnh thẳng, chậm, giữ ngắn:
+Gửi một đợt lệnh chạy thẳng tốc độ chậm:
 
 ```bash
 ros2 topic pub --times 20 /cmd_vel geometry_msgs/msg/Twist \
   "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 ```
 
-Hai mươi thông điệp là một cú lăn ngắn, không phải băng qua phòng. Trong cửa sổ Gazebo, khung đi dọc $$+x$$ và cả hai bánh quay. Hết publisher thì mô hình không còn bị dẫn. `linear.y` giữ 0 vì khung vi sai không trượt ngang. Với $$L/2 = 0.08$$, $$v = 0.2$$ và $$\omega = 0$$ đòi cả hai vành 0,2 m/s. Bạn cần thấy hai bánh quay cùng chiều.
+Hai mươi message chỉ đủ cho xe lăn một đoạn ngắn. Trong cửa sổ Gazebo, khung xe sẽ tiến dọc theo $$+x$$ với cả hai bánh quay cùng chiều, và khi publisher kết thúc, xe không còn nhận lực dẫn động nữa. Trường `linear.y` giữ bằng 0 vì xe vi sai không trượt ngang; với $$L/2 = 0.08$$, $$v = 0.2$$ và $$\omega = 0$$, vận tốc dài vành hai bánh đều bằng 0,2 m/s.
 
 ## Lab
 
-1. Thêm khối diff-drive ngắn vào xacro. Đặt `wheel_separation` bằng property khẩu độ và `wheel_radius` bằng property bán kính. Mỗi lần sửa, chạy lại `xacro` ra `/tmp/capstone.urdf`.
-2. Bật `robot_state_publisher` với `use_sim_time:=true` và bản mô tả đã bung.
-3. Launch `empty.sdf -r`. Xác nhận `gz topic -l` vẫn có `/clock`.
-4. Spawn với `-world empty`, `-file /tmp/capstone.urdf`, và `-name capstone`. Nhìn khung hình Gazebo, không chỉ RViz. Thân phải nằm trên mặt phẳng.
-5. Bật một `parameter_bridge` với đối số đồng hồ dùng `[` và đối số `cmd_vel` dùng `@`, đúng như ví dụ. Echo `/clock` một lần và xác nhận đồng hồ đang chạy.
-6. Xuất bản `linear.x` 0,2 trong một cụm ngắn (`--times 20` hoặc vài giây). Nhìn world.
-7. Dừng publisher. Mô hình phải hết bị dẫn. Ctrl-C cầu nối rồi xuất bản lại: mô hình phải đứng yên, chứng tỏ chuyển động phụ thuộc cầu nối.
+1. Thêm khối plugin `DiffDrive` vào tệp `xacro`, gán `wheel_separation` bằng thuộc tính khẩu độ và `wheel_radius` bằng thuộc tính bán kính bánh. Sau mỗi lần chỉnh sửa, chạy lại `xacro` để cập nhật `/tmp/capstone.urdf`.
+2. Khởi chạy `robot_state_publisher` với `use_sim_time:=true` và tệp URDF đã khai triển.
+3. Mở world bằng `empty.sdf -r` và xác nhận `gz topic -l` có `/clock`.
+4. Spawn mô hình với `-world empty`, `-file /tmp/capstone.urdf` và `-name capstone`. Quan sát trực tiếp trong Gazebo (không chỉ nhìn RViz) để chắc chắn xe nằm vững trên sàn.
+5. Chạy một tiến trình `parameter_bridge` với `[` cho `/clock` và `@` cho `/cmd_vel`, rồi `echo /clock --once` xác nhận thời gian đang chạy.
+6. Xuất bản `linear.x = 0.2` trong một cụm ngắn (`--times 20` hoặc vài giây) và quan sát xe di chuyển trong Gazebo.
+7. Dừng publisher và xác nhận xe ngừng được dẫn động. Sau đó nhấn Ctrl-C tắt cầu nối rồi thử xuất bản lại: xe phải đứng yên hoàn toàn, chứng minh luồng điều khiển đi qua cầu nối.
 
 **Kết quả mong đợi**
 
-Mô hình tên `capstone` hiện trong world Harmonic, phía trên mặt sàn. Trong cụm lệnh, cả hai bánh lăn trong world đó và khung tiến về phía trước. Hết cụm, nó không còn bị cấp lực. `/clock` echo thời gian khác không. Chuyển động chỉ có trong RobotModel của RViz, trong khi mô hình Gazebo ngồi im hoặc vắng mặt, là không đạt.
+Mô hình `capstone` hiển thị trên mặt sàn trong world Harmonic; khi gửi lệnh, cả hai bánh lăn đều và thân xe tiến về trước; khi dừng lệnh, xe không còn lực đẩy và `/clock` trả về thời gian lớn hơn 0. Nếu chỉ thấy mô hình hiển thị trong RViz còn trong Gazebo xe đứng yên hoặc không tồn tại thì bài lab chưa đạt.
 
 ```text
 capstone visible in the empty world
@@ -180,39 +180,39 @@ capstone visible in the empty world
 wheels rolling in Gazebo while linear.x is 0.2
 ```
 
-**Khi hỏng thì thường vì**
+**Các lỗi thường gặp**
 
-| Bạn thấy | Nguyên nhân hay gặp |
+| Hiện tượng | Nguyên nhân thường gặp |
 | --- | --- |
-| Lỗi spawn, hoặc mô hình không hiện | Lệch tên world (`shapes` với `empty`), hoặc `create` trỏ vào `.xacro` thay vì URDF đã bung |
-| Mô hình rơi xuyên sàn | Link có visual mà không có collision, nên không có gì tựa lên mặt phẳng |
-| Nổ ngay, hoặc mô hình bị từ chối | Có collision mà không có `<inertial>`, hoặc quán tính bằng không |
-| Bánh quay như đồng xu, hoặc khung trượt không lăn | Trục joint không phải trục bánh. Bài 09-06 dùng `<axis xyz="0 1 0"/>` sau khi lăn trụ |
-| `cmd_vel` echo được trong ROS, Gazebo không nhúc nhích | Cầu nối không chạy, hoặc tên joint plugin không phải `left_wheel_joint` và `right_wheel_joint` |
-| TF cũ, hoặc node `use_sim_time` không tick | Chưa bắc cầu đồng hồ, world tạm dừng vì quên `-r`, hoặc chỉ một phần node dùng thời gian mô phỏng |
+| Lỗi spawn hoặc không thấy mô hình | Sai tên world (`shapes` thay vì `empty`), hoặc truyền tệp `.xacro` thô cho `create` thay vì URDF đã khai triển |
+| Mô hình rơi xuyên qua mặt sàn | Link chỉ có `visual` mà thiếu `collision`, không có bề mặt tiếp xúc |
+| Mô hình văng ra hoặc bị từ chối nạp | Có `collision` nhưng thiếu `<inertial>`, hoặc ma trận quán tính bằng 0 |
+| Bánh quay ngang như đồng xu hoặc xe trượt không lăn | Khai báo sai trục `<axis>` của khớp; với khớp đã xoay `rpy="-1.5708 0 0"` ở bài 09-06, trục đúng là `<axis xyz="0 0 1"/>` |
+| `cmd_vel` xuất hiện trên ROS nhưng xe trong Gazebo không chạy | Cầu nối chưa chạy, hoặc tên khớp trong plugin không khớp `left_wheel_joint` và `right_wheel_joint` |
+| Dữ liệu TF cũ hoặc node `use_sim_time` bị đứng | Chưa bắc cầu `/clock`, world bị tạm dừng vì thiếu `-r`, hoặc chỉ một phần hệ thống bật thời gian mô phỏng |
 
 ## Mua ở Việt Nam
 
-Chỉ phần mềm. Lab chạy trên cùng laptop Ubuntu 24.04 của bài 10-01. Không cần board mới, không cần lidar, không cần robot trên bàn. Capstone thật để tắt nguồn; bài này không đụng cổng serial.
+Bài này hoàn toàn là mô phỏng phần mềm trên laptop Ubuntu 24.04 từ bài 10-01. Không cần mua thêm mạch, lidar hay kết nối robot thật (hãy tắt nguồn Capstone và không cắm cáp serial).
 
 ## Video tham khảo
 
-- **Xem trước:** [How do we describe a robot? With URDF! | Getting Ready to build Robots with ROS #7](https://www.youtube.com/watch?v=CwdbsvcpOHM) — Articulated Robotics, tiếng Anh. URDF phải khớp joint thật trước khi Gazebo chịu spawn.
-- [ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python](https://www.youtube.com/watch?v=campHHAPtyg) — Aleksandar Haber PhD, tiếng Anh. Đưa model vào world Jazzy và gửi lệnh. Đối chiếu tên topic với launch của bài.
-- [ROS2 - Create a Xacro Macro](https://www.youtube.com/watch?v=XH6Fvv7p5n0) — Robotics Back-End, tiếng Anh. Macro xacro cho từng bánh. Dùng khi file URDF của xe bắt đầu lặp.
+- **Xem trước:** [How do we describe a robot? With URDF! | Getting Ready to Build Robots with ROS #7](https://www.youtube.com/watch?v=CwdbsvcpOHM) — Articulated Robotics (tiếng Anh). Giải thích cấu trúc khớp trong URDF cần khớp chính xác trước khi đưa vào Gazebo.
+- [ROS2 Jazzy Tutorial: Develop and Control Gazebo Model of Mobile Robot in ROS2 and Python](https://www.youtube.com/watch?v=campHHAPtyg) — Aleksandar Haber PhD (tiếng Anh). Hướng dẫn đưa mô hình vào world trên Jazzy và gửi lệnh điều khiển; đối chiếu tên topic với lệnh launch trong bài.
+- [ROS2 - Create a Xacro Macro](https://www.youtube.com/watch?v=XH6Fvv7p5n0) — Robotics Back-End (tiếng Anh). Cách dùng macro `xacro` cho từng bánh xe để tránh lặp mã khi mô hình phức tạp hơn.
 
 ## Bài tập
 
-1. Khẩu độ xacro là 0,16 còn `wheel_separation` của plugin là 0,20. Tiếp xúc lăn dùng số nào, và bạn sửa gì? Gợi ý: khoảng cách trong plugin điều khiển động học mô phỏng, nên sửa nó về 0,16 rồi spawn lại, đừng “sửa” trong RViz.
-2. Bạn gửi $$v = 0$$ và $$\omega = +0.5$$ rad/s. Lệnh bánh nào lớn hơn theo quy ước dấu của khóa học? Gợi ý: bánh phải, vì yaw dương là cua trái khi $$+x$$ ở trước và $$+y$$ ở bên trái.
-3. Launch dùng `empty.sdf` còn `create` được gọi với `-world shapes`. Cái gì hỏng, và bạn sửa cờ nào? Gợi ý: `create` tìm world đang chạy theo tên, nên `-world` phải là `empty` khi SDF bạn launch là file đó.
-4. Nhân đôi URDF, xóa `<inertial>` của khung, spawn bản sao. Ghi lời bộ mô phỏng phàn nàn, rồi trả thẻ lại. Gợi ý: Harmonic không tích phân được vật va chạm không có khối lượng; hộp visual không thay thế được.
-5. Vì sao `/clock` được bắc cầu bằng `[` chứ không bằng một `@` thứ hai? Gợi ý: `parameter_bridge -h` đánh dấu `[` là Gazebo sang ROS, và đồng hồ hai chiều sẽ cho node khác xuất bản một mốc thời gian thứ hai.
+1. Nếu `xacro` khai báo khoảng cách hai bánh là 0,16 m nhưng plugin `DiffDrive` lại đặt `wheel_separation` là 0,20 m, mô phỏng sẽ dùng thông số nào và cần sửa ở đâu? *Gợi ý:* động học mô phỏng chạy theo thông số trong plugin; cần sửa lại về 0,16 m rồi spawn lại chứ không điều chỉnh trên RViz.
+2. Khi gửi lệnh $$v = 0$$ và $$\omega = +0.5$$ rad/s, bánh nào nhận vận tốc lớn hơn theo quy ước dấu của khóa học? *Gợi ý:* bánh phải, vì với trục $$+x$$ hướng trước và $$+y$$ sang trái, góc yaw dương tương ứng quay sang trái.
+3. World đang chạy là `empty.sdf` nhưng lệnh `create` lại truyền `-world shapes`. Lỗi gì xảy ra và cần sửa cờ nào? *Gợi ý:* `create` tìm world theo đúng tên đang hoạt động, nên phải đổi `-world` thành `empty`.
+4. Tạo một bản sao URDF, xóa thẻ `<inertial>` của thân xe rồi thử spawn để đọc thông báo lỗi của bộ mô phỏng, sau đó khôi phục lại thẻ này. *Gợi ý:* Harmonic không thể tính tích phân động lực học cho vật có va chạm nhưng không có khối lượng; thẻ `visual` không thể thay thế.
+5. Vì sao `/clock` dùng ký hiệu cầu nối một chiều `[` thay vì hai chiều `@`? *Gợi ý:* theo `parameter_bridge -h`, ký hiệu `[` chỉ cho phép dữ liệu đi từ Gazebo sang ROS, ngăn chặn việc một node ROS khác vô tình xuất bản thêm mốc thời gian gây xung đột.
 
 ## Đọc thêm
 
-- [README ros_gz_bridge](https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md) là chỗ quyết định các dạng `@` và `[` ở trên. Đọc lại nếu cầu đã chạy mà kiểu topic không khớp.
-- [Bắt đầu với Gazebo Harmonic](https://gazebosim.org/docs/harmonic/getstarted/) nói về tiến trình world mà lần spawn này gắn vào.
-- [Gazebo với ROS](https://gazebosim.org/docs/harmonic/ros_installation/) ghi launch `ros_gz_sim` và cách ghép với Jazzy.
-- [REP-103](https://www.ros.org/reps/rep-0103.html) là quy ước trục đằng sau câu “yaw dương nghĩa là trái.”
-- [REP-105](https://www.ros.org/reps/rep-0105.html) là chuỗi frame mà `robot_state_publisher` đã xuất bản từ URDF.
+- [README ros_gz_bridge](https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md) — tài liệu chuẩn về cú pháp `@` và `[` khi bắc cầu topic.
+- [Bắt đầu với Gazebo Harmonic](https://gazebosim.org/docs/harmonic/getstarted/) — tổng quan về tiến trình world nơi mô hình được spawn.
+- [Gazebo với ROS](https://gazebosim.org/docs/harmonic/ros_installation/) — hướng dẫn launch `ros_gz_sim` và tích hợp với Jazzy.
+- [REP-103](https://www.ros.org/reps/rep-0103.html) — chuẩn quy ước hệ trục tọa độ và chiều quay yaw dương.
+- [REP-105](https://www.ros.org/reps/rep-0105.html) — chuẩn hệ thống frame mà `robot_state_publisher` xuất bản từ URDF.

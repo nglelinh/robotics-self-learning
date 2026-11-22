@@ -11,83 +11,85 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: **80–100 phút**, gồm lúc đếm răng trên một hộp giảm tốc các bạn đang có, hoặc trên một ảnh rõ của hộp ấy.
+Thời lượng ước tính: **80–100 phút**, bao gồm thời gian đếm răng trực tiếp trên hộp giảm tốc bạn đang có hoặc trên một ảnh chụp rõ nét của hộp số đó.
 
 ## Mục tiêu học
 
-Hết bài này, các bạn tính được tỉ số truyền từ số răng, dự đoán góc đầu ra cho một góc đầu vào cho trước, và giữ đúng dấu của mỗi cặp ăn ngoài. Các bạn nói được một cấp worm dùng để làm gì, nêu được tỉ số hành tinh trong sách trong khi vẫn tin con số đóng trên động cơ TT, và cảm được độ rơ (backlash) như chuyển động mất đi, hiện thành xung encoder khi robot đảo chiều.
+Sau bài này, các bạn tính được tỉ số truyền từ số răng của từng cặp bánh răng, dự đoán góc quay đầu ra tương ứng với một góc quay đầu vào cho trước, và xác định đúng chiều quay qua mỗi cặp ăn khớp ngoài. Các bạn cũng phân biệt được công dụng của bộ truyền trục vít – bánh vít (worm), nắm được công thức tỉ số truyền hành tinh trong giáo trình đồng thời biết tin vào tỉ số đóng dấu trên vỏ động cơ TT, và nhận diện độ rơ (backlash) như phần chuyển động bị trễ xuất hiện dưới dạng xung encoder khi robot đảo chiều.
 
 ## Kiến thức cần có
 
-Các bạn đo được khổ vết và bán kính lăn (Bài 01) và biết vít cố định trục phải ngồi trên mặt vát chữ D (Bài 02). Số răng là số nguyên. Một phép chia trên máy tính là đủ.
+Các bạn đã biết đo khổ vết và bán kính lăn (Bài 01) và hiểu vít cố định trục phải tỳ đúng vào mặt vát trục chữ D (Bài 02). Số răng là số nguyên, nên chỉ cần các phép nhân chia cơ bản trên máy tính bỏ túi.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Encoder ở Chương 04 đếm trục động cơ, đôi khi đếm một trục nằm giữa đường trong hộp số. Bánh chạm sàn đã bị làm chậm bởi tỉ số truyền $$i$$. `diff_drive_controller` chỉ đổi xung thành mét sau khi cả tỉ số ấy và bán kính lăn đều đúng. Đổi chỗ bánh nào được gọi là đầu vào thì các bạn đảo $$i$$. Quãng đường trong odometry khi đó sai một thừa số $$i^2$$: tỉ số thật bằng 3 mà lưu thành $$1/3$$ sẽ kéo hoặc nén hành trình theo hệ số 9. Vòng tròn các bạn thấy vì khổ vết sai ở Bài 01 có một người anh em ở đây: robot có tỉ lệ bản đồ đơn giản là một con số sai. Ghi $$i$$ cạnh $$b$$ và $$r$$ trong `lab-notes.md`.
+Encoder (Chương 04) thường đếm số vòng quay trên trục động cơ hoặc một trục trung gian trong hộp số, trong khi bánh xe chạm sàn đã được giảm tốc qua tỉ số truyền $$i$$. Bộ điều khiển `diff_drive_controller` chỉ quy đổi chính xác số xung thành mét khi cả tỉ số truyền $$i$$ và bán kính lăn $$r$$ đều đúng.
+
+Nếu nhầm lẫn giữa bánh đầu vào và bánh đầu ra, bạn sẽ đảo ngược giá trị $$i$$. Khi đó, quãng đường odometry bị sai lệch theo hệ số $$i^2$$: chẳng hạn tỉ số thật bằng 3 nhưng lưu nhầm thành $$1/3$$ sẽ làm quãng đường ước lượng bị kéo giãn hoặc co ngắn tới 9 lần. Tương tự như lỗi khổ vết ở Bài 01 khiến xe chạy lệch thành đường cong, lỗi tỉ số truyền sẽ làm toàn bộ tỉ lệ bản đồ bị sai lệch. Hãy ghi $$i$$ ngay cạnh $$b$$ và $$r$$ trong `lab-notes.md`.
 
 ## Cặp ăn, worm, hành tinh, và vùng chết
 
-Với một cặp bánh răng trụ, tỉ số truyền là
+Với một cặp bánh răng trụ ăn khớp, tỉ số truyền được định nghĩa là:
 
 $$
 i = \frac{N_{\text{out}}}{N_{\text{in}}} = \frac{\omega_{\text{in}}}{\omega_{\text{out}}}.
 $$
 
-$$N$$ là số răng. Mô-men ở đầu ra tăng khi tốc độ giảm, trừ ma sát trong cặp ăn và trong bạc đạn. Một bánh dẫn 12 răng kéo một bánh 36 răng có $$i = 36/12 = 3$$. Ba vòng động cơ cho một vòng bánh xe. Mô-men bánh xe vào khoảng ba lần mô-men bánh dẫn, rồi nhỏ hơn một chút, vì răng cọ vào nhau.
+Trong đó $$N$$ là số răng. Khi tốc độ góc giảm, mô-men xoắn ở đầu ra tăng lên tương ứng (sau khi trừ tổn hao ma sát tại bề mặt răng và bạc đạn). Ví dụ, bánh dẫn 12 răng ăn khớp với bánh bị dẫn 36 răng cho tỉ số $$i = 36/12 = 3$$: động cơ quay ba vòng thì bánh xe quay một vòng, và mô-men tại bánh xe xấp xỉ gấp ba lần mô-men trục dẫn (thực tế nhỏ hơn một chút do ma sát).
 
-Mỗi cặp ăn ngoài đảo chiều. Bánh bị dẫn quay ngược bánh dẫn. Cặp ăn thứ hai, bánh dẫn vào bánh trung gian rồi vào đầu ra, đảo hai lần, nên đầu ra quay cùng chiều đầu vào. Một bánh trung gian đơn đổi chiều và để nguyên tỉ số, miễn nó là một bánh, không phải hai bánh khóa cùng nhau với số răng khác nhau. Bánh răng kép thì nhân tỉ số. Nếu các bạn còn có tỉ số hộp giảm tốc và tỉ số đai từ Bài 04, bánh xe thấy tích
+Mỗi cặp bánh răng ăn khớp ngoài sẽ làm đảo chiều quay, tức bánh bị dẫn quay ngược chiều bánh dẫn. Khi nối tiếp cặp ăn khớp thứ hai (bánh dẫn qua bánh trung gian rồi sang bánh ra), chiều quay bị đảo hai lần nên đầu ra quay cùng chiều với đầu vào. Một bánh trung gian đơn chỉ có tác dụng đổi chiều quay mà không làm thay đổi tỉ số truyền. Tuy nhiên, nếu hai bánh có số răng khác nhau được cố định trên cùng một trục (bánh răng kép), tỉ số truyền của các cấp sẽ nhân với nhau. Tương tự, nếu hệ truyền động có thêm bộ truyền đai (Bài 04) sau hộp giảm tốc, tỉ số truyền tổng tại bánh xe là:
 
 $$
 i_{\text{wheel}} = i_{\text{gearbox}} \cdot i_{\text{belt}}.
 $$
 
-Quên một trong hai thừa số là lỗi tỉ lệ kinh điển.
+Bỏ sót một trong hai thừa số là lỗi sai tỉ lệ thường gặp nhất.
 
-Cặp worm là một trục vít ăn với bánh vít. Tỉ số cao, thường hàng chục trên một trong một cấp, đó là lý do một cánh tay nhỏ giữ được tư thế khi nguồn động cơ sụt: nhiều cặp worm không bị dẫn ngược. Chúng cũng kém hiệu suất. Một phần lớn công suất điện các bạn đã dự trù ở Chương 05 thành nhiệt trong cặp ăn. Đó là trao đổi hợp lý trên một gắp phải giữ khép, và là trao đổi tệ trên bánh chủ động của Capstone A, nơi các bạn muốn pin thành chuyển động. Thử đầu ra worm: thường không xoay được từ phía bánh bằng ngón tay.
+Bộ truyền trục vít – bánh vít (worm) gồm một trục vít ăn khớp với bánh vít. Cơ cấu này đạt tỉ số truyền rất cao (thường hàng chục lần chỉ trong một cấp) và nhiều cặp có tính tự hãm (không thể xoay ngược từ phía bánh vít), giúp tay máy nhỏ giữ nguyên tư thế ngay cả khi mất nguồn động cơ. Nhược điểm là hiệu suất thấp: phần lớn năng lượng điện dự trù ở Chương 05 bị chuyển thành nhiệt do ma sát trượt. Vì vậy, bộ truyền worm thích hợp cho cơ cấu kẹp cần giữ chặt, nhưng không phù hợp cho bánh chủ động của Capstone A — nơi ta cần chuyển tối đa năng lượng pin thành chuyển động. Bạn có thể thử xoay trục đầu ra của một bộ worm bằng tay: thông thường bánh vít sẽ không quay được.
 
-Một bộ hành tinh nhét mặt trời, các hành tinh trên cần mang, và vành răng vào trong đường kính của vành. Trong trường hợp sách giáo khoa, vành cố định, mặt trời là đầu vào, cần mang là đầu ra. Tỉ số là
+Bộ truyền bánh răng hành tinh gom bánh răng mặt trời (sun), các bánh răng hành tinh trên cần mang (carrier) và vành răng ngoài (ring) vào gọn trong cùng một đường kính. Trong cấu hình cơ bản ở giáo trình (vành răng cố định, đầu vào là bánh mặt trời, đầu ra là cần mang), tỉ số truyền là:
 
 $$
 i = 1 + \frac{N_{\text{ring}}}{N_{\text{sun}}}.
 $$
 
-Công thức ấy là một cấp được vẽ trong sách. Hộp giảm tốc TT kim loại có thể là chồng hành tinh hoặc chồng bánh trụ, và con số đóng trên động cơ, thường 1:48 hoặc 1:90 hoặc 1:120, đã gồm mọi cấp nhà máy đặt bên trong. Tin dấu đóng cho động cơ ấy. Dùng công thức đếm răng khi nhìn thấy bánh răng, và dùng dấu đóng khi không nhìn thấy.
+Công thức trên áp dụng cho một cấp hành tinh đơn. Các hộp giảm tốc TT hoặc hộp số kim loại thực tế có thể gồm nhiều cấp bánh răng trụ hoặc nhiều tầng hành tinh xếp chồng, và con số đóng dấu trên vỏ (như 1:48, 1:90 hay 1:120) đã tính gộp tất cả các cấp bên trong. Hãy dùng công thức đếm răng khi bạn quan sát trực tiếp được bánh răng, và tin vào tỉ số đóng dấu khi hộp số đóng kín.
 
-Độ rơ (backlash) là chuyển động mất đi khi mô-men đảo chiều. Răng được cắt hơi mỏng để không kẹt, và khe ấy hiện ra như một khoảng dừng ở đầu cú quay. Lắc trục ra trong khi giữ trục vào: bánh dịch vài độ trước khi trục động cơ buộc phải động. Xung encoder ghi trong khoảng lắc ấy là một độ lệch, một số đếm nhỏ không tương ứng chuyển động trên sàn. Các bạn sẽ không loại được độ rơ khỏi hộp TT đúc. Các bạn sẽ đo nó, ước bằng mắt theo độ, và tránh những mẹo điều khiển đảo chiều vài miligiây một lần.
+Độ rơ (backlash) là khoảng chuyển động bị mất khi mô-men đảo chiều. Răng bánh răng luôn được chế tạo có khe hở nhỏ để tránh kẹt khi ăn khớp, và khe hở này tạo thành một khoảng trễ mỗi khi đổi chiều quay. Nếu giữ cố định trục động cơ rồi lắc nhẹ trục đầu ra, bạn sẽ thấy bánh xe dịch chuyển vài độ trước khi trục động cơ bắt đầu chịu lực. Các xung encoder sinh ra trong khoảng rơ này gây ra một độ lệch nhỏ không tương ứng với chuyển động thực trên sàn. Ta không thể loại bỏ hoàn toàn độ rơ ở hộp số TT nhựa đúc; thay vào đó, cần ước lượng góc rơ bằng mắt để ghi nhận và tránh các thuật toán điều khiển đảo chiều liên tục trong thời gian vài miligiây.
 
 ![Chuỗi bánh răng kép: số răng đặt tỉ số, mỗi cặp ăn ngoài đảo chiều]({{ site.imgurl }}/generated/gear_train_ratio.png)
 
-Hình cho thấy vì sao phải gọi tên đầu vào trước khi chia. Đi theo mô-men từ động cơ tới bánh, nhân $$N_{\text{out}}/N_{\text{in}}$$ của từng cấp, và đếm số cặp ăn ngoài nếu các bạn cần biết bánh lăn chiều nào. Một bánh trung gian vẽ giữa hai bánh là bộ sửa chiều. Nó không phải thừa số thêm, trừ khi hai phía của nó khác số răng.
+Hình trên cho thấy tầm quan trọng của việc xác định đúng bánh đầu vào trước khi chia. Hãy lần theo đường truyền mô-men từ động cơ ra bánh xe, nhân lần lượt $$N_{\text{out}}/N_{\text{in}}$$ qua từng cấp và đếm số cặp ăn khớp ngoài để biết chiều quay cuối cùng. Một bánh trung gian đơn nằm giữa hai bánh chỉ giúp đảo chiều, không thêm thừa số vào tỉ số truyền trừ khi nó là bánh răng kép có hai vòng răng khác số răng.
 
 ## Ví dụ tính tay
 
-Bánh dẫn $$N_{\text{in}} = 12$$, bánh bị dẫn $$N_{\text{out}} = 36$$.
+Xét cặp bánh răng có bánh dẫn $$N_{\text{in}} = 12$$ và bánh bị dẫn $$N_{\text{out}} = 36$$:
 
 $$
 i = \frac{36}{12} = 3.
 $$
 
-Xoay bánh dẫn $$90^\circ$$. Đầu ra xoay
+Khi xoay bánh dẫn một góc $$90^\circ$$, bánh đầu ra sẽ quay:
 
 $$
 \theta_{\text{out}} = \frac{90^\circ}{3} = 30^\circ,
 $$
 
-theo chiều ngược, vì có một cặp ăn ngoài. Ba vòng đủ của động cơ, $$1080^\circ$$, đưa bánh xe đi đúng một vòng. Nếu đảo tên và lưu $$i = 12/36 = 1/3$$, một quãng đường bánh được lệnh sẽ sai theo
+theo chiều ngược lại vì đây là một cặp ăn khớp ngoài. Ba vòng đầy đủ của động cơ ($$1080^\circ$$) tạo ra đúng một vòng quay bánh xe. Nếu gọi nhầm tên đầu vào/đầu ra và lưu $$i = 12/36 = 1/3$$, quãng đường tính toán sẽ lệch theo hệ số:
 
 $$
-i_{\text{true}}^{2} = 9.
+i_{\text{true}}^{2} = 9,
 $$
 
-Dài gấp chín, hoặc ngắn còn một phần chín, tùy phía phần mềm nào đang nhân. Cách sửa là chỉ vào bánh dẫn, nói to “đầu vào”, rồi mới chia.
+tức dài gấp 9 lần hoặc ngắn chỉ còn $$1/9$$ tùy bước nhân chia trong phần mềm. Cách tránh nhầm lẫn đơn giản nhất là luôn chỉ rõ bánh phía động cơ là “đầu vào” trước khi lập tỉ số.
 
-Tỉ số TT đóng dấu 1:48 là con số các bạn giữ, kể cả khi hình hành tinh trong đầu gợi $$1 + N_{\text{ring}}/N_{\text{sun}}$$. Dấu đóng đã làm phép tính ấy cho những cấp các bạn không nhìn thấy.
+Với động cơ TT đóng dấu 1:48, hãy ghi trực tiếp giá trị 48 vào sổ tay dù bạn biết công thức hành tinh $$1 + N_{\text{ring}}/N_{\text{sun}}$$, vì con số nhà sản xuất đã gộp toàn bộ các tầng giảm tốc bên trong.
 
 ## Lab: đếm, dự đoán, đối chiếu
 
 ### An toàn
 
-Nguồn tắt. Răng bánh kẹp ngón. Nếu mở hộp số, mỡ trơn và các phe nhỏ bắn ra; đếm qua một ảnh rõ là đủ cho bài này. Không chạy động cơ bằng pin khi ngón tay còn trong cặp ăn.
+Đảm bảo đã tắt nguồn. Răng bánh răng có thể kẹp ngón tay khi quay. Nếu mở hộp số, mỡ bôi trơn và các phe cài nhỏ rất dễ rơi bắn, nên đếm răng qua ảnh chụp sắc nét là đủ cho bài này. Tuyệt đối không cấp nguồn pin cho động cơ khi tay đang chạm vào cặp bánh răng.
 
 ### BOM
 
@@ -99,16 +101,16 @@ Nguồn tắt. Răng bánh kẹp ngón. Nếu mở hộp số, mỡ trơn và c�
 
 ### Các bước
 
-1. Gọi tên bánh đầu vào, bánh phía động cơ. Gọi tên bánh đầu ra, bánh phía bánh xe.
-2. Đếm răng. Trên động cơ TT kín, đọc dấu đóng (1:48 hoặc bất cứ số nào được in) và nói rõ là đang đọc dấu.
-3. Tính $$i = N_{\text{out}}/N_{\text{in}}$$, hoặc chép dấu đóng. Ghi bao nhiêu cặp ăn ngoài đảo chiều.
-4. Dự đoán góc đầu ra cho đầu vào $$90^\circ$$: $$\theta_{\text{out}} = 90^\circ / i$$.
-5. Nếu bánh đang trong tay, xoay đầu vào khoảng một phần tư vòng dựa vào một kim chỉ và đối chiếu. Lắc đầu ra và ước độ rơ theo độ. Ước bằng mắt là đủ.
-6. Nếu chỉ có bản vẽ, dự đoán trên giấy là sản phẩm nộp. Dán nhãn “bản vẽ”.
+1. Xác định rõ bánh đầu vào (phía động cơ) và bánh đầu ra (phía bánh xe).
+2. Đếm số răng của từng bánh. Với động cơ TT vỏ kín, đọc tỉ số đóng dấu (ví dụ 1:48) và ghi chú rõ là số liệu đọc từ nhãn vỏ.
+3. Tính $$i = N_{\text{out}}/N_{\text{in}}$$ hoặc chép lại tỉ số đóng dấu, đồng thời đếm số cặp ăn khớp ngoài để xác định chiều quay.
+4. Dự đoán góc quay đầu ra khi trục vào quay $$90^\circ$$ theo công thức $$\theta_{\text{out}} = 90^\circ / i$$.
+5. Nếu có bánh răng thực tế, xoay trục đầu vào khoảng một phần tư vòng (dựa theo vạch đánh dấu) để đối chiếu với dự đoán. Sau đó giữ trục vào, lắc nhẹ trục ra và ước lượng độ rơ theo độ.
+6. Nếu chỉ làm việc trên bản vẽ hoặc ảnh chụp, bản tính dự đoán trên giấy là kết quả nộp; nhớ ghi chú nhãn “bản vẽ”.
 
 ### Kết quả mong đợi
 
-Một $$i$$ đã viết, một ghi chú chiều quay, và một góc dự đoán. Với cặp 12 và 36, $$i = 3$$ và $$\theta_{\text{out}} = 30^\circ$$ ngược chiều đầu vào. Răng đúc trên hộp thật nên rơi trong khoảng 10 phần trăm so với dấu đóng khi các bạn kiểm đúng cách ở Bài 08. Độ rơ vài độ tại bánh là chuyện bình thường.
+Một giá trị $$i$$ cụ thể, ghi chú chiều quay và góc dự đoán trong sổ tay. Với cặp 12 và 36 răng, kết quả là $$i = 3$$ và $$\theta_{\text{out}} = 30^\circ$$ ngược chiều đầu vào. Ở hộp số nhựa đúc thực tế, tỉ số đo thực nghiệm ở Bài 08 thường sai lệch không quá 10% so với dấu đóng, và độ rơ vài độ tại trục bánh là bình thường.
 
 ### Lỗi thường gặp
 
@@ -121,42 +123,46 @@ Một $$i$$ đã viết, một ghi chú chiều quay, và một góc dự đoán
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Chuỗi bánh răng của Capstone A đã nằm trong động cơ giảm tốc TT. Mua động cơ có tỉ số in trên vỏ, và có encoder nếu mua được, để xung của Chương 04 có trục để đếm. Bánh răng nhựa rời dùng cho lab đếm răng nếu động cơ của các bạn bị kín.
+Bộ truyền bánh răng của Capstone A đã tích hợp sẵn bên trong động cơ giảm tốc TT. Hãy chọn mua động cơ có ghi rõ tỉ số truyền trên vỏ và có sẵn encoder (nếu tìm được) để kết nối với mạch đếm xung của Chương 04. Bộ bánh răng nhựa rời chỉ cần thiết nếu bạn muốn thực hành đếm răng trực tiếp khi hộp số động cơ bị kín.
 
 | Mua gì | Từ khóa | Khoảng giá (VND) | Ghi chú |
 |------|----------|------------------|-------|
 | Động cơ giảm tốc TT có encoder | `động cơ giảm tốc TT encoder` | 45.000–120.000 mỗi cái | Đọc dấu đóng: 1:48 là phổ biến |
 | Bộ bánh răng nhựa | `bánh răng nhựa robot` | 20.000–60.000 | Hữu ích khi hộp kín mà vẫn muốn đếm răng |
 
-Các trang tìm:
+Các trang tìm mua:
 
 - [Hshop](https://hshop.vn/search?q=%C4%91%E1%BB%99ng+c%C6%A1+gi%E1%BA%A3m+t%E1%BB%91c+TT)
 - [Shopee](https://shopee.vn/search?keyword=%C4%91%E1%BB%99ng%20c%C6%A1%20gi%E1%BA%A3m%20t%E1%BB%91c%20TT%20encoder)
 - [Lazada](https://www.lazada.vn/catalog/?q=%C4%91%E1%BB%99ng%20c%C6%A1%20TT%20encoder)
-- [Thế Giới IC](https://www.thegioiic.com/search?q=%C4%91%E1%BB%99ng%20c%C6%A1%20gi%E1%BA%A3m%20t%E1%BB%91c)
+- [Thế Giới IC](https://www.thegioiic.com/search?q=%C4%91%E1%BB%99ng+c%C6%A1+gi%E1%BA%A3m+t%E1%BB%91c)
 
-Giá dịch chuyển. Khớp trục với bánh đã mua ở Bài 01 trước khi trả tiền.
+Giá bán có thể thay đổi theo thời điểm. Hãy kiểm tra đường kính và kiểu trục khớp với bánh xe đã mua ở Bài 01 trước khi đặt hàng.
 
 ## Video tham khảo
 
-- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Tỉ số của một chuỗi bánh răng. Nhân từng cặp, đúng cách bài tính.
-- [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Bánh răng kép: số răng nào nằm trên cùng một trục. Dễ đếm sai ở chỗ đó.
-- [Worm Gears Explained, Calculated & Modeled](https://www.youtube.com/watch?v=K8HQA1Uz1sE) — INTEGRAL PHYSICS, tiếng Anh. Bánh worm: một chiều truyền và tỉ số lớn. Đối chiếu với backlash ở bài sau.
+- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Cách tính tỉ số truyền của một chuỗi bánh răng bằng cách nhân từng cặp, khớp với phương pháp trong bài.
+- [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Giải thích bánh răng kép và cách xác định hai bánh nào nằm chung một trục — vị trí rất dễ đếm nhầm.
+- [Worm Gears Explained, Calculated & Modeled](https://www.youtube.com/watch?v=K8HQA1Uz1sE) — INTEGRAL PHYSICS, tiếng Anh. Nguyên lý truyền một chiều và tỉ số truyền lớn của trục vít – bánh vít.
 
 ## Bài tập
 
-1. Một bánh dẫn 15 răng kéo một bánh 60 răng. Tìm $$i$$, góc đầu ra cho một vòng động cơ, và chiều so với động cơ.
-2. Cặp ấy được nối tiếp bởi một bánh trung gian đơn 20 răng rồi mới tới bánh 60 răng, nên bánh dẫn chỉ ăn với bánh trung gian. $$i$$ bây giờ là bao nhiêu, và đầu ra quay chiều nào so với bánh dẫn?
-3. Một cấp hành tinh vành cố định có $$N_{\text{sun}} = 12$$ và $$N_{\text{ring}} = 36$$. Tính $$i$$ theo sách. Động cơ TT của các bạn đóng dấu 1:48. Số nào đi vào `lab-notes.md` cho động cơ ấy?
-4. Các bạn lưu $$i = 1/4$$ cho một hộp số có tỉ số thật bằng 4. Quãng đường odometry sai theo hệ số nào?
-5. Các bạn giữ trục động cơ mà bánh vẫn lắc khoảng $$8^\circ$$. Chuyển động ấy gọi là gì, và nó làm gì với số xung lấy lúc robot bắt đầu một cú quay?
+1. Một bánh dẫn 15 răng ăn khớp với bánh bị dẫn 60 răng. Tính tỉ số truyền $$i$$, góc quay đầu ra khi động cơ quay đúng một vòng và chiều quay so với động cơ.
+2. Nếu chèn thêm một bánh trung gian đơn 20 răng giữa bánh 15 răng và bánh 60 răng (bánh dẫn chỉ ăn khớp với bánh trung gian), tỉ số $$i$$ và chiều quay đầu ra thay đổi thế nào?
+3. Một cấp bánh răng hành tinh có vành cố định, $$N_{\text{sun}} = 12$$ và $$N_{\text{ring}} = 36$$. Tính $$i$$ theo công thức giáo trình. Nếu động cơ TT của bạn đóng dấu 1:48, con số nào cần ghi vào `lab-notes.md`?
+4. Nếu bạn lưu nhầm $$i = 1/4$$ cho một hộp số có tỉ số thực bằng 4, quãng đường odometry sẽ sai lệch theo hệ số nào?
+5. Khi giữ cố định trục động cơ, bánh xe vẫn lắc được khoảng $$8^\circ$$. Hiện tượng này gọi là gì và nó ảnh hưởng ra sao đến số xung đo được khi robot bắt đầu quay?
 
 ### Gợi ý đáp án
 
-1. $$i = 60/15 = 4$$. Một vòng động cơ cho $$360^\circ/4 = 90^\circ$$ ở đầu ra, ngược chiều động cơ, một cặp ăn ngoài. 2. Bánh trung gian đơn để $$i = 4$$ và thêm một lần đảo chiều, nên đầu ra quay cùng chiều bánh dẫn. 3. Cấp theo sách: $$i = 1 + 36/12 = 4$$. Với động cơ đã đóng dấu, ghi 48. Dấu đóng gồm cả chồng bánh. 4. Theo $$i^2 = 16$$. 5. Độ rơ (backlash). Những độ ấy có thể hiện thành xung, hoặc thành một khoảng dừng trước khi xung làm bánh dịch, nên đầu cú quay bị lệch. Ghi góc; đừng dán keo vào cặp ăn.
+1. $$i = 60/15 = 4$$. Một vòng động cơ tạo ra góc đầu ra $$360^\circ/4 = 90^\circ$$, ngược chiều động cơ (do có một cặp ăn khớp ngoài).
+2. Bánh trung gian đơn giữ nguyên $$i = 4$$ nhưng thêm một lần đảo chiều, nên đầu ra quay cùng chiều với bánh dẫn.
+3. Theo công thức một cấp hành tinh: $$i = 1 + 36/12 = 4$$. Với động cơ TT đã đóng dấu, ghi giá trị 48 vì dấu đóng đã tính gộp toàn bộ các tầng bánh răng bên trong.
+4. Sai lệch theo hệ số $$i^2 = 16$$.
+5. Đó là độ rơ (backlash). Góc rơ này có thể sinh xung ảo hoặc tạo khoảng trễ trước khi bánh thực sự dịch chuyển, làm sai lệch giai đoạn đầu của cú quay. Cần ghi nhận góc rơ, không đổ keo vào bánh răng để cố khử.
 
 ## Đọc thêm
 
-- [SDP-SI, Elements of Metric Gear Technology](https://www.sdp-si.com/resources/elements-of-metric-gear-technology/index.php) — hình học răng, tỉ số và độ rơ từ một danh mục bánh răng vừa bán vừa dạy.
-- [Gear ratio](https://en.wikipedia.org/wiki/Gear_ratio) — định nghĩa $$N_{\text{out}}/N_{\text{in}}$$ và chuỗi bánh kép.
-- [Worm drive](https://en.wikipedia.org/wiki/Worm_drive) — tỉ số cao, hiệu suất, và vì sao nhiều cặp worm không chịu bị dẫn ngược.
+- [SDP-SI, Elements of Metric Gear Technology](https://www.sdp-si.com/resources/elements-of-metric-gear-technology/index.php) — tài liệu chuyên sâu về hình học răng, tỉ số truyền và độ rơ từ nhà sản xuất bánh răng.
+- [Gear ratio](https://en.wikipedia.org/wiki/Gear_ratio) — định nghĩa tỉ số truyền $$N_{\text{out}}/N_{\text{in}}$$ và cách tính chuỗi bánh răng kép.
+- [Worm drive](https://en.wikipedia.org/wiki/Worm_drive) — đặc điểm tỉ số truyền cao, hiệu suất và cơ chế tự hãm của bộ truyền trục vít – bánh vít.

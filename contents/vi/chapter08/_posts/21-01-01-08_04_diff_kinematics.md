@@ -11,27 +11,27 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~75 phút**.
+Thời lượng ước tính: **~75 phút**.
 
 ## Mục tiêu
 
-Bạn đo khẩu độ bánh của khung Capstone, đổi vận tốc thân $$(v, \omega)$$ thành tốc độ vành bánh trái và phải, rồi đổi ngược lại để kiểm tra số. Bạn dự đoán bán kính quay của một lệnh joystick trước khi robot nhúc nhích, và giải thích được vì sao khung vi sai không trượt ngang. Hai phương trình đó là thân của mọi callback `cmd_vel` từ chương 10 trở đi.
+Sau bài này, bạn đo chính xác khổ vết (khẩu độ bánh) của khung Capstone, chuyển đổi vận tốc thân robot $$(v, \omega)$$ thành tốc độ vành bánh trái và phải, rồi tính ngược lại để kiểm chứng. Bạn biết dự đoán bán kính quay của một lệnh điều khiển trước khi robot di chuyển và giải thích được vì sao cơ cấu vi sai không thể trượt ngang. Hai phương trình động học này là phần cốt lõi của mọi hàm xử lý `cmd_vel` từ Chương 10 trở đi.
 
 ## Kiến thức cần trước
 
-Bạn chỉ được bánh nào là bánh trái khi ngồi trên robot nhìn về phía trước. Teleop vòng hở chương 07 đã làm những bánh đó quay. Thước hoặc thước dây là đồ mới duy nhất. PID bài 08-03 là tùy chọn ở đây: động học ra đích tốc độ, PWM vòng hở vẫn cho thấy hình dạng của cú quay khi bánh ở trên không.
+Bạn xác định đúng bánh trái và bánh phải theo hướng nhìn từ trên thân robot về phía mũi xe, và đã hoàn thành bài teleop vòng hở ở Chương 07. Dụng cụ mới duy nhất cần dùng là thước hoặc thước dây. Vòng PID ở Bài 08-03 là tùy chọn trong bài này: động học tạo ra tốc độ đặt mục tiêu, còn chạy thử bằng PWM vòng hở khi kê bánh trên không vẫn đủ để kiểm chứng chiều quay.
 
 ## Vì sao bài này nằm trên lộ trình
 
-`geometry_msgs/Twist` không phải “động cơ trái” và “động cơ phải.” Nav2, teleop_twist_keyboard, và policy sau này đều xuất tốc độ tiến và tốc độ góc trong hệ thân robot. Ai đó phải nghịch đảo thành hai tốc độ bánh. Người đó dùng sai khẩu độ thì mọi bản đồ chương 11 sai tỉ lệ dù phần mềm SLAM hoàn hảo. Đổi dấu $$\omega$$ thì robot quay khỏi đích và planner “thất bại” vì lý do cơ khí. Viết hàm nghịch một lần, kèm đơn vị, và gọi nó từ cầu nối serial.
+Thông điệp `geometry_msgs/Twist` không gửi trực tiếp lệnh “động cơ trái” hay “động cơ phải”. Nav2, `teleop_twist_keyboard` và các chính sách điều khiển về sau đều xuất vận tốc tịnh tiến và vận tốc góc trong hệ tọa độ thân robot; tầng điều khiển dưới phải giải động học nghịch để tính tốc độ hai bánh. Nếu nhập sai khổ vết bánh, bản đồ Chương 11 sẽ sai tỉ lệ dù thuật toán SLAM hoạt động chuẩn xác; nếu ngược dấu $$\omega$$, robot sẽ quay ra xa mục tiêu khiến bộ lập kế hoạch thất bại. Hãy viết hàm động học nghịch một lần duy nhất, ghi rõ đơn vị và gọi lại thống nhất từ node cầu nối serial.
 
 ![Nhìn từ trên: khẩu độ và tốc độ hai bánh]({{ site.imgurl }}/generated/ch08_diff_kinematics.png)
 
 ## Khái niệm
 
-REP-103 đặt $$+x$$ về phía trước, $$+y$$ sang trái, $$+z$$ lên trên. Tốc độ góc $$\omega$$ dương là cua trái: bánh phải nhanh hơn bánh trái. $$v_R$$ và $$v_L$$ là tốc độ vành bánh theo mét trên giây, dương khi tiến. $$L$$ là khẩu độ tính bằng mét, khoảng cách giữa hai vết tiếp xúc, không phải chiều ngang tấm mica và không phải khoảng cách hai trục nếu lốp phình.
+Theo quy ước REP-103, trục $$+x$$ hướng về phía trước, $$+y$$ sang trái và $$+z$$ hướng lên trên. Vận tốc góc $$\omega$$ dương tương ứng với chuyển động rẽ trái (bánh phải chạy nhanh hơn bánh trái). Gọi $$v_R$$ và $$v_L$$ là vận tốc dài tại vành bánh phải và bánh trái (m/s, dương khi tiến), còn $$L$$ là khổ vết bánh tính bằng mét — đo giữa hai tâm vết tiếp xúc mặt lốp, không phải chiều rộng tấm mica.
 
-Chiều thuận, từ bánh lên thân:
+**Động học thuận** (từ tốc độ hai bánh suy ra vận tốc thân):
 
 $$
 v = \frac{v_R + v_L}{2}
@@ -41,7 +41,7 @@ $$
 \omega = \frac{v_R - v_L}{L}
 $$
 
-Chiều nghịch, từ Twist xuống bánh:
+**Động học nghịch** (từ lệnh `Twist` suy ra tốc độ hai bánh):
 
 $$
 v_R = v + \omega \frac{L}{2}
@@ -51,27 +51,27 @@ $$
 v_L = v - \omega \frac{L}{2}
 $$
 
-Nếu $$v = 0$$ và $$\omega \neq 0$$, hai bánh bằng nhau và ngược dấu, robot quay tại chỗ quanh tâm. Bán kính quay khi $$v \neq 0$$ là
+Khi $$v = 0$$ và $$\omega \neq 0$$, hai bánh quay ngược chiều với cùng độ lớn vận tốc, làm robot xoay tại chỗ quanh tâm trục. Khi $$v \neq 0$$ và $$\omega \neq 0$$, bán kính quỹ đạo quay là:
 
 $$
 R = \frac{v}{\omega}
 $$
 
-tâm quay nằm bên trái robot một đoạn $$R$$ khi $$\omega > 0$$ và $$v > 0$$. Không có $$v_y$$. Lệnh đòi khung trượt ngang không phải lỗi nhỏ; cơ cấu không làm được. Bộ điều khiển bỏ qua điều đó sẽ dao động. Bạn gặp lại câu này trong tour Nav2.
+Với $$\omega > 0$$ và $$v > 0$$, tâm quay tức thời nằm về phía bên trái robot một khoảng $$R$$. Lưu ý rằng khung vi sai không có thành phần vận tốc ngang $$v_y$$ (ràng buộc phi holonomic); mọi bộ điều khiển cố ra lệnh trượt ngang sẽ gây dao động — nguyên tắc này sẽ gặp lại khi cấu hình Nav2.
 
-Bán kính bánh $$r$$ chỉ xuất hiện khi bạn cần tốc độ trục hoặc số đếm encoder:
+Bán kính bánh $$r$$ chỉ xuất hiện khi quy đổi sang tốc độ góc trục bánh hoặc số xung encoder:
 
 $$
 \dot{\theta} = \frac{v_{\text{wheel}}}{r}
 $$
 
-Đừng đưa $$r$$ vào công thức $$v, \omega$$. Lỗi hay gặp là trộn vòng trên giây với mét trên giây trong cùng một biến.
+Không đưa $$r$$ vào phương trình tính $$v, \omega$$ để tránh nhầm lẫn giữa đơn vị vòng/giây (hoặc rad/s) và m/s trong cùng một biến.
 
-Trục joystick không phải mét trên giây. Chọn thang có chủ đích, ví dụ cần đầy về trước là $$v = 0,3$$ m/s và cần yaw đầy là $$\omega = 1,0$$ rad/s, rồi viết thang đó cạnh phương trình. Số nguyên −100…100 của bài 08-01 là thang thứ ba. Một hàm đổi m/s của vành bánh sang số nguyên đó sau động học nghịch, dùng tốc độ bạn đã thấy ở PWM 100 trong bài quay chương 07. Đừng giấu thang trong câu “thấy hợp thì thôi.”
+Cần phân biệt rõ ba thang giá trị: tín hiệu trục joystick (không có đơn vị m/s) phải được quy đổi có chủ đích — ví dụ đẩy hết cần tiến tương ứng $$v = 0,3$$ m/s và gạt hết cần quay tương ứng $$\omega = 1,0$$ rad/s — và ghi chú rõ bên cạnh phương trình. Sau khi qua động học nghịch ra m/s ở vành bánh, một hàm quy đổi riêng sẽ ánh xạ sang thang số nguyên −100…100 của Bài 08-01 (dựa trên tốc độ đo thực tế ở Chương 07), tránh đặt hệ số cảm tính.
 
 ## Ví dụ làm từng bước
 
-Đo thước: vết tiếp xúc đến vết tiếp xúc, $$L = 0,16$$ m. Bán kính bánh $$r = 0,033$$ m, chỉ dùng ở cuối. Lệnh: $$v = 0,20$$ m/s, $$\omega = 0,50$$ rad/s (cua trái nhẹ).
+Đo trực tiếp giữa hai tâm vết tiếp xúc được $$L = 0,16$$ m và bán kính bánh $$r = 0,033$$ m. Xét lệnh rẽ trái nhẹ với $$v = 0,20$$ m/s và $$\omega = 0,50$$ rad/s:
 
 $$
 \frac{L}{2} = 0,08
@@ -85,7 +85,7 @@ $$
 v_L = 0,20 - 0,50 \times 0,08 = 0,16 \text{ m/s}
 $$
 
-Kiểm tra:
+Kiểm tra ngược lại bằng động học thuận:
 
 $$
 v = \frac{0,24 + 0,16}{2} = 0,20
@@ -95,15 +95,15 @@ $$
 \omega = \frac{0,24 - 0,16}{0,16} = 0,50
 $$
 
-Bán kính $$R = 0,20 / 0,50 = 0,40$$ m. Trên sàn, một mẩu băng dính ở tâm hình học của trục nên đi vòng tròn bán kính khoảng 0,40 m. Lốp phải đi vòng lớn hơn lốp trái, nên nó nhanh hơn.
+Bán kính quỹ đạo là $$R = 0,20 / 0,50 = 0,40$$ m. Trên mặt sàn, trung điểm trục bánh sẽ vẽ cung tròn bán kính khoảng 0,40 m vì bánh phải chạy trên vòng ngoài lớn hơn nên có tốc độ cao hơn bánh trái.
 
-Tốc độ trục bánh phải, nếu PID cần:
+Nếu vòng PID cần vận tốc góc của trục bánh phải:
 
 $$
 \dot{\theta}_R = \frac{0,24}{0,033} \approx 7,27 \text{ rad/s}
 $$
 
-Python để lát nữa dán vào cầu nối:
+Đoạn mã Python sau có thể dùng trực tiếp trong node cầu nối Chương 10:
 
 ```python
 def wheel_speeds(v: float, omega: float, track: float) -> tuple[float, float]:
@@ -116,11 +116,11 @@ def body_from_wheels(v_l: float, v_r: float, track: float) -> tuple[float, float
 assert abs(body_from_wheels(*wheel_speeds(0.2, 0.5, 0.16), 0.16)[1] - 0.5) < 1e-9
 ```
 
-Quay tại chỗ, $$v = 0$$, $$\omega = 1,0$$, $$L = 0,16$$: $$v_R = 0,08$$, $$v_L = -0,08$$. Nếu cả hai số đều dương, bạn đã cộng $$\omega L$$ vào cả hai bánh thay vì tách dấu.
+Kiểm tra trường hợp xoay tại chỗ với $$v = 0$$, $$\omega = 1,0$$ rad/s và $$L = 0,16$$ m: ta được $$v_R = 0,08$$ m/s và $$v_L = -0,08$$ m/s. Nếu cả hai giá trị đều dương thì dấu cộng/trừ trong công thức đang bị sai.
 
 ## Từ số đếm encoder tới tư thế
 
-Động học ở trên dùng tốc độ vành. Encoder đưa số đếm. Gọi $N$ là số đếm mỗi vòng trục ra, $r$ là bán kính lăn tính bằng mét, $\Delta c_L$ và $\Delta c_R$ là số đếm mới trong một nhịp (có dấu):
+Các phương trình trên viết theo vận tốc vành bánh, còn cảm biến encoder trả về số xung đếm. Gọi $N$ là số xung trên mỗi vòng trục bánh, $r$ là bán kính lăn (mét), $\Delta c_L$ và $\Delta c_R$ là độ biến thiên số xung có dấu trong một chu kỳ cập nhật:
 
 $$
 \Delta s_L = \frac{2\pi r}{N}\Delta c_L, \qquad
@@ -132,7 +132,7 @@ $$
 \Delta \psi = \frac{\Delta s_R - \Delta s_L}{L}
 $$
 
-Trong nhịp đó xe đi trên cung tròn nếu hai bánh giữ tốc độ. Hướng dùng để chiếu cung xuống mặt phẳng là hướng ở **giữa** nhịp, không phải hướng lúc bắt đầu nhịp:
+Trong mỗi chu kỳ ngắn, quỹ đạo xe xấp xỉ một cung tròn. Để giảm sai số rời rạc hóa, ta chiếu quãng đường $\Delta s$ theo hướng ở **giữa** chu kỳ (phương pháp điểm giữa — midpoint) thay vì hướng ở đầu chu kỳ:
 
 $$
 x \leftarrow x + \Delta s \cos\left(\psi + \frac{\Delta\psi}{2}\right)
@@ -146,15 +146,15 @@ $$
 \psi \leftarrow \psi + \Delta\psi
 $$
 
-Chỉ dùng $\psi$ đầu nhịp thì mỗi cú quay bị tính trễ nửa bước. Đi thẳng thì $\Delta\psi = 0$, hai cách trùng. Quay tại chỗ thì $\Delta s = 0$, $x$ và $y$ đứng yên, chỉ $\psi$ đổi. Đó là hai ca mà phép điểm giữa chính xác từng milimét nếu số đếm không bị làm tròn.
+Nếu chỉ dùng góc $\psi$ đầu chu kỳ, mỗi đoạn quay sẽ bị trễ pha nửa bước. Khi đi thẳng ($\Delta\psi = 0$) hai cách cho kết quả giống nhau; khi xoay tại chỗ ($\Delta s = 0$) tọa độ $x, y$ đứng yên và chỉ góc $\psi$ thay đổi.
 
-Ví dụ khóa học: $r = 0{,}033$ m, $L = 0{,}16$ m, $N = 1440$. Mỗi đếm là
+Xét ví dụ chuẩn với $r = 0{,}033$ m, $L = 0{,}16$ m và $N = 1440$ xung/vòng. Mỗi xung tương ứng quãng đường:
 
 $$
 \frac{2\pi \cdot 0{,}033}{1440} \approx 1{,}440 \times 10^{-4}~\mathrm{m}
 $$
 
-Một mét đi thẳng, hai bánh cùng chiều, cần khoảng 6945 đếm mỗi bánh. Quay trái $\pi/2$ tại chỗ cần khoảng 873 đếm, bánh phải dương và bánh trái âm, vì cung của mỗi bánh là $(L/2)\cdot(\pi/2)$. Đi 1 m thẳng, quay trái đúng góc đó, rồi đi thêm 0,5 m: tư thế cuối gần $(1{,}00~\mathrm{m},\ 0{,}50~\mathrm{m},\ \pi/2)$. Phần lệch nhỏ hơn một milimét trên hình là do làm tròn số đếm về số nguyên trước khi chia nhịp, không phải do công thức.
+Để đi thẳng 1 m, mỗi bánh quay khoảng 6945 xung cùng chiều. Để xoay trái tại chỗ một góc $\pi/2$, mỗi bánh đi cung dài $(L/2)\cdot(\pi/2)$, tương ứng khoảng 873 xung (bánh phải dương, bánh trái âm). Nếu robot đi thẳng 1 m, xoay trái $\pi/2$ rồi đi tiếp 0,5 m, tư thế cuối sẽ rất gần $(1{,}00~\mathrm{m},\ 0{,}50~\mathrm{m},\ \pi/2)$ (sai lệch dưới 1 mm chỉ do làm tròn số xung nguyên).
 
 ![Đường odometry: thẳng, quay trái, thẳng]({{ site.imgurl }}/generated/ch08_odom_path.png)
 
@@ -193,17 +193,17 @@ assert abs(psi - math.pi / 2) < 0.02
 print(round(x, 4), round(y, 4), round(psi, 4))
 ```
 
-`print` gần `1.0 0.5 1.5708`. Nếu $y$ ra âm, bạn đã đảo trái và phải trong lúc quay.
+Kết quả in ra phải xấp xỉ `1.0 0.5 1.5708`. Nếu giá trị $y$ bị âm, bạn đã đảo nhầm bánh trái và bánh phải khi quay.
 
-Hàm này là thân của message `nav_msgs/Odometry` sau này: $x$, $y$, yaw đổi thành quaternion bài toán TF, và vận tốc lấy $\Delta s / \Delta t$, $\Delta\psi / \Delta t$. Đừng nhét số đếm thô vào ô `linear.x`.
+Hàm trên chính là phần lõi tạo nên thông điệp `nav_msgs/Odometry` sau này: $x, y$ và góc yaw (chuyển sang quaternion theo Bài 08-00) điền vào trường tư thế, còn $\Delta s / \Delta t$ và $\Delta\psi / \Delta t$ điền vào trường vận tốc — tuyệt đối không ghi trực tiếp số xung thô vào `linear.x`.
 
 ## Lab
 
-1. Đặt robot lên bàn, bánh trên không hoặc trên giá. Đo $$L$$ ba lần và ghi trung bình theo mét.
-2. Đánh dấu lốp bằng phấn. Ra lệnh hai bánh cùng tốc độ trong hai giây và xác nhận cả hai dấu chạy về trước. Việc này chốt dấu $$v_L$$ và $$v_R$$ trong firmware.
-3. Ra lệnh quay tại chỗ ở trên với PWM thấp (ánh xạ 0,08 m/s sang độ rộng xung mà chương 07 gọi là “tiến chậm”). Bánh trái phải quay lùi.
-4. Tùy chọn trên sàn, chỗ trống, tốc độ chậm: chạy $$v = 0,2$$, $$\omega = 0,5$$ một phần tư vòng và so bán kính đo thước với 0,40 m đã nhân theo $$L$$ thật của bạn. Tính lại $$R = v/\omega$$ bằng số của bạn trước khi cho chạy.
-5. Cất hàm và $$L$$ đã đo trong cùng file bạn sẽ import từ cầu nối chương 10.
+1. Đặt robot trên bàn (kê bánh trên không hoặc trên giá đỡ), đo khổ vết $$L$$ ba lần và ghi giá trị trung bình theo đơn vị mét.
+2. Đánh dấu một điểm trên mỗi lốp bằng phấn hoặc băng dính. Gửi lệnh cùng tốc độ cho cả hai bánh trong 2 giây để xác nhận cả hai dấu đều quay tiến, chốt chắc dấu của $$v_L$$ và $$v_R$$ trong firmware.
+3. Gửi lệnh xoay trái tại chỗ ở mức PWM thấp (tương ứng mức “tiến chậm” từ Chương 07) và xác nhận bánh phải quay tiến, bánh trái quay lùi.
+4. (Tùy chọn trên sàn trống, tốc độ chậm): chạy lệnh $$v = 0,2$$ m/s, $$\omega = 0,5$$ rad/s khoảng một phần tư vòng và so sánh bán kính thực đo bằng thước với giá trị dự đoán $$R = v/\omega$$ tính theo $$L$$ thực tế của xe bạn.
+5. Lưu hàm động học cùng giá trị $$L$$ đo được vào cùng một tệp Python để sẵn sàng import cho cầu nối ở Chương 10.
 
 **Ghi chú mong đợi**
 
@@ -214,7 +214,7 @@ v=0, w>0: phải tiến, trái lùi
 R dự đoán = 0.40 m, R đo = 0.45 m  (trượt, đừng "sửa" bằng hệ số ngẫu nhiên)
 ```
 
-Sai bán kính khoảng 10 phần trăm trên thảm là trượt và miết, không phải công thức hỏng. Bánh trái ngược chiều là sai dấu.
+Sai lệch bán kính khoảng 10% trên nền thảm là do trượt lốp, không phải lỗi công thức; nhưng nếu bánh trái quay sai chiều thì chắc chắn là lỗi dấu.
 
 **Khi hỏng thì thường vì**
 
@@ -228,24 +228,24 @@ Sai bán kính khoảng 10 phần trăm trên thảm là trượt và miết, kh
 
 ## Mua ở Việt Nam
 
-Không có linh kiện mới. Thước dây 3 m ở quầy văn phòng phẩm là đủ (khoảng 15.000–40.000 đồng trên Shopee, từ khóa `thước dây 3m`). Lốp méo hoặc mút bị bẹp thì thay cả cặp để $$r$$ khớp: tìm `bánh xe robot cao su 65mm`, khoảng 20.000–60.000 đồng mỗi bánh. Mua hai bánh cùng lúc. Trộn hai đường kính là một lỗi động học giả.
+Bài này không cần mua thêm linh kiện điện tử; một thước dây 3 m (tìm `thước dây 3m`, khoảng 15.000–40.000 đồng trên Shopee) là đủ. Nếu lốp bị méo hoặc xẹp không đều, nên thay đồng bộ cả cặp để bán kính $$r$$ khớp nhau (tìm `bánh xe robot cao su 65mm`, khoảng 20.000–60.000 đồng/chiếc). Không trộn hai lốp khác đường kính trên cùng một trục.
 
 ## Video tham khảo
 
-- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Từ vận tốc hai bánh ra vận tốc tiến và vận tốc góc. Đúng cặp công thức bài suy ra.
-- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Cộng từng bước encoder thành x, y, yaw. Video dùng hình học; bài dùng số đếm nguyên.
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Chuyển đổi từ vận tốc hai bánh sang vận tốc tiến và vận tốc góc — đúng cặp phương trình trong bài.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Tích phân từng bước từ số đo bánh xe thành tư thế $(x, y, \psi)$.
 
 ## Bài tập
 
-1. Khẩu độ của bạn là 0,20 m. Joystick xin $$v = 0$$, $$\omega = -0,8$$ rad/s. Tính $$v_L$$, $$v_R$$ và gọi tên cú cua. Gợi ý: bánh phải âm, bánh trái dương, cua phải (yaw âm).
-2. Cả hai bánh 0,3 m/s. $$v$$ và $$\omega$$ là bao nhiêu? Gợi ý: $$v = 0,3$$, $$\omega = 0$$, không phụ thuộc $$L$$.
-3. Vì sao không có cặp $$v_L, v_R$$ nào thỏa $$v_x = 0$$, $$v_y = 0,2$$, $$\omega = 0$$? Gợi ý: cả hai công thức chỉ tạo chuyển động dọc $$x$$ và quay. $$v_y$$ đồng nhất bằng 0.
-4. Bạn đo $$L = 15,5$$ cm rồi gõ `0.155` ở một file và `15.5` ở cầu nối. Triệu chứng nào hiện ra ở $$R$$? Gợi ý: bán kính sai 100 lần, trông như “robot quay tại chỗ dù lệnh là gì.”
-5. Hàm này đứng chỗ nào so với PID? Gợi ý: Twist → hàm này → hai setpoint m/s → hai vòng PID → hai PWM. Bỏ PID nghĩa là những số m/s chỉ là hy vọng.
+1. Khổ vết đo được là 0,20 m và lệnh joystick yêu cầu $$v = 0$$, $$\omega = -0,8$$ rad/s. Tính $$v_L$$, $$v_R$$ và gọi tên chuyển động. Gợi ý: bánh phải âm, bánh trái dương — robot xoay phải tại chỗ (yaw âm).
+2. Cả hai bánh đều chạy ở 0,3 m/s. Tính $$v$$ và $$\omega$$. Gợi ý: $$v = 0,3$$ m/s, $$\omega = 0$$ rad/s, không phụ thuộc vào $$L$$.
+3. Vì sao không tồn tại cặp $$(v_L, v_R)$$ nào thỏa mãn $$v_x = 0$$, $$v_y = 0,2$$ m/s và $$\omega = 0$$? Gợi ý: cấu trúc bánh vi sai chỉ tạo ra chuyển động dọc trục $$x$$ và quay quanh tâm, nên $$v_y$$ luôn bằng 0.
+4. Bạn đo $$L = 15,5$$ cm nhưng nhập `0.155` ở một tệp và nhầm thành `15.5` ở node cầu nối. Hiện tượng gì sẽ xảy ra với bán kính quay $$R$$? Gợi ý: bán kính quay thực tế nhỏ đi 100 lần (sai lệch 100 lần), khiến robot gần như xoay tại chỗ với hầu hết các lệnh rẽ.
+5. Hàm động học này nằm ở vị trí nào trong chuỗi xử lý cùng với PID? Gợi ý: `Twist` → hàm động học nghịch → hai tốc độ đặt (m/s) → hai vòng PID → hai mức PWM. Nếu bỏ qua PID, các giá trị m/s đầu ra chỉ mang tính ước lượng.
 
 ## Đọc thêm
 
 - [REP-103, đơn vị và quy ước hệ tọa độ](https://www.ros.org/reps/rep-0103.html).
-- [REP-105](https://www.ros.org/reps/rep-0105.html) về `base_link`, hệ mà các phương trình này sống trong đó.
-- [Modern Robotics, chương 13](https://hades.mech.northwestern.edu/index.php/Modern_Robotics) (bản mở) nếu bạn muốn chương robot bánh sau khi mô hình hai dòng bắt đầu thấy nhỏ.
-- `geometry_msgs/Twist` trong [tài liệu message Jazzy](https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Twist.html): `linear.x` là $$v$$, `angular.z` là $$\omega$$, bốn trường còn lại gần 0 trên khung này.
+- [REP-105](https://www.ros.org/reps/rep-0105.html) về hệ tọa độ `base_link` nơi các phương trình này được định nghĩa.
+- [Modern Robotics, chương 13](https://hades.mech.northwestern.edu/index.php/Modern_Robotics) (bản mở) — tài liệu chuyên sâu về động học robot bánh xe.
+- `geometry_msgs/Twist` trong [tài liệu message Jazzy](https://docs.ros.org/en/jazzy/p/geometry_msgs/msg/Twist.html): `linear.x` là $$v$$, `angular.z` là $$\omega$$, bốn trường còn lại bằng 0 trên khung vi sai.

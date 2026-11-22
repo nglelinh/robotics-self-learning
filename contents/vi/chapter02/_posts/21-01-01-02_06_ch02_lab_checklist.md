@@ -12,81 +12,71 @@ draft: false
 
 ## Mục tiêu
 
-Bạn chỉ khép chương 02 bằng chứng cứ chỉ được bằng tay. Bạn ghi toolchain và chuỗi phiên bản của nó. Bạn cho thấy LED onboard nhấp theo một chu kỳ bạn đã chọn, và bạn dán nhịp tim serial thay vì kể lại. Bạn hoàn thành thẻ chân cho đúng board trên bàn: GPIO nào là LED, và những chân nào là ngõ ra an toàn. Bạn viết hai số đo ray, 3,3 V và 5 V hoặc VBUS. Bạn thêm một câu gọi tên những chân motor chưa được dùng, VM và pin. Nếu một ô trượt, bạn mở lại bài đã dạy nó, thay vì mua một board thứ hai.
+Bài kiểm tra này dùng để chốt lại toàn bộ chương 02 dựa trên các bằng chứng thực tế có thể kiểm chứng trực tiếp. Bạn cần ghi rõ bộ công cụ (toolchain) cùng số phiên bản, xác nhận LED tích hợp nháy đúng chu kỳ đã chọn, dán đoạn log nhịp tim serial thay vì chỉ mô tả bằng lời, hoàn thiện thẻ sơ đồ chân cho đúng bo mạch trên bàn (gồm chân LED và chân ngõ ra an toàn), ghi chính xác hai giá trị đo đường nguồn (3,3 V và 5 V/VBUS), và ghi rõ câu xác nhận chưa dùng các chân nguồn động cơ (VM và pin). Nếu có mục nào chưa đạt, hãy quay lại bài học tương ứng để xử lý thay vì vội mua thêm bo mạch mới.
 
 ## Cần gì trước khi học
 
-Bài 1 đến bài 5 là chứng cứ trang này tiêu thụ. Bạn cần câu quyết định (bo mạch ESP32 hoặc một Pico đã gọi đúng tên), toolchain khớp nó, log nhịp tim hoặc một chỗ trống thành thật, và thẻ chân. Đồng hồ là bắt buộc cho ô đo ray. Giỏ đầy đủ vẫn là chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Đọc lại câu bánh nhấc lên trong sketch nhịp tim để checklist này không “đạt” một robot đã có thể lăn.
+Bài này tổng hợp kết quả từ bài 1 đến bài 5: câu quyết định chọn vi điều khiển (ESP32 hoặc đúng phiên bản Pico), bộ công cụ tương ứng, log nhịp tim (hoặc ghi rõ đang chờ nếu chưa có mạch) và thẻ sơ đồ chân. Bạn cần có đồng hồ vạn năng cho mục đo nguồn. Danh sách linh kiện đầy đủ nằm ở chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Cần đọc lại quy tắc nhấc bánh khỏi bàn từ bài nhịp tim để bảo đảm không đánh dấu đạt khi robot đang có nguy cơ tự lăn.
 
 ## Vì sao bài này gắn với Capstone A
 
-Chương 07 nhờ vi điều khiển này teleop một đế vi sai: hai kênh PWM hướng tới TB6612, pin trên VM, và bánh ở trên không cho đến khi bạn sẵn sàng. Nếu lệnh ngừng khoảng 300 ms, cả hai duty về không. Chương đó giả định các ô trên trang này đã qua với sổ tay. Một sinh viên tới nơi vẫn chưa chắc chân nào là mass sẽ sửa timeout trong lúc chip đang reset. Chương 08 có thể mang cùng teleop đó qua Wi-Fi trên ESP32, và nó sẵn sàng vận chuyển một luồng từ board đang brownout. Đồ thị lúc đó hiện một liên kết “lúc được lúc không.” Cái lúc không là một lần đo bị bỏ, hoặc một sợi VM lẽ ra không được gắn. Checklist này là khoảng dừng để phần mềm sau không giấu một vấn đề điện.
+Chương 07 sử dụng vi điều khiển này để chạy chương trình điều khiển từ xa (teleop) cho xe vi sai với hai kênh PWM nối tới TB6612, nguồn pin cấp vào VM, cơ chế tự ngắt sau khoảng 300 ms mất lệnh và quy tắc nhấc bánh khi thử nghiệm. Chương 07 giả định mọi mục trong danh sách kiểm tra này đã hoàn tất. Nếu bước sang chương sau mà vẫn chưa xác định chắc chắn chân mass hay độ ổn định nguồn, bạn sẽ mất thời gian sửa mã nguồn timeout trong khi lỗi thật sự là chip đang bị reset. Đến chương 08, kết nối Wi-Fi trên ESP32 càng dễ lộ lỗi nếu nguồn sụt áp (brownout), biểu hiện như tín hiệu mạng chập chờn. Danh sách kiểm tra này giúp loại bỏ các lỗi phần cứng cơ bản trước khi đi sâu vào phần mềm.
 
-## Sáu ô, mỗi ô một tín vật
+## Sáu mục kiểm tra và bằng chứng tương ứng
 
-Một ô là một điều kiện có chứng cứ, không phải một chủ đề bạn nhớ đã đọc. Chương 02 có sáu ô. Mỗi ô hoặc đạt với một con trỏ vào `lab-notes.md`, hoặc còn mở. Nửa ô (“gần được”) là ô đang mở.
+Mỗi mục trong danh sách đòi hỏi bằng chứng cụ thể ghi trong `lab-notes.md`, không phải việc bạn nhớ mình đã đọc qua lý thuyết. Chương 02 gồm sáu mục; mỗi mục chỉ có hai trạng thái: **ĐẠT** (kèm bằng chứng rõ ràng) hoặc **MỞ** (chưa hoàn thành). Không có trạng thái trung gian như "gần đạt".
 
-Ô toolchain là một phiên bản bạn đã viết ra. Arduino IDE: phiên bản trong hộp About, cộng phiên bản gói `esp32` đã cài trong Boards Manager. PlatformIO: chuỗi từ `pio --version`, và dòng `board = esp32dev` vẫn còn trong `platformio.ini`. Pico: phiên bản Thonny hoặc `mpremote`, và tên file UF2, kể cả đó là `RPI_PICO` hay `RPI_PICO2`. “Tôi đã cài cái gì đó” không phải phiên bản.
-
-Ô nhấp là một LED onboard bạn đã nhìn, ở một chu kỳ bạn chọn và viết thành số. Chu kỳ của lab nhịp tim là 500 ms, đảo mỗi 250 ms, 2 Hz. Nếu bạn cố ý chọn chu kỳ khác, viết số đó. LED nguồn không được tính. `LED_BUILTIN` không được tính cho đến khi đã đối chiếu silk. Sổ ghi GPIO hoặc bí danh Pico (`"LED"` hoặc 25).
-
-Ô serial là bản dán nhịp tim. Mười dòng, mốc mili giây tăng khoảng bằng chu kỳ bạn đã khai, một banner, không có dòng boot thứ hai trong khối. Các trường là thời gian và trạng thái. Câu “đếm ổn” thì trượt, vì lần so brownout sau này cần đúng cái cầu thang đó. Baud trong sổ là 115200 nếu bạn đang dùng sketch ESP32 của chương này. Monitor còn để 9600 là ô trượt dù LED vẫn nhấp.
-
-Ô thẻ chân là một bản vẽ hoặc một bảng markdown cho board bạn đang có, không phải cho một ảnh ngẫu nhiên. Nó ghi GPIO của LED, ít nhất một ngõ ra an toàn bạn đã kiểm (không phải chân strap bạn định kéo mạnh, không phải chân UART mà chip USB đang dùng, không phải chân nguồn), và các mass. Nhãn chép từ một bản clone khác thì trượt khi chúng lệch header của bạn. Trên Pico W, danh sách ngõ ra an toàn không được gọi GPIO 25 là LED onboard.
-
-Ô đồng hồ là hai con số, chỉ USB, không có pin. Khoảng 4,7 V đến 5,1 V trên chân 5 V hoặc trên VBUS, và khoảng 3,25 V đến 3,35 V trên 3V3. Viết các số. 4,82 V sau diode là một lần đạt khi các chữ số còn nhìn thấy. “5 V ổn” là trượt. Chân 3V3 ở 4,9 V là rút điện, không phải đạt.
-
-Ô chân motor là một câu gọi tên thứ bạn chưa dùng. Câu đạt: “VM trên TB6612 và pin 2S vẫn để hở. Pin không được chạm GPIO, 3V3, 5V/VIN, VSYS, hay VBUS.” Bánh nhấc lên thuộc cùng ghi chú đó. Ô ghi “motor để sau” mà không gọi tên VM và pin thì vẫn mở.
+1. **Bộ công cụ (Toolchain):** ghi rõ số phiên bản cụ thể. Với Arduino IDE: phiên bản trong hộp thoại About kèm phiên bản gói `esp32` trong Boards Manager. Với PlatformIO: kết quả lệnh `pio --version` cùng xác nhận dòng `board = esp32dev` trong `platformio.ini`. Với Pico: phiên bản Thonny hoặc `mpremote` kèm tên tệp UF2 (nêu rõ `RPI_PICO`, `RPI_PICO2` hay bản W). Ghi chung chung "đã cài rồi" là không đạt.
+2. **Nháy LED tích hợp:** xác nhận trực quan LED tích hợp nháy đúng chu kỳ đã chọn (bài nhịp tim là 500 ms, đảo mỗi 250 ms, tức 2 Hz; nếu chọn chu kỳ khác thì ghi rõ con số đó). Đèn báo nguồn không được tính, và `LED_BUILTIN` chỉ hợp lệ sau khi đã đối chiếu với nhãn trên mạch. Sổ tay cần ghi rõ số chân GPIO hoặc bí danh Pico (`"LED"` hay `25`).
+3. **Log nhịp tim serial:** dán trực tiếp 10 dòng log từ lần chạy thật, có duy nhất một dòng tiêu đề `heartbeat`, mốc mili giây tăng đều xấp xỉ chu kỳ khai báo, không bị chèn dòng khởi động lại ở giữa. Mỗi dòng thể hiện thời gian và trạng thái. Ghi "đếm ổn" sẽ không đạt vì sau này cần đúng dãy số đó để đối chiếu khi kiểm tra sụt áp. Với ESP32, tốc độ baud phải ghi 115200; để monitor ở 9600 là chưa đạt dù đèn vẫn nháy.
+4. **Thẻ sơ đồ chân:** bản vẽ hoặc bảng Markdown lập cho chính bo mạch đang có (không chép từ ảnh của biến thể khác), ghi rõ chân LED, các chân `GND` và ít nhất một chân ngõ ra an toàn (không phải chân strapping đang cần kéo mức đặc biệt, không phải chân UART của chip USB-serial và không phải chân nguồn). Trên Pico W, không được ghi GPIO 25 là LED tích hợp.
+5. **Đo nguồn bằng đồng hồ (chỉ cắm USB, không nối pin):** ghi chính xác hai con số thực đo — khoảng 4,7 V đến 5,1 V trên đường 5 V hoặc `VBUS`, và khoảng 3,25 V đến 3,35 V trên đường `3V3` (ví dụ 4,82 V sau diode là đạt nếu ghi rõ số liệu; viết "5 V ổn" là không đạt). Nếu chân `3V3` đo được 4,9 V, phải rút cáp ngay để kiểm tra vì mạch đang bị lỗi nguồn.
+6. **Xác nhận chân động cơ chưa sử dụng:** ghi rõ câu xác nhận: "Chân VM trên TB6612 và pin 2S vẫn để hở. Pin không được chạm vào GPIO, 3V3, 5V/VIN, VSYS hay VBUS", kèm quy tắc nhấc bánh khỏi bàn. Ghi chung chung "động cơ để sau" mà không gọi tên cụ thể VM và pin là chưa đạt.
 
 ![Checklist dừng trước nguồn motor]({{ site.imgurl }}/generated/power_order.png)
 
-Hình là chuỗi mà các ô đang giữ. USB, một lần nhấp, và một nhịp tim serial là bằng chứng ray logic còn sống. Driver và pin nằm bên phải một vạch chương này không bước qua.
+Sơ đồ nhắc lại giới hạn của chương 02: nguồn USB, nháy LED và nhịp tim serial xác nhận phần logic hoạt động ổn định; toàn bộ phần driver và pin nằm ở phía bên phải vạch ngăn cách và chưa được nối ở chương này.
 
-Thứ tự có giá. Thứ tự đưa lên của bài bản đồ là USB, LED onboard, serial 115200, một nút, PWM trên chân không tải, rồi mới driver và pin. Sáu ô của chương này dừng trước driver đó. PWM không tải có thể là bài tập sau. Nó không phải giấy phép kẹp motor vào GPIO vì checklist đã xong.
+Trình tự khởi chạy ở bài 1 gồm: nhận USB, nháy LED tích hợp, serial 115200 baud, đọc nút nhấn, xuất PWM không tải, sau đó mới tới driver và pin. Sáu mục trên dừng lại trước bước đấu driver; ngay cả khi hoàn thành danh sách này, vẫn không được nối trực tiếp động cơ vào chân GPIO.
 
-Nếu kiện hàng chưa tới, bạn được ghi phiên bản toolchain và một thẻ chân canh từ đúng listing đã trả tiền. Để trống nhấp, serial, và hai điện áp, ghi chữ đang chờ. Đừng dán serial tưởng tượng. Một trang khô là cách dùng thời gian chờ hàng. Nó không phải chương đã đạt.
+Nếu linh kiện vẫn đang trên đường giao, bạn có thể chuẩn bị trước phiên bản bộ công cụ và lập trước thẻ sơ đồ chân dựa trên đúng mẫu sản phẩm đã đặt, còn các mục nháy LED, log serial và đo điện áp ghi rõ trạng thái `đang chờ`. Không được điền số liệu giả định. Đây là bước chuẩn bị trước khi có phần cứng, chưa tính là đã hoàn thành chương.
 
-## Khi một ô trượt
+## Cách xử lý khi có mục chưa đạt
 
-Ô trượt thì mở lại bài đã dạy phần chứng cứ còn thiếu.
+Khi một mục chưa đạt, hãy mở lại đúng bài học tương ứng để khắc phục:
 
-Không có chuỗi phiên bản: mở About, hoặc chạy `pio --version`, hoặc in implementation của MicroPython từ REPL, rồi viết chữ đó ra. Đó là bài toolchain, ESP32 hoặc Pico, tùy board.
+- **Thiếu phiên bản bộ công cụ:** mở hộp thoại About, chạy `pio --version` hoặc kiểm tra thông tin phiên bản MicroPython trong REPL rồi ghi lại (xem lại bài cài đặt ESP32 hoặc Pico).
+- **Đèn không nháy hoặc sai chân:** xem lại bài nạp ESP32 hoặc bài nạp UF2 cho Pico, sau đó xem bài nhịp tim. Đối chiếu nhãn in trên mạch vì GPIO 2 không áp dụng cho mọi bản mạch, còn Pico W phải dùng `Pin("LED")`.
+- **Mất serial, ký tự rác hoặc lặp dòng tiêu đề:** xem bài nhịp tim. Đặt đúng 115200 baud; nếu tiêu đề lặp lại khi không có động cơ, đổi cáp USB và tháo các dây nối ngoài trước khi sửa mã nguồn. Nếu còn nối dây VM, rút ngay để tránh sụt áp.
+- **Thiếu thẻ sơ đồ chân hoặc sai biến thể:** xem bài sơ đồ chân, vẽ lại đủ đường 5 V/VBUS, 3V3, GND, chân LED và một chân ngõ ra an toàn.
+- **Thiếu số đo điện áp hoặc chỉ ghi "ổn":** thực hiện phép đo khi chỉ cắm USB theo bài sơ đồ chân. Nếu `3V3` lệch xa 3,3 V, dừng lại kiểm tra và tuyệt đối không gắn pin.
+- **Thiếu câu xác nhận về động cơ:** bổ sung ngay theo ví dụ mẫu ở bài sơ đồ chân, nhấn mạnh pin 2S chỉ nối vào VM, không chạm hàng chân vi điều khiển.
 
-Không nhấp, hoặc nhấp trên một chân chưa nhận dạng: quay lại bài nạp ESP32 hoặc bài UF2 của Pico, rồi tới bài nhịp tim. Đọc silk. GPIO 2 hay gặp trên DevKit V1 và sai trên board khác. Pico W dùng `Pin("LED")`, không dùng GPIO 25.
-
-Serial mất, thành rác, hoặc banner lặp: bài nhịp tim. Đặt 115200. Nếu banner lặp mà không có motor, đổi cáp và gỡ jumper trước khi viết lại câu in. Nếu VM vẫn đang nối, rút VM. Brownout đó không phải lỗi phần mềm.
-
-Thiếu thẻ chân, hoặc chép từ họ board kia: bài sơ đồ chân. Vẽ 5 V hoặc VBUS, 3V3, GND, chân LED, và một ngõ ra an toàn.
-
-Thiếu điện áp, hoặc viết “ổn”: bài sơ đồ chân, chỉ USB. Nếu 3V3 cách xa 3,3 V, dừng. Đừng gắn pin để biết thêm.
-
-Thiếu câu về motor: viết ngay, từ ví dụ đã làm của bài sơ đồ chân. Pin 2S được chạm VM. Nó không được chạm header của vi điều khiển.
-
-Mua ESP32 thứ hai vì một ô đang mở thường chỉ nhân đôi cùng một lỗi cáp. Hãy thay cáp chỉ sạc trước.
+Lưu ý: việc mua thêm một bo mạch ESP32 thứ hai khi có mục chưa đạt thường chỉ lặp lại đúng lỗi cáp ban đầu; hãy ưu tiên thay cáp chỉ sạc trước.
 
 ## Ví dụ đã làm
 
-Hai sổ, cả hai thành thật.
+Dưới đây là hai ví dụ ghi chép trung thực:
 
-Board của Hà tới từ tuần trước. Sổ ghi: Arduino IDE 2.3.2 với gói esp32 3.0.7; NodeMCU-32S; CH340 là `COM5`; LED onboard ở GPIO 2, đã đối silk, đảo mỗi 250 ms; mười dòng nhịp tim bước 498 ms đến 505 ms dưới một banner, monitor 115200; thẻ chân có 5V, 3V3, GND, LED GPIO 2, ngõ ra an toàn GPIO 4; đồng hồ 4,91 V và 3,31 V, chỉ USB; câu “VM và pin 2S để hở. Dương pin không chạm 5V, 3V3, hay bất kỳ GPIO nào.” Cả sáu ô đạt. Động cơ TT ở trong hộp. Bánh, khi đã có khung, được nhấc.
+Bo mạch của Hà đã giao từ tuần trước. Sổ ghi: Arduino IDE 2.3.2 kèm gói `esp32` 3.0.7; NodeMCU-32S dùng CH340 ở `COM5`; LED tích hợp tại GPIO 2 (đã đối chiếu nhãn mạch), đảo trạng thái mỗi 250 ms; 10 dòng nhịp tim bước nhảy từ 498 ms đến 505 ms dưới một dòng tiêu đề duy nhất ở 115200 baud; thẻ sơ đồ chân gồm 5V, 3V3, GND, LED GPIO 2 và ngõ ra an toàn GPIO 4; đo bằng đồng hồ khi chỉ cắm USB được 4,91 V và 3,31 V; kèm câu xác nhận "VM và pin 2S để hở, dương pin không chạm 5V, 3V3 hay bất kỳ GPIO nào." Cả sáu mục đều đạt, động cơ TT vẫn để trong hộp và quy tắc nhấc bánh đã được ghi nhận.
 
-Pico 2 của Khoa đang trên xe tải. Sổ ghi: đã cài Thonny 4.1.4, tên UF2 chép từ trang RPI_PICO2 để ảnh RP2040 không phải file sẽ được nạp, thẻ chân canh từ ảnh listing với VBUS, VSYS, 3V3, GND, LED GP25, ngõ ra an toàn GP16, và câu “không có 5 V trên chân GP. VM và pin không nằm trong kiện này.” Nhấp, serial, và hai điện áp là chữ `đang chờ`. Khoa không đánh dấu chương đã xong.
+Pico 2 của Khoa vẫn đang vận chuyển. Sổ ghi: đã cài Thonny 4.1.4, ghi sẵn tên tệp UF2 từ trang `RPI_PICO2` để tránh nạp nhầm bản RP2040, lập trước thẻ sơ đồ chân theo ảnh sản phẩm gồm VBUS, VSYS, 3V3, GND, LED GP25 và ngõ ra an toàn GP16, kèm ghi chú "không đưa 5 V vào chân GP; VM và pin không có trong kiện này." Các mục nháy LED, serial và đo điện áp ghi rõ `đang chờ`, và Khoa chưa đánh dấu hoàn thành chương.
 
-Một sổ thứ ba, bị loại, là sổ bài tập dùng.
+Một mẫu sổ thứ ba (chưa đạt) được dùng làm đề phân tích trong phần bài tập bên dưới.
 
 ## Lab
 
-Mở `lab-notes.md`. Tạo một mục ghi ngày và “cổng chương 02.” Với mỗi ô trong sáu ô, viết ĐẠT cộng chứng cứ, hoặc MỞ cộng bài bạn sẽ làm lại. Nếu chưa có board, đánh dấu nhấp, serial, và đồng hồ là đang chờ, bằng đúng những chữ đó. Đọc mục một lần. Ô nào không chỉ được bằng ngón tay — một chuỗi phiên bản, một dòng serial, một điện áp, một số chân, các chữ VM và pin — thì thành MỞ trước khi lưu.
+Mở `lab-notes.md`, tạo một mục mới ghi ngày thực hiện và tiêu đề "kiểm tra hoàn thành chương 02". Với từng mục trong sáu mục, ghi **ĐẠT** kèm bằng chứng cụ thể, hoặc **MỞ** kèm tên bài cần làm lại. Nếu chưa nhận được bo mạch, ghi rõ `đang chờ` cho các mục nháy LED, serial và đo nguồn. Kiểm tra lại toàn bộ một lượt: bất kỳ mục nào thiếu bằng chứng xác thực (số phiên bản, dòng log serial, số đo điện áp, số chân cụ thể, xác nhận về VM và pin) đều phải chuyển về trạng thái **MỞ** trước khi lưu.
 
-Chương đạt khi cả sáu ô ĐẠT, có câu bánh nhấc lên, không có motor nối. Lượt khô là toolchain, câu quyết định, và thẻ chân canh từ ảnh, với ba ô đo ghi rõ đang chờ. Không có trạng thái thứ ba tên là “gần đủ.”
+Chương 02 chỉ hoàn thành khi cả sáu mục đều **ĐẠT**, có ghi quy tắc nhấc bánh và chưa nối động cơ. Bản chuẩn bị trước khi có phần cứng phải ghi rõ ba mục đo kiểm ở trạng thái `đang chờ`.
 
 ## Video tham khảo
 
-- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Checklist chỉ đạt khi LED nhấp từ chương trình bạn nạp, không phải từ mạch có sẵn.
+- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Minh họa quy trình nạp để bảo đảm LED nháy từ chính chương trình bạn viết chứ không phải từ đèn báo nguồn có sẵn.
 
 ## Bài tập
 
-Dùng sổ giả này. Nó không phải một lần đạt.
+Xét mẫu ghi chép chưa đạt dưới đây:
 
 ```text
 Ngày: 23 Sep 2026
@@ -99,30 +89,30 @@ Ray: 5V ổn, 3.3 ổn
 Tiếp: PWM motor từ GPIO 2, sắp gắn pin
 ```
 
-1. Liệt kê mọi ô sổ này trượt, và tín vật còn thiếu của từng ô.
-2. Sketch nhịp tim gọi `Serial.begin(115200)`. Monitor ở 9600 hiện gì, và một thay đổi nào sửa được ô serial?
-3. “GPIO 2, hình như có nhấp” là chưa kiểm. Silk phải đúng điều gì thì GPIO 2 mới được là ô nhấp, và bạn viết gì nếu đèn ở chân khác?
-4. Viết lại dòng ray và dòng motor để hai ô đó có thể đạt. Đừng bịa điện áp bạn chưa đo. Dùng dạng ô yêu cầu, và đánh dấu số đang chờ nếu chưa dùng đồng hồ.
-5. Bạn mở lại bài nào trước, và vì sao một dev board thứ hai là món mua sai?
+1. Liệt kê tất cả các mục chưa đạt trong mẫu sổ trên và chỉ ra bằng chứng còn thiếu của từng mục.
+2. Chương trình nhịp tim đặt `Serial.begin(115200)`, còn monitor đang để 9600. Màn hình sẽ hiển thị gì, và cần thay đổi thông số nào để khắc phục?
+3. Ghi chú "GPIO 2, hình như có nhấp" chưa đạt yêu cầu kiểm chứng. Cần xác nhận điều gì trên bo mạch để công nhận GPIO 2, và phải ghi thế nào nếu đèn thực tế nằm ở chân khác?
+4. Viết lại hai dòng về đường nguồn và động cơ cho đúng định dạng yêu cầu mà không tự bịa số liệu chưa đo (dùng trạng thái đang chờ nếu chưa đo bằng đồng hồ).
+5. Với mẫu sổ trên, cần mở lại những bài học nào trước tiên, và vì sao mua thêm một bo mạch mới là cách xử lý sai?
 
 <details>
 <summary>Đáp án</summary>
 
-1. Toolchain: không có chuỗi phiên bản. Nhấp: “hình như” không phải chu kỳ đã chọn và không phải lần đối silk. Serial: không có dòng đã dán, và baud là 9600. Đồng hồ: “ổn” không phải hai con số. Chân motor: sổ định PWM motor từ GPIO 2 và gắn pin, tức là ngược với việc gọi tên VM và pin như những thứ chưa dùng. Thẻ chân vắng mặt hoàn toàn, nên ô ngõ ra an toàn cũng mở.
-2. Khung đầy rác hoặc những ký tự suýt là chữ, trong lúc LED vẫn có thể nhấp. Đặt monitor 115200. Đừng sửa sketch xuống 9600 cho khớp thói quen từ tutorial Uno.
-3. Silk hoặc sơ đồ hãng phải cho thấy LED onboard ở GPIO 2. Nhiều DevKit V1 thì đúng vậy. Một số board thì không. Nếu đèn ở chỗ khác, viết GPIO đó, nhìn nó nhấp đúng chu kỳ bạn chọn, và để GPIO 2 ra khỏi thẻ cho đến khi bạn biết nó là gì. `LED_BUILTIN` vẫn cần cùng một lần kiểm.
-4. Dòng ray đạt thì có chữ số, ví dụ “chỉ USB, chân 5V ____ V, chân 3V3 ____ V, pin chưa nối,” chỗ trống điền từ đồng hồ. Dòng motor đạt: “VM và pin 2S để hở. Pin không được chạm GPIO, 3V3, hay 5V/VIN.” GPIO 2 không phải chân motor.
-5. Mở bài nhịp tim trước nếu baud và bản dán còn thiếu là chỗ nghẽn, và bài sơ đồ chân cho các ray cùng câu VM. Board thứ hai lặp lại cùng những ghi chú còn thiếu. Nếu bản thân cổng không có, cáp chỉ sạc mới là món cần thay.
+1. Toàn bộ sáu mục đều chưa đạt: **Toolchain** thiếu số phiên bản IDE và gói `esp32`; **Nháy LED** ghi "hình như", thiếu chu kỳ và chưa đối chiếu nhãn mạch; **Serial** thiếu 10 dòng log dán kèm và sai tốc độ baud (9600); **Đo nguồn** chỉ ghi "ổn" thay vì hai số đo thực tế; **Chân động cơ** dự định xuất PWM động cơ thẳng từ GPIO 2 và gắn pin, trái ngược yêu cầu để hở VM và pin; **Thẻ sơ đồ chân** bị bỏ sót hoàn toàn nên mục ngõ ra an toàn cũng chưa đạt.
+2. Màn hình sẽ hiện toàn ký tự lỗi (rác) trong khi đèn LED vẫn có thể nháy bình thường. Chỉ cần chỉnh tốc độ Serial Monitor lên 115200 baud cho khớp chương trình, không hạ tốc độ trong mã nguồn xuống 9600.
+3. Nhãn in trên mạch hoặc sơ đồ hãng phải xác nhận LED tích hợp nối với GPIO 2 (phổ biến trên DevKit V1 nhưng không phải mọi mạch). Nếu đèn nằm ở chân khác, ghi đúng số chân GPIO đó, xác nhận đèn nháy theo chu kỳ đã chọn và không liệt kê GPIO 2 là chân LED; `LED_BUILTIN` cũng cần kiểm chứng tương tự.
+4. Dòng đo nguồn đúng định dạng: "chỉ USB, chân 5V ____ V, chân 3V3 ____ V, pin chưa nối (đang chờ đo đồng hồ)". Dòng động cơ đúng định dạng: "VM và pin 2S để hở; pin không chạm GPIO, 3V3 hay 5V/VIN; không điều khiển động cơ trực tiếp từ GPIO 2."
+5. Mở lại bài nhịp tim trước để sửa tốc độ baud và thu thập log, sau đó mở bài sơ đồ chân để đo đường nguồn và lập thẻ chân kèm ghi chú về VM. Mua bo mạch thứ hai không giải quyết được lỗi cấu hình và thiếu ghi chép; nếu không thấy cổng kết nối thì cần kiểm tra và thay cáp dữ liệu trước.
 
 </details>
 
 ## Mua ở Việt Nam
 
-Chỉ mua thứ một ô đang mở còn cần. Thiếu cáp dữ liệu: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Thiếu bộ não: [ESP32 NodeMCU-32S CH340, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker) hoặc [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32). [ESP32-S3-WROOM-1 giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif) là module trần và không khép ô toolchain. Đường Pico, giá đọc ngày 23 tháng 9 năm 2026 từ [trang tìm Pico](https://hshop.vn/search?q=raspberry+pi+pico): Pico 2 giá 195 000 ₫ ([trang sản phẩm](https://hshop.vn/mach-raspberry-pi-pico-2-rp2350)) và Pico 2 W giá 275 000 ₫ ([trang sản phẩm](https://hshop.vn/mach-raspberry-pi-pico-2-w-rp2350)). Shopee: [ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340), [Pico 2](https://shopee.vn/search?keyword=raspberry%20pi%20pico%202). [DevKitC-32U ở Thế Giới IC](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz) là trang kiểu board; xác nhận có USB. [IC Đây Rồi](https://icdayroi.com/) là quầy linh kiện. Đừng mua motor hay TB6612 để xong chương 02. Những dòng đó nằm trong [giỏ chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
+Chỉ mua bổ sung những món còn thiếu cho mục chưa đạt. Thiếu cáp dữ liệu: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Thiếu bo mạch chính: [ESP32 NodeMCU-32S CH340, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker) hoặc [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32) — không mua module trần [ESP32-S3-WROOM-1 giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif) vì không dùng làm bo mạch khởi đầu. Hướng Pico (giá ghi nhận ngày 23 tháng 9 năm 2026 từ [trang tìm Pico](https://hshop.vn/search?q=raspberry+pi+pico)): Pico 2 giá 195 000 ₫ ([trang sản phẩm](https://hshop.vn/mach-raspberry-pi-pico-2-rp2350)) và Pico 2 W giá 275 000 ₫ ([trang sản phẩm](https://hshop.vn/mach-raspberry-pi-pico-2-w-rp2350)). Tham khảo thêm trên Shopee: [ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340), [Pico 2](https://shopee.vn/search?keyword=raspberry%20pi%20pico%202). [DevKitC-32U ở Thế Giới IC](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz) là mẫu bo mạch phát triển (kiểm tra kỹ cổng USB); [IC Đây Rồi](https://icdayroi.com/) là cửa hàng linh kiện rời. Chưa cần mua động cơ hay TB6612 để hoàn thành chương 02; các món này nằm trong [giỏ hàng chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
 ## Đọc thêm
 
-- [PlatformIO `esp32dev`](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — id board mà ô toolchain ESP32 chờ theo mặc định.
-- [Cài arduino-esp32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — chỗ phiên bản gói trong sổ của bạn xuất phát.
-- [Trang tải MicroPython](https://micropython.org/download/) — tên file UF2 mà ô Pico phải ghi, RP2040 và RP2350 tách riêng.
-- [Datasheet ESP32](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — đối một “ngõ ra an toàn” với bảng điện trước khi tin pinout trên blog.
+- [PlatformIO `esp32dev`](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — mã bo mạch mặc định cho mục toolchain ESP32.
+- [Cài arduino-esp32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — nguồn cung cấp phiên bản gói phần mềm cần ghi vào sổ tay.
+- [Trang tải MicroPython](https://micropython.org/download/) — nơi tra cứu chính xác tên tệp UF2 riêng cho RP2040 và RP2350.
+- [Datasheet ESP32](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — tài liệu đối chiếu bảng đặc tính điện để chọn chân ngõ ra an toàn thay vì chỉ tin sơ đồ trên blog.

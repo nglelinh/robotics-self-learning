@@ -11,29 +11,29 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **90–120 phút**, kể cả bài lab bảng tính. Các mức giá dưới đây lấy từ trang sản phẩm công khai của Hshop ngày **23 tháng 9 năm 2026**. Giá sẽ đổi. Coi mỗi con số là một lần đọc, rồi mở lại listing trước khi chuyển khoản.
+Thời lượng dự kiến là **90–120 phút**, bao gồm cả phần thực hành lập bảng tính. Các mức giá trong bài được ghi nhận từ trang sản phẩm công khai của Hshop vào ngày **23 tháng 9 năm 2026**. Do giá linh kiện thay đổi theo thời điểm, hãy xem các con số này là mốc tham khảo và kiểm tra lại trang bán hàng trước khi thanh toán.
 
 ## Mục tiêu
 
-Hết bài này bạn lập được bảng vật tư Track A cho robot vi sai của capstone, chọn mạch ESP32 hoặc Pico theo thông số chứ không theo tem giảm giá, giải thích được vì sao không lấy L298N cho động cơ TT 3–6 V, ghép pin lithium với đúng kiểu sạc, và điền file `bom.csv` sao cho mỗi dòng có nơi mua, từ khóa tiếng Việt, linh kiện thay thế, và cột đã nhận hay chưa.
+Sau bài học này, bạn sẽ lập được bảng vật tư (BOM) cho xe vi sai theo Lộ trình A (Track A) phục vụ Capstone, biết chọn mạch ESP32 hoặc Pico theo thông số kỹ thuật thay vì theo chương trình giảm giá, giải thích được lý do không dùng L298N cho động cơ TT 3–6 V, ghép đúng bộ sạc cho pin lithium, và hoàn thiện tệp `bom.csv` với đầy đủ nơi mua, từ khóa tìm kiếm tiếng Việt, phương án thay thế và cột theo dõi tình trạng nhận hàng.
 
 ## Cần gì trước khi học
 
-Chỉ cần chịu ghi chép. Bài 00-02 (bạn đi Track A hay Track B) giúp quyết định Wi-Fi có phải nằm trên mạch ngay từ đầu hay không. Chưa cần thuộc định luật Ohm. Phần driver và pin dạy đúng hai con số không được mua sai. Trước khi có đồng hồ vạn năng, điện thoại để chụp kiện hàng cũng là dụng cụ.
+Bạn chỉ cần chuẩn bị sẵn công cụ ghi chép và quyết định chọn Lộ trình A hay Lộ trình B từ bài 00-02 để biết có cần Wi-Fi trên vi điều khiển ngay từ đầu hay không. Hiện tại chưa cần thuộc định luật Ohm; phần mạch lái và pin trong bài cung cấp đúng hai thông số quan trọng nhất để bạn không mua nhầm. Khi chưa có đồng hồ vạn năng, điện thoại để quay chụp kiện hàng cũng là một công cụ kiểm tra hữu ích.
 
-## Vì sao bài này quyết định capstone
+## Vì sao bài này quyết định Capstone
 
-Teleop ở chương 07 hỏng theo những kiểu rất nhàm: driver nuốt mất khoảng hai vôn, cổng USB bị bắt quay bánh, chân echo 5 V cắm thẳng vào GPIO 3,3 V, hoặc mạch sạc 4,2 V bị kẹp lên bộ pin 8,4 V. ROS 2 không sửa được những lỗi đó. BOM là danh sách để phần cứng khớp với firmware. Mua theo thông số, rồi robot mới chạy.
+Bài teleop ở Chương 07 thường hỏng bởi những nguyên nhân phần cứng rất dễ tránh: mạch lái gây sụt khoảng 2 V, cổng USB phải gánh dòng kéo bánh xe, chân echo 5 V cắm thẳng vào chân GPIO 3,3 V, hoặc mạch sạc một cell 4,2 V bị kẹp lên bộ pin 8,4 V. ROS 2 không thể khắc phục các lỗi phần cứng này. Bảng BOM giúp đảm bảo phần cứng khớp hoàn toàn với firmware; mua đúng thông số là điều kiện đầu tiên để robot chạy ổn định.
 
 ![Các nhóm đồ trong kit]({{ site.imgurl }}/generated/kit_catalog_overview.png)
 
 ![Thứ tự nguồn: mass chung, logic, tín hiệu, nguồn motor bật sau cùng, bánh không chạm bàn]({{ site.imgurl }}/generated/power_order.png)
 
-## Bạn đang mua cái gì
+## Bạn đang mua những gì
 
-BOM là bảng, mỗi dòng là một thứ phải có thật trên bàn, kể cả tua-vít bạn đã có sẵn. BOM không phải ảnh giỏ hàng. Mỗi dòng phải trả lời được: đó là gì, mua mấy cái, thông số nào thì mới chấp nhận, nó làm gì trên robot này, thay bằng gì được, mua ở đâu. Dòng không có thông số thì bạn không phân biệt được hàng thay đúng và hàng rẻ nhìn giống.
+BOM (Bill of Materials) là bảng liệt kê mọi linh kiện và dụng cụ cần có trên bàn làm việc — kể cả những món bạn đã sở hữu sẵn như tua-vít — chứ không phải ảnh chụp giỏ hàng. Mỗi dòng trong bảng phải trả lời rõ: đó là gì, số lượng bao nhiêu, thông số kỹ thuật tối thiểu chấp nhận được, vai trò trên robot, phương án thay thế và nơi mua. Nếu bỏ trống cột thông số, bạn sẽ không phân biệt được linh kiện thay thế đúng chuẩn với hàng giá rẻ có ngoại hình tương tự.
 
-Robot mặc định của khóa học là **xe vi sai**: hai bánh dẫn động, một bánh đa hướng, vi điều khiển logic 3,3 V, driver MOSFET, một cảm biến khoảng cách, và pin motor không bao giờ cấp dòng vào chân 3,3 V. IMU, encoder bánh xe, cảm biến ToF là dòng mua sau, khi xe đã chạy theo lệnh. Track B thêm máy Ubuntu 24.04 cho ROS 2 Jazzy. Đừng mua LiDAR ở tuần đầu cho có cảm giác sẵn sàng. Lidar mặt phẳng (LD06 hoặc RPLIDAR A1), Pi 5 hoặc Jetson, và pack có BMS nằm ở đợt 4 bên dưới, đúng chương sẽ dùng chúng.
+Robot mặc định của khóa học là **xe dẫn động vi sai**: gồm hai bánh chủ động, một bánh đa hướng, vi điều khiển logic 3,3 V, mạch lái động cơ MOSFET, một cảm biến khoảng cách, và nguồn pin động cơ cách ly hoàn toàn khỏi đường 3,3 V. Các cảm biến như IMU, encoder bánh xe hay ToF là phần bổ sung sau khi xe đã chạy theo lệnh. Lộ trình B sẽ thêm máy tính cài Ubuntu 24.04 cho ROS 2 Jazzy. Bạn không nên mua LiDAR ngay tuần đầu chỉ để tạo cảm giác sẵn sàng; LiDAR quét phẳng (LD06 hoặc RPLIDAR A1), Raspberry Pi 5 hoặc Jetson và bộ pin có mạch BMS được xếp ở Đợt 4 bên dưới, đúng thời điểm các chương sau cần dùng.
 
 ```
 USB 5 V ---- logic ESP32 / Pico (GPIO 3,3 V)
@@ -47,46 +47,46 @@ USB 5 V ---- logic ESP32 / Pico (GPIO 3,3 V)
 
 ![Đường 3,3 V, USB 5 V, và đường nguồn motor riêng]({{ site.imgurl }}/generated/power_rails_3v3.png)
 
-## Danh sách Track A mặc định
+## Danh sách Lộ trình A mặc định
 
-Chia ba đợt để khung xe đến muộn vẫn không chặn chương 01.
+Danh sách được chia thành ba đợt để ngay cả khi khung xe giao chậm, bạn vẫn có thể bắt đầu Chương 01 đúng kế hoạch.
 
-**Đợt 1 — bàn lab (học chương 01 ngay tuần này).** Đồng hồ vạn năng, mỏ hàn khoảng 60 W có đế, thiếc, kìm cắt, breadboard cắm, dây jumper, cáp USB có data, mạch vi điều khiển, vài LED, một nút nhấn.
+**Đợt 1 — bàn lab (để học Chương 01 ngay tuần này):** đồng hồ vạn năng, mỏ hàn khoảng 60 W kèm giá đỡ, thiếc hàn, kìm cắt, breadboard không hàn, dây cắm jumper, cáp USB truyền dữ liệu, mạch vi điều khiển, vài đèn LED và một nút nhấn.
 
-**Đợt 2 — chuyển động (trước chương 05).** Khung xe, hoặc động cơ TT rời kèm gá và bánh đa hướng, driver TB6612FNG (DRV8833 chỉ là phương án nhỏ hơn), HC-SR04, và mạch chuyển mức 3,3 V / 5 V cho chân echo.
+**Đợt 2 — chuyển động (chuẩn bị trước Chương 05):** khung xe (hoặc động cơ TT rời kèm gá bắt và bánh đa hướng), mạch lái TB6612FNG (hoặc phương án nhỏ hơn là DRV8833), cảm biến siêu âm HC-SR04 và mạch chuyển mức logic 3,3 V / 5 V cho chân echo.
 
-**Đợt 3 — năng lượng (sau khi bạn đo được điện áp).** Hai cell 18650 có mức dung lượng hợp lý, đế pin, và sạc nạp **từng cell** lên 4,2 V. Đế nối tiếp trên xe không phải là sạc.
+**Đợt 3 — năng lượng (sau khi bạn đã biết đo điện áp):** hai cell pin 18650 có dung lượng thực tế, đế giữ pin và bộ sạc nạp **từng cell riêng lẻ** lên 4,2 V. Lưu ý rằng đế pin nối tiếp gắn trên xe không phải là bộ sạc.
 
-Chưa đưa vào hóa đơn đầu: RPLiDAR, Raspberry Pi 5, máy hiện sóng, nguồn 12 V 10 A, và mọi "combo robot" mà driver là L298N dán sẵn hộp 4 pin AA không có tài liệu.
+Chưa cần đưa vào đơn hàng đầu tiên: RPLIDAR, Raspberry Pi 5, máy hiện sóng, nguồn 12 V 10 A, và các "combo xe robot" đóng gói sẵn mạch L298N cùng hộp 4 pin AA không rõ thông số.
 
-### Bảng kit gộp
+### Bảng tổng hợp bộ kit
 
-Thông số lấy từ datasheet thường gặp hoặc từ listing Hshop được dẫn ở phần mua hàng. Khi hàng tới, đọc chữ in trên IC.
+Các thông số dưới đây tổng hợp từ datasheet phổ biến và trang sản phẩm Hshop dẫn ở mục mua hàng. Khi nhận linh kiện, hãy luôn kiểm tra trực tiếp ký hiệu in trên thân IC.
 
-| Dòng | SL | Thông số chấp nhận | Vai trò trên capstone | Món nên mua | Thay được bằng |
+| Hạng mục | SL | Thông số chấp nhận | Vai trò trên Capstone | Gợi ý nên mua | Phương án thay thế |
 |------|---:|--------------------|------------------------|-------------|----------------|
-| Vi điều khiển | 1 | GPIO 3,3 V, USB-UART, từ 20 chân dùng được | Firmware, sau này teleop Wi-Fi | Mạch ESP32 dạng dev board, khoảng 30 chân, CH340 hoặc CP2102 | Pico 2 nếu chấp nhận teleop qua USB trước, Wi-Fi để sau |
-| Khung | 1 | Hai bánh dẫn, sàn bắt mạch | Thân xe vi sai | Kit 2WD mica TT, hoặc kit 4WD của Hshop dùng hai bánh dẫn cộng bánh đa hướng | Động cơ TT rời, hai bánh, hai gá, một bánh đa hướng, một tấm cứng |
-| Động cơ TT | 2 bánh dẫn | 3–9 V, hộp số khoảng 1:48 | Bánh trái và phải | Motor đi kèm khung | TT 1:48 của Hshop, listing 20 000 ₫/cái |
-| Driver | 1 | Cầu H MOSFET, VM khoảng 5–10 V, mỗi kênh ≥ 1 A liên tục | Chiều quay và PWM | Module TB6612FNG, VM 4,5–10 V, 1,2 A liên tục / 3,2 A đỉnh | DRV8833, VM 2,7–10,8 V, listing Hshop ghi tối đa 1,5 A/kênh; kẹt bánh thì nóng |
-| Khoảng cách | 1 | HC-SR04 hoặc ToF nhỏ | Khoảng cách vật cản | HC-SR04 | Module VL53L0X nếu muốn I²C và 3,3 V ngay từ đầu |
-| Chuyển mức | 1 | 4 kênh 3,3 V ↔ 5 V | Echo HC-SR04 vào ESP32 | Module MOSFET | Cầu chia áp chỉ trên echo (trig 3,3 V đôi khi không đủ với module kém) |
-| Pin motor | 2 cell | Li-ion 18650, mức công bố ≤ 3500 mAh | VM qua driver | Cell nạp **bên ngoài** xe | 6 pin AA (~9 V) nếu bạn chưa muốn lithium; không dùng pin vuông 9 V |
-| Sạc | 1 | 4,2 V mỗi cell, tự ngắt khi đầy | Nạp từng cell | Sạc khay 4 ngăn 18650 | TP4056 **chỉ** cho một cell, không kẹp lên đế 2S |
-| Đồng hồ | 1 | V DC, Ω, chuông thông mạch | Kiểm tra dây | UNI-T UT33D+ hoặc đồng hồ hobby rẻ hơn | Đồng hồ nào có chuông; nếu đo dòng thì phải có cầu chì |
-| Mỏ hàn | 1 | ~60 W, đế, thiếc 0,8 mm | Dây và header | Mỏ 60 W cố định là đủ cho Dupont và hàng chân | Trạm hàn để sau, chưa cần để bắt đầu |
-| Mạch thử | 1 | Breadboard 830 lỗ, dây đực-đực và đực-cái | Chương 01–03 | — | Breadboard 400 lỗ nếu dây ngắn |
-| Ốc | 1 bộ | Vít M3, trụ nhựa | Kê mạch khỏi mặt kim loại | Thường có trong khung | Bộ M3 ở cửa hàng cơ khí |
+| Vi điều khiển | 1 | GPIO 3,3 V, có chip USB-UART, từ 20 chân khả dụng | Chạy firmware, về sau làm teleop Wi-Fi | Mạch phát triển ESP32 (~30 chân), chip CH340 hoặc CP2102 | Pico 2 nếu ưu tiên teleop qua USB trước, Wi-Fi để sau |
+| Khung xe | 1 | Hai bánh chủ động, có sàn lắp mạch | Thân xe vi sai | Kit 2WD mica động cơ TT, hoặc kit 4WD của Hshop (chỉ dùng 2 bánh chủ động kèm bánh đa hướng) | Động cơ TT rời, 2 bánh xe, 2 gá bắt, 1 bánh đa hướng và 1 tấm đế cứng |
+| Động cơ TT | 2 bánh dẫn | Điện áp 3–9 V, tỉ số truyền khoảng 1:48 | Dẫn động bánh trái và phải | Động cơ đi kèm khung xe | Động cơ TT 1:48 của Hshop (giá tham khảo 20.000 ₫/cái) |
+| Mạch lái (Driver) | 1 | Cầu H MOSFET, VM khoảng 5–10 V, mỗi kênh ≥ 1 A liên tục | Điều khiển chiều quay và tốc độ PWM | Module TB6612FNG (VM 4,5–10 V, 1,2 A liên tục / 3,2 A đỉnh) | DRV8833 (VM 2,7–10,8 V, tối đa 1,5 A/kênh; dễ nóng khi kẹt bánh) |
+| Cảm biến khoảng cách | 1 | HC-SR04 hoặc cảm biến ToF nhỏ | Đo khoảng cách vật cản | HC-SR04 | Module VL53L0X nếu muốn dùng giao tiếp I²C và mức 3,3 V ngay từ đầu |
+| Chuyển mức logic | 1 | 4 kênh 3,3 V ↔ 5 V | Hạ mức chân echo HC-SR04 về ESP32 | Module chuyển mức MOSFET | Cầu chia áp chỉ cho chân echo (lưu ý trig 3,3 V có thể thiếu ổn định với một số module kém) |
+| Pin động cơ | 2 cell | Li-ion 18650, dung lượng công bố ≤ 3500 mAh | Cấp nguồn VM qua mạch lái | Cell rời, tháo ra sạc **bên ngoài** xe | 6 pin AA (~9 V) nếu chưa muốn dùng lithium; không dùng pin vuông 9 V |
+| Bộ sạc | 1 | 4,2 V mỗi cell, tự ngắt khi đầy | Sạc riêng từng cell | Bộ sạc khay 4 ngăn 18650 | TP4056 **chỉ** dùng cho 1 cell đơn, tuyệt đối không kẹp lên đế 2S |
+| Đồng hồ vạn năng | 1 | Đo V DC, Ω, có còi thông mạch | Kiểm tra dây và nguồn | UNI-T UT33D+ hoặc mẫu phổ thông tương đương | Đồng hồ bất kỳ có còi thông mạch; thang đo dòng phải có cầu chì |
+| Mỏ hàn | 1 | ~60 W, có giá đỡ, thiếc 0,8 mm | Hàn dây động cơ và hàng chân header | Mỏ hàn 60 W thông thường là đủ | Trạm hàn chỉnh nhiệt để nâng cấp về sau |
+| Mạch thử | 1 | Breadboard 830 lỗ, dây cắm đực-đực và đực-cái | Thực hành Chương 01–03 | — | Breadboard 400 lỗ nếu bố trí dây ngắn |
+| Ốc vít | 1 bộ | Vít M3, trụ đồng/nhựa cách điện | Cố định mạch cách ly khỏi bề mặt dẫn điện | Thường có sẵn trong bộ khung | Bộ ốc M3 mua tại cửa hàng cơ khí |
 
-## Vì sao dòng driver không phải "cầu H nào cũng được"
+## Vì sao mạch lái không phải "cầu H nào cũng như nhau"
 
-Trên Hshop, module L298N và module TB6612FNG cùng giá **45 000 ₫** (SKU HS0695V và HS2458V vào ngày viết bài). Giá không phải chỗ khác nhau. L298N là cầu Darlington. Khi có dòng motor, nó rơi khoảng 1,8 V đến 2,5 V giữa pin và động cơ. TB6612FNG là cầu MOSFET; động cơ gần như nhận đủ điện áp nguồn motor.
+Trên Hshop tại thời điểm khảo sát, cả module L298N và TB6612FNG đều có giá **45.000 ₫** (mã SKU HS0695V và HS2458V), nên sự khác biệt không nằm ở giá bán. L298N sử dụng cầu Darlington nên khi có dòng động cơ chạy qua, nó làm sụt khoảng 1,8 V đến 2,5 V giữa pin và động cơ. Ngược lại, TB6612FNG dùng cầu MOSFET nên gần như truyền trọn vẹn điện áp nguồn tới động cơ:
 
 $$
 V_{motor} \approx V_{pin} - V_{roi}
 $$
 
-Lấy bộ hai cell ở 7,4 V danh định. Rơi 2,0 V với Darlington, rơi 0,3 V với MOSFET:
+Với bộ pin hai cell có điện áp danh định 7,4 V (ước tính sụt 2,0 V trên Darlington và 0,3 V trên MOSFET):
 
 $$
 V_{L298} \approx 7{,}4 - 2{,}0 = 5{,}4\,\text{V}
@@ -96,141 +96,138 @@ $$
 V_{TB6612} \approx 7{,}4 - 0{,}3 = 7{,}1\,\text{V}
 $$
 
-Listing động cơ TT tỉ số 1:48 của Hshop ghi điện áp khuyến nghị **3–9 V**, dòng không tải **110–150 mA**, khoảng **200–208 vòng/phút ở 5–6 V**, mô-men **0,8 kg·cm ở 6 V**. Năm vôn đã là vùng chậm và yếu của chính listing đó. Bốn pin AA mới chỉ khoảng 6 V trước khi trừ sụt trên L298N, nên motor có thể còn gần 4 V và xe bò. Module L298N còn có IC 7805. Đừng lấy 5 V từ con 7805 đó để nuôi ESP32 khi nguồn motor trên 12 V. Bộ pin của ta dưới 10 V, và dù vậy vẫn không nuôi vi điều khiển từ chân 5 V của module driver. Logic của TB6612FNG là **2,7–5,5 V**, nên mức cao 3,3 V từ GPIO là hợp lệ. Chân STBY phải được kéo lên, nếu không cầu H ngủ.
+Theo trang sản phẩm động cơ TT tỉ số 1:48 trên Hshop, điện áp khuyến nghị là **3–9 V**, dòng không tải **110–150 mA**, tốc độ khoảng **200–208 vòng/phút ở 5–6 V**, và mô-men **0,8 kg·cm ở 6 V**. Như vậy, mức 5 V vốn đã nằm ở vùng chạy chậm và yếu. Nếu dùng 4 pin AA mới (~6 V) đi qua L298N, điện áp đến động cơ chỉ còn gần 4 V khiến xe di chuyển rất yếu. Ngoài ra, module L298N tích hợp IC ổn áp 7805, nhưng bạn không nên lấy 5 V từ mạch này để nuôi ESP32 khi nguồn động cơ vượt 12 V — và ngay cả khi bộ pin dưới 10 V, vẫn không nên nuôi vi điều khiển từ chân 5 V của mạch lái. Trong khi đó, chân logic của TB6612FNG hoạt động trong dải **2,7–5,5 V**, tương thích trực tiếp với mức cao 3,3 V của GPIO. Lưu ý rằng chân STBY phải được kéo lên mức cao để đánh thức cầu H.
 
-Module DRV8833 giá **25 000 ₫**. Listing Hshop cho VM **2,7–10,8 V** và **tối đa 1,5 A mỗi kênh**. Đủ làm phương án thay khi mỗi kênh một động cơ TT. Ít đồng và vỏ nhỏ hơn TB6612, nên kẹt bánh lâu sẽ nóng sớm. Đừng mắc song song hai motor trên một kênh DRV8833.
+Module DRV8833 có giá **25.000 ₫**, dải VM **2,7–10,8 V** và dòng tối đa **1,5 A mỗi kênh** theo thông số trên Hshop. Mạch này dùng thay thế tốt khi mỗi kênh kéo một động cơ TT, nhưng do diện tích đồng tản nhiệt và vỏ IC nhỏ hơn TB6612 nên sẽ nhanh nóng nếu bánh bị kẹt lâu. Không mắc song song hai động cơ trên cùng một kênh DRV8833.
 
-Dòng kẹt trục không phải dòng không tải. Listing không ghi dòng kẹt. Hãy dự phòng vài lần 150 mA, rồi **đo** sau: bánh nhấc khỏi mặt bàn, đồng hồ mắc nối tiếp, chỉ bấm một xung ngắn. Mua driver chỉ vì tem ghi 2 A là dòng đó chưa xong.
+Cần phân biệt rõ dòng kẹt trục với dòng không tải. Trang bán hàng không công bố dòng kẹt, vì vậy bạn cần dự phòng dòng gấp vài lần mức 150 mA và tự **đo kiểm** về sau (nhấc bánh khỏi bàn, mắc đồng hồ nối tiếp và cấp một xung ngắn). Chọn mạch lái chỉ dựa vào nhãn quảng cáo "2 A" là chưa đủ căn cứ.
 
 ![Ý tưởng cầu H: vi điều khiển chỉ chọn chiều dòng, không phải nguồn cấp dòng cho motor]({{ site.imgurl }}/generated/hbridge_concept.png)
 
-## Pin, đế và sạc là một quyết định
+## Pin, đế giữ pin và bộ sạc là một tổ hợp thống nhất
 
-Một cell 18650 khoảng 3,6–3,7 V danh định và **đầy ở 4,2 V**. Hai cell nối tiếp, đúng kiểu đế "2×18650 nối tiếp", khoảng **7,4 V danh định và 8,4 V khi đầy**. Điện áp đó đi vào chân VM của driver. Không đi vào GPIO, và không đi vào TP4056.
+Một cell 18650 có điện áp danh định khoảng 3,6–3,7 V và **đầy ở 4,2 V**. Hai cell lắp trong đế "2×18650 nối tiếp" tạo ra **7,4 V danh định và 8,4 V khi đầy**. Điện áp này chỉ nối vào chân VM của mạch lái, tuyệt đối không đưa vào GPIO hay vào mạch sạc TP4056.
 
-Các mạch TP4056 trên Hshop (bản USB-C 10 000 ₫ và bản mini-USB 2 000 ₫) là sạc **một cell**. Chúng cố đưa một cell lên 4,2 V ở khoảng 1 A. Kẹp một mạch như vậy lên cặp nối tiếp là bắt sạc 4,2 V làm việc với cụm 8,4 V, hoặc chỉ nạp một phần cụm trong khi hai cell lệch nhau. Cả hai cách đều sai dòng BOM. Hãy nạp từng cell trong sạc có khay, đo điện áp hở mạch nằm khoảng 3,6 V đến 4,20 V, rồi mới lắp vào đế. Sạc 4 khay cổng USB trên Hshop giá **68 000 ₫** (listing ghi 14500 / 18650 / 21700). Dùng một khay cho đến khi bạn tin mạch đó.
+Các mạch TP4056 trên Hshop (bản USB-C giá 10.000 ₫ và bản mini-USB giá 2.000 ₫) là mạch sạc **một cell**, hoạt động bằng cách nạp một cell lên 4,2 V ở dòng khoảng 1 A. Kẹp mạch này lên hai đầu đế pin 2S sẽ ép mạch 4,2 V làm việc với cụm 8,4 V hoặc gây lệch áp giữa hai cell — cả hai đều sai và mất an toàn. Cách đúng là sạc riêng từng cell trong bộ sạc có khay, đo điện áp hở mạch nằm trong khoảng 3,6 V đến 4,20 V rồi mới lắp vào đế trên xe. Bộ sạc 4 khay cổng USB trên Hshop có giá **68.000 ₫** (hỗ trợ 14500 / 18650 / 21700); bạn nên thử nghiệm với một khay trước cho đến khi kiểm chứng được mạch ngắt ổn định.
 
-Dung lượng có trần vật lý. Cell 18650 thật hiếm khi quá khoảng 3500 mAh. Cell trung thực thường 2000–3000 mAh. Hshop niêm yết Sunpower **2000 mAh giá 35 000 ₫** và **2500 mAh giá 45 000 ₫**. Listing chợ viết 9900 mAh hoặc 12000 mAh với giá tương tự là bịa. Chữ "10C" trên tên Sunpower là tuyên bố dòng xả, không phải dung lượng. Đừng tin hệ số C nếu không có datasheet. Hai động cơ TT cũng không cần hệ số C tưởng tượng.
+Dung lượng pin có giới hạn vật lý: cell 18650 thật hiếm khi vượt quá 3500 mAh, phổ biến ở mức 2000–3000 mAh. Hshop niêm yết cell Sunpower **2000 mAh giá 35.000 ₫** và **2500 mAh giá 45.000 ₫**. Những bài đăng rao bán cell 9900 mAh hay 12000 mAh ở tầm giá tương đương đều là thông số giả. Ký hiệu "10C" trên tên pin Sunpower là thông số dòng xả công bố, không phải dung lượng; không nên tin tuyệt đối vào hệ số C khi không có datasheet, và hai động cơ TT cũng không đòi hỏi dòng xả quá lớn như vậy.
 
-Cell hobby thường **không** có mạch bảo vệ. Tua-vít chạm hai cực có thể xả hàng chục ampe. Đừng để cell trong túi cùng chìa khóa. Đừng sạc trên giường. Dừng nếu cell phồng, dưới khoảng 2,5 V, hoặc nóng. Pin vuông 9 V là lỗi kinh điển còn lại: nội trở sụp ngay khi motor kẹt, vi điều khiển reset trong khi driver vẫn đang được lệnh chạy.
+Cell pin phổ thông thường **không có mạch bảo vệ** tích hợp. Chạm tua-vít qua hai cực có thể gây phóng dòng hàng chục ampe tức thời. Không bỏ cell trần vào túi cùng chìa khóa, không sạc trên bề mặt dễ cháy, và ngưng sử dụng ngay nếu cell bị phồng, tụt dưới 2,5 V hoặc nóng bất thường. Một lỗi phổ biến khác là dùng pin vuông 9 V: nội trở lớn khiến điện áp sụp ngay khi động cơ kẹt, làm vi điều khiển khởi động lại trong khi mạch lái vẫn giữ lệnh chạy.
 
-Khi học trên bàn, nuôi vi điều khiển bằng USB. Nối mass USB với mass driver. Bật pin motor sau cùng, và chỉ khi bánh đã được nhấc.
+Khi thực hành trên bàn, hãy cấp nguồn vi điều khiển bằng cáp USB, nối mass chung giữa USB và mạch lái, và chỉ bật nguồn pin động cơ sau cùng khi bánh xe đã được nhấc lên.
 
-## Đợt 4 — máy trên xe, lidar, và pin (khi tới chương 07, 09, 11)
+## Đợt 4 — máy tính nhúng trên xe, LiDAR và pin nâng cấp (cho Chương 07, 09, 11)
 
-Đợt 1 đến 3 ở trên vẫn là giỏ để xe chạy teleop. Ba món sau **không** nằm trong giỏ tuần đầu. Mua khi bài cần chúng. Cột giá để trống: listing đổi, và bài này không bịa số. Điền giá hôm bạn mở trang.
+Các đợt 1 đến 3 ở trên đã đủ để xe hoàn thành teleop. Những món trong bảng dưới đây **không** nằm trong đơn hàng tuần đầu mà chỉ mua khi học tới chương tương ứng. Cột giá được để trống để bạn tự điền đúng mức giá tại thời điểm mở trang mua hàng:
 
-| Món | Khi nào | Việc trên lộ trình | Trang đã mở (tìm, không phải một SKU) | Giá (điền khi mua) |
+| Hạng mục | Thời điểm | Vai trò trên lộ trình | Nguồn tìm kiếm tham khảo | Giá (điền khi mua) |
 | --- | --- | --- | --- | --- |
-| Raspberry Pi 5, RAM đủ để Ubuntu Server 24.04 | Đầu chương 09 nếu xe sẽ rời laptop | Máy chạy Jazzy, agent, bridge | [Hshop, raspberry pi](https://hshop.vn/search?q=raspberry+pi), [Shopee, Raspberry Pi 5](https://shopee.vn/search?keyword=raspberry%20pi%205) | |
-| Jetson Orin Nano | Chỉ khi bạn cần GPU trên xe | JetPack 6 là Ubuntu 22.04, không cài Jazzy. JetPack 7 là Ubuntu 24.04. Đọc [quick start](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/quick_start.html) trước khi trả tiền | Tìm `Jetson Orin Nano` trên [Shopee](https://shopee.vn/search?keyword=jetson%20orin%20nano) hoặc nhà phân phối bạn kiểm được hóa đơn | |
-| Lidar mặt phẳng LD06 hoặc RPLIDAR A1 | Chương 11, lab SLAM thật | `/scan` cho `slam_toolbox`. ToF một tia không thay được | [Hshop, lidar](https://hshop.vn/search?q=lidar), [Slamtec A1](https://www.slamtec.com/en/Lidar/A1), [LDRobot](https://www.ldrobot.com/) | |
-| LiPo 2S có giắc cân bằng, hoặc LiFePO4 đúng sạc, hoặc 18650 đã có ở đợt 3 | Trước bài lắp chương 07 | VM. Không dùng chung hồ sơ sạc | [Hshop, lipo](https://hshop.vn/search?q=lipo). Cell 18650 vẫn là link trong mục nguồn bên dưới | |
-| BMS đúng số cell và đúng hóa học, nếu pack chưa có mạch | Cùng lúc với pin | Cắt quá áp / dưới áp. Không thay cầu chì | Tìm `BMS 2S` trên [Shopee](https://shopee.vn/search?keyword=bms%202s) hoặc [Lazada](https://www.lazada.vn/catalog/?q=bms%202s). Đọc tem Li-ion hay LiFePO4 | |
-| Module buck và cầu chì 2 A, 3 A | Chương 07 | 5,0 V cho ESP32, chì trên cực dương | Đã nói ở bài pin chương 07. [Thế Giới IC](https://www.thegioiic.com/), [IC Đây Rồi](https://icdayroi.com/) | |
+| Raspberry Pi 5 (RAM đủ chạy Ubuntu Server 24.04) | Đầu Chương 09 nếu muốn xe chạy độc lập không cần laptop | Máy tính chạy ROS 2 Jazzy, agent và bridge | [Hshop, raspberry pi](https://hshop.vn/search?q=raspberry+pi), [Shopee, Raspberry Pi 5](https://shopee.vn/search?keyword=raspberry%20pi%205) | |
+| Jetson Orin Nano | Chỉ khi cần GPU xử lý trực tiếp trên xe | Lưu ý: JetPack 6 dùng Ubuntu 22.04 (không cài Jazzy gốc), JetPack 7 dùng Ubuntu 24.04. Đọc kỹ [quick start](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/quick_start.html) trước khi mua | Tìm `Jetson Orin Nano` trên [Shopee](https://shopee.vn/search?keyword=jetson%20orin%20nano) hoặc nhà phân phối có hóa đơn rõ ràng | |
+| LiDAR quét phẳng LD06 hoặc RPLIDAR A1 | Chương 11, bài lab SLAM thực tế | Xuất dữ liệu `/scan` cho `slam_toolbox` (cảm biến ToF một tia không thay thế được) | [Hshop, lidar](https://hshop.vn/search?q=lidar), [Slamtec A1](https://www.slamtec.com/en/Lidar/A1), [LDRobot](https://www.ldrobot.com/) | |
+| Pin LiPo 2S có giắc cân bằng, LiFePO4 đúng sạc, hoặc dùng tiếp 18650 Đợt 3 | Trước bài lắp khung Chương 07 | Cấp nguồn VM (tuyệt đối không dùng lẫn chế độ sạc giữa các loại pin) | [Hshop, lipo](https://hshop.vn/search?q=lipo); cell 18650 xem ở mục Nguồn bên dưới | |
+| Mạch BMS đúng số cell và loại hóa học (nếu pack chưa có) | Mua cùng lúc với pin | Bảo vệ quá áp / dưới áp (không thay thế cầu chì) | Tìm `BMS 2S` trên [Shopee](https://shopee.vn/search?keyword=bms%202s) hoặc [Lazada](https://www.lazada.vn/catalog/?q=bms%202s); kiểm tra nhãn Li-ion hay LiFePO4 | |
+| Mạch hạ áp (buck) và cầu chì 2 A, 3 A | Chương 07 | Tạo nguồn 5,0 V cho ESP32 và lắp cầu chì trên dây dương | Xem bài pin Chương 07; tham khảo [Thế Giới IC](https://www.thegioiic.com/), [IC Đây Rồi](https://icdayroi.com/) | |
 
-Pi 5 và Jetson là hai cách có một máy Ubuntu trên xe, không phải mua cả hai. Lidar là một trong hai kiểu, không phải cả LD06 lẫn A1. Bài [pin, nguồn và an toàn]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}) là chỗ tính cầu chì. Bài [Linux trên SBC]({% multilang_post_url contents/chapter09/09_00_linux_on_sbc %}) là chỗ chọn 24.04 chứ không phải ảnh mới hơn.
+Raspberry Pi 5 và Jetson Orin Nano là hai lựa chọn thay thế nhau cho một máy Ubuntu trên xe, không cần mua cả hai; tương tự, chỉ chọn một trong hai mẫu LiDAR LD06 hoặc A1. Bạn sẽ học cách tính chọn cầu chì ở bài [Pin, nguồn và an toàn]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}) và cách chọn đúng ảnh hệ điều hành Ubuntu 24.04 ở bài [Linux trên SBC]({% multilang_post_url contents/chapter09/09_00_linux_on_sbc %}). Nguyên tắc không mua LiDAR sớm ở tuần đầu vẫn giữ nguyên cho đến Chương 11.
 
-Câu "đừng mua LiDAR cho có cảm giác sẵn sàng" ở đầu bài vẫn đúng với tuần đầu. Chương 11 là lúc lidar có việc.
+## Kinh nghiệm đặt mua và kiểm hàng
 
-## Cách mua
+Hãy luôn mua dựa trên thông số kỹ thuật thay vì ảnh minh họa hay nhãn giảm giá: một bộ L298N giảm giá 30% vẫn là loại mạch lái gây sụt áp lớn. Trước khi đặt hàng, cần đọc kỹ dải điện áp, dòng liên tục, mức logic và loại giắc cắm.
 
-Mua thông số, không mua ảnh thumbnail. Tem giảm 30 % trên combo L298N vẫn là cầu H sai. Đọc điện áp, dòng liên tục, mức logic và loại giắc trước khi đọc phần giảm giá.
+Với Đợt 1, nên gom chung tại một cửa hàng để tránh cảnh thiếu sợi cáp USB mà phải chờ thêm đơn hàng khác. Tại Việt Nam, Hshop (`hshop.vn`, địa chỉ 269/20 Lý Thường Kiệt, Phường Phú Thọ, TP.HCM) có mô tả kỹ thuật và mã SKU rõ ràng (các mã SKU kết thúc bằng chữ **V** là giá công ty đã bao gồm VAT; cửa hàng cũng yêu cầu quay video mở hộp trong 7 ngày cho bảo hành cơ bản). Trên Shopee và Lazada, hãy lọc các gian hàng uy tín, đọc kỹ xem sản phẩm là mạch phát triển (dev board) hay module trần, và ưu tiên nơi có ảnh chụp rõ chữ in trên IC. Thế Giới IC (`thegioiic.com`) và IC Đây Rồi (`icdayroi.com`, Thủ Đức) là các cửa hàng linh kiện rất phù hợp khi mua IC ổn áp hoặc module rời, nhưng cần chú ý phân biệt module ESP32 trần với mạch phát triển có sẵn cổng USB.
 
-Đợt 1 nên gom một shop để thiếu cáp USB không phải chờ kiện thứ hai. Ở Việt Nam, Hshop (hshop.vn, cửa hàng 269/20 Lý Thường Kiệt, Phường Phú Thọ, TP.HCM) có listing kỹ thuật và SKU. Chính họ ghi SKU kết thúc bằng **V** là giá công ty đã gồm VAT. Họ cũng yêu cầu quay video mở hộp trong bảy ngày nếu bạn muốn bảo hành cơ bản. Shopee và Lazada là chợ tìm kiếm: lọc shop có đánh giá, đọc kỹ đó là module hay dev board, ưu tiên shop chụp rõ chữ trên IC. Thế Giới IC (thegioiic.com) và IC Đây Rồi (icdayroi.com, Thủ Đức) là quầy linh kiện. Họ rất hợp để mua **module** ESP32 hoặc IC ổn áp, và rất dễ bị nhìn nhầm thành mạch cắm USB.
+Với cửa hàng điện tử chuyên dụng, bạn có thể chuyển khoản sau khi xác nhận còn hàng; với sàn thương mại điện tử, nên thanh toán qua hệ thống của sàn cho các món như dây jumper hay khung xe. Tránh chuyển khoản trực tiếp cho người bán không rõ nguồn gốc trên mạng xã hội để mua "pin 18650 đã test" mà không có chính sách đổi trả.
 
-Chuyển khoản cho cửa hàng điện tử sau khi họ xác nhận còn hàng. Ví sàn thì ổn cho dây jumper và khung xe. Đừng chuyển cho người lạ trên mạng xã hội để mua "pin 18650 đã test" mà không có đường trả.
-
-Khi kiện tới, làm các việc sau trước khi mừng:
-
-1. Quay video mở hộp. Đếm túi theo `bom.csv`.
-2. Đồng hồ: chuông khi chập hai que đo, rồi khoảng 5 V trên củ sạc USB bạn đã tin.
-3. Vi điều khiển: cắm cáp **có data** vào máy tính. Phải xuất hiện cổng serial mới. Cáp chỉ sạc thì im lặng, trông như mạch chết.
-4. Chỉ cắm USB, chân 3,3 V đọc khoảng 3,3 V. Nếu ra 5 V thì dừng.
-5. Driver: chữ trên IC đúng TB6612FNG hoặc DRV8833, không phải L298N.
-6. Motor: trục quay tay không có tiếng sạn. Tỉ số trên túi khớp dòng đã trả tiền.
-7. Cell: không phồng, mỗi cell khoảng 3,4 V đến 4,2 V. Chưa nối tiếp khi chưa có cả hai số đo.
+Khi kiện hàng giao tới, hãy kiểm tra theo đúng 7 bước sau trước khi lắp ráp:
+1. Quay video quá trình mở hộp và kiểm đếm từng túi linh kiện đối chiếu với `bom.csv`.
+2. Kiểm tra đồng hồ vạn năng: chạm hai que đo phải kêu bíp thông mạch, sau đó đo thử khoảng 5 V trên một củ sạc USB đáng tin cậy.
+3. Kiểm tra vi điều khiển: cắm bằng cáp USB **có truyền dữ liệu** vào máy tính và xác nhận xuất hiện cổng serial mới (cáp chỉ sạc sẽ không hiện cổng và dễ bị nhầm là mạch hỏng).
+4. Khi chỉ cắm USB, đo chân 3,3 V phải đạt khoảng 3,3 V; nếu đo ra 5 V thì dừng ngay.
+5. Kiểm tra mạch lái: đọc chữ in trên thân IC để chắc chắn là TB6612FNG hoặc DRV8833, không phải L298N.
+6. Kiểm tra động cơ: xoay nhẹ trục bằng tay xem có bị sượng không và đối chiếu tỉ số truyền ghi trên bao bì với đơn đặt hàng.
+7. Kiểm tra cell pin: vỏ không phồng, điện áp mỗi cell nằm trong khoảng 3,4 V đến 4,2 V; không lắp nối tiếp trước khi đo đủ cả hai viên.
 
 ## Mua ở Việt Nam
 
-Link dưới đây hoặc là **trang sản phẩm đã trả về giá ngày 23 tháng 9 năm 2026**, hoặc là **trang tìm kiếm**. Trang tìm kiếm được ghi rõ. Đừng coi URL tìm kiếm là lời hứa rằng kết quả đầu tiên đúng món. Link Shopee là trang tìm theo từ khóa. Tìm trên Lazada bằng `https://www.lazada.vn/catalog/?q=` cộng từ khóa; trình duyệt tự động đôi khi gặp captcha, trình duyệt thường vẫn ra danh sách.
+Các liên kết dưới đây bao gồm **trang sản phẩm đã ghi nhận giá ngày 23 tháng 9 năm 2026** và **trang tìm kiếm theo từ khóa** (được ghi chú rõ). Với trang tìm kiếm, kết quả đầu tiên không phải lúc nào cũng đúng món cần mua nên bạn vẫn cần đọc kỹ thông số. Trên Lazada, bạn có thể tìm theo cấu trúc `https://www.lazada.vn/catalog/?q=` kèm từ khóa trên trình duyệt thông thường.
 
 ### Vi điều khiển
 
-Từ khóa: `ESP32 NodeMCU 38 chân CH340`, `ESP32 DevKit V1`, `Raspberry Pi Pico 2`.
+Từ khóa gợi ý: `ESP32 NodeMCU 38 chân CH340`, `ESP32 DevKit V1`, `Raspberry Pi Pico 2`.
 
-- Trang Hshop đã kiểm: [ESP32 NodeMCU-32S CH340 Ai-Thinker, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker). Đây là dev board có USB. Mua loại này.
-- Trang Hshop đã kiểm, đắt hơn: [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32).
-- Trang Hshop đã kiểm, **không** phải máy tính duy nhất bạn cần: [module ESP32-S3-WROOM-1, 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif). Module chưa có USB-UART cho đến khi bạn gắn thêm.
-- Trang tìm Hshop đã kiểm: [raspberry pi pico](https://hshop.vn/search?q=raspberry+pi+pico) lúc đó có Pico 2 giá 195 000 ₫ và Pico 2 W giá 275 000 ₫.
-- Trang Thế Giới IC đã thấy: [ESP32-DevKitC-32U](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz). Đọc xem anten có phải bản U.FL (DevKitC-32U) và cáp anten có đi kèm không.
-- Tìm Shopee: [ESP32 DevKit](https://shopee.vn/search?keyword=esp32%20devkit%20ch340).
-- Tránh ảnh vỏ kim loại không có ổ USB nếu tiêu đề vẫn ghi "kit phát triển".
+- Trang Hshop đã kiểm: [ESP32 NodeMCU-32S CH340 Ai-Thinker, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker) — đây là mạch phát triển có sẵn USB, phù hợp để chọn mua.
+- Trang Hshop đã kiểm (phân khúc cao hơn): [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32).
+- Trang Hshop đã kiểm (**không** chọn làm mạch duy nhất ban đầu): [module ESP32-S3-WROOM-1, 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif) — đây là module trần, chưa có chip USB-UART.
+- Trang tìm kiếm Hshop: [raspberry pi pico](https://hshop.vn/search?q=raspberry+pi+pico) (thời điểm khảo sát có Pico 2 giá 195.000 ₫ và Pico 2 W giá 275.000 ₫).
+- Trang Thế Giới IC: [ESP32-DevKitC-32U](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz) — cần đọc kỹ xem bản dùng đầu nối anten U.FL này có kèm sẵn cáp anten ngoài hay không.
+- Tìm trên Shopee: [ESP32 DevKit](https://shopee.vn/search?keyword=esp32%20devkit%20ch340).
+- Lưu ý: tránh các sản phẩm chỉ chụp ảnh module bọc kim loại không có cổng USB dù tiêu đề vẫn ghi "kit phát triển".
 
 ### Khung xe, động cơ, bánh đa hướng
 
-Từ khóa: `khung xe robot 2 bánh TT`, `động cơ giảm tốc TT 1:48`, `bánh đa hướng`.
+Từ khóa gợi ý: `khung xe robot 2 bánh TT`, `động cơ giảm tốc TT 1:48`, `bánh đa hướng`.
 
-- Các lần tìm cho bài này **không** thấy kit 2WD mica rẻ trên Hshop. Có thấy [khung MKE-R01 4WD động cơ TT, 245 000 ₫](https://hshop.vn/khung-xe-mke-r01-4wd-robot-car-chassis-tt-motor). Dùng hai motor cho capstone, để hai cái làm dự phòng, thêm bánh đa hướng, **hoặc** gom bánh trái một tốc độ và bánh phải một tốc độ chỉ sau khi đã đo dòng.
-- Linh kiện rời, đã kiểm: [động cơ TT 1:48, 20 000 ₫](https://hshop.vn/dong-co-dc-giam-toc-tt-motor-ti-so-1-48), [bánh 65 mm, 8 000 ₫](https://hshop.vn/banh-xe-dong-co-dc-giam-toc-v1-plastic-geared-tt-motor-65mm), [gá, 10 000 ₫](https://hshop.vn/ga-bat-dong-co-dc-giam-toc-tt-motor-mounting-bracket), [bánh đa hướng, 15 000 ₫](https://hshop.vn/banh-xe-nhua-da-huong-3pi-ball-caster-wheel).
-- Tìm Shopee (trang tìm, chưa lấy giá từng tin): [khung xe 2 bánh TT](https://shopee.vn/search?keyword=khung%20xe%20robot%202%20b%C3%A1nh%20TT). Tin rao thường nằm khoảng **90 000–180 000 ₫**; ảnh phải có hai motor, bánh đa hướng và hộp pin.
-- Tìm Lazada: [khung xe robot](https://www.lazada.vn/catalog/?q=khung%20xe%20robot%202%20banh).
-- Tránh "kit robot" chỉ có L298N và hộp 4 pin AA rồi gọi là đủ.
+- Tại thời điểm khảo sát, Hshop không có sẵn bộ khung 2WD mica giá rẻ, nhưng có [khung MKE-R01 4WD động cơ TT, 245 000 ₫](https://hshop.vn/khung-xe-mke-r01-4wd-robot-car-chassis-tt-motor). Bạn có thể dùng hai động cơ cho xe Capstone (để hai chiếc còn lại dự phòng) kèm một bánh đa hướng, hoặc chỉ ghép cặp bánh trái/phải sau khi đã đo dòng cụ thể.
+- Linh kiện mua rời trên Hshop: [động cơ TT 1:48, 20 000 ₫](https://hshop.vn/dong-co-dc-giam-toc-tt-motor-ti-so-1-48), [bánh 65 mm, 8 000 ₫](https://hshop.vn/banh-xe-dong-co-dc-giam-toc-v1-plastic-geared-tt-motor-65mm), [gá bắt động cơ, 10 000 ₫](https://hshop.vn/ga-bat-dong-co-dc-giam-toc-tt-motor-mounting-bracket), [bánh đa hướng, 15 000 ₫](https://hshop.vn/banh-xe-nhua-da-huong-3pi-ball-caster-wheel).
+- Tìm trên Shopee (trang tìm kiếm chung): [khung xe 2 bánh TT](https://shopee.vn/search?keyword=khung%20xe%20robot%202%20b%C3%A1nh%20TT) — mức giá phổ biến khoảng **90.000–180.000 ₫**; cần kiểm tra ảnh có đủ hai động cơ, bánh đa hướng và hộp pin.
+- Tìm trên Lazada: [khung xe robot](https://www.lazada.vn/catalog/?q=khung%20xe%20robot%202%20banh).
+- Tránh các bộ "kit robot" ghép sẵn L298N với hộp 4 pin AA.
 
 ### Driver động cơ
 
-Từ khóa: `TB6612FNG`, `DRV8833`. Đừng lấy `module L298 giá rẻ` làm mặc định.
+Từ khóa gợi ý: `TB6612FNG`, `DRV8833` (không chọn `module L298 giá rẻ` làm mặc định).
 
-- Đã kiểm: [TB6612FNG, 45 000 ₫, SKU HS2458V](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver). VM 4,5–10 V, logic 2,7–5,5 V, 1,2 A liên tục, 3,2 A đỉnh, 20×20 mm.
-- Thay thế đã kiểm: [DRV8833, 25 000 ₫](https://hshop.vn/mach-dieu-khien-dong-co-drv8833-dc-motor-driver). VM 2,7–10,8 V, listing ghi tối đa 1,5 A/kênh.
-- Món đã kiểm nhưng **không** để làm mặc định: [module L298N, cũng 45 000 ₫](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298). Chỉ mua khi bạn hiểu điện áp rơi và motor thuộc loại 12 V.
-- Tìm Shopee: [TB6612FNG](https://shopee.vn/search?keyword=tb6612fng).
-- Mạch Pololu là bản tham chiếu đáng tin nếu sau này nhập: [Pololu 713](https://www.pololu.com/product/713).
+- Đã kiểm: [TB6612FNG, 45 000 ₫, SKU HS2458V](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver) — VM 4,5–10 V, logic 2,7–5,5 V, dòng 1,2 A liên tục, 3,2 A đỉnh, kích thước 20×20 mm.
+- Phương án thay thế đã kiểm: [DRV8833, 25 000 ₫](https://hshop.vn/mach-dieu-khien-dong-co-drv8833-dc-motor-driver) — VM 2,7–10,8 V, dòng tối đa 1,5 A/kênh theo mô tả.
+- Sản phẩm tham khảo nhưng **không** dùng làm mặc định: [module L298N, cùng giá 45 000 ₫](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298) — chỉ cân nhắc nếu bạn nắm rõ mức sụt áp và dùng động cơ loại 12 V.
+- Tìm trên Shopee: [TB6612FNG](https://shopee.vn/search?keyword=tb6612fng).
+- Mạch tham chiếu chuẩn nếu có nhu cầu nhập chính hãng về sau: [Pololu 713](https://www.pololu.com/product/713).
 
 ### Cảm biến
 
-Từ khóa: `HC-SR04`, `VL53L0X`, `MPU6050 GY-521`, `đĩa encoder TT 20 xung`.
+Từ khóa gợi ý: `HC-SR04`, `VL53L0X`, `MPU6050 GY-521`, `đĩa encoder TT 20 xung`.
 
-- Đã kiểm: [HC-SR04, 27 000 ₫](https://hshop.vn/cam-bien-sieu-am-srf04). Echo ra 5 V. Mua mạch chuyển mức cùng lúc.
-- Mạch chuyển mức đã kiểm: [4 kênh, 10 000 ₫](https://hshop.vn/mach-chuyen-muc-tin-hieu-logic-4-kenh).
-- Dòng mua sau, đã kiểm: [GY-521 MPU6050, 85 000 ₫](https://hshop.vn/cam-bien-6-dof-bac-tu-do-gy-521-mpu6050). I²C, listing ghi nuôi 3,3–5 V, logic 3,3 V. Chưa cần để nhấp LED.
-- ToF thay HC-SR04, đã kiểm: [module VL53L0X, 115 000 ₫](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x).
-- Đĩa encoder, đã kiểm nhưng rất dễ mất: [đĩa 20 xung, 1 000 ₫](https://hshop.vn/dia-encoder-20-xung-dong-co-dc-giam-toc-v1). Mạch cảm biến là dòng khác; tìm `cảm biến tốc độ encoder hồng ngoại`.
-- Shopee: [HC-SR04](https://shopee.vn/search?keyword=hc-sr04).
+- Đã kiểm: [HC-SR04, 27 000 ₫](https://hshop.vn/cam-bien-sieu-am-srf04) — chân echo xuất mức 5 V nên cần mua kèm mạch chuyển mức logic.
+- Mạch chuyển mức đã kiểm: [mạch chuyển mức 4 kênh, 10 000 ₫](https://hshop.vn/mach-chuyen-muc-tin-hieu-logic-4-kenh).
+- Linh kiện nâng cấp về sau (đã kiểm): [GY-521 MPU6050, 85 000 ₫](https://hshop.vn/cam-bien-6-dof-bac-tu-do-gy-521-mpu6050) — giao tiếp I²C, cấp nguồn 3,3–5 V, logic 3,3 V; chưa cần ở giai đoạn đầu.
+- Phương án ToF thay HC-SR04 (đã kiểm): [module VL53L0X, 115 000 ₫](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x).
+- Đĩa encoder (đã kiểm, kích thước nhỏ rất dễ thất lạc): [đĩa 20 xung, 1 000 ₫](https://hshop.vn/dia-encoder-20-xung-dong-co-dc-giam-toc-v1). Mạch cảm biến quang đọc đĩa là món riêng, tìm theo từ khóa `cảm biến tốc độ encoder hồng ngoại`.
+- Tìm trên Shopee: [HC-SR04](https://shopee.vn/search?keyword=hc-sr04).
 
 ### Nguồn
 
-Từ khóa: `pin 18650 2500mAh`, `sạc 18650 4 ngăn`. Chỉ tìm `TP4056` khi bạn biết nó là một cell.
+Từ khóa gợi ý: `pin 18650 2500mAh`, `sạc 18650 4 ngăn`. Chỉ tìm `TP4056` khi bạn dùng đúng cho mục đích sạc một cell đơn.
 
-- Cell đã kiểm: [Sunpower 2500 mAh, 45 000 ₫](https://hshop.vn/pin-sac-18650-li-ion-rechargeable-battery-3-7v-2500mah-10c-sunpower), [2000 mAh, 35 000 ₫](https://hshop.vn/pin-sac-18650-li-ion-rechargeable-battery-3-7v-2000mah-10c-sunpower).
-- Đế hàn chân, đã kiểm: [đế 2×18650, 4 000 ₫](https://hshop.vn/hop-pin-2-co-18650). Khung xe có thể đã kèm đế lò xo. Đừng mua cả hai rồi nối tiếp bốn cell.
-- Đế không hàn, đã kiểm: [đế DIY, 10 000 ₫](https://hshop.vn/hop-pin-ghep-noi-diy-solderless-18650-battery-holder).
-- Sạc khay đã kiểm: [sạc 4 ngăn USB, 68 000 ₫](https://hshop.vn/bo-sac-pin-18650-li-ion-usb-battery-charger-yh-18650-4).
-- Mạch một cell đã kiểm, **không** dùng cho cụm 2S: [TP4056 USB-C, 10 000 ₫](https://hshop.vn/mach-sac-pin-tp4056-lithium-battery-charge-controller-usb-c).
-- Tìm Shopee: [sạc pin 18650](https://shopee.vn/search?keyword=s%E1%BA%A1c%20pin%2018650%204%20ng%C4%83n).
-- Tránh mạch "sạc nhanh 2A" không thấy điện trở chỉnh dòng, và mọi cell đề trên 3500 mAh.
+- Cell pin đã kiểm: [Sunpower 2500 mAh, 45 000 ₫](https://hshop.vn/pin-sac-18650-li-ion-rechargeable-battery-3-7v-2500mah-10c-sunpower) và [Sunpower 2000 mAh, 35 000 ₫](https://hshop.vn/pin-sac-18650-li-ion-rechargeable-battery-3-7v-2000mah-10c-sunpower).
+- Đế pin chân hàn đã kiểm: [đế 2×18650, 4 000 ₫](https://hshop.vn/hop-pin-2-co-18650). Lưu ý nhiều bộ khung xe đã kèm sẵn đế pin, tránh mua dư rồi mắc nối tiếp bốn cell.
+- Đế pin không hàn đã kiểm: [đế DIY, 10 000 ₫](https://hshop.vn/hop-pin-ghep-noi-diy-solderless-18650-battery-holder).
+- Bộ sạc khay đã kiểm: [sạc 4 ngăn USB, 68 000 ₫](https://hshop.vn/bo-sac-pin-18650-li-ion-usb-battery-charger-yh-18650-4).
+- Mạch sạc một cell đã kiểm (**không** dùng cho cụm 2S): [TP4056 USB-C, 10 000 ₫](https://hshop.vn/mach-sac-pin-tp4056-lithium-battery-charge-controller-usb-c).
+- Tìm trên Shopee: [sạc pin 18650](https://shopee.vn/search?keyword=s%E1%BA%A1c%20pin%2018650%204%20ng%C4%83n).
+- Lưu ý: tránh các mạch "sạc nhanh 2 A" không rõ thiết kế giới hạn dòng và mọi cell pin quảng cáo trên 3500 mAh.
 
 ### Dụng cụ và mạch thử
 
-Từ khóa: `đồng hồ vạn năng`, `mỏ hàn 60W`, `breadboard 830`, `dây breadboard đực cái`.
+Từ khóa gợi ý: `đồng hồ vạn năng`, `mỏ hàn 60W`, `breadboard 830`, `dây breadboard đực cái`.
 
-- Đồng hồ đã kiểm: [UNI-T UT33D+, 285 000 ₫](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang), [Wadfow WDM1501, 185 000 ₫](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms). UT136C+ giá 560 000 ₫ là nâng cấp sau, không phải mặc định cho sinh viên.
-- Mỏ hàn đã kiểm: [Wadfow WEL3616 60 W, 75 000 ₫](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron), [đế, 40 000 ₫](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi), [thiếc Sn63 0,8 mm, 24 000 ₫](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire).
-- Kìm đã kiểm: [kìm cắt chân 170, 35 000 ₫](https://hshop.vn/kim-cat-day-dien-nho-170-cat-chan-linh-kien-dien-tu). Kìm tuốt nếu muốn một dụng cụ ít cứa đứt lõi đồng: [Wadfow WBQ8401, 130 000 ₫](https://hshop.vn/kim-tuot-day-dien-da-nang-wadfow-wbq8401-wire-stripper).
-- Mạch thử đã kiểm: [breadboard 830 lỗ, 35 000 ₫](https://hshop.vn/test-board-cammb-102), [dây đực-đực, 30 000 ₫](https://hshop.vn/day-cam-breadboard-duc-duc-20cm-cap-det-40-soi-m-m-jumper-wire), [dây đực-cái, 30 000 ₫](https://hshop.vn/day-cam-breadboard-duc-cai-20cm-cap-det-40-soi-m-f-jumper-wire), [mạch cấp nguồn breadboard, 25 000 ₫](https://hshop.vn/mach-cap-nguon-cho-breadboard-400-830-lo-mb-102). Hoãn mạch cấp nguồn đến khi bạn phân biệt được ray 3,3 V và ray 5 V.
-- Cáp đã kiểm: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Cáp 30 cm giá 27 000 ₫ có bán và rất ngắn khi xe ở trên sàn. Mạch cổng USB-C thì mua cáp USB-C.
-- Phụ kiện nhỏ đã kiểm: [bộ LED 3 mm, 20 000 ₫](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led), [nút nhấn tròn, 10 000 ₫](https://hshop.vn/nut-nhan-nha-tron-pbs-11b-12mm-kem-cap), [dây đỏ đen 1 m, 8 000 ₫](https://hshop.vn/day-dien-do-den).
-- Trang đầu khi tìm `điện trở` trên Hshop **không** ra bộ điện trở 1/4 W (ra shunt và LCD). Tìm Shopee [bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W), khoảng **30 000–80 000 ₫**. Trong bộ cần có 220 Ω, 330 Ω, 1 kΩ và 10 kΩ.
+- Đồng hồ vạn năng đã kiểm: [UNI-T UT33D+, 285 000 ₫](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang), [Wadfow WDM1501, 185 000 ₫](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms). Mẫu UT136C+ (560.000 ₫) là phương án nâng cấp về sau, chưa cần thiết cho giai đoạn bắt đầu.
+- Dụng cụ hàn đã kiểm: [Wadfow WEL3616 60 W, 75 000 ₫](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron), [giá đỡ, 40 000 ₫](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi), [thiếc Sn63 0,8 mm, 24 000 ₫](https://hshop.vn/thiec-han-sunchi-kp26-0-8mm-sn63-pb37-solder-wire).
+- Kìm đã kiểm: [kìm cắt chân 170, 35 000 ₫](https://hshop.vn/kim-cat-day-dien-nho-170-cat-chan-linh-kien-dien-tu); nếu muốn thêm kìm tuốt dây hạn chế cứa lõi đồng, tham khảo [Wadfow WBQ8401, 130 000 ₫](https://hshop.vn/kim-tuot-day-dien-da-nang-wadfow-wbq8401-wire-stripper).
+- Mạch thử đã kiểm: [breadboard 830 lỗ, 35 000 ₫](https://hshop.vn/test-board-cammb-102), [dây đực-đực, 30 000 ₫](https://hshop.vn/day-cam-breadboard-duc-duc-20cm-cap-det-40-soi-m-m-jumper-wire), [dây đực-cái, 30 000 ₫](https://hshop.vn/day-cam-breadboard-duc-cai-20cm-cap-det-40-soi-m-f-jumper-wire), [mạch cấp nguồn breadboard, 25 000 ₫](https://hshop.vn/mach-cap-nguon-cho-breadboard-400-830-lo-mb-102) (nên hoãn dùng mạch cấp nguồn breadboard cho tới khi bạn phân biệt chắc chắn đường 3,3 V và 5 V).
+- Cáp USB đã kiểm: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Cáp dài 30 cm (27.000 ₫) khá bất tiện khi đặt xe dưới sàn; nếu mạch dùng cổng USB-C thì chọn cáp USB-C truyền dữ liệu tương ứng.
+- Phụ kiện nhỏ đã kiểm: [bộ LED 3 mm, 20 000 ₫](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led), [nút nhấn tròn, 10 000 ₫](https://hshop.vn/nut-nhan-nha-tron-pbs-11b-12mm-kem-cap), [dây điện đỏ đen 1 m, 8 000 ₫](https://hshop.vn/day-dien-do-den).
+- Bộ điện trở: tại thời điểm khảo sát, tìm `điện trở` trên Hshop không ra bộ 1/4 W thông dụng, nên bạn có thể tìm trên Shopee theo [bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W) (giá thường khoảng **30.000–80.000 ₫**), đảm bảo trong bộ có các trị số 220 Ω, 330 Ω, 1 kΩ và 10 kΩ.
 - Tìm dụng cụ trên Shopee: [mỏ hàn 60W](https://shopee.vn/search?keyword=m%E1%BB%8F%20h%C3%A0n%2060W), [đồng hồ vạn năng](https://shopee.vn/search?keyword=%C4%91%E1%BB%93ng%20h%E1%BB%93%20v%E1%BA%A1n%20n%C4%83ng).
-- IC Đây Rồi nếu bạn ở Thủ Đức, hợp linh kiện rời: [icdayroi.com](https://icdayroi.com/). Thế Giới IC: [thegioiic.com](https://www.thegioiic.com/).
+- Cửa hàng linh kiện rời: [IC Đây Rồi](https://icdayroi.com/) (khu vực Thủ Đức) và [Thế Giới IC](https://www.thegioiic.com/).
 
-Dây Dupont là dây tín hiệu. Dòng motor đi trên dây đỏ đen to hơn, vặn vít hoặc hàn vào cực driver, không đi qua một hàng lỗ breadboard.
+Nhắc lại nguyên tắc đi dây: dây Dupont chỉ dùng cho tín hiệu, còn dòng động cơ phải đi qua dây đỏ đen tiết diện lớn hơn, bắt chặt vào trạm vít hoặc hàn thẳng vào cực của mạch lái thay vì cắm qua hàng lỗ breadboard.
 
-## Giỏ hàng mẫu: bạn Lan, Track A, trần 2 000 000 ₫
+## Giỏ hàng mẫu: bạn Lan, Lộ trình A, trần 2.000.000 ₫
 
-Lan học Track A. Cô muốn teleop Wi-Fi ở chương 08, nên vi điều khiển là ESP32 NodeMCU-32S, không phải Pico. Cô chưa chơi pin lithium, nên giỏ có sạc khay và cấm TP4056 kẹp lên đế nối tiếp. Cô rút hai motor khỏi kit 4WD, gắn bánh đa hướng, hai motor còn lại để dành. Giá là snapshot Hshop ở trên.
+Lan học theo Lộ trình A và muốn làm teleop Wi-Fi ở Chương 08, nên chọn mạch ESP32 NodeMCU-32S thay vì Pico. Vì mới tiếp xúc với pin lithium, cô mua bộ sạc 4 khay để sạc từng cell riêng và tuyệt đối không kẹp TP4056 lên đế nối tiếp. Với bộ khung 4WD, cô tháo bớt hai động cơ để dự phòng và gắn thêm bánh đa hướng. Bảng dưới đây dùng mốc giá Hshop đã ghi nhận ở trên:
 
-| Dòng | SL | Đơn giá (₫) | Thành tiền (₫) |
+| Hạng mục | SL | Đơn giá (₫) | Thành tiền (₫) |
 |------|---:|------------:|---------------:|
 | ESP32 NodeMCU-32S CH340 | 1 | 190 000 | 190 000 |
 | Khung MKE-R01 4WD (dùng 2 motor) | 1 | 245 000 | 245 000 |
@@ -251,74 +248,72 @@ Lan học Track A. Cô muốn teleop Wi-Fi ở chương 08, nên vi điều khi�
 | Bộ LED + nút + dây 1 m | 1 | 20 000 + 10 000 + 8 000 | 38 000 |
 | **Tổng linh kiện** | | | **1 421 000** |
 
-Cộng bộ điện trở theo khoảng Shopee 50 000 ₫ và ship nội thành khoảng 30 000 ₫ thì gần **1 500 000 ₫**. Vẫn trong trần 1 500 000–2 500 000 ₫, còn chỗ cho trụ đồng M3 và một cáp USB dự phòng. Đổi đồng hồ sang Wadfow 185 000 ₫ thì tiết kiệm 100 000 ₫. Đổi ESP32 sang Pico 2 giá 195 000 ₫ gần như không rẻ hơn, và Wi-Fi bị hoãn. Thêm một TB6612 thứ hai thay cho bánh đa hướng, rồi dẫn cả bốn bánh thành hai cặp, là một robot khác. Lan ghi đó là phương án bị loại, không sửa giỏ trong im lặng.
+Cộng thêm bộ điện trở mua trên Shopee khoảng 50.000 ₫ và phí vận chuyển nội thành khoảng 30.000 ₫, tổng chi phí vào khoảng **1.500.000 ₫**, nằm gọn trong ngưỡng 1.500.000–2.500.000 ₫ và vẫn còn dư ngân sách cho trụ đồng M3 cùng cáp USB dự phòng. Nếu đổi đồng hồ sang Wadfow (185.000 ₫) sẽ tiết kiệm thêm 100.000 ₫. Đổi sang Pico 2 (195.000 ₫) hầu như không rẻ hơn mà lại phải hoãn phần Wi-Fi. Lan cũng cân nhắc việc mua thêm một mạch TB6612 thứ hai để kéo cả bốn bánh thay vì dùng bánh đa hướng, nhưng xác định đó là một cấu hình robot khác nên ghi rõ là phương án bị loại thay vì âm thầm sửa giỏ hàng.
 
-Cô không thêm L298N "vì cũng 45 000". Ở 7,4 V với sụt 2,0 V, motor chỉ còn 5,4 V. Listing motor của Hshop: 5–6 V là khoảng 200 vòng/phút và 0,8 kg·cm ở 6 V. Cô muốn phía 7 V của đường đó, nên driver MOSFET ở lại.
+Cô loại bỏ L298N dù cùng giá 45.000 ₫ vì ở nguồn 7,4 V, sụt áp 2,0 V chỉ còn lại 5,4 V — nằm sát vùng yếu (5–6 V, ~200 vòng/phút, 0,8 kg·cm ở 6 V) của động cơ TT. Mạch lái MOSFET giúp giữ điện áp gần mức 7 V để xe vận hành khỏe hơn.
 
-## Lab: lập `bom.csv` và kiểm từng dòng
+## Thực hành: lập tệp `bom.csv` và kiểm tra từng dòng
 
-Tạo `bom.csv` trong thư mục ghi chú, dòng đầu:
+Tạo tệp `bom.csv` trong thư mục ghi chú với dòng tiêu đề sau:
 
 ```text
 part_id,name,qty,role,rating,vendor,url_or_search,unit_vnd,line_vnd,substitute,wave,received,photo,notes
 ```
 
-**Các bước**
+**Các bước thực hiện:**
 
-1. Chép bảng của Lan, rồi xóa hoặc hoãn MPU6050 nếu vượt ngân sách của bạn. Thêm một dòng bộ điện trở, giá ghi "khoảng Shopee, chốt khi mở tin" cho đến khi có số thật.
-2. Giữ ba cột bạn sẽ dùng: `received` (yes/no), `photo` (tên file ảnh), `notes` (chữ đọc được trên IC).
-3. Dòng driver: ghi dải VM và câu "không lấy L298N" vào `notes`.
-4. Dòng sạc: ghi "mỗi khay một cell, không kẹp lên đế 2S".
-5. Hàng chưa về thì `received` để no, bảng vẫn phải xong. Hôm mạch và đồng hồ tới thì chụp ảnh.
-6. Cộng cột thành tiền. Nếu quá 2 500 000 ₫, cắt theo thứ tự: IMU, kìm tuốt, mạch nguồn breadboard. Không cắt đồng hồ hoặc driver.
+1. Chép danh sách mẫu của Lan, sau đó bỏ hoặc hoãn MPU6050 nếu vượt ngân sách của bạn. Thêm một dòng cho bộ điện trở, tạm ghi giá là "khoảng Shopee, chốt khi mở tin" cho tới khi có giá thực tế.
+2. Duy trì đủ ba cột theo dõi thực tế: `received` (`yes`/`no`), `photo` (tên tệp ảnh chụp) và `notes` (ký hiệu đọc trực tiếp trên thân IC).
+3. Ở dòng mạch lái, ghi rõ dải điện áp VM và ghi chú "không lấy L298N" vào cột `notes`.
+4. Ở dòng bộ sạc, ghi chú "mỗi khay một cell, không kẹp lên đế 2S".
+5. Nếu hàng chưa giao tới, để `received` là `no` nhưng vẫn phải hoàn thiện toàn bộ bảng; khi mạch và đồng hồ về tới thì chụp ảnh bổ sung.
+6. Tính tổng cột `line_vnd`. Nếu vượt 2.500.000 ₫, cắt giảm theo thứ tự ưu tiên: cảm biến IMU, kìm tuốt dây, mạch cấp nguồn breadboard — không cắt đồng hồ vạn năng hay mạch lái động cơ.
 
-**Bạn phải thấy**
+**Kết quả cần đạt:** Một tổng chi phí có thể giải thích rõ ràng trong một phút; dòng mạch lái nêu rõ phương án thay thế là DRV8833 và loại bỏ L298N; dòng bộ sạc đảm bảo không dùng TP4056 cho đế pin nối tiếp.
 
-Một tổng giải thích được trong một phút, dòng driver có phương án thay là DRV8833 và món bị loại là L298N, dòng sạc không thể được thỏa bằng TP4056 trên đế nối tiếp.
+**Các lỗi thường gặp:**
 
-**Lỗi hay gặp**
-
-| Bạn thấy | Thường là | Cách sửa |
+| Tình huống gặp phải | Nguyên nhân | Cách khắc phục |
 |----------|-----------|----------|
-| Giỏ rẻ nhưng driver là L298N | Bỏ qua điện áp rơi | Đổi dòng; phần mềm không cứu được |
-| Dòng ESP32 trỏ tới module WROOM | Không có USB | Đổi sang dev board có ổ cắm USB |
-| Hai cell cộng một TP4056 | Sạc 4,2 V, cụm 8,4 V | Sạc khay, nạp từng cell |
-| Cột dung lượng ghi 9900 mAh | Công bố giả | Bỏ tin đó |
-| Tổng đang tính cáp 30 cm | Dây USB không tới xe | Mua cáp data 1 m |
-| Ghi chú motor đi dây Dupont | Breadboard sẽ sụt áp hoặc nóng | Vít terminal và dây đỏ đen |
+| Giỏ hàng rẻ nhưng dùng mạch lái L298N | Bỏ qua yếu tố sụt áp cầu Darlington | Đổi sang TB6612FNG hoặc DRV8833; phần mềm không bù được sụt áp |
+| Dòng ESP32 trỏ tới module WROOM trần | Không có cổng USB-UART | Đổi sang mạch phát triển (dev board) có sẵn cổng USB |
+| Đặt hai cell 18650 kèm một mạch TP4056 | Sạc 4,2 V không tương thích cụm 8,4 V | Đổi sang bộ sạc khay để nạp riêng từng cell |
+| Cột dung lượng pin ghi 9900 mAh | Thông số công bố sai sự thật | Bỏ qua sản phẩm đó, chọn cell uy tín ≤ 3500 mAh |
+| Chọn cáp USB dài 30 cm | Quá ngắn khi thử xe trên sàn hoặc bàn | Đổi sang cáp truyền dữ liệu dài 1 m |
+| Dự định đi dây động cơ bằng dây Dupont | Tiếp điểm breadboard gây sụt áp và sinh nhiệt | Dùng dây đỏ đen tiết diện lớn nối qua trạm vít |
 
-**An toàn.** Mối nguy của bài này là cell lithium, không phải file bảng tính. Sạc ở chỗ bạn nhìn thấy cell. Đừng chập đế pin. Đừng nối VM vào chân 5 V hoặc 3,3 V của ESP32 để "thử pin".
+**Lưu ý an toàn:** Rủi ro thực sự của bài này nằm ở pin lithium, không phải ở tệp bảng tính. Luôn sạc pin ở nơi dễ quan sát, tránh làm chập hai cực đế pin, và tuyệt đối không nối nguồn VM vào chân 5 V hay 3,3 V của ESP32 để "thử pin".
 
 ## Video tham khảo
 
-- **Xem trước:** [PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS](https://www.youtube.com/watch?v=RsZBxfpcLu8) — Aleksandar Haber PhD, tiếng Anh. Một xe vi sai giá thấp và những món người dựng thực sự mua. Đối chiếu với BOM của khóa, đừng chép giá trong video.
-- [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Đọc một trang linh kiện như đọc datasheet: điện áp, dòng, và thứ listing không ghi.
+- **Xem trước:** [PART1: Building Low-Cost Differential Wheeled Robot For Machine Learning, SLAM, and ROS](https://www.youtube.com/watch?v=RsZBxfpcLu8) — Aleksandar Haber PhD, tiếng Anh. Minh họa một mẫu xe vi sai chi phí thấp và các linh kiện thực tế cần dùng; hãy đối chiếu với bảng BOM của khóa thay vì sao chép nguyên giá trong video.
+- [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Hướng dẫn cách đọc trang sản phẩm linh kiện tương tự đọc datasheet: chú ý điện áp, dòng điện và những thông số bị lược bỏ.
 
 ## Bài tập
 
-1. Cụm 2S đang ở 8,0 V. L298N rơi 2,2 V, đường TB6612 rơi 0,4 V. Động cơ TT nhận bao nhiêu vôn trong mỗi trường hợp? Mức nào nằm giữa vùng dễ chịu của listing 3–9 V?
-2. Đế của bạn ghi nối tiếp. Bạn chỉ có một mạch TP4056. Viết đúng trình tự nạp cả hai cell mà không kẹp sạc lên cặp nối tiếp.
-3. Tiêu đề Shopee ghi "ESP32 WiFi Bluetooth", ảnh là module bọc kim loại, mép chân hàn, không có cổng USB. Đó là dòng nào trên BOM, và còn thiếu món gì?
-4. Echo của HC-SR04 là 5 V. GPIO của bạn là 3,3 V. Bạn thêm món nào, và đo gì để chắc echo chưa cắm thẳng vào chân?
-5. Tổng linh kiện 1 420 000 ₫ trước ship. Ship 35 000 ₫, bộ điện trở 55 000 ₫. Nếu Lan thêm một TB6612 nữa giá 45 000 ₫ thì còn dưới trần 2 000 000 ₫ không? Viết phép cộng.
+1. Giả sử cụm pin 2S đang ở mức 8,0 V. Mạch L298N làm sụt 2,2 V còn mạch TB6612 làm sụt 0,4 V. Động cơ TT nhận được bao nhiêu vôn trong mỗi trường hợp, và mức nào nằm tốt hơn trong dải 3–9 V của động cơ?
+2. Bạn có một đế pin nối tiếp 2S và chỉ có một mạch sạc TP4056. Hãy viết đúng trình tự nạp cả hai cell mà không kẹp mạch sạc lên cụm nối tiếp.
+3. Một bài đăng trên Shopee có tiêu đề "ESP32 WiFi Bluetooth", nhưng ảnh chụp là module bọc vỏ kim loại có hàng chân hàn viền ngoài và không có cổng USB. Món này tương ứng với dòng nào trong BOM và còn thiếu phần nào?
+4. Chân echo của HC-SR04 xuất mức 5 V trong khi chân GPIO của vi điều khiển chỉ chịu 3,3 V. Bạn cần thêm linh kiện nào, và dùng phép đo gì để chắc chắn chân echo chưa bị nối thẳng vào GPIO?
+5. Tổng tiền linh kiện trước vận chuyển là 1.420.000 ₫, phí vận chuyển 35.000 ₫ và bộ điện trở 55.000 ₫. Nếu Lan mua thêm một mạch TB6612 nữa giá 45.000 ₫ thì tổng chi phí có còn dưới mức trần 2.000.000 ₫ không? Hãy viết phép tính cụ thể.
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Đường L298: $$8{,}0 - 2{,}2 = 5{,}8\,\text{V}$$. Đường TB6612: $$8{,}0 - 0{,}4 = 7{,}6\,\text{V}$$. Cả hai đều trong 3–9 V. 7,6 V là điểm khỏe hơn so với mốc mô-men ở 6 V trên listing; 5,8 V là phía yếu.
-2. Rút cell ra. Nạp cell A trong một khay đến khi sạc ngắt gần 4,2 V. Lặp lại với cell B. Đo cả hai. Sau đó mới lắp vào đế nối tiếp. TP4056 có thể nạp một cell rời; không được kẹp vào hai cực của đế.
-3. Đó là module trần, không phải dòng dev board. Vẫn cần dev board, hoặc mạch nạp USB-UART kèm ổn áp 3,3 V. Đừng bắt đầu khóa học bằng module trần.
-4. Thêm mạch chuyển mức 4 kênh (hoặc cầu chia trên echo). Khi cảm biến đã có nguồn mà echo chưa tới GPIO, net echo và net GPIO chưa được nối thẳng. Kiểm thông mạch: hai net đó không thông nhau cho đến khi phía hạ áp của mạch chuyển mức nằm ở giữa.
-5. $$1\,420\,000 + 35\,000 + 55\,000 + 45\,000 = 1\,555\,000$$. Vẫn dưới 2 000 000 ₫. Driver thứ hai là đổi thiết kế (bốn motor), không phải đồ dự phòng miễn phí, nên cột ghi chú phải nói rõ.
+1. Qua L298N: $$8{,}0 - 2{,}2 = 5{,}8\,\text{V}$$. Qua TB6612: $$8{,}0 - 0{,}4 = 7{,}6\,\text{V}$$. Cả hai đều nằm trong dải 3–9 V, nhưng 7,6 V giúp động cơ khỏe hơn rõ rệt so với mốc mô-men chuẩn 6 V trên bảng thông số, còn 5,8 V nằm về phía yếu.
+2. Tháo rời hai cell khỏi đế. Nạp cell A đơn lẻ cho đến khi TP4056 báo đầy và ngắt gần 4,2 V, sau đó lặp lại tương tự với cell B. Đo kiểm tra điện áp cả hai viên rồi mới lắp vào đế 2S. TP4056 chỉ dùng cho từng cell rời, không kẹp lên hai cực đế nối tiếp.
+3. Đó là module trần, không phải mạch phát triển (dev board). Nó còn thiếu mạch giao tiếp USB-UART và mạch ổn áp 3,3 V; người mới không nên bắt đầu khóa học bằng module trần.
+4. Cần bổ sung mạch chuyển mức logic 4 kênh (hoặc cầu chia áp trên riêng chân echo). Khi cảm biến đã cấp nguồn nhưng chưa nối qua mạch chuyển mức, kiểm tra thông mạch để chắc chắn mạng dây echo và chân GPIO không thông trực tiếp với nhau.
+5. $$1\,420\,000 + 35\,000 + 55\,000 + 45\,000 = 1\,555\,000$$ ₫, vẫn thấp hơn trần 2.000.000 ₫. Tuy nhiên, thêm mạch lái thứ hai đồng nghĩa thay đổi thiết kế sang hệ bốn động cơ chứ không phải phụ tùng dự phòng thông thường, nên cần ghi rõ trong cột ghi chú.
 
 </details>
 
 ## Đọc thêm
 
-- [Trang TB6612FNG của Pololu, mã 713](https://www.pololu.com/product/713) — mạch MOSFET mà module Hshop đang làm theo.
-- [Thư mục DRV8833 của TI](https://www.ti.com/product/DRV8833) — giới hạn dòng và dải VM của món thay rẻ.
-- [Nhóm driver DC chổi than của Pololu](https://www.pololu.com/category/11/brushed-dc-motor-drivers) — vì sao tem "2 A" trên mạch Darlington chưa nói hết.
-- [SparkFun: logic levels](https://learn.sparkfun.com/tutorials/logic-levels) — echo 5 V và GPIO 3,3 V.
-- [Battery University, BU-409, nạp lithium-ion](https://batteryuniversity.com/article/bu-409-charging-lithium-ion) — 4,20 V mỗi cell, vì sao cụm nối tiếp cần sạc hiểu nối tiếp.
-- [Datasheet ESP32 của Espressif](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — điện áp tối đa trên GPIO không phải 5 V.
-- [Tài liệu module HC-SR04, SparkFun](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — thời gian trig/echo; coi echo là 5 V.
+- [Trang TB6612FNG của Pololu, mã 713](https://www.pololu.com/product/713) — thiết kế mạch MOSFET chuẩn mà các module trên thị trường tham khảo theo.
+- [Thư mục DRV8833 của TI](https://www.ti.com/product/DRV8833) — thông số giới hạn dòng và dải điện áp VM của phương án thay thế gọn hơn.
+- [Nhóm driver DC chổi than của Pololu](https://www.pololu.com/category/11/brushed-dc-motor-drivers) — giải thích vì sao thông số "2 A" trên mạch Darlington chưa phản ánh đầy đủ khả năng làm việc thực tế.
+- [SparkFun: logic levels](https://learn.sparkfun.com/tutorials/logic-levels) — giải thích sự khác biệt giữa tín hiệu echo 5 V và chân GPIO 3,3 V.
+- [Battery University, BU-409, nạp lithium-ion](https://batteryuniversity.com/article/bu-409-charging-lithium-ion) — lý thuyết về mức đầy 4,20 V mỗi cell và yêu cầu đối với bộ sạc pin mắc nối tiếp.
+- [Datasheet ESP32 của Espressif](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — tài liệu gốc xác nhận điện áp cực đại trên chân GPIO không phải 5 V.
+- [Tài liệu module HC-SR04, SparkFun](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf) — thông số thời gian xung trig/echo và mức điện áp 5 V của chân echo.

@@ -11,55 +11,57 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: **70–90 phút**, gồm lúc phân loại một bộ ốc nhỏ và chụp ảnh đai ốc nyloc đặt cạnh đai ốc thường.
+Thời lượng ước tính: **70–90 phút**, bao gồm thời gian phân loại một bộ ốc nhỏ và chụp ảnh so sánh đai ốc nyloc với đai ốc thường.
 
 ## Mục tiêu học
 
-Hết bài này, các bạn tách được ốc M2, M3 và M4 bằng cách đo đường kính ren, chọn đai ốc nyloc ở những mối mà đai ốc thường sẽ tự tháo dưới rung, và siết vít cố định trục (set screw) đúng vào mặt vát của trục chữ D. Các bạn quyết định được khi nào bạc đạn bi 608 thuộc về con lăn in 3D, khi nào bạc lót sẵn trong hộp giảm tốc TT phải được để yên, và chọn khớp nối khớp đường kính trục đã mua thật, không khớp đường kính ghi trong trí nhớ.
+Sau bài này, các bạn phân biệt được ốc M2, M3 và M4 thông qua việc đo đường kính ren, biết chọn đai ốc nyloc cho các mối ghép dễ tự tháo khi rung, và siết vít cố định trục (set screw) đúng vào mặt vát của trục chữ D. Các bạn cũng xác định được khi nào nên dùng bạc đạn bi 608 (cho con lăn in 3D), khi nào nên giữ nguyên bạc lót sẵn có trong hộp giảm tốc TT, và biết chọn khớp nối theo đúng đường kính trục đo thực tế thay vì dựa vào trí nhớ.
 
 ## Kiến thức cần có
 
-Các bạn dùng được thước kẹp, hoặc khi không có thước thì dùng một đai ốc đã biết cỡ làm dưỡng (thói quen đo của Chương 01). Các bạn biết khung ở Bài 01 có bánh ngồi trên trục động cơ, và những trục ấy về sau phải báo góc quay trung thực cho encoder.
+Các bạn sử dụng được thước kẹp, hoặc dùng một đai ốc đã biết cỡ làm dưỡng kiểm tra khi không có thước (theo thói quen đo lường ở Chương 01). Các bạn đã biết ở Bài 01 rằng bánh xe gắn trực tiếp lên trục động cơ và các trục này cần truyền góc quay trung thực tới encoder.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Odometry của Capstone A tin rằng góc bánh và góc động cơ là cùng một góc, chỉ nhân với tỉ số truyền các bạn sẽ ghi ở Bài 03. Vít cố định trục (set screw) trượt khỏi mặt vát thì bánh kêu tách trong khi encoder vẫn đếm một vòng hoàn hảo của động cơ. Tư thế ROS sau đó đi lang thang trên bản đồ trong lúc robot ngập ngừng trên nền gạch. Ốc vít là lý do lời nói dối ấy bắt đầu, hoặc không bao giờ bắt đầu. Một đai ốc nyloc đứng yên, một khớp nối đúng trục, và một bạc đạn đúng việc, là nửa cơ khí của một topic `odom` đáng tin. Nửa kia là xung encoder. Thiếu nửa cơ khí thì hiệu chỉnh phần mềm chỉ làm đẹp một quỹ đạo không có thật.
+Hệ thống odometry của Capstone A hoạt động dựa trên giả định rằng góc quay của bánh xe và góc quay của trục động cơ liên hệ chặt chẽ qua tỉ số truyền (sẽ ghi ở Bài 03). Nếu vít cố định trục (set screw) trượt khỏi mặt vát, bánh xe sẽ trượt kèm tiếng tách trong khi encoder vẫn đếm đủ vòng quay của động cơ. Khi đó, tư thế robot trong ROS bị trôi trên bản đồ dù xe thực tế đang khựng lại trên sàn. Các chi tiết ghép nối cơ khí chính là yếu tố quyết định sai số này có xảy ra hay không: một đai ốc nyloc không tự lỏng, một khớp nối đúng cỡ trục và một bạc đạn dùng đúng chỗ tạo nên nửa cơ khí của topic `odom` đáng tin cậy. Nửa còn lại là tín hiệu xung encoder; nếu thiếu phần cơ khí vững chắc, mọi tinh chỉnh phần mềm chỉ tạo ra một quỹ đạo sai lệch.
 
 ## Ốc, đai ốc, và một mặt vát trên trục
 
-Ốc hệ mét được gọi theo đường kính ngoài của ren. M3 nghĩa là khoảng 3 mm đo qua đỉnh ren, và đó là cỡ mặc định trên robot này: giá động cơ, giá cảm biến, và chính tấm khung. Bước ren thô chuẩn của M3 là 0,5 mm, nên một vòng đủ của ốc tiến thêm nửa milimét vào đai ốc. M2 là ốc nhỏ trên một số mạch cảm biến, dễ tòe đầu. M4 khỏe hơn và thường quá lớn so với rãnh động cơ TT. Lỗi mua hàng quen thuộc là một túi ghi “M3” nhưng bên trong là hỗn hợp nhiều cỡ.
+Ốc hệ mét được đặt tên theo đường kính ngoài của phần ren. Ốc M3 có đường kính đỉnh ren khoảng 3 mm và là cỡ tiêu chuẩn cho robot trong môn học này, dùng cho giá động cơ, giá cảm biến và tấm khung. Bước ren thô chuẩn của M3 là 0,5 mm, tức mỗi vòng vặn đủ sẽ đưa ốc tiến thêm 0,5 mm vào đai ốc. Ốc M2 có kích thước nhỏ, thường gặp trên một số mạch cảm biến và rất dễ tòe đầu; còn M4 cứng cáp hơn nhưng thường quá lớn so với rãnh lắp động cơ TT. Một lỗi mua hàng hay gặp là túi linh kiện ghi nhãn “M3” nhưng bên trong lại lẫn nhiều cỡ khác nhau.
 
-Đai ốc thường là lục giác với ren sạch. Rung từ hộp giảm tốc làm nó tự đi ra khỏi ốc sau một buổi chiều chạy xe. Đai ốc nyloc có một vòng nhựa nylon ở một đầu, vòng ấy kẹp ren. Vặn tay đến khi vòng nhựa cắn, rồi siết nốt bằng tô-vít. Độ bám ấy là phương án cho Capstone A. Keo khóa ren xanh (loại trung bình) là phương án dự phòng dạng lỏng cho ren kim loại ăn kim loại mà các bạn có thể không bao giờ tháo. Đó là phương án kém trên nhựa PLA: dung môi có thể làm nứt nhựa. Trên giá in, dùng nyloc, hoặc nóng chảy một đai đồng có ren rồi đặt nyloc lên ren kim loại mà đai đồng tạo ra.
+Đai ốc lục giác thông thường có ren trơn, nên rung động từ hộp giảm tốc dễ làm nó tự xoay và lỏng ra chỉ sau một buổi chạy thử. Đai ốc nyloc (đai ốc khóa nylon) có thêm vòng nhựa nylon ở một đầu để kẹp chặt ren: bạn vặn tay tới khi vòng nhựa bắt đầu bám, sau đó siết chặt bằng dụng cụ. Đây là lựa chọn tiêu chuẩn cho Capstone A. Keo khóa ren màu xanh (loại lực giữ trung bình) là phương án dự phòng dạng lỏng cho mối ghép kim loại–kim loại ít khi tháo lắp, nhưng không phù hợp trên nhựa PLA vì dung môi có thể làm giòn và nứt nhựa. Với các chi tiết in 3D, hãy dùng đai ốc nyloc hoặc ép nhiệt đai đồng cấy ren (threaded insert) rồi dùng nyloc trên phần ren kim loại đó.
 
-Trục động cơ giảm tốc sở thích thường là trục chữ D: một hình trụ có một mặt vát. Moay-ơ bánh hoặc khớp nối mang một vít cố định trục (set screw), tức một ốc nhỏ cắn trục từ bên hông. Ốc ấy phải rơi đúng mặt vát. Cắn vào phần tròn, nó đẩy một gờ, moay-ơ kêu vo vo dưới mô-men, và encoder, vốn đang nhìn động cơ, vẫn đếm. Odometry khi đó báo chuyển động mà sàn không thấy. Sau khi siết vít, thử vặn bánh trên trục bằng ngón tay. Vít ngồi đúng mặt vát thì giữ. Vít ngồi trên đỉnh tròn thì trượt kèm một tiếng tách.
+Trục của các động cơ giảm tốc phổ thông thường có dạng chữ D — hình trụ được vát phẳng một mặt. Moay-ơ bánh xe hoặc khớp nối có một vít cố định trục (set screw) siết từ bên hông vào trục. Vít này bắt buộc phải tỳ vuông góc lên mặt vát. Nếu tỳ lên phần mặt tròn, vít chỉ tạo một vết cấn nhỏ; khi có mô-men tải, moay-ơ sẽ trượt trên trục trong khi encoder gắn phía động cơ vẫn đếm xung bình thường, làm odometry báo quãng đường không hề xảy ra trên sàn. Sau khi siết vít, hãy dùng ngón tay vặn thử bánh xe: nếu vít nằm đúng mặt vát thì bánh giữ chắc, còn nếu nằm trên mặt tròn thì bánh sẽ trượt kèm tiếng tách.
 
 ![Bạc đạn bi: vòng trong, bi, vòng ngoài]({{ site.imgurl }}/wikimedia/Ball_bearing.jpg)
 
-Bạc đạn bi, như trong ảnh, có vòng trong, một vòng bi, và vòng ngoài. Cỡ 608 thông dụng có lỗ 8 mm, đường kính ngoài 22 mm, dày 7 mm, chính là bạc đạn ván trượt. Nó hợp với con lăn in cho đai, ngồi trên vai 8 mm hoặc trên một trục in thực sự là 8 mm. Nó quá cỡ với động cơ TT vàng, vì trục và hộp số của loại ấy không được thiết kế quanh bạc 608. Hộp giảm tốc TT rẻ chạy trên bạc lót, tức ống trượt trơn. Chúng ồn, và chúng là bình thường. Mở hộp giữa chừng Capstone để “nâng cấp” sẽ mất dấu tỉ số in trên vỏ và mất cả một cuối tuần. Để yên cho đến khi robot chạy được.
+Bạc đạn bi (như trong ảnh) gồm vòng trong, dãy viên bi và vòng ngoài. Cỡ 608 phổ biến có đường kính lỗ 8 mm, đường kính ngoài 22 mm và bề dày 7 mm — giống bạc đạn dùng trên ván trượt. Loại này phù hợp cho con lăn dẫn hướng đai in 3D lắp trên vai trục 8 mm, nhưng quá cỡ so với động cơ TT vỏ vàng, vốn không được thiết kế cho bạc 608. Hộp giảm tốc TT giá rẻ sử dụng bạc lót (ống trượt trơn); chúng chạy hơi ồn nhưng hoàn toàn bình thường. Việc tự ý tháo hộp số giữa chừng Capstone để “nâng cấp” bạc đạn dễ làm mất dấu tỉ số truyền in trên vỏ và tốn cả cuối tuần lắp lại. Hãy giữ nguyên hộp số cho tới khi robot đã vận hành ổn định.
 
-Trục gặp trục qua một khớp nối khi động cơ và tải không chung một đoạn thép. Khớp cứng đòi hai trục thẳng hàng. Một chút lệch góc trở thành tải tuần hoàn, bạc nóng, và bánh lắc. Khớp hàm, với một đệm đàn hồi hình sao giữa hai moay-ơ, tha thứ một độ lệch nhỏ và là lựa chọn dịu hơn trên tấm của sinh viên. Đường kính khắc trên khớp phải khớp trục: 3 mm, 4 mm và 6 mm đều phổ biến trên động cơ giảm tốc kim loại, và chúng không thay thế cho nhau. Khớp 6 mm trên trục 4 mm kẹp thành hình ô-van rồi vẫn trượt. Đo trục bằng thước kẹp trước khi đặt hàng. Bánh TT thường có sẵn lỗ chữ D đúng động cơ ấy, nên trên bánh chủ động của Capstone A các bạn thường không cần khớp nối.
+Khi động cơ và trục tải không liền khối, ta nối chúng bằng khớp nối. Khớp nối cứng yêu cầu hai trục phải đồng tâm tuyệt đối; chỉ một độ lệch góc nhỏ cũng tạo ra tải tuần hoàn làm nóng bạc đạn và khiến bánh xe đảo. Khớp nối hàm (jaw coupling) có miếng đệm đàn hồi hình sao ở giữa giúp bù sai lệch nhỏ và phù hợp hơn với khung xe do sinh viên gia công. Đường kính lỗ khắc trên khớp phải khớp chính xác với trục: các cỡ 3 mm, 4 mm và 6 mm đều phổ biến trên động cơ giảm tốc kim loại và không thể thay thế lẫn nhau. Lắp khớp 6 mm lên trục 4 mm sẽ làm lỗ kẹp bị méo thành hình ô-van và vẫn trượt khi chịu tải. Hãy đo trục bằng thước kẹp trước khi đặt mua. Riêng bánh xe TT thường đã đúc sẵn lỗ chữ D khớp trục động cơ nên bánh chủ động của Capstone A thường không cần khớp nối riêng.
 
 ## Ví dụ tính tay
 
-Ốc M3 có bước 0,5 mm. Bốn vòng đủ, sau khi đai ốc đã vào ren, ăn
+Ốc M3 có bước ren 0,5 mm. Sau khi đai ốc đã vào ren, bốn vòng vặn đủ sẽ ăn sâu một đoạn:
 
 $$
-4 \times 0.5 = 2.0\ \text{mm}
+4 \times 0.5 = 2.0\ \text{mm}.
 $$
 
-ren. Đó là chênh lệch giữa một giá động cơ đã khít và một con ốc đã chạm đáy rồi bắt đầu nứt lỗ mica. Dừng khi các chi tiết đã ngồi, rồi thêm khoảng một phần tư vòng. Phía trục, giả sử vít cố định trục trượt khỏi mặt vát và bánh trượt đúng một vòng trong lúc encoder đếm vòng ấy như chuyển động thật. Với bán kính lăn $$r = 31.2$$ mm từ Bài 01, odometry bịa ra một quãng đường
+Khoảng cách 2 mm này đủ tạo ra sự khác biệt giữa một giá động cơ vừa khít và một con ốc bị siết kịch đáy làm nứt lỗ mica. Quy tắc thực hành là dừng tay ngay khi các chi tiết đã áp sát, rồi siết thêm khoảng một phần tư vòng.
+
+Xét ở phía trục bánh xe: giả sử vít cố định trục bị trượt khỏi mặt vát khiến bánh xe đứng yên mất đúng một vòng trong khi encoder vẫn đếm đủ vòng quay đó. Với bán kính lăn $$r = 31.2$$ mm từ Bài 01, odometry sẽ ghi nhận một quãng đường ảo:
 
 $$
-s = 2\pi r = 2\pi \times 31.2 \approx 196\ \text{mm}
+s = 2\pi r = 2\pi \times 31.2 \approx 196\ \text{mm}.
 $$
 
-mà robot không hề đi. Một mặt vát bị trượt, một đoạn ma khoảng 20 cm, mỗi lần mô-men đảo chiều và moay-ơ kêu tách.
+Chỉ một lần trượt trục đã tạo ra sai số gần 20 cm, và sai số này sẽ lặp lại mỗi khi mô-men đảo chiều làm moay-ơ trượt.
 
 ## Lab: phân loại ốc và tìm mặt vát
 
 ### An toàn
 
-Nguồn tắt. Vít cố định trục nhỏ và hay bắn ra khỏi lục giác; hướng moay-ơ ra xa mắt. Keo khóa ren là tùy chọn và phải đậy nắp; không hít, và không nhỏ lên nhựa “cho chắc”.
+Đảm bảo đã tắt nguồn. Vít cố định trục rất nhỏ và dễ văng khỏi đầu khóa lục giác, vì vậy luôn hướng moay-ơ ra xa mắt khi thao tác. Keo khóa ren là vật tư tùy chọn; luôn đậy nắp khi không dùng, tránh hít hơi keo và không nhỏ lên chi tiết nhựa.
 
 ### BOM
 
@@ -73,15 +75,15 @@ Nguồn tắt. Vít cố định trục nhỏ và hay bắn ra khỏi lục giá
 
 ### Các bước
 
-1. Đo đường kính đỉnh ren của từng ốc, hoặc thử vào một đai ốc đã biết. M2 không vào được đai ốc M3. M4 không vào được đai ốc M3. M3 chạy trơn.
-2. Chia đống thành ba cốc. Ghi số ốc M3 các bạn thực sự có; Capstone A ăn loại này.
-3. Chụp một đai ốc nyloc cạnh một đai ốc thường. Trên ảnh, đánh dấu vòng nylon.
-4. Nếu có moay-ơ bánh, nới vít cố định trục, đặt trục chữ D sao cho mặt vát hướng vào ốc, rồi siết. Vặn bánh bằng tay. Ghi xem nó có giữ không.
-5. Nếu có bạc 608, đo 8 × 22 × 7 mm và viết một câu về chỗ nó được sống (con lăn in) và chỗ nó không được sống (bên trong hộp giảm tốc TT).
+1. Đo đường kính đỉnh ren của từng con ốc bằng thước kẹp, hoặc thử vặn vào đai ốc mẫu đã biết cỡ. Ốc M2 sẽ lỏng trong đai ốc M3, ốc M4 không vặn vào được, còn ốc M3 sẽ ăn ren trơn tru.
+2. Phân loại toàn bộ vào ba cốc riêng (M2, M3, M4) và ghi lại số lượng ốc M3 hiện có — đây là cỡ chính cho Capstone A.
+3. Chụp ảnh một đai ốc nyloc đặt cạnh một đai ốc thường, sau đó chú thích rõ phần vòng nhựa nylon trên ảnh.
+4. Nếu có moay-ơ bánh xe, nới vít cố định trục, xoay mặt vát của trục chữ D hướng thẳng vào đầu vít rồi siết chặt. Dùng tay vặn thử bánh xe và ghi lại xem mối ghép có giữ chắc không.
+5. Nếu có bạc đạn 608, đo kiểm kích thước 8 × 22 × 7 mm và ghi ngắn gọn một câu phân biệt nơi nên dùng (con lăn in 3D) với nơi không nên dùng (bên trong hộp giảm tốc TT).
 
 ### Kết quả mong đợi
 
-Ba nhóm đã dán nhãn, một ảnh nyloc đối chiếu đai ốc thường, và một câu trong `lab-notes.md` nêu đường kính trục các bạn sẽ đi mua. Vít cố định trục đã ngồi đúng thì giữ bánh trước mô-men ngón tay.
+Ba nhóm ốc đã được phân loại và dán nhãn rõ ràng, một ảnh so sánh đai ốc nyloc với đai ốc thường, và một ghi chú trong `lab-notes.md` nêu chính xác đường kính trục cần mua linh kiện. Vít cố định trục sau khi lắp đúng mặt vát phải giữ chặt bánh xe khi vặn thử bằng tay.
 
 ### Lỗi thường gặp
 
@@ -91,11 +93,11 @@ Ba nhóm đã dán nhãn, một ảnh nyloc đối chiếu đai ốc thường, 
 | Đai ốc quay mãi dưới rung | Đai ốc thường, và mối ấy chưa có nyloc |
 | Bánh kêu vo vo, encoder vẫn đếm | Vít cố định trục đang nằm trên phần tròn của trục chữ D |
 | Khớp nối kẹp rất chặt mà vẫn trượt | Lỗ lớn hơn trục một cỡ |
-| Gờ nhựa nứt vào hôm sau khi bôi keo khóa ren | Keo ấy là phương án cho PLA; chuyển sang nyloc hoặc đai đồng |
+| Gờ nhựa nứt vào hôm sau khi bôi keo khóa ren | Keo khóa ren không phù hợp với nhựa PLA; chuyển sang nyloc hoặc đai đồng cấy ren |
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Một bộ ốc M3 cộng một túi nhỏ đai ốc nyloc M3 là đủ cho Capstone A. Chỉ mua bạc 608 khi các bạn đang in con lăn. Chỉ mua khớp hàm khi hai trục phải gặp nhau, và chỉ sau khi đã có số đọc thước kẹp.
+Một bộ ốc M3 kèm một túi nhỏ đai ốc nyloc M3 là đủ dùng cho Capstone A. Chỉ mua bạc đạn 608 khi bạn có kế hoạch in con lăn, và chỉ mua khớp nối hàm khi cần nối hai trục sau khi đã đo chính xác đường kính bằng thước kẹp.
 
 | Mua gì | Từ khóa | Khoảng giá (VND) | Ghi chú |
 |------|----------|------------------|-------|
@@ -104,7 +106,7 @@ Một bộ ốc M3 cộng một túi nhỏ đai ốc nyloc M3 là đủ cho Caps
 | Bạc đạn 608 | `bạc đạn 608` | 5.000–20.000 mỗi cái | 8×22×7 mm, cho con lăn |
 | Khớp nối hàm | `khớp nối trục 4mm` | 15.000–45.000 | Khớp trục đã đo: 3 mm, 4 mm hoặc 6 mm |
 
-Tìm và so hai người bán. Giá dịch chuyển.
+Nên tìm và so sánh ít nhất hai nhà bán vì giá linh kiện có thể thay đổi:
 
 - [Hshop: ốc M3](https://hshop.vn/search?q=%E1%BB%91c+M3)
 - [Shopee: đai ốc nyloc M3](https://shopee.vn/search?keyword=%C4%91ai%20%E1%BB%91c%20nyloc%20M3)
@@ -113,24 +115,28 @@ Tìm và so hai người bán. Giá dịch chuyển.
 
 ## Video tham khảo
 
-- **Xem trước:** [How to Measure Screws & Bolts - US & Metric Sizing | Fasteners 101](https://www.youtube.com/watch?v=78R1QXL9ijM) — Albany County Fasteners, tiếng Anh. Đo ren và chiều dài ốc. Đơn vị inch và mét không trộn trên cùng một lỗ.
-- [What is Bearing? Types of Bearings and How they Work?](https://www.youtube.com/watch?v=8q25EUszBSI) — The Engineers Post, tiếng Anh. Bạc đạn giữ trục quay. Xem loại bạc đạn trước khi siết khớp nối.
-- [How to Identify Thread Pitch and Size | Tech Tips | Swagelok (2020)](https://www.youtube.com/watch?v=Gdvtw0pTAOs) — Swagelok, tiếng Anh. Bước ren. Dùng khi hai ốc trông cùng đường kính nhưng không vào cùng đai ốc.
+- **Xem trước:** [How to Measure Screws & Bolts - US & Metric Sizing | Fasteners 101](https://www.youtube.com/watch?v=78R1QXL9ijM) — Albany County Fasteners, tiếng Anh. Hướng dẫn đo đường kính ren và chiều dài ốc, đồng thời phân biệt hệ inch và hệ mét để không lắp nhầm vào cùng một lỗ ren.
+- [What is Bearing? Types of Bearings and How they Work?](https://www.youtube.com/watch?v=8q25EUszBSI) — The Engineers Post, tiếng Anh. Giải thích nguyên lý hoạt động và các loại bạc đạn giúp giữ trục quay ổn định trước khi lắp khớp nối.
+- [How to Identify Thread Pitch and Size | Tech Tips | Swagelok (2020)](https://www.youtube.com/watch?v=Gdvtw0pTAOs) — Swagelok, tiếng Anh. Cách nhận diện bước ren khi hai con ốc có cùng đường kính nhưng không vặn vừa cùng một đai ốc.
 
 ## Bài tập
 
-1. Một con ốc đo 2,9 mm qua đỉnh ren và tiến 0,5 mm mỗi vòng. Tên gọi của nó là gì, và sáu vòng nó tiến bao xa?
-2. Các bạn đang dùng đai ốc thường trên giá động cơ, và sẽ chạy giá ấy mỗi buổi lab. Thay bằng gì, và vì sao keo khóa ren xanh không phải phương án đầu nếu giá ấy là nhựa PLA?
-3. Moay-ơ bánh kêu tách khi vặn, và số đếm encoder vẫn tăng khi về sau cấp điện cho động cơ trong lúc bánh được nhấc lên. Vít cố định trục đang ngồi ở đâu?
-4. Thước kẹp đọc 4,0 mm trên trục động cơ giảm tốc kim loại. Đặt lỗ khớp nối cỡ nào, và lỗ 6 mm sẽ xảy ra chuyện gì?
-5. Một người bạn muốn ép bạc đạn 608 vào hộp giảm tốc TT vàng “cho lăn êm hơn”. Trong Capstone A, các bạn bảo họ làm gì với bạc lót sẵn có?
+1. Một con ốc đo được 2,9 mm qua đỉnh ren và tiến thêm 0,5 mm sau mỗi vòng vặn. Đó là cỡ ốc nào và sau sáu vòng nó tiến sâu thêm bao nhiêu milimét?
+2. Bạn đang dùng đai ốc thường cho giá động cơ chạy mỗi buổi lab. Nên thay bằng loại nào, và vì sao keo khóa ren xanh không phải lựa chọn đầu tiên nếu giá động cơ in bằng nhựa PLA?
+3. Moay-ơ bánh xe phát ra tiếng tách khi vặn bằng tay, và khi cấp điện (nhấc bánh khỏi sàn), số xung encoder vẫn tăng dù bánh trượt. Vít cố định trục đang tỳ vào vị trí nào?
+4. Thước kẹp đo được 4,0 mm trên trục động cơ giảm tốc kim loại. Bạn cần đặt khớp nối lỗ cỡ bao nhiêu, và điều gì xảy ra nếu dùng lỗ 6 mm?
+5. Một người bạn định ép bạc đạn 608 vào hộp giảm tốc TT vỏ vàng để “quay êm hơn”. Trong phạm vi Capstone A, bạn nên khuyên họ xử lý bạc lót sẵn có thế nào?
 
 ### Gợi ý đáp án
 
-1. M3, vì đỉnh ren khoảng 3 mm và bước ren là chuẩn 0,5 mm. Sáu vòng tiến $$6 \times 0.5 = 3.0$$ mm. 2. Một đai ốc nyloc. Keo khóa ren xanh có thể làm nứt PLA; đai đồng cộng nyloc giữ hóa chất trên kim loại. 3. Trên phần tròn của trục chữ D, không trên mặt vát. Nới ra, xoay mặt vát vào dưới ốc, siết lại, rồi thử vặn. 4. Lỗ 4 mm. Lỗ 6 mm kẹp thành ô-van và trượt dưới mô-men. 5. Để nguyên bạc lót. Bạc 608 là 8×22×7 mm và thuộc về con lăn in, không thuộc về bên trong hộp số ấy.
+1. Ốc M3, vì đường kính đỉnh ren xấp xỉ 3 mm và bước ren chuẩn là 0,5 mm. Sau sáu vòng, ốc tiến thêm $$6 \times 0.5 = 3.0$$ mm.
+2. Thay bằng đai ốc nyloc. Keo khóa ren xanh có thể làm nứt nhựa PLA; nếu muốn dùng khóa ren chắc trên nhựa in, hãy ép nhiệt đai đồng cấy ren rồi dùng nyloc trên phần ren kim loại.
+3. Vít cố định trục đang tỳ lên phần tròn của trục chữ D thay vì mặt vát. Cần nới vít, xoay mặt vát về đúng vị trí dưới đầu vít, siết lại rồi vặn thử bằng tay.
+4. Đặt khớp nối lỗ 4 mm. Nếu dùng lỗ 6 mm, khớp sẽ bị kẹp méo thành hình ô-van và trượt khi chịu mô-men.
+5. Nên giữ nguyên bạc lót sẵn có. Bạc đạn 608 có kích thước 8×22×7 mm, chỉ phù hợp cho con lăn in 3D chứ không lắp vừa vào bên trong hộp giảm tốc TT.
 
 ## Đọc thêm
 
-- [Danh mục McMaster-Carr](https://www.mcmaster.com/) — tra ốc, nyloc, vòng chặn trục và khớp hàm theo tên để học kích thước. Dùng như từ điển hình. Đặt hàng từ nước ngoài nằm ngoài môn này.
-- [Đai ren nhiệt trên RepRap](https://reprap.org/wiki/Threaded_insert) — đai đồng nóng chảy cho nhựa in, cách bền để đặt ren M3 vào PLA.
-- [Bạc đạn bi (tổng quan)](https://en.wikipedia.org/wiki/Ball_bearing) — vòng bi và cỡ 608 trong ngữ cảnh.
+- [Danh mục McMaster-Carr](https://www.mcmaster.com/) — tra cứu ốc, đai ốc nyloc, vòng chặn trục và khớp nối hàm theo tên để học quy cách kích thước (chỉ dùng như tài liệu tra cứu, không cần đặt hàng từ nước ngoài).
+- [Đai ren nhiệt trên RepRap](https://reprap.org/wiki/Threaded_insert) — hướng dẫn sử dụng đai đồng cấy ren bằng nhiệt cho chi tiết in 3D, giúp tạo ren M3 bền vững trên nhựa PLA.
+- [Bạc đạn bi (tổng quan)](https://en.wikipedia.org/wiki/Ball_bearing) — tổng quan về cấu tạo vòng bi và kích thước tiêu chuẩn 608.
