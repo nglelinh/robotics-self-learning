@@ -11,108 +11,107 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~65 phút**. Bạn đọc một trang dự án, nhìn một phép trung bình, và viết một đoạn. Bạn không khử nhiễu cái gì trên GPU.
+Thời lượng: **~65 phút**, dành để đọc trang dự án, phân tích phép tính trung bình hành động và viết một đoạn nhận xét (không chạy khử nhiễu hay huấn luyện trên GPU).
 
 ## Mục tiêu
 
-Bạn giải thích vì sao diffusion policy sinh một quỹ đạo action bằng khử nhiễu lặp, thay vì nhả một lần hồi quy. Bạn chỉ ra, với hai demonstration Capstone vòng một cái ghế, rằng action trung bình lao vào ghế. Bạn đọc phác thảo $$x_{t-1} = f(x_t, \text{observation})$$ như hình một bộ khử nhiễu đã học, không phải phương trình cập nhật của bài báo. Bạn đối chiếu hình đó với ACT trong hai đoạn: một lượt thuận của CVAE theo chunk, đối lại nhiều bước làm sạch một quỹ đạo.
+Sau bài học này, bạn sẽ giải thích được vì sao Diffusion Policy tạo ra quỹ đạo hành động bằng quá trình khử nhiễu lặp thay vì hồi quy một lần duy nhất. Thông qua ví dụ hai phiên mẫu xe Capstone vòng tránh một chiếc ghế, bạn sẽ chứng minh được vì sao lệnh trung bình lại đâm thẳng vào vật cản, đọc hiểu biểu diễn giản lược $$x_{t-1} = f(x_t, \text{observation})$$ như sơ đồ tư duy của bộ khử nhiễu đã học (chứ không phải phương trình cập nhật đầy đủ của bài báo), và đối chiếu rõ nét cơ chế của Diffusion Policy với ACT trong hai đoạn ngắn.
 
 ## Kiến thức cần trước
 
-Bài 12-01 và 12-02 đã xong. Bạn nói được khóa dataset là gì, và nói được chunk ACT hở vòng trong $$k/f$$ giây. Cái ghế trong bài này là đồ đạc, không phải robot mới. Không GPU, không môi trường conda, không checkpoint. Trang dự án là trang công khai.
+Hoàn thành bài 12-01 và 12-02: bạn nắm rõ cấu trúc khóa dataset và cách tính cửa sổ hở vòng $$k/f$$ giây của ACT. Bài học này không đòi hỏi GPU, môi trường conda hay checkpoint tải về; bạn chỉ cần truy cập trang dự án công khai.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Capstone đã gặp một planner chọn một đường và một controller bám đường đó. Diffusion Policy, Chi và cộng sự, là một đề xuất khác cho chỗ đường đến từ đâu khi đường được người demo vẽ mà những người đó không đồng ý với nhau. Trong hành lang, hai người lái vòng ghế hai phía. Tracker bị bảo bám trung bình của hai đường đó sẽ nhắm vào ghế. Jazzy sẵn sàng xuất bản trung bình đó như một `Twist`. Firmware sẵn sàng đổi nó thành PWM. Không chương nào từ 08 đến 11 tính "lệnh này là trung bình của hai ý hay". Bạn phải tự thấy trung bình đó, trong dữ liệu, trước khi hào hứng với một policy sinh mẫu. Bài này là lần thấy đó. Đây cũng là lần thứ hai bạn gặp một quỹ đạo sinh ra thành loạt, nên thói quen cắt ở 0,2 s từ ACT vẫn đúng khi loạt đó được khử nhiễu chứ không phải hồi quy.
+Ở các chương trước, xe Capstone bám theo tuyến đường do bộ lập kế hoạch tường minh tính ra. **Diffusion Policy** (Chi và cộng sự) đưa ra một cách tiếp cận khác khi quỹ đạo học từ các phiên điều khiển mẫu mà người lái có nhiều phương án đi khác nhau. Trong hành lang, hai người lái có thể vòng qua một chiếc ghế từ hai phía trái và phải; nếu buộc bộ điều khiển bám theo giá trị trung bình của hai đường đó, xe sẽ lao thẳng vào chiếc ghế — trong khi cả ROS 2 Jazzy lẫn firmware đều sẵn sàng chuyển tiếp và thực thi giá trị trung bình đó mà không hề cảnh báo. Bài học giúp bạn nhận diện bài toán phân phối đa chế độ (multimodal) ngay trong dữ liệu, đồng thời củng cố thói quen kiểm soát cửa sổ hở vòng tương tự như ở ACT.
 
 ## Khái niệm
 
-Policy hồi quy nhìn observation và nhả action, hoặc một chunk action, trong một phát. Luyện đẩy đầu ra về phía các số đã demo. Demonstration chung một cách làm thì việc này chạy. Chúng tách làm hai thì bình phương sai số là một thỏa hiệp. Thỏa hiệp không phải một trong các cách đã demo.
+Một mô hình hồi quy thông thường nhận đầu vào `observation` và xuất ngay một `action` (hoặc một chunk) trong một lượt tính duy nhất. Cách này hoạt động tốt khi mọi mẫu huấn luyện cùng đi theo một phương án; nhưng khi dữ liệu tách thành hai phương án hợp lệ khác nhau, hàm mất mát bình phương sai số sẽ kéo dự đoán về điểm trung bình — một phương án thỏa hiệp không nằm trong tập mẫu và thường gây va chạm.
 
-Chi, Feng, Du, Xu, Cousineau, Burchfiel và Song đặt policy thành khử nhiễu có điều kiện. Bạn bắt đầu bằng một cục nhiễu có hình quỹ đạo. Một mạng, nhận observation làm điều kiện, bước một bước nhỏ về phía quỹ đạo có thể đến từ demonstration. Bạn lặp bước đó. Bốn hộp trên hình là các lần lặp: nhiễu, bớt nhiễu, gần thành action, một quỹ đạo. Các bước sớm không có việc gì để gửi tới động cơ. Các bước muộn là một chuỗi thời gian của $$(v, \omega)$$, hoặc của đích khớp, theo đơn vị của robot đã sinh ra log. Observation là đầu vào ở mọi bước, dù hình chỉ vẽ action đang sạch dần. Che camera thì bộ khử nhiễu không có lý do để thích đường trái hơn đường phải.
+Chi, Feng, Du, Xu, Cousineau, Burchfiel và Song mô hình hóa policy như một quá trình **khử nhiễu có điều kiện** (conditional denoising): bắt đầu từ một chuỗi nhiễu ngẫu nhiên có cùng kích thước với quỹ đạo hành động, một mạng nơ-ron (lấy `observation` làm điều kiện) sẽ từng bước khử bớt nhiễu để kéo chuỗi đó tiến dần về một quỹ đạo hợp lệ tương tự tập mẫu. Bốn khối trên sơ đồ minh họa tiến trình này: từ nhiễu thuần, qua các bước giảm nhiễu trung gian, đến quỹ đạo hoàn chỉnh gồm chuỗi $$(v, \omega)$$ (hoặc góc khớp) theo đúng đơn vị của robot. Các bước trung gian ban đầu tuyệt đối không được gửi tới động cơ, và `observation` luôn tham gia ở mọi bước khử nhiễu (nếu che camera, mô hình không còn căn cứ hình ảnh để chọn đường vòng phù hợp).
 
-Phép cập nhật bạn được phép nhớ cho khóa học này là một phác thảo:
+Phép cập nhật dạng giản lược dùng để nắm trực giác trong khóa học này là:
 
 $$
 x_{t-1} = f(x_t, \text{observation})
 $$
 
-Ở đây $$x_t$$ là quỹ đạo nhiễu ở bước $$t$$, và $$t$$ đếm bước khử nhiễu, không đếm nhịp điều khiển. Chữ $$f$$ thay cho một bộ khử nhiễu đã học. Cập nhật thật của bài báo dự đoán nhiễu, trộn với một lịch, và thêm ngẫu nhiên để hai lần chạy có thể chọn hai mode. Bạn lập trình chữ $$f$$ thành "trừ một hằng số" thì bạn chưa lập trình Diffusion Policy. Bạn đã lập trình bức tranh. Đó là độ sâu đúng cho tối nay.
+Trong đó $$x_t$$ là quỹ đạo còn nhiễu ở bước khử nhiễu thứ $$t$$ (lưu ý chỉ số $$t$$ đếm bước khử nhiễu chứ **không phải** bước thời gian điều khiển), còn $$f$$ đại diện cho bộ khử nhiễu đã học. Trong bài báo gốc, bước cập nhật đầy đủ bao gồm dự đoán thành phần nhiễu theo một lịch nhiễu (noise schedule) và cộng thêm nhiễu ngẫu nhiên để các lần lấy mẫu khác nhau có thể hội tụ về các nhánh hành động (mode) khác nhau.
 
-Vì sao vòng lặp đáng cái giá độ trễ: vật được làm sạch là cả một quỹ đạo ngắn, và phân phối luyện có thể đặt xác suất lên cả hai đường vòng ghế. Một mẫu là một trong hai đường. Mẫu không phải trung bình của hai đường. Bạn thực hiện một mẫu. Lấy trung bình hai mẫu, một trái một phải, là dựng lại cú đâm mà bạn đang tránh. "Sinh" ở đây nghĩa là "rút một quỹ đạo mạch lạc", không phải "trộn mọi demonstration thành một lệnh dịu".
+Đánh đổi của quá trình lặp là độ trễ tính toán cao hơn, nhưng lợi ích cốt lõi là mô hình học được phân phối xác suất trên toàn bộ các phương án hợp lệ: mỗi lần lấy mẫu sẽ rút ra một quỹ đạo nhất quán (hoặc vòng trái, hoặc vòng phải) thay vì trộn hai hướng lại thành cú đâm thẳng. Lưu ý rằng việc lấy trung bình hai mẫu đầu ra của Diffusion Policy sẽ tái tạo lại chính lỗi đâm vật cản mà phương pháp này muốn tránh.
 
-Thói quen chân trời lùi thì quen từ chunk ACT. Khử nhiễu một quỹ đạo dài thì đắt, và đầu xa của nó là phần dễ sai nhất khi thế giới dịch. Các cài đặt vì thế chỉ thực hiện một đoạn đầu, rồi khử nhiễu lại. Đoạn đầu hở vòng suốt thời gian nó kéo dài. Mười bước khử nhiễu tốn 100 ms rồi bạn thực hiện tám action ở 50 Hz, thì đoạn đầu dài $$8/50 = 0.16$$ s. Cùng cấp với cửa sổ ACT $$k = 10$$. Người bước vào trước đoạn đầu là cùng một việc khẩn. Watchdog vẫn chỉ nhận ra sự im lặng. Bộ khử nhiễu cứ phát "tiến" thì không im.
+Tương tự khái niệm chunk ở ACT, Diffusion Policy thường áp dụng chiến lược **chân trời lùi** (receding horizon): do khử nhiễu quỹ đạo dài khá tốn kém và đoạn cuối quỹ đạo dễ lỗi thời khi môi trường thay đổi, hệ thống chỉ thực thi một đoạn ngắn ở đầu quỹ đạo rồi chạy khử nhiễu lại từ đầu. Nếu 10 bước khử nhiễu tốn 100 ms và bạn thực thi 8 bước hành động đầu ở tần số 50 Hz, cửa sổ hở vòng dài $$8/50 = 0.16$$ s — tương đương quy mô của ACT với $$k = 10$$. Do đó, watchdog 300 ms vẫn không tự ngắt nếu mô hình tiếp tục phát lệnh tiến khi có người bước vào trước xe; bạn vẫn cần lệnh dừng tường minh `0`.
 
-Hai đoạn đối chiếu, vì tên hay bị tráo trong sổ tay.
+Đối chiếu ngắn gọn hai kiến trúc để tránh nhầm lẫn:
 
-ACT, Zhao và cộng sự, hỏi transformer một lần để lấy chunk $$k$$ action. Biến ẩn CVAE là cách mô hình đó tránh dự đoán trung bình của vài kiểu demonstration: biến ẩn chọn một kiểu, chunk là hồi quy khi đã có kiểu và observation. Độ trễ là một lần đánh giá mạng mỗi câu hỏi, cộng thời gian hở vòng của đoạn đầu bạn thực hiện. Temporal ensemble trung bình các chunk chồng để dịu rung, và chính trung bình đó có thể đưa lại một thỏa hiệp nhỏ giữa "dừng" mới và "tiến" cũ.
-
-Diffusion Policy, Chi và cộng sự, không nhả chunk bằng một lần hồi quy. Nó bắt đầu từ nhiễu và áp bộ khử nhiễu đã học nhiều lần cho đến khi quỹ đạo trông như thứ demonstration chịu, với ảnh đã cho. Đa mode nằm ở chỗ các lần rút nhiễu khác nhau, hoặc các lựa chọn giữa chừng khác nhau, có thể rơi vào mode khác nhau, trái hoặc phải, thay vì vào một mã ẩn bạn đặt bằng 0. Bạn trả giá bằng nhiều lần gọi mạng mỗi lần lập kế hoạch lại. Cả hai phương pháp đều biểu diễn được hơn một cách làm. Cả hai vẫn có thể ra lệnh cho Capstone lao vào ghế nếu bạn thực hiện nhầm mẫu, hoặc lấy trung bình các mẫu, hoặc tắt timeout vì video demo trông mượt. Chọn giữa chúng tuần này là một lựa chọn đọc. Không phải một cuộc đua train.
+- **ACT (Zhao và cộng sự):** dùng một lượt suy luận duy nhất qua transformer để sinh chunk $$k$$ hành động. Biến ẩn của CVAE giúp chọn một phong cách thực hiện nhằm tránh trung bình hóa các mẫu trái ngược. Độ trễ gồm một lượt tính mạng cộng cửa sổ hở vòng của đoạn thực thi; cơ chế temporal ensemble làm mượt lệnh nhưng cũng có thể tạo ra giá trị trung gian nhỏ giữa "tiến" cũ và "dừng" mới.
+- **Diffusion Policy (Chi và cộng sự):** không hồi quy trực tiếp một lần mà khởi đầu từ nhiễu và chạy lặp bộ khử nhiễu nhiều bước cho đến khi thu được quỹ đạo sạch. Tính đa chế độ đến từ quá trình lấy mẫu ngẫu nhiên có thể hội tụ về các nhánh khác nhau (vòng trái hoặc vòng phải), đổi lại phải trả chi phí nhiều lượt tính mạng cho mỗi lần lập kế hoạch lại. Cả hai phương pháp đều xử lý được hành động đa phương án, và cả hai đều vẫn đòi hỏi watchdog cùng lệnh dừng tường minh khi triển khai trên phần cứng thật.
 
 ## Hình
 
 ![Từ nhiễu đến một quỹ đạo]({{ site.imgurl }}/generated/ch12_diffusion.png)
 
-Từ trái sang phải: hộp đỏ là nhiễu, hộp vàng là bớt nhiễu, hộp nhạt gần thành action, hộp xanh là quỹ đạo. Mũi tên là bước khử nhiễu, không phải thời gian dọc đường robot. Dòng chú dưới hộp nói phép tính của bài bằng lời: trung bình của "trái hoặc phải" là thẳng vào vật cản. Chân hình ghi Chi và cộng sự, Diffusion Policy, 2023, và bảo đọc chứ đừng train làm lab tối nay. Hãy tin chân hình.
+Từ trái sang phải là tiến trình khử nhiễu: nhiễu thuần (đỏ), giảm nhiễu (vàng), tiệm cận hành động (nhạt) và quỹ đạo hoàn chỉnh (xanh). Các mũi tên biểu diễn bước khử nhiễu chứ không phải trục thời gian chạy của robot. Ghi chú phía dưới tóm tắt trọng tâm bài học: trung bình của "rẽ trái" và "rẽ phải" là đâm thẳng vào vật cản (nguồn: Chi và cộng sự, Diffusion Policy, 2023).
 
 ## Ví dụ đọc có số
 
-Hai demonstration, một điểm quyết định, đơn vị Capstone. Ghế cách camera 0,40 m, nằm giữa. Cả hai người lái giữ vận tốc tiến vừa phải và chỉ bất đồng về yaw.
+Xét hai phiên điều khiển mẫu trên Capstone tại cùng một thời điểm quyết định khi chiếc ghế nằm chính giữa, cách camera 0,40 m. Cả hai người lái cùng giữ vận tốc tiến 0,15 m/s nhưng chọn hai hướng rẽ ngược nhau:
 
-| Demo | $$v$$ (m/s) | $$\omega$$ (rad/s) | Ý |
+| Mẫu | $$v$$ (m/s) | $$\omega$$ (rad/s) | Hướng đi |
 | --- | --- | --- | --- |
-| L | 0.15 | $$+0.50$$ | vòng bên trái |
-| R | 0.15 | $$-0.50$$ | vòng bên phải |
-| Trung bình | 0.15 | $$0.00$$ | nhắm vào ghế |
+| L | 0.15 | $$+0.50$$ | Vòng sang trái |
+| R | 0.15 | $$-0.50$$ | Vòng sang phải |
+| Trung bình | 0.15 | $$0.00$$ | Đâm thẳng vào ghế |
 
-Trung bình không phải một pha trộn thận trọng. Yaw triệt tiêu. Vận tốc tiến thì không. Thời gian tới ghế cách 0,40 m, nếu không ai yaw và tốc độ giữ nguyên, là
+Phép trung bình làm vận tốc góc yaw triệt tiêu hoàn toàn về 0 trong khi vận tốc tiến vẫn giữ nguyên 0,15 m/s. Nếu giữ nguyên lệnh này, thời gian để xe đâm vào chiếc ghế cách 0,40 m là:
 
 $$
 \frac{0.40}{0.15} \approx 2.7\,\text{s}
 $$
 
-Bạn không có 2,7 s báo trước bên trong một đoạn đầu hở vòng 0,16 s. Đoạn đầu mang action trung bình đã chĩa vào vật cản. Bộ khử nhiễu đã thấy cả hai demonstration, với ảnh có cái ghế, nên kéo một lần rút nhiễu về demo L hoặc demo R. Đừng bắt nó xuất cả hai rồi cầu của bạn lấy trung bình. Chưa chắc mình đã rút mode nào thì lệnh an toàn là $$v = 0$$, không phải trung bình.
+Trong khi đó, một bộ khử nhiễu đã học từ cả hai mẫu (dựa trên ảnh có chiếc ghế) sẽ kéo lần lấy mẫu về hẳn nhánh L hoặc hẳn nhánh R. Nếu không chắc chắn về nhánh được chọn, hành động an toàn phải là dừng lại ($$v = 0$$), tuyệt đối không lấy trung bình.
 
-Đặt phác thảo cạnh các số đó. Ở bước khử nhiễu muộn, $$x_t$$ có thể là một chuỗi ngắn mà action đầu gần $$(0.15, 0.48)$$, một đường trái còn nhiễu. Khi đó $$f$$, với ảnh, kéo nó về $$(0.15, 0.50)$$. Ở bước sớm, $$x_t$$ chưa phải đường vòng cái gì cả, và gửi nó lên `cmd_vel` là lái trên nhiễu thuần. Chỉ số $$t$$ trong phác thảo không phải nhịp 50 Hz. Trộn hai đồng hồ là cách một người thực hiện bước "nhiễu" như thể nó là bước "quỹ đạo".
+Liên hệ với biểu diễn $$x_{t-1} = f(x_t, \text{observation})$$: ở các bước khử nhiễu gần cuối, $$x_t$$ có thể chứa hành động đầu xấp xỉ $$(0.15, 0.48)$$ và hàm $$f$$ (kèm ảnh camera) tinh chỉnh nó về $$(0.15, 0.50)$$. Ở các bước khử nhiễu sớm, $$x_t$$ chỉ là nhiễu thuần nên tuyệt đối không gửi lên `/cmd_vel` — luôn phân biệt rạch ròi chỉ số bước khử nhiễu $$t$$ với nhịp điều khiển 50 Hz.
 
-## Cùng ý đó trên tay SO-101
+## Áp dụng cùng trực giác cho cánh tay SO-101
 
-Capstone có hai số $(v, \omega)$. Follower SO-101 có sáu motor: pan, lift, elbow, wrist flex, wrist roll, gripper. Hai demonstration gắp một khối từ hai phía là hai vector sáu chiều. Trung bình từng khớp có thể là một tư thế đi xuyên khối, cùng kiểu với yaw bị triệt khi vòng ghế. Diffusion Policy, nếu train trên dataset của chính tay đó, rút một trong hai cách gắp. Nó không biết gì về `cmd_vel` của xe trừ khi card action của bạn là $(v, \omega)$.
+Xe Capstone có vector hành động 2 chiều $(v, \omega)$, còn cánh tay follower SO-101 có 6 động cơ (`pan`, `lift`, `elbow`, `wrist flex`, `wrist roll`, `gripper`). Hai mẫu gắp một khối vật thể từ hai phía tương ứng hai vector 6 chiều khác nhau; việc lấy trung bình từng khớp có thể tạo ra tư thế cánh tay đâm xuyên qua vật thể — hoàn toàn tương đồng với hiện tượng triệt tiêu yaw khi tránh ghế. Nếu huấn luyện Diffusion Policy trên tập dữ liệu của SO-101, mô hình sẽ chọn một trong hai cách gắp; nó không liên quan gì đến `/cmd_vel` của xe trừ khi bạn dùng đúng bộ khóa hành động $(v, \omega)$.
 
-Trang imitation của LeRobot, lúc khóa học đối chiếu, ví dụ `lerobot-train` đang để `--policy.type=act`. Tên `diffusion` là subclass trong mã LeRobot, không phải cờ bạn đoán. Lab tay [bài SO-101]({% multilang_post_url contents/chapter12/12_06_so101_arm_lab %}) là chỗ ghi một episode hoặc viết giấy hoãn, và là chỗ mở file cấu hình trước khi đổi `policy.type`. Bài này vẫn không yêu cầu GPU.
+Trên tài liệu imitation learning của LeRobot tại thời điểm đối chiếu, lệnh ví dụ `lerobot-train` đang dùng `--policy.type=act`, còn `diffusion` là một lớp con (subclass) đăng ký trong mã nguồn. Ở [bài lab SO-101]({% multilang_post_url contents/chapter12/12_06_so101_arm_lab %}), bạn sẽ kiểm tra tệp cấu hình trước khi thay đổi `policy.type` (vẫn không yêu cầu GPU).
 
 ![Sáu khớp không phải vector của một VLA khác thân]({{ site.imgurl }}/generated/ch12_so101_action.png)
 
 ## Lab
 
-Mở trang dự án [diffusion-policy.cs.columbia.edu](https://diffusion-policy.cs.columbia.edu/) và abstract tại [arXiv:2303.04137](https://arxiv.org/abs/2303.04137). Bạn tìm câu khẳng định policy mô hình một phân phối trên chuỗi action, và một hình nào đó cho thấy quỹ đạo hiện ra hoặc một việc đa mode. Đừng đi theo link "train" hoặc "download checkpoint" quá mức đọc để biết nó có tồn tại.
+Mở trang dự án [diffusion-policy.cs.columbia.edu](https://diffusion-policy.cs.columbia.edu/) và trang tóm tắt [arXiv:2303.04137](https://arxiv.org/abs/2303.04137) để tìm nội dung mô tả việc mô hình hóa phân phối trên chuỗi hành động cùng hình minh họa bài toán đa phương án (không tải checkpoint hay chạy lệnh huấn luyện).
 
-Rồi viết một đoạn trong `lab-notes.md` về đa mode, dùng Capstone. Cảnh là hai demonstration vòng một cái ghế hai phía khác nhau. Đoạn phải có action trung bình, và phải nói trung bình đâm vào ghế. Dùng số của ví dụ, hoặc đổi số và tính lại thời gian chạm sao cho số mới vẫn đâm. Kết đoạn bằng một câu tường minh: bạn không train mô hình và không nạp trọng số.
+Sau đó viết một đoạn phân tích vào `lab-notes.md` về hiện tượng đa phương án trên xe Capstone: mô tả tình huống hai mẫu vòng tránh chiếc ghế từ hai phía, tính rõ lệnh trung bình cùng hệ quả đâm vào ghế (dùng bộ số trong ví dụ hoặc tự chọn bộ số mới kèm phép tính thời gian va chạm), và kết thúc bằng một câu xác nhận rõ bạn không huấn luyện mô hình hay nạp trọng số trong bài này.
 
-**Kỳ vọng.** Một đoạn mà bạn học kiểm được mà không cần xem video. Có hai phía, một yaw bị triệt, một vận tốc tiến khác 0, cái ghế, và một lời từ chối train. Đoạn chỉ nói "diffusion giỏi đa mode hơn" là chưa xong, vì chưa hề nhắc trung bình.
+**Kết quả mong đợi:** đoạn văn tự kiểm chứng được gồm đầy đủ hai hướng rẽ, góc yaw bị triệt tiêu, vận tốc tiến khác 0, nguy cơ đâm vào ghế và xác nhận không chạy huấn luyện. Một đoạn chỉ nhận xét chung chung "diffusion xử lý đa mode tốt hơn" mà không chứng minh qua phép trung bình là chưa đạt.
 
-**Các kiểu hỏng**
+**Các lỗi thường gặp**
 
-| Lỗi | Vì sao đoạn hỏng |
+| Sai sót | Nguyên nhân |
 | --- | --- |
-| Bạn gộp hai demonstration thành một episode "trung tính" và gọi dataset sạch hơn | Bạn đã xóa cả hai đường vòng thành công và chèn vào cú va |
-| Bạn coi GPU không có, hoặc lỗi hết bộ nhớ, là lab trượt | Lab là đoạn văn. Tắt tiến trình train là cách thoát, không phải kết quả |
-| Bạn viết diffusion an toàn hơn vì nó lặp | Vòng lặp sinh một mẫu. Mẫu có thể nói tiến. An toàn vẫn là timeout cộng một số 0 tường minh khi đoạn đầu sai |
-| Bạn gửi một bước khử nhiễu sớm tới động cơ vì nó đã có hình $$(v, \omega)$$ | Bước sớm là nhiễu mang hình đó. Chỉ quỹ đạo đã xong mới là ứng viên lệnh, và chỉ theo đơn vị của dataset |
+| Gộp hai mẫu trái/phải thành một tập "trung tính" để làm sạch dữ liệu | Vô tình xóa cả hai đường né thành công và tạo ra mẫu đâm vào vật cản |
+| Coi việc thiếu GPU hoặc lỗi tràn bộ nhớ là trượt lab | Bài lab đánh giá đoạn phân tích lý thuyết, không chấm quá trình huấn luyện |
+| Kết luận Diffusion Policy tự động an toàn hơn vì có nhiều bước lặp | Quá trình lặp chỉ sinh ra một quỹ đạo mẫu; an toàn phần cứng vẫn phụ thuộc watchdog và lệnh dừng tường minh `0` |
+| Gửi kết quả bước khử nhiễu trung gian tới động cơ vì thấy có dạng $$(v, \omega)$$ | Bước trung gian vẫn là nhiễu; chỉ quỹ đạo hoàn chỉnh sau bước cuối mới là ứng viên lệnh |
 
 ## Video tham khảo
 
-- **Xem trước:** [Diffusion Policy: LeRobot Research Presentation #2 by Cheng Chi](https://www.youtube.com/watch?v=M03sZFfW-qU) — Hugging Face, tiếng Anh. Cheng Chi nói về Diffusion Policy trên kênh Hugging Face. Xem ý khử nhiễu một quỹ đạo, không cần train.
+- **Xem trước:** [Diffusion Policy: LeRobot Research Presentation #2 by Cheng Chi](https://www.youtube.com/watch?v=M03sZFfW-qU) — Hugging Face (tiếng Anh). Cheng Chi trực tiếp trình bày ý tưởng khử nhiễu quỹ đạo của Diffusion Policy trên kênh Hugging Face (xem để nắm trực giác, không cần chạy train).
 
 ## Bài tập
 
-1. Demo L là $$(v, \omega) = (0.20, +0.80)$$ và demo R là $$(0.20, -0.40)$$, đơn vị m/s và rad/s. Action trung bình là gì, và nó yaw về phía nào? Gợi ý: trung bình $$v = 0.20$$, trung bình $$\omega = +0.20$$. Yaw không triệt tiêu. Trung bình vẫn không cần phải là một trong hai demonstration. Nói bạn có thực hiện nó khi ghế nằm giữa hay không.
-2. Trong phác thảo, chỉ số dưới $$t$$ đếm cái gì? Gợi ý: các bước khử nhiễu. Nó không đếm chu kỳ điều khiển 20 ms. Viết một câu giữ hai đồng hồ tách nhau.
-3. Bạn thực hiện một đoạn đầu 8 action ở 50 Hz sau khi quỹ đạo đã sạch. Đoạn đầu dài bao lâu, và watchdog 300 ms có hết hạn trong lúc đó nếu bạn vẫn xuất bản? Gợi ý: $$8/50 = 0.16$$ s. Watchdog không hết hạn, vì việc xuất bản còn tiếp. Nêu lệnh bạn xuất bản nếu đoạn đầu chĩa vào ghế.
-4. ACT cam kết bằng một biến ẩn và một lượt thuận. Diffusion Policy cam kết bằng cách rút một quỹ đạo ra khỏi nhiễu. Nêu một cái giá của lựa chọn thứ hai mà lựa chọn thứ nhất không trả ở mỗi lần lập kế hoạch lại. Gợi ý: nhiều lần đánh giá bộ khử nhiễu mỗi lần lập lại, thay vì một lượt transformer. Cái giá là độ trễ, không phải giấy phép bỏ lệnh dừng.
-5. Đoạn của bạn nói trung bình đâm ghế. Đổi ghế còn cách 0,15 m và giữ $$v = 0.15$$ với $$\omega = 0$$. Bao lâu thì chạm, và khoảng đó có dài hơn đoạn đầu 0,16 s không? Gợi ý: $$0.15/0.15 = 1.0$$ s hành trình nếu tốc độ giữ. Một giây dài hơn đoạn đầu, nghĩa là riêng đoạn đầu chưa đâm xong, và cũng nghĩa là đoạn đầu đã cam kết bạn vào hướng xấu. Cách sửa là một số 0, không phải một bài ngắn hơn.
+1. Giả sử mẫu L là $$(v, \omega) = (0.20, +0.80)$$ và mẫu R là $$(0.20, -0.40)$$ (đơn vị m/s và rad/s). Tính lệnh trung bình, cho biết chiều yaw và đánh giá có nên thực thi lệnh trung bình này khi chiếc ghế nằm chính giữa không. *Gợi ý:* trung bình là $$(0.20, +0.20)$$ — dù yaw không triệt tiêu về 0, lệnh này vẫn không thuộc hai mẫu hợp lệ ban đầu.
+2. Trong biểu diễn giản lược $$x_{t-1} = f(x_t, \text{observation})$$, chỉ số $$t$$ biểu thị đại lượng gì? Viết một câu phân biệt nó với chu kỳ điều khiển 20 ms. *Gợi ý:* $$t$$ đếm bước khử nhiễu nội bộ của mạng, hoàn toàn tách biệt với trục thời gian thực thi lệnh trên robot.
+3. Nếu bạn thực thi 8 bước đầu của quỹ đạo đã khử nhiễu ở tần số 50 Hz, cửa sổ hở vòng kéo dài bao lâu và watchdog 300 ms có kích hoạt trong khoảng thời gian đó không? *Gợi ý:* $$8/50 = 0.16$$ s; watchdog không kích hoạt vì lệnh vẫn đang được phát đều — nếu quỹ đạo hướng vào ghế, bắt buộc phải gửi tường minh lệnh `0`.
+4. So với một lượt suy luận thuận của ACT, cơ chế rút mẫu từ nhiễu của Diffusion Policy phải trả thêm chi phí gì tại mỗi lần lập kế hoạch lại? *Gợi ý:* chi phí độ trễ do phải chạy lặp mạng khử nhiễu nhiều lần thay vì một lượt duy nhất.
+5. Nếu chiếc ghế chỉ còn cách 0,15 m và lệnh trung bình giữ $$v = 0.15$$ m/s, $$\omega = 0$$, sau bao lâu xe sẽ chạm ghế và khoảng thời gian đó dài hay ngắn hơn cửa sổ hở vòng 0,16 s? *Gợi ý:* $$0.15/0.15 = 1.0$$ s — dài hơn cửa sổ 0,16 s nên xe chưa đâm ngay trong một nhịp hở vòng, nhưng đoạn đầu đã đẩy xe hướng thẳng vào vật cản và cần cắt bằng lệnh dừng `0`.
 
 ## Đọc thêm
 
-- [Trang dự án Diffusion Policy](https://diffusion-policy.cs.columbia.edu/). Đọc phần ý tưởng và các hình. Lệnh train cứ để đó: bạn không chạy.
-- [Chi và cộng sự, arXiv:2303.04137](https://arxiv.org/abs/2303.04137). Abstract đủ để xác nhận tác giả và câu khẳng định. Lịch nhiễu trong bài báo là máy thật của bộ khử nhiễu đã học, sâu hơn phác thảo $$f$$.
+- [Trang dự án Diffusion Policy](https://diffusion-policy.cs.columbia.edu/) — xem ý tưởng cốt lõi và hình minh họa (không chạy phần huấn luyện).
+- [Chi và cộng sự, arXiv:2303.04137](https://arxiv.org/abs/2303.04137) — đọc phần tóm tắt để nắm rõ tuyên bố của tác giả và lịch nhiễu thực tế đứng sau phác thảo $$f$$.

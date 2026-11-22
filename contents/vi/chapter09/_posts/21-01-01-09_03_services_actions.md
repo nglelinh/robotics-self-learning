@@ -15,58 +15,58 @@ Thời lượng: **~75 phút**.
 
 ## Mục tiêu
 
-Bạn gọi service cộng hai số và đọc một phản hồi, rồi gửi goal action Fibonacci và chỉ ra feedback khác kết quả cuối chỗ nào. Bạn chọn topic, service hoặc action cho bốn việc: stream tốc độ bánh, xóa encoder, chạy tới một pose, và xuất bản laser scan. `NavigateToPose` của Nav2 nên giống demo Fibonacci có thêm bản đồ, không phải một tôn giáo mới.
+Sau bài học này, bạn sẽ gọi được một service cộng hai số để nhận phản hồi trực tiếp, đồng thời gửi mục tiêu (goal) cho action Fibonacci và phân biệt rõ phản hồi tiến độ (feedback) với kết quả cuối cùng (result). Bạn cũng sẽ chọn đúng cơ chế topic, service hoặc action cho bốn tác vụ phổ biến: truyền liên tục vận tốc bánh xe, đặt lại bộ đếm encoder, di chuyển tới một tư thế (pose) đích và xuất bản dữ liệu quét laser. Nhờ đó, khi gặp action `NavigateToPose` của Nav2 ở chương sau, bạn sẽ nhận ra nó có cùng cấu trúc với ví dụ Fibonacci nhưng được bổ sung thêm bản đồ.
 
 ## Kiến thức cần trước
 
-Talker của bài 09-02 đã quen. Bạn để một tiến trình chạy ở một terminal và gõ ở terminal khác. Không cần robot.
+Đã làm quen với ví dụ `talker` ở bài 09-02 và biết cách chạy song song các tiến trình ở nhiều cửa sổ terminal khác nhau. Bài này chưa cần robot thật.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Stream `cmd_vel` trên topic là công cụ đúng vì lệnh mới thay lệnh cũ và không ai phải đợi trả lời trước tick 50 ms kế. “Đã tới đích chưa?” là topic tệ nếu bạn còn cần hủy và tiến độ. Đó là action, và đó là cách Nav2 nhận một pose ở chương 11. Service là câu hỏi ngắn: đặt một bool, kích hoạt hiệu chuẩn, trả về một tổng. Người đặt chuyến đi năm phút lên service sẽ thấy Ctrl-C là cách hủy duy nhất. Watchdog Capstone vẫn là timeout firmware dù bạn chọn gì; hủy action cũng nên xuất bản Twist 0, nếu không bánh giữ lệnh cuối.
+Việc truyền liên tục `cmd_vel` phù hợp với topic vì lệnh mới nhất luôn thay thế lệnh cũ và hệ thống không cần đợi phản hồi trước chu kỳ 50 ms kế tiếp. Ngược lại, bài toán "đã tới đích chưa?" sẽ rất bất tiện nếu dùng topic vì cần theo dõi tiến độ và hỗ trợ hủy giữa chừng — đó chính là lý do action ra đời và là cách Nav2 nhận mục tiêu di chuyển ở chương 11. Trong khi đó, service dành cho các tác vụ ngắn dạng hỏi-đáp: bật/tắt một cờ logic, kích hoạt hiệu chuẩn hoặc tính một tổng nhỏ. Nếu đặt một chuyến di chuyển kéo dài năm phút vào service, cách hủy duy nhất của bạn sẽ là ngắt cưỡng bức bằng Ctrl-C. Dù dùng cơ chế nào, watchdog của Capstone vẫn là lớp bảo vệ timeout trên firmware; khi hủy một action, hệ thống vẫn cần gửi kèm lệnh `Twist` bằng 0 để bánh xe không tiếp tục quay theo lệnh cũ.
 
 ![Một trả lời service so với dòng thời gian action]({{ site.imgurl }}/generated/ch09_svc_action.png)
 
 ## Khái niệm
 
-**Service** là một yêu cầu và một trả lời. Client gửi một message, server gửi một message, lời gọi trở về. `example_interfaces/srv/AddTwoInts` nhận `a` và `b` rồi trả `sum`. Dùng khi việc ngắn và bên gọi chờ được. Đừng dùng cho stream. Server service mà kẹt trong vòng động cơ sẽ trượt hạn của bài 08-05.
+**Service** hoạt động theo mô hình yêu cầu – phản hồi (request – response): client gửi một message yêu cầu, server xử lý rồi trả về một message kết quả và kết thúc lời gọi. Ví dụ `example_interfaces/srv/AddTwoInts` nhận hai số `a`, `b` và trả về `sum`. Cơ chế này chỉ phù hợp cho các tác vụ ngắn mà bên gọi có thể chờ; tuyệt đối không dùng cho luồng dữ liệu liên tục, vì một lời gọi service bị chặn bên trong vòng điều khiển động cơ sẽ làm trượt chu kỳ thời gian thực của bài 08-05.
 
-**Action** là goal, dòng feedback, và một kết quả, cộng thêm hủy. Tutorial Fibonacci gửi `order` và phản hồi dãy khi nó dài ra. Bạn hủy được goal đang quá lâu. Action điều hướng của Nav2 cùng hình dạng: pose đích đi vào, feedback (quãng còn lại, pose hiện tại) dọc đường, kết quả (thành công hoặc hủy bỏ) ở cuối. Recovery nằm trong behavior tree, chương 11 chỉ nhìn lướt. Bạn không cần cây đó để thấy vì sao action tồn tại.
+**Action** bao gồm mục tiêu (goal), luồng phản hồi tiến độ (feedback), kết quả cuối (result) và cơ chế hủy (cancel). Trong ví dụ Fibonacci, client gửi giá trị `order` và nhận liên tục dãy số đang được tính dần; nếu quá lâu, client có thể gửi yêu cầu hủy. Action điều hướng của Nav2 có cấu trúc hoàn toàn tương tự: đầu vào là pose đích, dọc đường trả về feedback (quãng đường còn lại, pose hiện tại) và cuối cùng trả về kết quả (thành công hoặc bị hủy). Các hành vi phục hồi sự cố (recovery) nằm trong cây hành vi (behavior tree) sẽ được giới thiệu sơ lược ở chương 11, nhưng bạn không cần đến nó để hiểu vai trò của action.
 
-Cách chia thực tế cho robot này:
+Bảng phân loại thực tế cho robot trong khóa học:
 
-| Việc | Dùng | Vì sao |
+| Tác vụ | Cơ chế phù hợp | Lý do |
 | --- | --- | --- |
-| Lệnh bánh ở 10–50 Hz | Topic `cmd_vel` | Message mới nhất thắng. Không cần trả lời |
-| Laser scan | Topic | Stream. Thường QoS best-effort |
-| “Xóa bộ đếm encoder” | Service | Một câu, một lời, vài mili giây |
-| “Chạy tới pose này” | Action | Vài phút, hủy được, có feedback |
-| Điện áp pin | Topic | Stream, chậm cũng được |
+| Gửi lệnh vận tốc bánh ở 10–50 Hz | Topic `cmd_vel` | Chỉ cần lệnh mới nhất, không cần phản hồi từng gói |
+| Dữ liệu quét laser (Laser scan) | Topic | Luồng dữ liệu liên tục, thường dùng QoS best-effort |
+| "Xóa bộ đếm encoder" | Service | Một yêu cầu, một phản hồi, hoàn thành trong vài mili giây |
+| "Chạy tới pose đích này" | Action | Kéo dài nhiều giây hoặc phút, cần theo dõi tiến độ và hủy được |
+| Điện áp pin | Topic | Luồng dữ liệu định kỳ, tần số thấp vẫn phù hợp |
 
-Hủy action không tự cắt cổng MOSFET. Cầu nối phải coi “không có Twist mới” là dừng. Luật đó đã có trong timeout serial. Giữ nó khi Twist bắt đầu đến từ controller của action server thay vì bàn phím.
+Lưu ý rằng việc hủy một action không tự động ngắt dòng điện cấp cho động cơ. Cầu nối điều khiển vẫn phải coi trạng thái "không có lệnh `Twist` mới" là lệnh dừng — quy tắc này vốn đã được cài đặt trong timeout serial và cần được giữ nguyên khi `Twist` bắt đầu đến từ bộ điều khiển của action server thay vì bàn phím.
 
-## Hủy là một message, không phải một ước muốn
+## Hủy tác vụ là một message hợp lệ, không phải ngắt cưỡng bức
 
-Server Fibonacci tiếp tục tính đến khi goal xong hoặc một lệnh hủy tới. Nhìn terminal server trong lúc bạn gửi `order: 20`. Dãy feedback dài ra. Ctrl-C trên *client* hủy goal đó trong CLI; tiến trình server phải còn sống và `ros2 action list` vẫn phải thấy `/fibonacci`. Nếu cách duy nhất bạn biết để dừng một goal là giết server, bạn không có hủy, bạn có một cú crash.
+Server Fibonacci sẽ tiếp tục tính toán cho đến khi hoàn thành mục tiêu hoặc nhận được lệnh hủy. Khi bạn gửi `order: 20` và quan sát cửa sổ server, dãy số feedback sẽ dài dần. Nhấn Ctrl-C trên cửa sổ *client* sẽ gửi yêu cầu hủy goal qua dòng lệnh, trong khi tiến trình server vẫn chạy bình thường và lệnh `ros2 action list` vẫn thấy `/fibonacci`. Nếu cách duy nhất để dừng một tác vụ là tắt hẳn tiến trình server, hệ thống đó không có cơ chế hủy mà chỉ đang bị sập (crash).
 
 ```bash
 ros2 action send_goal /fibonacci action_tutorials_interfaces/action/Fibonacci "{order: 20}"
 ```
 
-Ngắt nó. Rồi ngay:
+Ngắt lệnh trên bằng Ctrl-C, rồi kiểm tra ngay:
 
 ```bash
 ros2 action list
 ros2 node list
 ```
 
-**Mong đợi:** `/fibonacci` còn, node server còn. Một goal ngắn thứ hai, `order: 5`, vẫn phải trả kết quả. Đó là hành vi bạn muốn ở Nav2 sau này: một lần điều hướng thất bại hoặc bị hủy không đòi bạn khởi động lại cả stack. Đó cũng là hành vi bạn *không* có từ service. Không có `ros2 service cancel`. Client chờ, hoặc bạn giết nó, và server có thể vẫn đang ở trong lời gọi.
+**Kết quả mong đợi:** `/fibonacci` và node server vẫn tồn tại. Nếu bạn gửi tiếp một goal ngắn hơn (`order: 5`), server vẫn phải tính và trả về kết quả bình thường. Đây chính là đặc tính cần có ở Nav2 sau này: một lượt điều hướng bị hủy hoặc thất bại không buộc bạn phải khởi động lại toàn bộ hệ thống. Service không có khả năng này — không tồn tại lệnh `ros2 service cancel`; client hoặc phải chờ, hoặc bị tắt ngang trong khi server có thể vẫn đang kẹt giữa chừng.
 
-Viết hệ quả động cơ vào cùng ghi chú. Hủy `NavigateToPose` làm action server ngừng gửi feedback mới. Nó không, tự thân, ép `Twist` cuối về 0 trừ khi controller hoặc cầu nối của bạn làm việc đó. Timeout firmware 300 ms từ chương 08 là lưới sau cùng. Cầu nối hiểu action thì xuất bản số 0 khi hủy *và* khi im lặng. Chỉ viết một trong hai là cách robot vẫn bò sau khi bạn bấm dừng trong RViz.
+Ghi chú thêm về hệ quả đối với động cơ: hủy `NavigateToPose` chỉ làm action server ngừng gửi feedback mới, chứ không tự động đặt `Twist` cuối về 0 nếu bộ điều khiển hoặc cầu nối không chủ động làm việc đó. Watchdog 300 ms trên firmware (chương 08) đóng vai trò lưới an toàn cuối cùng. Một cầu nối thiết kế tốt sẽ chủ động xuất bản `Twist` bằng 0 cả khi nhận lệnh hủy *lẫn* khi mất luồng dữ liệu, tránh tình trạng xe vẫn tiếp tục trôi sau khi bạn bấm nút dừng trên RViz.
 
 ## Lab
 
-Service, hai terminal. Tutorial: [Tìm hiểu service](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html).
+Thực hành service trên hai cửa sổ terminal theo hướng dẫn [Tìm hiểu service](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html):
 
 ```bash
 ros2 run demo_nodes_cpp add_two_ints_server
@@ -78,7 +78,7 @@ ros2 service type /add_two_ints
 ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 2, b: 3}"
 ```
 
-**Mong đợi:**
+**Kết quả mong đợi:**
 
 ```text
 example_interfaces/srv/AddTwoInts
@@ -86,9 +86,9 @@ response:
 example_interfaces.srv.AddTwoInts_Response(sum=5)
 ```
 
-Nếu terminal server không chạy, lời gọi ngồi chờ. Sự chờ đó là lý do một service động cơ bị mất cảm giác như teleop treo. Ctrl-C client.
+Nếu terminal chạy server chưa được bật, lệnh gọi service sẽ bị treo chờ phản hồi — đó cũng là lý do nếu đặt lệnh động cơ vào service, chỉ cần server gặp sự cố là cả hệ thống điều khiển sẽ bị đứng. Nhấn Ctrl-C để dừng client.
 
-Action, hai terminal. Tutorial: [Tìm hiểu action](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html).
+Thực hành action trên hai cửa sổ terminal theo hướng dẫn [Tìm hiểu action](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html):
 
 ```bash
 ros2 run action_tutorials_py fibonacci_action_server
@@ -100,36 +100,36 @@ ros2 action info /fibonacci
 ros2 action send_goal /fibonacci action_tutorials_interfaces/action/Fibonacci "{order: 5}"
 ```
 
-**Mong đợi:** các dòng feedback với `sequence` dài dần, rồi một kết quả. Đọc khối result thay vì học thuộc dãy trên blog. `send_goal` cũng in goal id. Gửi order 20 rồi hủy mới là ý: terminal khác vẫn thấy `/fibonacci` trong `ros2 action list`, và bạn ngắt client được. Không cần giết server để dừng một goal.
+**Kết quả mong đợi:** các dòng feedback hiển thị dãy `sequence` tăng dần độ dài, sau đó trả về kết quả cuối cùng kèm `goal id`. Hãy đọc trực tiếp khối `result` in ra trên terminal. Tiếp theo, gửi `order: 20` rồi nhấn Ctrl-C ở client để hủy: kiểm tra lại từ một terminal khác sẽ thấy `/fibonacci` vẫn hiển thị trong `ros2 action list`, chứng tỏ bạn có thể hủy mục tiêu mà không cần tắt server.
 
-**Khi hỏng thì thường vì**
+**Các lỗi thường gặp**
 
-| Bạn thấy | Nguyên nhân hay gặp |
+| Hiện tượng | Nguyên nhân thường gặp |
 | --- | --- |
-| Lời gọi service ngồi mãi | Server không chạy, hoặc sai tên |
-| `package 'action_tutorials_py' not found` | Thiếu gói. `sudo apt install ros-jazzy-action-tutorials-py` |
-| Không có feedback, chỉ có kết quả | Client giấu feedback. CLI `send_goal` thì hiện |
-| Bạn gắn “đi 2 m” vào service | Hủy và tiến độ không có chỗ ở. Làm thành action, và vẫn timeout động cơ |
+| Lệnh gọi service bị treo mãi | Server chưa chạy, hoặc gõ sai tên service |
+| `package 'action_tutorials_py' not found` | Thiếu gói mẫu; cài thêm bằng `sudo apt install ros-jazzy-action-tutorials-py` |
+| Chỉ thấy kết quả cuối mà không thấy feedback | Client không bật chế độ in feedback; công cụ CLI `send_goal` mặc định hiển thị đầy đủ |
+| Đưa tác vụ "đi 2 m" vào service | Không có cơ chế hủy và báo tiến độ; cần chuyển sang dùng action và vẫn duy trì timeout động cơ |
 
 ## Mua ở Việt Nam
 
-Không có gì. Đây là lab laptop.
+Không cần mua thêm phần cứng. Đây là bài thực hành hoàn toàn trên laptop.
 
 ## Video tham khảo
 
-- **Xem trước:** [ROS/ROS 2 - What are messages, services and actions?](https://www.youtube.com/watch?v=WzOopOkrowA) — Hummingbird, tiếng Anh. Message, service, và action khác nhau ở chỗ có chờ kết quả hay không. Đúng bảng bài này.
+- **Xem trước:** [ROS/ROS 2 - What are messages, services and actions?](https://www.youtube.com/watch?v=WzOopOkrowA) — Hummingbird (tiếng Anh). So sánh sự khác biệt giữa message, service và action dựa trên việc có cần chờ kết quả hay không, khớp với bảng phân loại trong bài.
 
 ## Bài tập
 
-1. Xếp loại “xuất bản điện áp pin mười lần một giây.” Gợi ý: topic.
-2. Xếp loại “Nav2, đi tới bếp.” Gợi ý: action. Tên bạn sẽ tra sau: `NavigateToPose`.
-3. Lời gọi service treo 30 giây. Tiến trình đầu tiên bạn kiểm là gì? Gợi ý: server, bằng `ros2 service list` và terminal server, trước khi cài lại ROS.
-4. Vì sao hủy action vẫn phải tạo Twist 0 trên Capstone? Gợi ý: firmware giữ lệnh bánh cuối đến khi watchdog 300 ms. Hủy phải được nối bằng im lặng hoặc số 0 tường minh, nếu không robot trôi trên PWM cũ đến khi watchdog cứu.
-5. Fibonacci `order: 5` là vật thế. Trường “order” tương tự cái gì trên xe? Gợi ý: pose đích, không phải PWM.
+1. Tác vụ "xuất bản điện áp pin mười lần mỗi giây" nên dùng cơ chế nào? *Gợi ý:* topic.
+2. Tác vụ "yêu cầu Nav2 di chuyển vào bếp" nên dùng cơ chế nào? *Gợi ý:* action (tên cụ thể bạn sẽ gặp ở chương sau là `NavigateToPose`).
+3. Một lệnh gọi service bị treo suốt 30 giây. Bước kiểm tra đầu tiên bạn nên làm là gì? *Gợi ý:* kiểm tra tiến trình server qua `ros2 service list` và cửa sổ terminal của server, thay vì vội cài lại ROS.
+4. Vì sao khi hủy action, hệ thống Capstone vẫn cần gửi lệnh `Twist` bằng 0? *Gợi ý:* firmware giữ vận tốc bánh theo lệnh cuối cho tới khi hết thời gian chờ 300 ms của watchdog; việc gửi rõ giá trị 0 (hoặc ngắt luồng kịp thời) giúp xe dừng ngay thay vì tiếp tục trôi theo mức PWM cũ.
+5. Trong ví dụ minh họa Fibonacci, trường `order: 5` tương ứng với khái niệm nào trên robot thực tế? *Gợi ý:* tương ứng với pose đích cần di chuyển tới, không phải giá trị PWM trực tiếp.
 
 ## Đọc thêm
 
-- [Tìm hiểu service](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html).
-- [Tìm hiểu action](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html).
-- [Bắt đầu với Nav2 (Jazzy)](https://docs.nav2.org/jazzy/getting_started/) cho action điều hướng bạn chưa chạy.
-- Định nghĩa `action_tutorials_interfaces/action/Fibonacci` qua `ros2 interface show`.
+- [Tìm hiểu service](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html)
+- [Tìm hiểu action](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html)
+- [Bắt đầu với Nav2 (Jazzy)](https://docs.nav2.org/jazzy/getting_started/) — giới thiệu action điều hướng sẽ dùng ở chương sau.
+- Xem trực tiếp định nghĩa `action_tutorials_interfaces/action/Fibonacci` bằng lệnh `ros2 interface show`.

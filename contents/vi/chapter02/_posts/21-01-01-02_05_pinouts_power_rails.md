@@ -12,108 +12,110 @@ draft: false
 
 ## Mục tiêu
 
-Bạn gọi được tên, trên chính board của mình, chân USB 5 V và chân 3,3 V đã ổn áp, rồi đo cả hai khi chỉ có USB. Bạn coi mọi GPIO của ESP32 và Pico là chân 3,3 V mà 5 V có thể giết. Bạn đặt pin 2S lên chân VM của TB6612 trong một bản vẽ, và liệt kê các chân header mà pin đó không bao giờ được chạm. Bạn đổi mức echo của HC-SR04 trên giấy, có mass chung, trước khi bất kỳ cảm biến nào được đi dây. Cả lab, pin không được nối.
+Sau bài này, bạn xác định được đúng vị trí chân nguồn USB 5 V và chân nguồn 3,3 V đã ổn áp trên bo mạch của mình, rồi đo kiểm cả hai bằng đồng hồ vạn năng khi chỉ cấp nguồn qua USB. Bạn nắm vững nguyên tắc mọi chân GPIO của ESP32 và Pico đều là 3,3 V và có thể hỏng nếu đưa 5 V vào. Bạn vẽ được sơ đồ đấu nguồn pin 2S vào chân VM của TB6612 trên giấy, đồng thời liệt kê đầy đủ các chân header mà nguồn pin tuyệt đối không được chạm tới. Bạn cũng thiết kế được mạch chuyển mức tín hiệu Echo của HC-SR04 kèm nối chung mass trước khi đấu dây cảm biến thật. Trong suốt bài thực hành này, không kết nối pin.
 
 ## Cần gì trước khi học
 
-Lab nhịp tim đã chứng minh board được máy tính nhận và bạn biết chân LED của mình. Bạn chỉnh được đồng hồ về điện áp một chiều và đặt que đen lên một mass gọi được tên. Mạch chia áp của chương 01 là phần toán mạch duy nhất. Nguồn motor chưa nối. Giỏ đầy đủ, gồm driver và pin, là bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Bạn không mua pin để xong trang này.
+Bạn cần đã hoàn thành bài nhịp tim để xác nhận bo mạch kết nối tốt với máy tính và biết rõ chân LED của mình. Bạn cần biết đặt đồng hồ vạn năng ở thang đo điện áp một chiều và đặt que đen lên chân mass (GND) xác định. Kiến thức về mạch chia áp ở chương 01 là phần tính toán duy nhất cần dùng. Nguồn động cơ chưa được đấu nối; danh sách đầy đủ gồm driver và pin nằm ở bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
 ## Vì sao bài này gắn với Capstone A
 
-Firmware teleop chương 07 hỏng theo những kiểu không giống một câu `if` sai. Echo siêu âm 5 V rơi vào GPIO 3,3 V. Dây hồi của motor không chung mass với logic, nên chân “PWM” nổi so với driver và TB6612 đọc ra vô nghĩa. Pin 7,4 V bị kẹp vào chân ghi 5V hoặc 3V3 vì nhãn trông rộng rãi. Chip reset, hoặc một chân chết, ngay lần đầu robot được bảo chạy. Thời gian chờ khoảng 300 ms và quy tắc bánh nhấc lên vẫn quan trọng, và chúng không cứu được một chân đã nhìn thấy pin. Tấm thẻ bạn vẽ ở đây là bản đồ bạn sẽ cầm khi driver ở chương 05 và PWM ở chương 07 cuối cùng được phép. Wi-Fi ở chương 08 không làm GPIO cứng hơn.
+Nhiều lỗi nghiêm trọng khi chạy firmware teleop ở chương 07 không xuất phát từ lỗi lập trình mà từ lỗi đấu nối phần cứng: đưa thẳng xung Echo 5 V vào GPIO 3,3 V; quên nối chung mass giữa mạch động cơ và vi điều khiển khiến tín hiệu PWM bị trôi mức tham chiếu và TB6612 không đọc được; hoặc cấp nhầm pin 7,4 V vào chân 5V hay 3V3 trên bo mạch. Hậu quả là chip bị reset liên tục hoặc hỏng chân ngay lần cấp điện đầu tiên. Cơ chế tự ngắt 300 ms và quy tắc nhấc bánh không thể bảo vệ được một chân GPIO đã bị quá áp. Thẻ sơ đồ chân bạn lập trong bài này sẽ là tài liệu đối chiếu trực tiếp khi bắt đầu lắp driver ở chương 05 và xuất PWM ở chương 07.
 
-## Hai ray, và một ray thứ ba không nằm trên header này
+## Hai đường nguồn trên bo mạch và đường nguồn riêng cho động cơ
 
-Chân GPIO của ESP32 và Pico là logic 3,3 V. Năm vôn trên một GPIO có thể giết chân. Trên ESP32, cực đại tuyệt đối chỉ hơn ray một khoảng sụt diode:
+Chân GPIO của ESP32 và Pico hoạt động ở mức logic 3,3 V; cấp 5 V vào chân GPIO có thể làm hỏng chân chip. Trên ESP32, điện áp cực đại tuyệt đối chỉ cao hơn nguồn nuôi khoảng một mức sụt áp diode:
 
 $$
 V_{DD} + 0{,}3\,\mathrm{V} = 3{,}3\,\mathrm{V} + 0{,}3\,\mathrm{V} = 3{,}6\,\mathrm{V}.
 $$
 
-Giới hạn của Pico cùng kiểu, chỉ nhỉnh hơn 3,3 V vài phần mười. Năm vôn vượt cả hai giới hạn.
+Giới hạn chịu áp trên Pico cũng tương tự, chỉ nhỉnh hơn 3,3 V vài phần mười vôn. Điện áp 5 V vượt xa cả hai giới hạn này.
 
-Một quy tắc đọc kiểu học tập, tách khỏi vạch hỏng đó, nói mức cao nên ít nhất khoảng $$0{,}7 \times 3{,}3\,\mathrm{V} \approx 2{,}3\,\mathrm{V}$$ trước khi bạn tin. $$V_{IL}$$ và $$V_{IH}$$ thật nằm trong datasheet. Quy tắc vận hành đơn giản hơn cả hai công thức: đừng nuôi GPIO từ một chân 5 V.
+Tách biệt với giới hạn hư hỏng trên, quy tắc ước lượng trong học tập cho mức logic cao là điện áp nên đạt ít nhất khoảng $$0{,}7 \times 3{,}3\,\mathrm{V} \approx 2{,}3\,\mathrm{V}$$ để được đọc ổn định là mức cao (giá trị $$V_{IL}$$ và $$V_{IH}$$ chính xác tra trong datasheet). Quy tắc vận hành đơn giản và an toàn nhất là không bao giờ nối trực tiếp ngõ ra 5 V vào chân GPIO 3,3 V.
 
-Trên dev board ESP32 cổ điển, chân ghi 5V hoặc VIN là USB 5 V, thường qua một diode Schottky, nên header ngồi thấp hơn 5 V của laptop vài phần mười vôn. Nó nuôi được một cảm biến nhỏ khi bạn còn trên bàn. Nó không nuôi được động cơ TT. Dòng không tải của một động cơ TT trên listing của môn đã khoảng 110 mA đến 150 mA, và lúc kẹt thì lớn hơn nhiều lần. Hai motor cộng một đỉnh Wi-Fi làm sập cổng USB. Sự từ chối đến dưới dạng mất kết nối hoặc reset brownout, cùng banner lặp mà bạn đã học ở lab nhịp tim. Chân ghi 3V3 là ngõ ra của ổn áp. Nó nuôi module. Motor không thuộc về nó.
+Trên bo mạch ESP32 cổ điển, chân ghi `5V` hoặc `VIN` lấy nguồn 5 V từ cổng USB (thường đi qua một diode Schottky nên điện áp thực đo thấp hơn 5 V vài phần mười vôn). Đường này có thể cấp cho một cảm biến tiêu thụ dòng nhỏ khi thử trên bàn, nhưng tuyệt đối không dùng để cấp nguồn cho động cơ TT. Dòng không tải của một động cơ TT theo thông số bán hàng đã vào khoảng 110 mA đến 150 mA, và tăng lên gấp nhiều lần khi bị kẹt trục. Hai động cơ cộng thêm xung dòng phát Wi-Fi sẽ làm sụt nguồn cổng USB, gây mất kết nối hoặc reset do sụt áp (brownout) — biểu hiện giống hiện tượng lặp lại dòng tiêu đề đã gặp ở bài nhịp tim. Trong khi đó, chân `3V3` là ngõ ra của mạch ổn áp dùng để nuôi khối logic, hoàn toàn không dành cho động cơ.
 
-Pico gọi cùng các ý đó thẳng hơn. VBUS là USB 5 V và có mặt khi cáp đang cắm. VSYS là ngõ vào hệ thống. USB tới VSYS qua một diode, và một nguồn ngoài đặt thẳng lên VSYS bị giới hạn khoảng 1,8 V đến 5,5 V. 3V3 là ray đã ổn áp và nó là ngõ ra. Đừng đưa 7,4 V vào 3V3. Đừng đưa 7,4 V vào VSYS. Cả hai đều ngoài việc những chân đó được làm ra để nhận, và 7,4 V trên 3V3 là một cú đánh thẳng vào ngõ ra ổn áp.
+Trên Raspberry Pi Pico, tên các chân nguồn thể hiện rõ chức năng hơn: `VBUS` là nguồn 5 V trực tiếp từ USB khi cắm cáp; `VSYS` là ngõ vào nguồn hệ thống nhận từ USB qua diode và chấp nhận nguồn ngoài trong khoảng 1,8 V đến 5,5 V; `3V3` là ngõ ra đã ổn áp. Không bao giờ đưa pin 7,4 V vào `3V3` hay `VSYS`, vì cả hai đều vượt quá giới hạn thiết kế, đặc biệt đưa 7,4 V vào `3V3` sẽ đánh thẳng vào ngõ ra mạch ổn áp.
 
 ![USB 5 V, 3,3 V đã ổn áp, và ray motor nằm ngoài header]({{ site.imgurl }}/generated/power_rails_3v3.png)
 
-Đọc hình như một lời hứa về dòng, không chỉ về áp. Ray 5 V đến từ USB và có thể mượn nhẹ. Ray 3,3 V dành cho logic. Mass là chung. Ray motor không phải một trong hai chân đó.
+Hãy hiểu sơ đồ nguồn theo cả mức điện áp lẫn khả năng cấp dòng: đường 5 V từ USB chỉ đủ cho tải nhỏ, đường 3,3 V dành riêng cho mạch logic, mass (GND) phải nối chung, còn đường nguồn động cơ phải tách riêng hoàn toàn khỏi hàng chân vi điều khiển.
 
 ![Giải phẫu board: que đo đặt lên header, không đặt lên module]({{ site.imgurl }}/generated/pcb_mcu_anatomy.png)
 
-Cổng USB giải thích VBUS hoặc chân 5V của dev board. Ổn áp giải thích 3V3. Đồng hồ đặt lên header. Vỏ kim loại không phải điểm đo.
+Cổng USB cấp cho `VBUS` (hoặc chân `5V` trên ESP32), còn mạch ổn áp tạo ra đường `3V3`. Khi đo kiểm, đặt đầu que đo trực tiếp vào các chân header, không đặt lên vỏ kim loại của module.
 
-Mass chung với driver là bắt buộc. TB6612 đo PWM của bạn so với mass logic của chính nó. Nếu mass đó không phải mass của vi điều khiển, driver không thấy mức cao đáng tin, dù điện áp GPIO trông đúng trên một đồng hồ đang tham chiếu sai chỗ. Khi driver tới, chân GND của nó buộc vào một chân GND trên ESP32 hoặc Pico. Nguồn motor thì không.
+Việc nối chung mass giữa vi điều khiển và mạch cầu H là bắt buộc. TB6612 đọc mức điện áp PWM dựa trên tham chiếu mass logic của chính nó. Nếu chân GND của driver không nối với GND của ESP32 hoặc Pico, driver sẽ không nhận diện được mức cao/thấp một cách ổn định. Khi lắp driver ở các chương sau, phải nối chung chân GND logic với vi điều khiển, còn đường nguồn động cơ VM đi riêng từ pin.
 
-## Chân echo
+## Xử lý chân Echo 5 V
 
-Ngõ ra echo của HC-SR04 là một xung 5 V. Xung đó phải được đổi mức trước khi tới ngõ vào ESP32 hoặc Pico. Module chuyển mức là dụng cụ chắc: phía điện áp thấp là 3V3 của board, phía điện áp cao là 5 V của cảm biến, và các mass buộc vào nhau. Echo đi từ phía cao sang phía thấp rồi vào GPIO. Nhiều module nhận mức cao 3,3 V trên chân trigger. Đó là tính chất ngõ vào của cảm biến, và không phải giấy phép bỏ qua việc dịch echo. Bạn sẽ xác nhận trigger ở chương cảm biến. Hôm nay không khám phá điều đó bằng cách hy sinh một GPIO.
+Ngõ ra Echo của cảm biến siêu âm HC-SR04 xuất xung 5 V, do đó bắt buộc phải hạ mức điện áp trước khi đưa vào chân GPIO của ESP32 hoặc Pico. Cách chắc chắn nhất là dùng mạch chuyển mức logic (level shifter): nối phía điện áp thấp (LV) vào chân `3V3` của bo mạch, phía điện áp cao (HV) vào nguồn 5 V của cảm biến và nối chung mass. Tín hiệu Echo đi qua chiều từ HV sang LV rồi vào GPIO. Nhiều cảm biến HC-SR04 có thể nhận tín hiệu kích (Trigger) ở mức 3,3 V, nhưng đó là đặc tính ngõ vào của cảm biến chứ không đồng nghĩa với việc được bỏ qua mạch chuyển mức ở chân Echo.
 
-Mạch chia điện trở là phép tính cho thấy vì sao echo 5 V thô là trái phép. Với $$1\,\mathrm{k}\Omega$$ từ echo tới nút GPIO và $$2\,\mathrm{k}\Omega$$ từ nút đó xuống GND:
+Trong trường hợp cần tính toán bằng mạch chia điện trở, nếu mắc điện trở $$1\,\mathrm{k}\Omega$$ từ chân Echo đến nút nối GPIO và điện trở $$2\,\mathrm{k}\Omega$$ từ nút đó xuống GND, điện áp thu được là:
 
 $$
 V_{\mathrm{GPIO}} = 5\,\mathrm{V} \times \frac{2}{1 + 2} \approx 3{,}33\,\mathrm{V}.
 $$
 
-Nó ngồi gần đỉnh vùng được phép, nên shifter dễ chịu hơn khi robot phải chạy ổn. Dung sai và cáp dài làm nút đó dịch. Lab này không lắp cảm biến. Viết phân số lên thẻ chân để lần đi dây sau có một con số đi kèm.
+Giá trị 3,33 V nằm khá sát giới hạn trên cho phép, và sai số điện trở hoặc chiều dài dây dẫn có thể làm điện áp tại nút này dịch chuyển, vì vậy dùng module chuyển mức vẫn ổn định hơn khi lắp trên robot thật. Bài này chưa đấu cảm biến; bạn chỉ cần ghi công thức chia áp lên thẻ sơ đồ chân để chuẩn bị cho các chương sau.
 
 ## Ví dụ đã làm
 
-Một bộ pin 2S bằng cell 18650 ngồi gần 7,4 V danh định, đầy thì cao hơn, yếu thì thấp hơn. Hà vẽ chỗ đáp hợp pháp duy nhất của dây đỏ: cực VM của TB6612. Module kiểu Hshop trong ghi chú chương 00 nhận nguồn motor trong dải có chứa 7,4 V. Dây đen đáp vào GND của driver, và một sợi riêng nối GND đó với GND của vi điều khiển.
+Một bộ pin 2S ghép từ hai cell 18650 có điện áp danh định 7,4 V (sạc đầy cao hơn và khi yếu thấp hơn). Hà vẽ đường đi hợp lệ duy nhất cho dây dương (màu đỏ) của pin: nối thẳng vào cực `VM` của mạch cầu H TB6612 (loại module bán tại Hshop trong ghi chú chương 00 hỗ trợ dải nguồn động cơ bao gồm 7,4 V). Dây âm (màu đen) nối vào cực `GND` của driver, đồng thời kéo một dây riêng nối `GND` này sang `GND` của vi điều khiển.
 
-Dây dương của pin có một danh sách chân không bao giờ được chạm. Trên header ESP32: mọi GPIO, chân 3V3, và chân 5V/VIN. Chân 5V đó là USB 5 V. Pin 2S ở đó có thể đẩy ngược vào laptop. Trên Pico: mọi chân GP, 3V3, VSYS, và VBUS. Cửa sổ cho phép của VSYS khoảng 1,8 V đến 5,5 V, và 7,4 V nằm ngoài. 3V3 là ngõ ra trên cả hai board. VCC logic của driver, chân nhỏ chờ 3,3 V hoặc 5 V, không phải VM. Hà viết “chỉ VM” cạnh pin và “VCC logic lấy từ 3V3, không lấy từ pin” cạnh driver.
+Bên cạnh đó, Hà lập danh sách các chân tuyệt đối không được chạm dây dương pin:
+- Trên ESP32: mọi chân GPIO, chân `3V3` và chân `5V`/`VIN` (vì nối với nguồn USB 5 V, cấp pin 2S vào có thể đẩy ngược điện áp về laptop).
+- Trên Pico: mọi chân GP, `3V3`, `VSYS` (giới hạn tối đa 5,5 V) và `VBUS`.
 
-Không có sợi nào được nối. Bản vẽ là ví dụ đã làm. Phần đồng hồ là một việc khác, nhỏ hơn: chỉ USB.
+Chân `VCC` (nguồn logic) của mạch cầu H nhận 3,3 V hoặc 5 V chứ không phải nguồn pin `VM`. Hà ghi rõ trên bản vẽ: "pin 2S chỉ nối vào VM" và "VCC logic lấy từ 3V3, không lấy từ pin". Ở bước này chưa nối dây thật; phần thực hành đo điện áp chỉ tiến hành với nguồn USB.
 
 ## Lab
 
-Chỉ cáp USB. Pin rút, driver rút, cảm biến rút.
+Chỉ cắm cáp USB; đảm bảo đã tháo hoàn toàn pin, mạch cầu H và cảm biến.
 
-1. Que đỏ ở lỗ đo áp, que đen trên một chân GND gọi được tên, đồng hồ ở điện áp một chiều.
-2. Đo ray 5 V: chân dev board ghi 5V hoặc VIN, hoặc VBUS của Pico. Viết con số.
-3. Đo 3,3 V: chân ghi 3V3, hoặc 3V3(OUT) của Pico. Viết con số.
-4. Vẽ thẻ chân: hai ray đó, GND, chân LED của nhịp tim, một GPIO trống đã đối chiếu silk, và một danh sách cấm. Danh sách cấm gồm “5 V không bao giờ lên GPIO” và câu “pin 2S chỉ chạm VM và GND của driver.”
-5. Trên cùng thẻ, phác echo HC-SR04 qua mạch chuyển mức hoặc mạch chia 1 kΩ / 2 kΩ. Không nối cảm biến.
+1. Cắm que đỏ vào lỗ đo điện áp (V), đặt que đen lên một chân `GND` xác định, chỉnh đồng hồ về thang đo điện áp một chiều (DCV).
+2. Đo đường nguồn 5 V (chân `5V`/`VIN` trên ESP32 hoặc `VBUS` trên Pico) và ghi chính xác giá trị đo được.
+3. Đo đường nguồn 3,3 V (chân `3V3` hoặc `3V3(OUT)` trên Pico) và ghi chính xác giá trị đo được.
+4. Vẽ thẻ sơ đồ chân cho bo mạch của bạn gồm: hai đường nguồn vừa đo, các chân `GND`, chân LED của bài nhịp tim, một chân GPIO trống đã đối chiếu nhãn mạch và mục cấm (ghi rõ "không cấp 5 V vào GPIO" và "pin 2S chỉ nối vào VM và GND của driver").
+5. Phác thảo mạch chuyển mức (hoặc mạch chia áp 1 kΩ / 2 kΩ) cho chân Echo của HC-SR04 ngay trên thẻ; chưa đấu dây cảm biến thật.
 
-Bạn sẽ đọc khoảng 4,7 V đến 5,1 V trên ray USB và khoảng 3,25 V đến 3,35 V trên 3,3 V. Chân 5V của ESP32 bị trừ qua diode, gần 4,7 V đến 4,9 V, vẫn là ray USB khỏe. Viết con số, đừng làm tròn thành “5 V.” Số đọc 3,3 V ngoài cửa sổ đó là dừng. Số đọc trên 3,6 V ở 3V3 có nghĩa 5 V đang rò vào: rút và tìm. Lab này không nối pin, kể cả để “xem VM sẽ là bao nhiêu.”
+Kết quả đo chuẩn khi chỉ dùng USB nằm trong khoảng 4,7 V đến 5,1 V ở đường 5 V (chân `5V` của ESP32 qua diode thường đọc khoảng 4,7 V đến 4,9 V) và khoảng 3,25 V đến 3,35 V ở đường `3V3`. Ghi chính xác các chữ số đo được, không ghi chung chung là "5 V". Nếu đường `3V3` nằm ngoài khoảng cho phép — đặc biệt nếu vượt quá 3,6 V chứng tỏ có rò áp 5 V — phải rút cáp ngay để kiểm tra. Tuyệt đối không nối pin trong bài thực hành này.
 
 ![Thứ tự nối: mass chung, logic, tín hiệu, nguồn motor sau cùng, bánh nhấc]({{ site.imgurl }}/generated/power_order.png)
 
-Hình là thứ tự mà thẻ đang giữ. Bạn vẫn ở bước USB. Nguồn motor là khối cuối, và bánh được nhấc khi việc đó cuối cùng thành hợp pháp.
+Sơ đồ nhắc lại trình tự đấu nối an toàn: hiện tại bạn vẫn đang ở bước kiểm tra nguồn USB; nguồn động cơ là bước cuối cùng và chỉ được cấp khi bánh xe đã nhấc khỏi bàn.
 
-Các lỗi. Que đen trên chân 5V và que đỏ trên GND cho số âm hoặc một số không khó hiểu. Đổi que và gọi lại tên GND. Đo lên vỏ kim loại, hoặc lên một tụ, không phải đo ray. Số 0 V trên 3V3 trong khi USB còn sống là sai chân, thiếu mass, hoặc ổn áp chết. Dừng. Bạn nào nuôi động cơ TT từ chân 5V sẽ làm brownout board ngay lúc motor kẹt. Chân đó là USB 5 V.
+Các lỗi đo thường gặp: đặt ngược que đo (que đen vào `5V`, que đỏ vào `GND`) khiến đồng hồ hiện số âm; đặt que lên vỏ kim loại hoặc thân tụ thay vì chân header; hoặc đo chân `3V3` ra 0 V khi USB đang cắm (do đặt nhầm chân, thiếu tiếp xúc mass hoặc hỏng mạch ổn áp — cần dừng lại kiểm tra). Cấp nguồn động cơ TT từ chân `5V` sẽ gây sụt áp ngay khi động cơ khởi động hoặc kẹt trục.
 
-An toàn: pin ở trong túi. Đừng mắc đồng hồ ở chế độ đo dòng nối tắt giữa 5V và GND. Đó là một mạch ngắn qua đồng hồ.
+An toàn: giữ pin ở ngoài khu vực mạch. Không đặt đồng hồ ở thang đo dòng điện (A/mA) rồi chạm trực tiếp giữa `5V` và `GND` vì sẽ gây ngắn mạch qua đồng hồ.
 
 ## Video tham khảo
 
-- **Xem trước:** [HOW TO USE LOGIC LEVEL SHIFTER ON ARDUINO TO CONVERT CIRCUITS AND SENSORS FROM 5V TO 3.3V CIRCUITS](https://www.youtube.com/watch?v=RBDVBafNF44) — Circuit Desolator, tiếng Anh. 5 V và 3,3 V không nối thẳng. Xem mạch chuyển mức trước khi cắm cảm biến vào ESP32.
-- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Một module chuyển mức tám kênh. Chiều cao và chiều thấp phải khớp sơ đồ chân bài này.
+- **Xem trước:** [HOW TO USE LOGIC LEVEL SHIFTER ON ARDUINO TO CONVERT CIRCUITS AND SENSORS FROM 5V TO 3.3V CIRCUITS](https://www.youtube.com/watch?v=RBDVBafNF44) — Circuit Desolator, tiếng Anh. Giải thích lý do không nối thẳng 5 V vào 3,3 V và cách dùng mạch chuyển mức trước khi ghép cảm biến với ESP32.
+- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Giới thiệu module chuyển mức 8 kênh; chú ý phân biệt phía điện áp cao (HV) và phía điện áp thấp (LV) cho khớp sơ đồ chân trong bài.
 
 ## Bài tập
 
-1. Tính ngõ ra mạch chia cho 5 V với $$1\,\mathrm{k}\Omega$$ phía trên và $$2\,\mathrm{k}\Omega$$ phía dưới. Nếu cả hai điện trở cao thêm 5 phần trăm, tỉ số có đổi không?
-2. Cực nào của pin 2S 7,4 V được chạm TB6612, và những chân header ESP32 nào pin đó không bao giờ được chạm?
-3. Trên bàn có một Pico. Nhãn nào là USB 5 V, nhãn nào nhận khoảng 1,8 V đến 5,5 V, và nhãn nào là ngõ ra đã ổn áp? 7,4 V gây hỏng ngay nhất ở đâu?
-4. Đồng hồ đọc 4,86 V và 3,29 V, chỉ USB. Có nằm trong cửa sổ không? Thẻ chân vẫn cần câu nào về VM?
-5. Echo của HC-SR04 bị đi thẳng vào GPIO 18 “chỉ để xem.” Điện áp nào đập vào chân, và món nào phải đứng trên sợi dây đó?
+1. Tính điện áp ngõ ra của mạch chia áp cho nguồn 5 V với điện trở phía trên $$1\,\mathrm{k}\Omega$$ và phía dưới $$2\,\mathrm{k}\Omega$$. Nếu cả hai điện trở cùng tăng thêm 5%, tỉ số chia áp có thay đổi không?
+2. Các cực của pin 2S 7,4 V được phép nối vào chân nào của TB6612, và tuyệt đối không được chạm vào những chân header nào của ESP32?
+3. Trên Raspberry Pi Pico, chân nào là USB 5 V, chân nào nhận nguồn ngoài trong dải 1,8 V đến 5,5 V, và chân nào là ngõ ra đã ổn áp? Nếu cấp nhầm 7,4 V thì chân nào chịu rủi ro hư hỏng trực tiếp nhất?
+4. Khi chỉ cắm USB, đồng hồ đo được 4,86 V và 3,29 V. Hai giá trị này có nằm trong ngưỡng bình thường không? Thẻ sơ đồ chân vẫn cần bổ sung câu ghi chú gì về cực VM?
+5. Một sinh viên nối thẳng chân Echo của HC-SR04 vào GPIO 18 "chỉ để thử nhanh". Mức điện áp nào tác động lên chân GPIO và cần bổ sung mạch gì trên đường dây đó?
 
 <details>
 <summary>Đáp án</summary>
 
-1. $$5 \times 2 / 3 \approx 3{,}33\,\mathrm{V}$$. Nếu cả hai điện trở nhân 1,05 thì tỉ số không đổi, nên nút lý tưởng vẫn khoảng 3,33 V. Sai số không đều thì không triệt. Đó là một lý do shifter dễ chịu hơn mạch chia ráp từ điện trở thừa.
-2. Dương pin được chạm VM. Âm pin chạm GND driver, và GND đó phải chung với vi điều khiển. Pin không được chạm bất kỳ GPIO nào của ESP32, không chạm 3V3, không chạm chân 5V/VIN.
-3. VBUS là USB 5 V. VSYS là ngõ vào nhận khoảng 1,8 V đến 5,5 V, USB tới qua diode. 3V3 là ngõ ra đã ổn áp. 7,4 V trên 3V3 đánh thẳng ngõ ra ổn áp. 7,4 V trên VSYS cũng ngoài cửa sổ cho phép.
-4. 4,86 V nằm trong khoảng 4,7 V đến 5,1 V, và 3,29 V nằm trong khoảng 3,25 V đến 3,35 V. Thẻ vẫn cần một câu rõ: pin 2S chỉ chạm VM và mass driver, và pin đã không được nối trong lần đo.
-5. Chân echo đẩy khoảng 5 V vào GPIO 3,3 V, trên vùng cực đại tuyệt đối cỡ 3,6 V. Một mạch chuyển mức (hoặc, như một thỏa hiệp đã tính, mạch chia) phải đứng trên sợi đó, mass buộc chung. Rút echo trước mọi thí nghiệm tiếp.
+1. $$5 \times 2 / 3 \approx 3{,}33\,\mathrm{V}$$. Nếu cả hai điện trở cùng nhân với 1,05 thì hệ số triệt tiêu ở cả tử và mẫu nên tỉ số chia áp không đổi, điện áp lý tưởng vẫn xấp xỉ 3,33 V. Tuy nhiên, nếu sai số giữa hai điện trở lệch nhau thì điện áp sẽ thay đổi — đó là lý do dùng module chuyển mức ổn định hơn mạch chia áp ghép từ điện trở rời.
+2. Cực dương pin nối vào `VM`, cực âm nối vào `GND` của mạch cầu H (và `GND` này phải nối chung với `GND` của vi điều khiển). Pin tuyệt đối không được chạm vào bất kỳ chân GPIO nào của ESP32, chân `3V3` hay chân `5V`/`VIN`.
+3. `VBUS` là USB 5 V; `VSYS` là ngõ vào chấp nhận khoảng 1,8 V đến 5,5 V (nhận từ USB qua diode); `3V3` là ngõ ra đã ổn áp. Đưa 7,4 V vào `3V3` sẽ đánh thẳng vào ngõ ra ổn áp, còn đưa vào `VSYS` cũng vượt xa ngưỡng cho phép tối đa 5,5 V.
+4. Cả hai đều đạt: 4,86 V nằm trong khoảng 4,7 V – 5,1 V và 3,29 V nằm trong khoảng 3,25 V – 3,35 V. Thẻ vẫn cần ghi rõ: pin 2S chỉ nối vào cực `VM` và `GND` của driver, đồng thời xác nhận chưa nối pin trong lần đo này.
+5. Chân Echo đẩy xung 5 V vào GPIO 3,3 V, vượt quá giới hạn cực đại tuyệt đối khoảng 3,6 V. Cần tháo dây Echo ngay và lắp qua mạch chuyển mức logic (hoặc mạch chia áp đã tính toán) kèm nối chung mass trước khi thử tiếp.
 
 </details>
 
 ## Đọc thêm
 
-- [Logic levels của SparkFun](https://learn.sparkfun.com/tutorials/logic-levels) — vì sao mức cao 5 V và ngõ vào 3,3 V cần mạch dịch.
-- [Datasheet Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf) — VBUS, VSYS, 3V3, và cửa sổ VSYS được phép.
-- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — đặc tính điện của GPIO và mức cực đại tuyệt đối.
+- [Logic levels của SparkFun](https://learn.sparkfun.com/tutorials/logic-levels) — giải thích chi tiết lý do cần chuyển mức giữa tín hiệu 5 V và ngõ vào 3,3 V.
+- [Datasheet Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf) — sơ đồ và thông số các đường nguồn VBUS, VSYS, 3V3 cùng dải điện áp cho phép của VSYS.
+- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — bảng đặc tính điện của chân GPIO và các mức giới hạn cực đại tuyệt đối.

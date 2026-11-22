@@ -11,31 +11,31 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~60 phút**. Đây là cửa ký, không phải giao thức mới. Chương 09 được mở khi năm dòng dưới có bằng chứng, hoặc khi một chỗ hỏng được gọi tên và chưa bị bỏ qua.
+Thời lượng ước tính: **~60 phút**. Đây là bài tổng kết nghiệm thu (cổng qua chương), không giới thiệu giao thức mới. Bạn chỉ nên chuyển sang Chương 09 khi cả năm hạng mục dưới đây đều có bằng chứng cụ thể, hoặc đã chỉ rõ lỗi cần khắc phục mà không bỏ qua.
 
 ## Mục tiêu
 
-Bạn chấm sổ chương 08 theo năm cửa: toán TF chạy được, khung serial có timeout, PID có CSV, động học có khẩu độ đo được, và vòng lặp có chu kỳ. Mỗi cửa đạt hoặc trượt. Ô trống là trượt.
+Bạn tự đánh giá sổ tay Chương 08 theo năm tiêu chí: toán biến đổi TF chạy kiểm chứng thành công, khung truyền serial có timeout an toàn, vòng PID có tệp log CSV, động học vi sai có khổ vết đo thực tế, và vòng điều khiển có số đo chu kỳ định thời. Mỗi tiêu chí chỉ chấm đạt hoặc trượt — mọi ô để trống đều tính là trượt.
 
 ## Kiến thức cần trước
 
-Bài 08-00 đến 08-05 là việc đang ký. Bạn cần `lab-notes.md`, file `math_tf_lab.py`, CSV PID nếu đã có encoder, và số $L$ đo bằng thước. Chưa có encoder thì cửa PID được hoãn bằng một câu ngày, không được thay bằng cảm giác "bánh quay đều".
+Toàn bộ kết quả từ Bài 08-00 đến Bài 08-05. Bạn cần chuẩn bị sẵn `lab-notes.md`, tệp `math_tf_lab.py`, dữ liệu CSV của PID (nếu đã có encoder) và số đo khổ vết $L$ bằng thước. Nếu chưa có phần cứng encoder, tiêu chí PID trên xe thật có thể được ghi hoãn có ngày kèm kết quả mô phỏng, tuyệt đối không thay thế bằng nhận xét cảm tính “bánh quay thấy đều”.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Chương 09 sẽ gọi $v$ và $\omega$ là `linear.x` và `angular.z`. Nó giả định dấu bánh và mét đã đúng từ chương này. Một quaternion yaw $90^\circ$ ghi thành $(0, 0, 1, 0)$ sẽ làm frame laser quay $180^\circ$ so với ý bạn. Ký trước khi mở workspace Jazzy cho đỡ lẫn lỗi toán với lỗi DDS.
+Chương 09 sẽ ánh xạ $v$ và $\omega$ sang `linear.x` và `angular.z` của ROS 2, dựa trên giả định rằng quy ước dấu hai bánh và đơn vị mét đã chuẩn xác từ chương này. Chẳng hạn, ghi nhầm quaternion cho yaw $90^\circ$ thành $(0, 0, 1, 0)$ sẽ xoay ngược khung LiDAR tới $180^\circ$. Hoàn tất nghiệm thu trước khi mở workspace ROS 2 Jazzy giúp bạn tránh nhầm lẫn giữa lỗi toán hình học và lỗi truyền thông DDS.
 
 ## Đạt và trượt
 
-**Toán.** `math_tf_lab.py` chạy, dòng in có quaternion gần $(0,\ 0,\ 0{,}7071,\ 0{,}7071)$ và điểm $(0{,}30,\ 0)$ khi lidar ở $x = 0{,}10$ và điểm quét ở $0{,}20$. Thiếu assertion hoặc thiếu trường hợp yaw $\pi$ là trượt.
+**1. Toán TF:** Tệp `math_tf_lab.py` chạy không lỗi, in ra quaternion xấp xỉ $(0,\ 0,\ 0{,}7071,\ 0{,}7071)$ và tọa độ điểm $(0{,}30,\ 0)$ khi LiDAR đặt tại $x = 0{,}10$ m với điểm quét cách $0{,}20$ m. Thiếu kiểm tra `assert` hoặc thiếu trường hợp yaw $\pi$ tính là trượt.
 
-**Serial.** Nhật ký có một khung lệnh mà phía nhận bỏ qua khi quá hạn, và duty về 0. "In ra serial cho dễ xem" không phải giao thức.
+**2. Giao thức serial:** Nhật ký ghi nhận rõ trường hợp bên nhận bỏ qua khung lỗi/quá hạn và đưa PWM về 0. Việc chỉ dùng `println` in ra Serial Monitor cho dễ đọc không đạt chuẩn giao thức.
 
-**PID.** CSV có `t`, setpoint, tốc độ đo, và lệnh. Bánh trên không: lệnh dương khi tốc độ còn dưới setpoint. Chưa có encoder: một đoạn hoãn có ngày, cộng bài mô phỏng đã chạy và đã dán đỉnh P khoảng $0{,}29$ m/s. Không có cả CSV lẫn mô phỏng là trượt.
+**3. Vòng điều khiển PID:** Tệp CSV lưu đủ cột thời gian `t`, setpoint, tốc độ đo và tín hiệu lệnh. Khi kê bánh trên không, lệnh phải dương lúc tốc độ thấp hơn setpoint. Nếu chưa có encoder thật, bắt buộc có dòng ghi hoãn kèm ngày thực hiện, đồng thời chạy thành công đoạn mã mô phỏng và dán kết quả đỉnh bộ P xấp xỉ $0{,}29$ m/s; thiếu cả CSV lẫn mô phỏng là trượt.
 
-**Động học.** $L$ là mét, đo vết tiếp xúc, ba lần. Hàm `wheel_speeds` đổi một twist thử thành hai tốc độ, rồi đổi ngược lại ra đúng twist. $L$ bằng chiều ngang tấm mica là trượt.
+**4. Động học vi sai:** Khổ vết $L$ được đo ba lần giữa hai tâm vết tiếp xúc và lưu theo đơn vị mét. Hàm `wheel_speeds` chuyển đổi một lệnh thử thành tốc độ hai bánh rồi tính ngược lại khớp đúng lệnh ban đầu. Dùng chiều ngang tấm mica làm $L$ tính là trượt.
 
-**Chu kỳ.** Một số đo chu kỳ vòng lặp, hoặc một câu nói vòng PID không gọi theo `loop()` ngẫu nhiên. Thiếu số và thiếu câu là trượt.
+**5. Định thời vòng lặp:** Có số đo chu kỳ thực tế (p50, p95, max), hoặc có cấu trúc định thời rõ ràng chứng minh vòng PID không chạy tùy tiện theo nhịp `loop()` ngẫu nhiên. Thiếu cả số đo lẫn cấu trúc định thời là trượt.
 
 ## Một sổ trông xong mà vẫn trượt
 
@@ -45,13 +45,13 @@ L = 16 cm. Hàm dùng 16 vì thước ghi vậy.
 Quaternion: z = 1 cho góc vuông, cho dễ nhớ.
 ```
 
-Cả ba dòng trượt. Ổn không phải là số. $16$ trong công thức mét là khẩu độ $16$ m. $z = 1$ là quay $180^\circ$.
+Cả ba dòng trên đều trượt: “quay ổn” không phải bằng chứng đo đạc; nhập $16$ vào công thức đơn vị mét tương đương khổ vết $16$ m; và $z = 1$ (với $w = 0$) là góc quay $180^\circ$ chứ không phải $90^\circ$.
 
 ## Lab
 
-1. Chép năm cửa vào sổ, ghi đạt hoặc trượt, kèm tên file bằng chứng.
-2. Với mỗi cửa trượt, viết một việc sửa dài một câu. Không viết "sẽ xem lại".
-3. Chỉ ghi "chương 09 được bắt đầu" khi không còn cửa trượt, hoặc khi cửa hoãn encoder có ngày và bốn cửa kia đạt.
+1. Chép đủ năm tiêu chí vào `lab-notes.md`, chấm rõ “đạt” hoặc “trượt” kèm tên tệp bằng chứng tương ứng.
+2. Với mỗi tiêu chí trượt, viết một câu cụ thể nêu rõ hành động khắc phục (không ghi chung chung kiểu “sẽ xem lại”).
+3. Chỉ ghi xác nhận “đủ điều kiện bắt đầu Chương 09” khi cả năm tiêu chí đều đạt (hoặc bốn tiêu chí đạt kèm mục hoãn encoder có ngày cụ thể và đã chạy đạt phần mô phỏng PID).
 
 ### Lỗi thường gặp
 
@@ -64,17 +64,19 @@ Cả ba dòng trượt. Ổn không phải là số. $16$ trong công thức mé
 
 ## Video tham khảo
 
-- **Xem trước:** [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. Checklist chương hỏi một bước nhảy và một tư thế từ encoder. Xem lại hình PID trước khi tick.
+- **Xem trước:** [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. Ôn lại đặc tính đáp ứng bước nhảy của PID trước khi hoàn tất checklist kiểm tra chương này.
 
 ## Bài tập
 
-1. Cửa nào trượt nếu quaternion đúng nhưng điểm yaw $\pi$ vẫn dương?
-2. $L$ đo $0{,}158$ m, code để $15{,}8$. $R = v/\omega$ sai khoảng bao nhiêu lần?
-3. Vì sao cửa PID được hoãn bằng ngày, còn cửa động học thì không?
+1. Tiêu chí nào bị trượt nếu quaternion yaw $90^\circ$ đã đúng nhưng tọa độ điểm ứng với góc yaw $\pi$ vẫn ra số dương?
+2. Khổ vết thực đo được $L = 0{,}158$ m nhưng trong mã nguồn nhập nhầm thành $15{,}8$. Bán kính quay $R = v/\omega$ bị sai lệch khoảng bao nhiêu lần?
+3. Vì sao tiêu chí PID trên phần cứng thật có thể tạm hoãn có ngày (kèm mô phỏng), còn tiêu chí động học thì không?
 
 ### Gợi ý đáp án
 
-1. Cửa toán. Quay $180^\circ$ chưa vào ma trận. 2. Khoảng 100 lần, vì $15{,}8 / 0{,}158 = 100$. 3. PID cần xung thật hoặc một mô phỏng thay thế đã chấm. Động học chỉ cần thước và hàm. Không có lý do hoãn thước.
+1. Tiêu chí Toán TF bị trượt vì phép quay $180^\circ$ chưa được áp dụng đúng vào ma trận biến đổi.
+2. Sai lệch 100 lần, vì $15{,}8 / 0{,}158 = 100$.
+3. PID trên xe thật phụ thuộc phần cứng encoder (có thể thay thế tạm bằng mô phỏng đã kiểm chứng), còn động học chỉ cần thước đo khung xe và viết hàm Python nên không có lý do để trì hoãn.
 
 ## Đọc thêm
 

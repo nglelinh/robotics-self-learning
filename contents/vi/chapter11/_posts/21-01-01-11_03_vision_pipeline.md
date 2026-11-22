@@ -11,27 +11,31 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: khoảng 75 phút khi camera USB xuất hiện thành `/dev/video0`, và khoảng 45 phút khi bạn ghi nhận thiết bị không có rồi vẫn đi hết pipeline trên giấy.
+Thời lượng ước tính: **~75 phút** khi camera USB nhận diện tại `/dev/video0`, hoặc khoảng 45 phút nếu máy chưa có camera và bạn hoàn thành phần thiết kế pipeline trên giấy.
 
 ## Mục tiêu học
 
-Bạn sắp pipeline theo ánh sáng, rồi camera, rồi thuật toán, và không chỉnh ngưỡng khi cửa sổ làm trắng thẻ. Bạn nói được `usb_cam` phát gì, tính centroid, hành động một lần ở 5 đến 10 Hz thay vì từng khung hình, nêu khung quang học khác `camera_link` theo REP-103, và ghi `/dev/video0` mất tích như một kết quả chứ không phải lab hỏng.
+Sau bài học này, bạn sẽ xây dựng quy trình xử lý thị giác theo đúng thứ tự **ánh sáng → camera → thuật toán** (tránh chỉnh ngưỡng màu khi ánh sáng môi trường làm cháy sáng thẻ màu). Bạn nắm được kiểu dữ liệu `usb_cam` xuất bản, tính được tọa độ trọng tâm (centroid), giới hạn tần số ra quyết định ở mức 5–10 Hz thay vì gửi lệnh theo từng khung hình, phân biệt rõ hệ tọa độ quang học với `camera_link` theo chuẩn REP-103, và biết cách ghi nhận tình huống thiếu `/dev/video0` một cách trung thực.
 
 ## Kiến thức cần có
 
-Bạn chạy được một script Python ngắn và biết ảnh là một mảng. Bạn đã gặp `geometry_msgs/msg/Twist` ở tour Nav2, nên biết lệnh vận tốc có phần tịnh tiến và phần quay. Không cần camera độ sâu, và bài này không đòi RealSense.
+Bạn chạy được script Python cơ bản và hiểu ảnh số là một mảng hai chiều (hoặc ba chiều theo kênh màu). Từ bài tour Nav2, bạn đã nắm cấu trúc `geometry_msgs/msg/Twist` gồm thành phần tịnh tiến và thành phần quay. Bài thực hành này không yêu cầu camera chiều sâu hay RealSense.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Lộ trình là đế Capstone, rồi ROS 2 Jazzy, rồi Gazebo, rồi tự hành. Đế đã có cầu từ `cmd_vel` sang PWM. Jazzy là cách camera phát `sensor_msgs/msg/Image` cạnh topic lidar. Một thẻ trên bàn cho thấy ngưỡng gãy dưới ánh sáng thật nhanh hơn camera giả lập. Hành động ở đây khiêm tốn: quay về phía thẻ, hoặc dừng. Đó vẫn là Twist mà Nav2 phát. Vòng 30 Hz đánh nhau với cầu nối. Vòng 5 đến 10 Hz chia sẻ được robot với navigator sau.
+Trên lộ trình từ khung xe Capstone lên ROS 2 Jazzy, qua Gazebo rồi đến tự hành, xe đã có cầu nối từ `/cmd_vel` sang PWM, còn ROS 2 cho phép camera xuất bản `sensor_msgs/msg/Image` song song với dữ liệu lidar. Thử nghiệm thực tế với một tấm thẻ màu trên bàn giúp bạn thấy ngay sự nhạy cảm của ngưỡng màu trước ánh sáng — điều mà camera mô phỏng khó phản ánh hết. Hành động điều khiển trong bài giữ ở mức cơ bản (quay về phía thẻ hoặc dừng lại) nhưng vẫn dùng đúng message `Twist` như Nav2. Duy trì nhịp quyết định 5–10 Hz thay vì chạy hết tốc độ 30 Hz giúp cầu nối hoạt động êm và dễ phối hợp với bộ điều hướng về sau.
 
 ## Khái niệm
 
-Bắt đầu bằng ánh sáng. Thẻ đỏ dưới đèn trần và cùng thẻ đó trong nắng chiều là hai phép đo khác nhau. Mắt không thấy mảng tách biệt thì OpenCV không cứu demo. Dịch đèn hoặc tắt ngược sáng trước khi sửa hue. Camera đứng thứ hai: thiết bị USB UVC, thường là `/dev/video0`. `usb_cam` hoặc `v4l2_camera` phát `sensor_msgs/msg/Image`. Thuật toán đứng thứ ba, và ở đây là ngưỡng màu cộng centroid, không phải bộ phát hiện neural.
+**Bước 1: Ánh sáng.** Cùng một tấm thẻ đỏ nhưng đặt dưới đèn trần hay dưới nắng chiều sẽ cho giá trị màu hoàn toàn khác nhau. Nếu mắt thường không thấy sự tách biệt rõ rệt giữa thẻ và nền, OpenCV cũng không thể phân đoạn ổn định; do đó hãy điều chỉnh nguồn sáng hoặc tránh ngược sáng trước khi chỉnh ngưỡng màu (hue).
+
+**Bước 2: Camera.** Sử dụng camera USB chuẩn UVC (thường xuất hiện tại `/dev/video0`), với driver `usb_cam` hoặc `v4l2_camera` xuất bản `sensor_msgs/msg/Image`.
+
+**Bước 3: Thuật toán.** Bài này tập trung vào phân ngưỡng màu kết hợp tính trọng tâm, chưa dùng mạng nơ-ron phát hiện vật thể.
 
 ![Ảnh camera thành mặt nạ ngưỡng, rồi thành centroid có thể phát một lệnh yaw chậm]({{ site.imgurl }}/generated/ch11_vision.png)
 
-Trên máy Jazzy đã cài gói nhị phân, hình dạng driver là:
+Trên máy ROS 2 Jazzy đã cài gói nhị phân, cú pháp chạy driver `usb_cam` là:
 
 ```bash
 sudo apt install ros-jazzy-usb-cam
@@ -39,29 +43,29 @@ source /opt/ros/jazzy/setup.bash
 ros2 run usb_cam usb_cam_node_exe
 ```
 
-`ros2 launch usb_cam camera.launch.py` thêm trình xem. Topic ảnh thường là `/image_raw`, kiểu `sensor_msgs/msg/Image`. Topic im thì sửa đường dẫn thiết bị trước mọi ngưỡng. Lab không bắt buộc node này. Nó gọi OpenCV trực tiếp.
+Lệnh `ros2 launch usb_cam camera.launch.py` sẽ mở kèm cửa sổ xem ảnh. Topic mặc định thường là `/image_raw` (`sensor_msgs/msg/Image`); nếu topic không có dữ liệu, cần kiểm tra đường dẫn thiết bị trước khi đụng tới thuật toán ngưỡng. Bài lab dưới đây gọi trực tiếp OpenCV nên chưa bắt buộc chạy node này.
 
-Ngưỡng HSV ổn hơn kênh đỏ thô, và vẫn mong manh. Chốt một cận dưới, một cận trên, và ánh sáng bạn đã dùng. Mặt nạ trắng trên thẻ. Moment biến mặt nạ thành centroid. Với pixel $$(x_i, y_i)$$,
+Phân ngưỡng trong không gian màu HSV ổn định hơn kênh RGB thô nhưng vẫn phụ thuộc điều kiện chiếu sáng; hãy chốt rõ cận dưới, cận trên cùng điều kiện ánh sáng sử dụng. Sau khi tạo mặt nạ nhị phân (vùng thẻ mang giá trị trắng), ta dùng mô-men ảnh để tính trọng tâm (centroid). Với tập $$N$$ điểm ảnh trắng có tọa độ $$(x_i, y_i)$$:
 
 $$
 c_x = \frac{\sum_i x_i}{N}, \qquad c_y = \frac{\sum_i y_i}{N},
 $$
 
-đúng việc `cv2.moments` làm khi chia `m10` cho `m00` và `m01` cho `m00`. Tính tay một mặt nạ ba pixel trắng tại $$(100, 80)$$, $$(102, 80)$$, và $$(101, 82)$$:
+chính là phép chia `m10 / m00` và `m01 / m00` từ hàm `cv2.moments`. Ví dụ với một mặt nạ gồm ba điểm ảnh tại $$(100, 80)$$, $$(102, 80)$$ và $$(101, 82)$$:
 
 $$
 c_x = \frac{100 + 102 + 101}{3} = 101, \qquad c_y = \frac{80 + 80 + 82}{3} \approx 80{,}67.
 $$
 
-Ảnh rộng 320 pixel thì tâm ngang là 160. Vệt nằm bên trái tâm. Camera nhìn thẳng thấy đó là "đích bên trái", nên đế vi sai phải quay trái, tức `angular.z` dương theo REP-103, cho đến khi centroid đi về phía tâm. Nếu diện tích `m00` quá nhỏ, không có thẻ. Đừng phát gì, hoặc phát twist bằng không, thay vì đuổi nhiễu.
+Với ảnh rộng 320 pixel (tâm ngang tại 160), trọng tâm $$c_x = 101$$ nằm về phía bên trái tâm khung hình. Khi camera hướng thẳng về trước, điều này có nghĩa mục tiêu đang ở bên trái, nên xe vi sai cần quay trái (`angular.z` dương theo REP-103) để đưa trọng tâm tiến về giữa ảnh. Nếu diện tích `m00` quá nhỏ (không phát hiện thẻ), cần dừng hoặc phát `Twist` bằng 0 thay vì để xe đuổi theo nhiễu.
 
-Hành động phải chậm. Camera có thể đưa 30 khung mỗi giây. Động cơ không nên nhận 30 lệnh vận tốc mới mỗi giây từ pipeline này. Chọn một lần đọc ở 5 đến 10 Hz, phát một Twist hoặc một lệnh dừng rõ ràng, và giữ đến quyết định sau. Đủ tốc độ khung hình trông linh trong cửa sổ và làm hộp số rung.
+Tần số ra quyết định nên giữ chậm: dù camera thu 30 khung hình/giây, việc gửi 30 lệnh vận tốc mới mỗi giây sẽ làm rung hộp số và tranh chấp tài nguyên. Thay vào đó, chỉ trích xuất và ra quyết định ở nhịp 5–10 Hz, gửi một lệnh `Twist` (hoặc lệnh dừng rõ ràng) rồi giữ đến chu kỳ tiếp theo.
 
-[REP-103](https://www.ros.org/reps/rep-0103.html) cho thân `x` về trước, `y` sang trái, `z` lên trên. Khung quang học khác: `z` ra khỏi ống kính, `x` sang phải trên ảnh, `y` xuống dưới trên ảnh. `camera_link` thường là giá kiểu thân. `camera_optical_frame` là khung nên đóng dấu trên ảnh. Khớp tĩnh thường gặp từ `camera_link` kiểu thân dùng roll $$-\pi/2$$ và yaw $$-\pi/2$$. Vẫn đọc khớp trong URDF của bạn. Centroid theo pixel chưa phải điểm trong `base_link` khi chưa có phép quay đó và mô hình camera. Bài này không đòi phép chiếu. Quay theo pixel.
+Theo [REP-103](https://www.ros.org/reps/rep-0103.html), hệ tọa độ thân xe (`camera_link`) có `x` hướng trước, `y` sang trái, `z` hướng lên; trong khi hệ tọa độ quang học (`camera_optical_frame` — giá trị ghi vào `frame_id` của ảnh) có `z` hướng dọc trục ống kính ra trước, `x` sang phải ảnh và `y` hướng xuống dưới ảnh. Phép chuyển tĩnh phổ biến từ `camera_link` sang `camera_optical_frame` gồm roll $$-\pi/2$$ và yaw $$-\pi/2$$ (luôn kiểm tra lại trong URDF của bạn). Tọa độ pixel chưa phải tọa độ 3D trong `base_link` nếu chưa áp dụng phép chiếu và phép quay này; trong phạm vi bài này ta chỉ cần điều khiển quay trực tiếp theo độ lệch ngang trên ảnh.
 
 ## Ví dụ làm từng bước
 
-Script sau là cả thuật toán, không cần ROS. Nó mở camera đầu tiên, lấy ngưỡng một dải cam rộng trong HSV, và in một centroid. Cam chỉ là ví dụ. Thẻ của bạn màu xanh thì đổi cận và ghi số mới vào vở. Chạy từ thư mục bạn nhìn thấy terminal:
+Đoạn mã dưới đây cài đặt trọn vẹn thuật toán độc lập với ROS: mở camera đầu tiên, lọc một dải màu cam rộng trong không gian HSV và in tọa độ trọng tâm. Nếu thẻ của bạn có màu khác (ví dụ màu xanh), hãy điều chỉnh cận dưới/trên và ghi lại vào sổ. Chạy lệnh:
 
 ```bash
 python3 card_centroid.py
@@ -97,94 +101,92 @@ else:
     print(f"centroid u={u} v={v} area={int(area)}")
 ```
 
-Giữ thẻ cam trước ống kính dưới một đèn ổn định. Dòng khỏe trông như:
+Đưa tấm thẻ cam ra trước ống kính dưới nguồn sáng ổn định. Kết quả thành công có dạng:
 
 ```text
 centroid u=312 v=248 area=1840
 ```
 
-Số của bạn sẽ khác. `u` tăng khi thẻ sang phải. `area` tăng khi thẻ lại gần. `centroid none area=0` nghĩa là cận trượt đèn này: đổi ánh sáng, rồi đổi cận. `error: cannot open /dev/video0` là dòng lab hợp lệ. Ghi lại. Đừng bịa centroid.
+Giá trị cụ thể sẽ khác tùy vị trí: `u` tăng khi thẻ dịch sang phải, `area` tăng khi thẻ tiến lại gần. Nếu kết quả là `centroid none area=0`, hãy kiểm tra lại ánh sáng rồi mới chỉnh ngưỡng HSV. Nếu máy không có camera, dòng `error: cannot open /dev/video0` là kết quả ghi nhận hợp lệ — tuyệt đối không bịa số liệu trọng tâm.
 
-Node ROS về sau quyết định ở 5 hoặc 10 Hz. `area` dưới 500 thì phát Twist không. `u` bên trái tâm thì `angular.z` gần 0.3. `u` bên phải thì `angular.z` gần -0.3. Giữ lệnh đến tick sau. Đủ để cầu nối giật bánh về phía thẻ. Không phải navigator.
+Khi chuyển thành node ROS về sau, timer sẽ quyết định ở tần số 5–10 Hz: nếu `area < 500` thì phát `Twist` bằng 0; nếu `u` nằm bên trái tâm thì đặt `angular.z` khoảng `0.3`; nếu nằm bên phải thì khoảng `-0.3`, rồi giữ nguyên lệnh tới chu kỳ kế tiếp.
 
 ## Lab
 
-Lưu script thành `card_centroid.py` rồi chạy. Chọn kết quả mong đợi khớp máy bạn đang có.
+Lưu đoạn mã trên thành `card_centroid.py` và chạy thử; đối chiếu kết quả theo đúng tình trạng phần cứng của bạn:
 
-Nếu có camera và thẻ nằm trong khung, dòng mong đợi theo mẫu sau, với số của bạn:
+- Có camera và phát hiện được thẻ:
 
 ```text
 centroid u=312 v=248 area=1840
 ```
 
-Nếu có camera mà mặt nạ trống, dòng mong đợi là:
+- Có camera nhưng mặt nạ rỗng:
 
 ```text
 centroid none area=0
 ```
 
-Nếu không thiết bị nào hiện ra, dòng mong đợi là:
+- Không tìm thấy thiết bị camera:
 
 ```text
 error: cannot open /dev/video0
 ```
 
-Trường hợp mất thiết bị, chạy thêm `ls /dev/video*` và dán lời than của shell vào cùng ghi chú. Rồi viết bốn câu vẫn giải thích pipeline: ánh sáng, thiết bị, ngưỡng, centroid, và vì sao không phát Twist ở đủ tốc độ khung hình. Thiếu thiết bị không xóa lời giải thích đó.
+Trong trường hợp không có thiết bị, chạy thêm `ls /dev/video*` và dán thông báo lỗi của shell vào sổ. Sau đó viết bốn câu trình bày rõ toàn bộ pipeline (ánh sáng, thiết bị, phân ngưỡng, trọng tâm) và giải thích vì sao không nên xuất bản `Twist` ở trọn tốc độ khung hình.
 
-| Bạn thấy | Nguyên nhân hay gặp | Việc cần kiểm |
+| Hiện tượng | Nguyên nhân thường gặp | Hướng kiểm tra |
 | --- | --- | --- |
-| `error: cannot open /dev/video0` | Không có thiết bị UVC, hoặc cáp chỉ sạc | `ls /dev/video*` và cổng khác |
-| Camera mở, mãi `centroid none` | Cận hue đánh nhau với đèn, hoặc thẻ ra ngoài khung | Nhìn thẻ bằng mắt, rồi mới nhìn cận |
-| Centroid giật hàng chục pixel dù thẻ đứng yên | Nắng trộn đèn, hoặc mặt nạ quá nhỏ | Một đèn, nâng ngưỡng diện tích |
-| Bánh rú khi sau này nối Twist | Bạn phát theo tốc độ khung hình | Timer 5 đến 10 Hz, một lệnh mỗi tick |
-| Thẻ sang phải ngoài đời nhưng `u` giảm | Ảnh bị lật gương, hoặc dấu yaw bị đảo | Tin `u` tăng về phía phải của mảng |
-| Bạn nhắm bằng trục `camera_link` | Quang học `y` đi xuống, thân `z` đi lên | REP-103: quang học khác thân |
+| `error: cannot open /dev/video0` | Không có camera UVC, hoặc dùng nhầm cáp chỉ sạc | Kiểm tra `ls /dev/video*` và đổi cổng USB |
+| Camera mở được nhưng luôn báo `centroid none` | Ngưỡng hue không hợp với ánh sáng hoặc thẻ ngoài khung hình | Kiểm tra độ tương phản thẻ bằng mắt trước khi chỉnh cận |
+| Trọng tâm nhảy hàng chục pixel dù thẻ đứng yên | Ánh sáng trộn lẫn (nắng + đèn) hoặc vùng mặt nạ quá nhỏ | Dùng một nguồn sáng ổn định và tăng ngưỡng diện tích |
+| Động cơ rung mạnh khi nối với `Twist` | Xuất bản lệnh theo trọn tốc độ khung hình 30 Hz | Dùng timer 5–10 Hz, mỗi nhịp gửi một lệnh |
+| Thẻ dịch sang phải ngoài đời nhưng `u` giảm | Ảnh bị lật gương hoặc đảo dấu góc yaw | Đảm bảo trục `u` tăng dần từ trái sang phải trên mảng ảnh |
+| Tính toán hướng nhắm theo trục `camera_link` | Nhầm quy ước trục (`y` quang học hướng xuống, `z` thân hướng lên) | Đối chiếu chuẩn REP-103 phân biệt hệ quang học và hệ thân |
 
 ## Mua camera ở Việt Nam
 
-Camera độ sâu nằm ngoài phạm vi. Tìm Shopee bằng `camera USB UVC`. Webcam UVC thường gần đây khoảng 150 đến 450 nghìn đồng. Xem lại listing, và tránh cáp ghi là chỉ sạc.
-
-Camera Pi loại IMX219 là lựa chọn kia, thường vài trăm nghìn đồng. Một Waveshare IMX219-77 từng niêm yết gần 432.000 đồng. Xem lại trang hiện tại trước khi đặt. Cả hai loại nuôi được script hoặc topic ảnh ROS. Không loại nào phải là RealSense.
+Camera chiều sâu (như RealSense) nằm ngoài yêu cầu của bài. Bạn chỉ cần tìm trên Shopee với từ khóa `camera USB UVC` (giá tham khảo khoảng 150.000–450.000 đồng, lưu ý tránh cáp chỉ sạc). Một lựa chọn khác cho Raspberry Pi là camera dùng cảm biến IMX219 (ví dụ Waveshare IMX219-77 từng niêm yết khoảng 432.000 đồng, cần kiểm tra lại giá hiện tại). Cả hai loại đều dùng tốt cho script OpenCV và topic ảnh ROS.
 
 ## Video tham khảo
 
-- **Xem trước:** [Control your Webcam with Python - OpenCV Beginners Tutorial #4](https://www.youtube.com/watch?v=sd25t4HmFdU) — Sam Westby Tech, tiếng Anh. Đọc một khung hình từ camera bằng OpenCV. Pipeline bài này bắt đầu ở đúng chỗ đó.
-- [OpenCV Python Camera Calibration (Intrinsic, Extrinsic, Distortion)](https://www.youtube.com/watch?v=H5qbRTikxI4) — Kevin Wood | Robotics & AI, tiếng Anh. Hiệu chỉnh nội tại camera. Chỉ cần thấy ma trận và méo; chưa cần chạy hiệu chỉnh tối nay.
+- **Xem trước:** [Control your Webcam with Python - OpenCV Beginners Tutorial #4](https://www.youtube.com/watch?v=sd25t4HmFdU) — Sam Westby Tech (tiếng Anh). Hướng dẫn đọc khung hình từ webcam bằng OpenCV — bước khởi đầu trực tiếp cho pipeline trong bài.
+- [OpenCV Python Camera Calibration (Intrinsic, Extrinsic, Distortion)](https://www.youtube.com/watch?v=H5qbRTikxI4) — Kevin Wood | Robotics & AI (tiếng Anh). Giới thiệu ma trận nội tại và méo ống kính (chỉ cần nắm khái niệm, chưa cần chạy hiệu chỉnh trong bài này).
 
 ## Bài tập
 
 ### Bài 1
 
-Thẻ biến mất khỏi mặt nạ mỗi khi cửa sổ mở, và hiện lại khi bạn kéo rèm, cùng các số hue. Bạn gỡ tầng nào, và tầng nào để yên?
+Tấm thẻ màu biến mất khỏi mặt nạ mỗi khi mở cửa sổ và xuất hiện lại khi kéo rèm, dù giữ nguyên cận HSV. Bạn cần xử lý tầng nào trước và giữ nguyên tầng nào?
 
-**Gợi ý.** Ánh sáng đứng trước. Đừng viết lại công thức moment. Nói bạn sẽ đổi gì trong phòng.
+**Gợi ý.** Tầng ánh sáng đứng đầu tiên — điều chỉnh nguồn sáng trong phòng trước, không vội sửa công thức tính mô-men.
 
 ### Bài 2
 
-Mặt nạ chỉ trắng tại $$(10, 10)$$, $$(14, 10)$$, $$(12, 16)$$, và $$(12, 12)$$. Tính $$c_x$$ và $$c_y$$. Ảnh rộng 64. Vệt nằm trái hay phải tâm?
+Một mặt nạ chỉ có bốn điểm ảnh trắng tại $$(10, 10)$$, $$(14, 10)$$, $$(12, 16)$$ và $$(12, 12)$$ trên ảnh rộng 64 pixel. Tính $$c_x$$, $$c_y$$ và cho biết vùng thẻ nằm bên trái hay bên phải tâm ảnh.
 
-**Gợi ý.** Trung bình bốn giá trị `x` và bốn giá trị `y`. Tâm là 32. So $$c_x$$ với 32.
+**Gợi ý.** Lấy trung bình cộng bốn hoành độ và bốn tung độ, sau đó so sánh $$c_x$$ với tâm ảnh là 32.
 
 ### Bài 3
 
-Camera phát 30 ảnh mỗi giây. Vì sao cầu nối chỉ nên thấy Twist mới 5 đến 10 lần mỗi giây? Lấy động cơ Capstone làm lý do.
+Camera thu 30 khung hình/giây, nhưng vì sao cầu nối chỉ nên nhận lệnh `Twist` mới ở nhịp 5–10 Hz? Giải thích gắn với phần cứng xe Capstone.
 
-**Gợi ý.** Nói về rung và về việc chia sẻ `cmd_vel` với navigator sau này. Một câu về timer là đủ.
+**Gợi ý.** Giảm rung lắc cho hộp số động cơ và giúp dễ chia sẻ topic `/cmd_vel` với bộ điều hướng về sau nhờ dùng timer cố định.
 
 ### Bài 4
 
-Nêu ba hướng trục của khung quang học, và ba hướng trục của khung thân REP-103. Khung nào phải được đóng dấu trên ảnh?
+Nêu hướng của ba trục tọa độ trong hệ quang học và trong hệ thân theo REP-103. Hệ nào phải được ghi vào `frame_id` của ảnh?
 
-**Gợi ý.** Quang học: `z` ra khỏi ống kính, `x` phải, `y` xuống. Thân: `x` trước, `y` trái, `z` lên. Ảnh dùng khung quang học.
+**Gợi ý.** Hệ quang học: `z` hướng ra khỏi ống kính, `x` sang phải, `y` xuống dưới. Hệ thân: `x` hướng trước, `y` sang trái, `z` lên trên. Ảnh luôn gắn với hệ quang học.
 
 ### Bài 5
 
-Script in `error: cannot open /dev/video0`. Liệt kê ba việc kiểm tra dạy bạn điều gì đó mà không mua camera, và nói phần viết bạn vẫn còn nợ.
+Khi script báo `error: cannot open /dev/video0`, hãy liệt kê ba bước kiểm tra có thể làm ngay mà không cần mua camera mới, đồng thời nêu phần bài nộp dạng văn bản vẫn cần hoàn thành.
 
-**Gợi ý.** `ls` thư mục thiết bị, thử cổng USB khác, ghi đúng câu lỗi. Bạn vẫn nợ bốn câu pipeline trong lab.
+**Gợi ý.** Chạy `ls /dev/video*`, thử cổng USB khác, ghi lại chính xác thông báo lỗi, và hoàn thiện bốn câu mô tả pipeline theo yêu cầu lab.
 
 ## Đọc thêm
 
-- [Bài ngưỡng của OpenCV](https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html) là chỗ xem phân đoạn kiểu `inRange` và xem mặt nạ trước khi tin centroid.
-- [usb_cam](https://github.com/ros-drivers/usb_cam) mô tả `usb_cam_node_exe` và `camera.launch.py` cho camera V4L2 trên ROS 2.
-- [REP-103](https://www.ros.org/reps/rep-0103.html) là chuẩn tách trục thân khỏi khung quang học trên ảnh.
+- [Bài ngưỡng của OpenCV](https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html) — hướng dẫn phân đoạn `inRange` và kiểm tra trực quan mặt nạ trước khi tính trọng tâm.
+- [usb_cam](https://github.com/ros-drivers/usb_cam) — tài liệu về `usb_cam_node_exe` và `camera.launch.py` cho camera V4L2 trên ROS 2.
+- [REP-103](https://www.ros.org/reps/rep-0103.html) — chuẩn phân tách hệ trục thân và hệ trục quang học của ảnh.

@@ -11,23 +11,23 @@ lesson_type: required
 draft: false
 ---
 
-Mọi bộ điều khiển về sau trên robot này là cùng ba hộp: cảm nhận, tính, tác động. Lab này khép chúng bằng cái máy tính thô nhất mà vẫn đếm được: nếu khoảng cách nằm trong 20 cm thì PWM bánh bằng không; nếu không, một PWM tiến vừa phải được phép. Luật đó là bang-bang. PID đến ở Chương 08. Điều bạn tập bây giờ là hình an toàn mà các luật sau phải giữ: cảm biến hỏng thì dừng.
+Mọi bộ điều khiển robot về sau đều tuân theo chung một vòng lặp ba khối: **cảm nhận** (sense), **tính toán** (compute) và **tác động** (act). Bài thực hành này khép kín vòng lặp đó bằng luật điều khiển đơn giản nhất (điều khiển bật/tắt hay bang-bang): nếu khoảng cách nhỏ hơn 20 cm thì đưa PWM bánh xe về 0, ngược lại cho phép chạy tiến ở mức PWM vừa phải. Bộ điều khiển PID sẽ học ở Chương 08; trọng tâm của bài hôm nay là thiết lập nguyên tắc an toàn bắt buộc cho mọi luật điều khiển sau này: **cảm biến lỗi hoặc mất tín hiệu thì phải dừng**.
 
 ## Mục tiêu học
 
-Hết bài, bạn vẽ được vòng cảm nhận, tính và tác động cho một cảm biến khoảng cách cùng một lệnh motor. Bạn triển khai luật bang-bang ở 20 cm, với một timeout ép PWM về không. Bạn thêm một dải trễ đơn giản để motor không kêu lạch cạch ở ngưỡng. Bạn nói được subscriber ROS 2 của `/cmd_vel` sẽ ngồi ở đâu trong sơ đồ này, và cú dừng nào phải ở lại trong firmware.
+Sau bài này, bạn vẽ được sơ đồ vòng kín cảm nhận–tính–tác động nối cảm biến khoảng cách với lệnh điều khiển động cơ. Bạn triển khai được luật bang-bang tại ngưỡng 20 cm có xử lý timeout ép PWM về 0, đồng thời bổ sung vùng trễ (hysteresis) để động cơ không đóng ngắt liên tục quanh ngưỡng. Bạn cũng xác định được vị trí của subscriber ROS 2 `/cmd_vel` trên sơ đồ và giải thích vì sao cơ chế dừng an toàn vẫn phải giữ lại ở tầng firmware.
 
 ## Kiến thức cần có
 
-Bạn cần một số đọc khoảng cách từ bài siêu âm hoặc time-of-flight ở Chương 04, bằng milimét hoặc bằng centimét bạn đổi được. Bạn cần một kênh motor mà bảng chân lý tiến đã viết ở bài 05-01, trên một driver bạn gọi tên được từ bài 05-02. Bánh rời mặt đất trước khi chạm sàn. Một bia carton và một công tắc nguồn bạn với tay tắt được là một phần của dụng cụ.
+Bạn cần hàm đọc khoảng cách đã kiểm chứng từ Chương 04 (siêu âm hoặc ToF, quy đổi sang milimét hoặc centimét), một kênh động cơ có bảng chân lý rõ ràng từ bài 05-01 trên mạch cầu H đã nhận diện ở bài 05-02. Luôn thử nghiệm với bánh nhấc khỏi mặt bàn trước khi hạ xuống sàn; chuẩn bị sẵn một tấm bìa carton và công tắc cắt nguồn động cơ trong tầm tay.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Capstone A sẽ chạy về phía vật, và quan trọng hơn, dừng trước khi đâm. Chương 07 lắp hai PWM có dấu. Chương 08 thay khối tính bật/tắt này bằng một PID giữ được tốc độ hoặc hướng. Khối cảm nhận và khối tác động ở lại. Khi ROS 2 được đưa vào, một subscriber của `/cmd_vel` là một cách khác để điền khối tính: một tiến trình khác đề xuất một twist, và node của bạn biến nó thành PWM trái và phải. Cú dừng theo khoảng cách không dời ra topic đó. Firmware vẫn sở hữu cái nhìn cuối vào cảm biến. Nếu topic nói “tiến” mà khoảng cách nói “quá gần” hoặc “tôi không biết”, bánh dừng. Một planner im lặng không được hiểu là hành lang trống.
+Capstone A cần vừa tiến về phía trước vừa dừng lại kịp thời trước vật cản. Sang Chương 07 ta mở rộng ra hai kênh PWM có dấu, và sang Chương 08 ta thay khối tính bật/tắt bằng PID để giữ tốc độ hoặc hướng, nhưng cấu trúc cảm nhận và tác động giữ nguyên. Khi tích hợp ROS 2, một subscriber lắng nghe `/cmd_vel` sẽ cung cấp vận tốc mong muốn cho khối tính, nhưng quyền ngắt khẩn cấp theo cảm biến vẫn phải thuộc về firmware: nếu `/cmd_vel` yêu cầu đi tới trong khi cảm biến báo quá gần hoặc mất dữ liệu, bánh xe vẫn bắt buộc dừng.
 
-## Bang-bang, trong một câu
+## Luật điều khiển bang-bang và vùng trễ
 
-Đọc khoảng cách. Nếu dưới 20 cm, lệnh PWM 0. Nếu rõ ràng xa hơn, lệnh PWM 80 theo chiều tiến trong bảng chân lý của bạn. Tám mươi trên thang 8 bit là một cú bò chậm, đúng thứ bạn muốn khi tay vẫn là bia.
+Ở mức cơ bản nhất, nếu khoảng cách nhỏ hơn 20 cm thì xuất `PWM = 0`; nếu lớn hơn rõ rệt và số đọc hợp lệ thì xuất `PWM = 80` (thang 8-bit, tốc độ chậm an toàn) theo chiều tiến đã ghi trong bảng chân lý:
 
 $$
 \mathrm{PWM} =
@@ -37,13 +37,13 @@ $$
 \end{cases}
 $$
 
-Chữ “otherwise” là chữ nguy hiểm. Một cảm biến timeout, trả về một sentinel cực đại, hoặc trả về 0 vì tiếng vọng không bao giờ về, không phải một “otherwise” hợp lệ. Những số đọc đó đi nhánh dừng. Cảm biến hỏng không được có nghĩa “đường trống, hết ga”.
+Điều kiện "khi số đọc hợp lệ" cực kỳ quan trọng: nếu cảm biến bị timeout, trả về giá trị lỗi hoặc trả về 0 do mất sóng phản hồi, hệ thống bắt buộc rẽ vào nhánh dừng. Tuyệt đối không để lỗi cảm biến bị hiểu nhầm là "đường trống".
 
-Dải trễ giữ trục khỏi kêu khi bạn giữ tay gần 20 cm. Dừng khi khoảng cách xuống dưới 20 cm. Ở dừng cho đến khi khoảng cách lên trên 25 cm. Giữa hai số đó, giữ lệnh trước. Motor khi ấy đổi trạng thái ít hơn một chút, và hộp số hết kêu ở biên.
+Để tránh hiện tượng động cơ đóng ngắt lạch cạch khi vật cản đứng sát mốc 20 cm (nhiễu dao động quanh 19–21 cm), ta thêm một **vùng trễ (hysteresis)**: dừng khi khoảng cách xuống dưới 20 cm (200 mm) và chỉ cho chạy lại khi khoảng cách vượt trên 25 cm (250 mm); trong khoảng từ 200 mm đến 250 mm, giữ nguyên trạng thái PWM hiện tại.
 
-## Ba hộp nằm ở đâu trong code
+## Cấu trúc ba khối trong mã nguồn
 
-Cảm nhận là hàm bạn đã tin từ Chương 04, bọc lại sao cho timeout trở về một số âm hoặc một cờ không hợp lệ tường minh. Tính là khối `if` bên dưới. Tác động là cặp chân hướng cộng một lần ghi PWM. Đặt số chân vào các hằng có tên ở đầu, để bài viết lab nói được GPIO nào đã cử động.
+Khối **cảm nhận** là hàm `readRangeMm()` từ Chương 04 được bọc lại để trả về số âm khi timeout hoặc lỗi; khối **tính** là cấu trúc điều kiện `if`/`else if`; khối **tác động** điều khiển các chân hướng và PWM.
 
 ```cpp
 const int PIN_IN1  = 25;   // sửa thành cặp tiến của bạn
@@ -77,68 +77,73 @@ void loop() {
 }
 ```
 
-`readRangeMm` là hàm bạn chuyển từ sketch siêu âm hoặc ToF của mình. Khi timeout nó trả một giá trị âm. Số 0 đúng nghĩa cũng dừng, vì $$0 \le 200$$. Hướng được đặt một lần, từ bảng chân lý, nên vòng đầu này chỉ phải quyết tốc độ. Khi sau này bạn trộn một cú lùi thoát, bạn sẽ đổi IN1 và IN2 có chủ đích, trong khối tác động, với cùng luật “không hợp lệ thì dừng” vẫn đứng trên chúng.
+Khi `readRangeMm()` timeout, giá trị âm làm điều kiện `mm < 0` đúng và ép PWM về 0; giá trị 0 cũng thỏa $$0 \le 200$$ nên lập tức dừng.
 
-Quy trình bánh trên không: giơ tay trước cảm biến. Tay xa, bánh quay tiến chậm. Tay trong khoảng 20 cm, bánh dừng. Che cảm biến hoặc rút dây echo một lát và xác nhận bánh dừng, vì lần đọc đã hỏng. Chỉ sau đó bạn mới đặt robot xuống sàn, chĩa vào carton, và giữ tay trên công tắc cắt nguồn motor. Lượt chạy sàn thì ngắn. Bạn đang kiểm cú dừng, không phải đua hành lang.
+Quy trình kiểm thử: đặt xe trên giá (bánh nhấc khỏi bàn), đưa tay ra xa để thấy bánh quay chậm, đưa tay vào trong 20 cm để thấy bánh dừng, sau đó che kín cảm biến hoặc rút tạm dây Echo để xác nhận bánh tự dừng khi mất tín hiệu. Chỉ sau khi vượt qua bài thử này mới đặt robot xuống sàn hướng về tấm bìa carton (chạy đoạn ngắn, tay sẵn sàng trên công tắc nguồn động cơ).
 
-## Ví dụ tính
+## Ví dụ minh họa vùng trễ
 
-Ngưỡng: dừng ở 200 mm, đi từ 250 mm trở lên.
+Với ngưỡng dừng 200 mm và ngưỡng chạy lại 250 mm:
+- Đọc được 180 mm (< 200 mm) $\rightarrow$ `PWM = 0`.
+- Đọc được 900 mm ($\ge 250$ mm) $\rightarrow$ `PWM = 80` (tiến).
+- Đọc được 0 hoặc timeout ($-1$) $\rightarrow$ `PWM = 0` (dừng an toàn).
 
-Số đọc 180 mm nằm dưới 200 mm, nên PWM thành 0. Số đọc 900 mm là hành lang trống, nên PWM thành 80 tiến. Số đọc 0, hoặc timeout trả về −1, đi nhánh dừng dù 0 là “ít khoảng cách” và timeout là “không có khoảng cách”. Khối tính từ chối coi cả hai là giấy phép để chạy.
+Theo dõi chuỗi tiến lại gần rồi lùi ra xa:
+- Tay tiến lại: 400 mm (tiến) $\rightarrow$ 260 mm (vẫn tiến) $\rightarrow$ 220 mm (trong vùng trễ, giữ tiến) $\rightarrow$ 180 mm (dừng).
+- Tay lùi ra: 220 mm (trong vùng trễ, vẫn dừng) $\rightarrow$ 260 mm (chạy tiến trở lại).
 
-Đi dải trễ. Tay tiến lại: 400 mm (tiến), 260 mm (vẫn tiến, vì 260 trên 250), 220 mm (giữ tiến, nằm trong dải), 180 mm (dừng). Tay lùi ra: 220 mm (ở dừng, nằm trong dải), 260 mm (tiến lại). Không có dải, nhiễu cảm biến 190 mm và 210 mm sẽ kêu hộp số mỗi vòng lặp.
+Nhờ khoảng đệm 50 mm này, nhiễu đo quanh mốc 200 mm (chẳng hạn nhảy giữa 190 mm và 210 mm) không còn làm hộp số bật tắt liên tục.
 
-## Hình
+## Hình minh họa
 
 ![Cảm nhận, tính, tác động: số đọc khoảng cách vào, một quyết định được đưa, một lệnh motor ra]({{ site.imgurl }}/generated/sense_compute_act.png)
 
-Gắn nhãn các hộp bằng danh từ của bạn: siêu âm hoặc ToF, khối `if` bang-bang, và PWM của cầu H. Vẽ một mũi tên thứ hai vào khối tính và viết `/cmd_vel` lên đó, rồi vẽ cú dừng vẫn ngồi trong firmware sau mũi tên ấy.
+Đối chiếu ba khối với phần cứng của bạn: cảm biến siêu âm/ToF $\rightarrow$ khối điều kiện bang-bang $\rightarrow$ PWM cầu H. Khi bổ sung `/cmd_vel` từ ROS vào khối tính về sau, nhánh dừng khẩn cấp theo cảm biến vẫn phải nằm chặn phía sau trong firmware.
 
 ## Lab
 
 ### An toàn
 
-Buổi đầu: khung trên giá, bánh trên không, giới hạn dòng hoặc cầu chì đã có, USB chỉ trên vi điều khiển. Buổi sau: lượt sàn ngắn về phía carton, một người, tay trên công tắc cắt nguồn motor. Giữ PWM ở 80, không phải 255. Nếu dòng cảm biến dừng, bánh phải đã dừng nhờ nhánh timeout của bạn. Đừng “sửa” timeout bằng cách comment nhánh đó đi.
+Giai đoạn 1: kê khung xe để bánh quay tự do trên không, có giới hạn dòng hoặc cầu chì, USB chỉ cấp cho vi điều khiển. Giai đoạn 2 *(tùy chọn)*: chạy thử đoạn ngắn trên sàn hướng về tấm bìa carton, giữ `PWM = 80` (không đặt 255) và để tay sẵn trên công tắc nguồn động cơ. Không được bỏ qua nhánh kiểm tra timeout.
 
 ### BOM
 
 | Món | Vai trò |
 |------|------|
-| Vi điều khiển cộng cảm biến khoảng cách từ Chương 04 | Cảm nhận |
-| Một motor và driver đã nhận diện | Tác động |
-| Pin hoặc nguồn có giới hạn cho VM, mass chung | Nguồn motor |
-| Bia carton | Một mặt cảm biến nhìn thấy |
-| Công tắc nguồn với tới được | Cầu chì bằng tay người |
-| Sổ | Ba số đọc thử và bài timeout |
+| Vi điều khiển và cảm biến khoảng cách (Chương 04) | Khối cảm nhận |
+| Một động cơ và mạch cầu H đã nhận diện | Khối tác động |
+| Pin hoặc nguồn có giới hạn dòng cho `VM`, mass chung | Nguồn động cơ |
+| Tấm bìa carton | Vật cản thử nghiệm |
+| Công tắc nguồn trong tầm tay | Ngắt khẩn cấp bằng tay |
+| Sổ tay | Ghi ba trường hợp thử và kết quả timeout |
 
 ### Các bước
 
-1. Đối chiếu `readRangeMm` với thước ở khoảng 20 cm và khoảng 50 cm trước khi enable motor. Sửa cảm biến trước.
-2. Nhập các hằng và `loop` ở trên. Đặt hướng từ bảng chân lý của bạn. PWM ở 0 cho đến số đọc xa hợp lệ đầu tiên.
-3. Bánh trên không. Đưa tay khoảng 40 cm, rồi 15 cm, rồi che cảm biến. Ghi hành vi PWM cho mỗi trường hợp.
-4. Lượt sàn tùy chọn: carton ở cuối một làn ngắn, tay trên công tắc, PWM 80. Robot phải bò và dừng gần 20 cm. Nếu nó không dừng, cắt nguồn. Đừng tăng PWM.
-5. Viết câu chuyện dải trễ trong hai dòng: khoảng cách nó dừng, và khoảng cách nó chạy lại.
+1. Kiểm tra lại hàm `readRangeMm()` bằng thước tại mốc 20 cm và 50 cm trước khi bật động cơ.
+2. Nạp mã nguồn trên với đúng chân hướng từ bảng chân lý của bạn, bảo đảm `PWM = 0` lúc khởi động.
+3. Với bánh nhấc khỏi bàn, thử lần lượt ba tình huống: đưa tay ở ~40 cm, đưa tay vào ~15 cm và che cảm biến/rút dây tín hiệu để kiểm tra timeout; ghi hành vi PWM tương ứng.
+4. *(Tùy chọn)* Đặt robot xuống sàn hướng về tấm bìa carton với `PWM = 80` để xác nhận xe tự dừng gần mốc 20 cm; ngắt công tắc ngay nếu xe không dừng.
+5. Ghi lại cơ chế vùng trễ trong hai dòng: khoảng cách dừng (200 mm) và khoảng cách chạy lại (250 mm).
 
 ### Kết quả mong đợi
 
-Một ghi chú với ba trường hợp (xa → tiến, gần → dừng, timeout hoặc 0 → dừng) và, nếu bạn đã chạy sàn, khoảng cách dừng xấp xỉ. Một câu gọi `/cmd_vel` là ngõ vào tính trong tương lai, và ngõ vào đó không được quyền ghi đè cú dừng này.
+Sổ tay ghi rõ ba trường hợp (xa $\rightarrow$ tiến, gần $\rightarrow$ dừng, timeout/0 $\rightarrow$ dừng), khoảng cách dừng thực tế (nếu có chạy sàn) và câu khẳng định `/cmd_vel` về sau không được phép ghi đè lệnh dừng an toàn này.
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Cần kiểm |
-|--------------|----------------|
-| Bánh chạy khi cảm biến bị rút | Timeout đang rơi xuống nhánh tiến. Trả một mã âm và kiểm `mm < 0`. |
-| Bánh kêu ở biên | Ngưỡng đi và ngưỡng dừng bằng nhau. Tách chúng (200 mm và 250 mm). |
-| Bánh chạy lùi | IN1 và IN2 không khớp dòng tiến của bảng chân lý. |
-| Robot không bao giờ khởi động | Mọi số đọc nằm trong dải dừng, bia quá gần, hoặc STBY / enable đang thấp. |
-| Lượt sàn không dừng | Sai đơn vị (cm đem so với 200), hoặc cảm biến chĩa qua carton. Cắt nguồn. |
+| Hiện tượng | Cần kiểm tra |
+|------------|--------------|
+| Bánh vẫn quay khi rút cảm biến | Nhánh timeout bị rơi sang nhánh tiến; cần trả số âm và kiểm `mm < 0` |
+| Bánh đóng ngắt lạch cạch quanh 20 cm | Ngưỡng dừng và ngưỡng chạy lại trùng nhau; tách thành 200 mm và 250 mm |
+| Bánh quay lùi | `IN1`/`IN2` ngược với dòng tiến trong bảng chân lý |
+| Bánh không bao giờ quay | Vật cản quá gần, mọi số đọc lỗi hoặc quên kéo cao chân `STBY`/`Enable` |
+| Xe không dừng khi chạy trên sàn | Nhầm đơn vị (so sánh cm với 200 mm) hoặc cảm biến đặt lệch khỏi bìa; ngắt nguồn ngay |
 
-## Mua ở Việt Nam / Where to buy in Vietnam
+## Mua ở Việt Nam
 
-Lab này dùng cảm biến và driver bạn đã có. Chỉ mua chỗ thiếu: một TB6612 hoặc L298N nếu bài 05-02 vẫn thiếu board, một motor TT nếu bạn không có trục để nhìn, một HC-SR04 hoặc một ToF nhỏ nếu Chương 04 làm trên bàn bạn học. Giá chạy. Khoảng thô: HC-SR04 khoảng 15.000–35.000 VND, motor TT khoảng 25.000–45.000 VND, module L298N khoảng 35.000–70.000 VND.
+Bài thực hành tận dụng lại cảm biến từ Chương 04 và mạch cầu H từ bài 05-02; chỉ mua bổ sung món còn thiếu (giá tham khảo: HC-SR04 khoảng 15.000–35.000 VND, động cơ TT khoảng 25.000–45.000 VND, L298N khoảng 35.000–70.000 VND):
 
-- Trang L298N đã kiểm, khoảng 45.000 VND: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
+- Trang L298N đã kiểm tra, khoảng 45.000 VND: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - HShop: [HC-SR04](https://hshop.vn/search?q=HC-SR04), [TB6612](https://hshop.vn/search?q=TB6612), [motor TT](https://hshop.vn/search?q=motor%20TT)
 - Shopee: [HC-SR04](https://shopee.vn/search?keyword=HC-SR04), [TB6612](https://shopee.vn/search?keyword=TB6612)
 - Lazada: [HC-SR04](https://www.lazada.vn/catalog/?q=HC-SR04), [VL53L0X](https://www.lazada.vn/catalog/?q=VL53L0X)
@@ -146,22 +151,26 @@ Lab này dùng cảm biến và driver bạn đã có. Chỉ mua chỗ thiếu: 
 
 ## Video tham khảo
 
-- **Xem trước:** [Control Systems Lectures - Closed Loop Control](https://www.youtube.com/watch?v=O-OqgFE9SD4) — Brian Douglas, tiếng Anh. Vòng kín: đo, so với đích, sửa lệnh. Đúng vòng cảm nhận rồi tác động của lab.
-- [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. PID là một cách điền chỗ sửa lệnh. Chương 08 sẽ chỉnh số; bài này chỉ cần thấy vòng kín.
+- **Xem trước:** [Control Systems Lectures - Closed Loop Control](https://www.youtube.com/watch?v=O-OqgFE9SD4) — Brian Douglas, tiếng Anh. Giới thiệu nguyên lý vòng kín (đo, so sánh với mục tiêu và hiệu chỉnh lệnh), khớp với cấu trúc bài thực hành.
+- [PID Control - A brief introduction](https://www.youtube.com/watch?v=UR0hOmjaHp0) — Brian Douglas, tiếng Anh. Tổng quan về PID như bước phát triển tiếp theo của khối tính toán ở Chương 08.
 
 ## Bài tập
 
-1. Khoảng cách đọc 180 mm, rồi 900 mm, rồi một timeout. Bạn lệnh PWM bao nhiêu trong mỗi trường hợp nếu dừng là 200 mm và đi là 250 mm?
-2. Vì sao số đọc 0 đi nhánh dừng?
-3. Bánh kêu bật tắt khi tay giữ yên gần 20 cm. Hai hằng nào bạn phải tách?
-4. Một bản tin `/cmd_vel` nói tiến đúng lúc khoảng cách là 12 cm. Firmware làm gì?
-5. PID là Chương 08. Khối tính bạn giao hôm nay là gì, trong một câu?
+1. Với ngưỡng dừng 200 mm và ngưỡng chạy lại 250 mm, hệ thống xuất mức PWM nào khi cảm biến lần lượt báo 180 mm, 900 mm và timeout?
+2. Vì sao giá trị đo bằng 0 phải đi vào nhánh dừng?
+3. Động cơ đóng ngắt liên tục khi giữ tay quanh mốc 20 cm. Cần tách hai hằng số nào để khắc phục?
+4. Một bản tin `/cmd_vel` yêu cầu đi tới đúng lúc cảm biến đo được 12 cm. Firmware phải xử lý ra sao?
+5. Tóm tắt trong một câu vai trò của khối tính toán bang-bang triển khai trong bài hôm nay (trước khi học PID ở Chương 08).
 
 ### Gợi ý đáp án
 
-180 mm thì dừng, 900 mm lệnh PWM 80 tiến, và timeout thì dừng. Số đọc 0 là không hợp lệ hoặc nằm trong ngưỡng dừng, nên không được tính là đường trống. Tách ngưỡng dừng và ngưỡng đi, ví dụ 200 mm và 250 mm, và giữ lệnh trước trong dải. Firmware dừng trên số đọc 12 cm dù `/cmd_vel` nói tiến. Khối tính hôm nay là bang-bang: PWM 0 khi khoảng cách dưới 20 cm hoặc cảm biến đã hỏng, và PWM 80 tiến khi khoảng cách hợp lệ và đã qua điểm nhả của dải trễ.
+1. 180 mm $\rightarrow$ `PWM = 0` (dừng); 900 mm $\rightarrow$ `PWM = 80` (tiến); timeout $\rightarrow$ `PWM = 0` (dừng).
+2. Giá trị 0 hoặc biểu thị lỗi timeout hoặc khoảng cách sát bằng 0 — cả hai đều không được coi là đường trống.
+3. Tách ngưỡng dừng (`STOP_MM = 200`) và ngưỡng chạy lại (`GO_MM = 250`), giữ nguyên trạng thái trong khoảng giữa.
+4. Firmware bắt buộc dừng động cơ vì khoảng cách 12 cm vi phạm ngưỡng an toàn, không cho `/cmd_vel` ghi đè.
+5. Khối tính bang-bang xuất `PWM = 0` khi khoảng cách dưới 20 cm hoặc cảm biến lỗi/timeout, và xuất `PWM = 80` tiến khi khoảng cách hợp lệ vượt ngưỡng nhả của vùng trễ.
 
 ## Đọc thêm
 
-- Control Guru, điều khiển on/off và ngõ ra đáp lại khi phép đo vượt setpoint: [https://controlguru.com/the-on-off-controller-output-response-to-set-point-changes/](https://controlguru.com/the-on-off-controller-output-response-to-set-point-changes/)
-- Topic ROS 2, đường ống mà subscriber `/cmd_vel` về sau sẽ nghe. Bản thân `geometry_msgs/Twist` được giới thiệu ở Chương 09: [https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
+- Control Guru — điều khiển bật/tắt (on/off) và đáp ứng ngõ ra quanh điểm đặt: [https://controlguru.com/the-on-off-controller-output-response-to-set-point-changes/](https://controlguru.com/the-on-off-controller-output-response-to-set-point-changes/)
+- Topic ROS 2 (cơ chế truyền tin mà subscriber `/cmd_vel` sẽ sử dụng ở Chương 09): [https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)

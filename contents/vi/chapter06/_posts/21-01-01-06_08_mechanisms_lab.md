@@ -11,59 +11,61 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: **80–110 phút**. Bài này là phần làm tay. Nguồn tắt cho mọi mục kiểm cơ khí.
+Thời lượng ước tính: **80–110 phút**. Đây là bài thực hành trực tiếp trên cơ khí; nguồn điện phải tắt hoàn toàn trong mọi bước kiểm tra.
 
 ## Mục tiêu học
 
-Hết bài này, các bạn có một tỉ số truyền vừa dự đoán vừa kiểm, một ước lượng độ rơ tại bánh theo độ, và một checklist lắp viết ra được để chạy trước bất kỳ điện áp nào ở Chương 07. Các bạn phân biệt được bánh trung gian đơn với một lần đổi tỉ số, và nhân được dấu đóng của hộp giảm tốc với một đai ngoài khi cả hai đều tồn tại.
+Sau bài này, các bạn có một giá trị tỉ số truyền đã được dự đoán và đo kiểm thực tế, một ước lượng độ rơ (backlash) tại bánh xe theo độ, và một danh sách kiểm tra lắp ráp (checklist) hoàn chỉnh để thực hiện trước khi cấp điện ở Chương 07. Các bạn phân biệt rõ tác dụng của bánh trung gian đơn với tầng đổi tỉ số, đồng thời biết nhân tỉ số hộp giảm tốc với tỉ số bộ truyền đai ngoài (nếu có).
 
 ## Kiến thức cần có
 
-Bài 01 đến Bài 07. Các bạn cần $$b$$, $$r$$, thói quen M3, định nghĩa tỉ số $$i = N_{\text{out}}/N_{\text{in}} = \omega_{\text{in}}/\omega_{\text{out}}$$, và phép giật giảm lực kéo dây. Một kim chỉ bằng bìa và một thước đo góc, hoặc một thước đo góc in trên giấy, là đủ dụng cụ.
+Kiến thức từ Bài 01 đến Bài 07: $$b$$, $$r$$, quy cách ốc M3, định nghĩa tỉ số truyền $$i = N_{\text{out}}/N_{\text{in}} = \omega_{\text{in}}/\omega_{\text{out}}$$ và kỹ thuật kiểm tra giảm lực kéo dây. Dụng cụ chỉ cần kim chỉ cắt từ bìa cứng và thước đo góc (hoặc thước đo góc in trên giấy).
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Chương 07 là lần đầu khung này được phép nhìn thấy điện áp. Checklist bên dưới là cổng. Một bánh cà, một cục pin trượt, hoặc một vít cố định trục nằm trên phần tròn sẽ đốt buổi lab ấy vào một dạng hỏng mà Bài 07 đã gọi tên. Tỉ số các bạn đo là tỉ số `diff_drive_controller` sẽ đổi thành mét. Một kết quả nằm trong khoảng 10 phần trăm so với nhãn là điều răng đúc chịu được. Nếu kit vẫn đang trên đường, dự đoán trên bản vẽ là sản phẩm nộp và các bạn dán nhãn đó là bản vẽ. Đừng bịa một góc đo mà các bạn không đo.
+Chương 07 sẽ là lần đầu tiên khung robot được cấp điện áp. Checklist trong bài này đóng vai trò chốt chặn an toàn: một bánh xe cọ khung, khối pin lỏng hay vít cố định trục đặt sai vị trí sẽ làm hỏng buổi thực hành cấp nguồn bằng đúng các dạng lỗi đã phân tích ở Bài 07.
+
+Tỉ số truyền bạn đo hôm nay chính là tham số `diff_drive_controller` dùng để quy đổi xung thành mét. Với bánh răng nhựa đúc, sai số đo nằm trong phạm vi 10% so với thông số nhãn là chấp nhận được. Nếu bộ kit chưa về kịp, phần tính dự đoán trên bản vẽ là sản phẩm nộp (ghi rõ nhãn “bản vẽ”); tuyệt đối không tự bịa số đo góc thực tế.
 
 ## Các bạn đang kiểm gì
 
-Đếm răng nếu nhìn thấy, hoặc đọc dấu đóng trên hộp giảm tốc. Dấu đóng là dự đoán. Phép kiểm là động học: một kim trên đầu vào, một kim trên đầu ra, một chuyển động đầu vào đã biết, một góc đầu ra đã đo. Với tỉ số $$i$$, ba vòng đầu vào phải cho
+Trước hết, đếm số răng nếu nhìn thấy hoặc đọc tỉ số đóng dấu trên vỏ hộp giảm tốc — đây là giá trị dự đoán. Bước kiểm chứng được thực hiện theo phương pháp động học: gắn một kim chỉ lên trục đầu vào và một kim chỉ lên trục đầu ra, xoay trục vào một số vòng đã biết rồi đo góc quay đầu ra. Với tỉ số $$i$$, ba vòng quay của trục đầu vào phải tạo ra góc đầu ra:
 
 $$
 \theta_{\text{out}} = \frac{3}{i} \times 360^\circ.
 $$
 
-Sau đó giữ đầu vào đứng yên và lắc bánh. Góc bánh dịch trước khi kim đầu vào buộc phải động chính là độ rơ các bạn sẽ nêu. Ước bằng mắt là đủ. Vài độ tại bánh là bánh đúc bình thường. Hàng chục độ nghĩa là vít cố định trục lỏng hoặc đai nhảy răng, đó là một lỗi khác.
+Tiếp theo, giữ cố định trục đầu vào và lắc nhẹ bánh xe. Góc bánh dịch chuyển trước khi kim đầu vào bắt đầu nhúc nhích chính là độ rơ (backlash). Chỉ cần ước lượng bằng mắt theo độ: vài độ là bình thường ở hộp số nhựa đúc, nhưng nếu lên tới hàng chục độ thì nguyên nhân là vít cố định trục lỏng hoặc đai nhảy răng — đây là lỗi cơ khí cần sửa ngay.
 
-Một bánh trung gian đơn đảo chiều và không đổi $$i$$. Đếm nó như một cặp ăn cho dấu, không đếm như một thừa số, trừ khi nó là bánh trung gian kép với hai số răng khác nhau khóa cùng nhau. Nếu một đai ngồi ngoài hộp giảm tốc, tỉ số bánh là tích. Sinh viên mất một thừa số hai ở đây thường hơn là đếm sai một bánh dẫn.
+Lưu ý rằng một bánh trung gian đơn chỉ đảo chiều quay chứ không làm thay đổi tỉ số $$i$$; chỉ tính nó là một cặp ăn khớp khi xác định dấu chiều quay (trừ khi đó là bánh răng kép gồm hai vòng răng khác số răng gắn cố định trên cùng trục). Nếu có thêm bộ truyền đai bên ngoài hộp số, tỉ số tổng tại bánh xe là tích của hai tầng — bỏ sót hệ số 2 ở bộ đai là lỗi phổ biến hơn cả việc đếm nhầm số răng.
 
-Rồi chạy danh sách lắp với pin nằm trên bàn, không nằm trên giắc. Ốc chặt. Vít cố định trục trên mặt vát. Bánh không chạm tấm. Caster quay và có đuôi. Dây có vòng dự phòng và mối hàn không bị bẻ. Pin không trượt trong túi tương lai của nó. Cả hai động cơ xoay bằng tay với lực cản tương đương. Động cơ nào cảm thấy sạn hoặc cứng hơn hẳn người anh em thì được ghi chú trước Chương 07, không được một PWM cao hơn.
+Sau khi đo tỉ số, hãy kiểm tra toàn bộ checklist lắp ráp khi pin vẫn đặt rời trên bàn (chưa cắm giắc): ốc vít đã siết chặt; vít cố định trục tỳ đúng mặt vát; bánh xe không cọ tấm khung; bánh caster xoay trơn và có khoảng đuôi đúng hướng; dây có vòng dự phòng và mối hàn không chịu lực uốn; pin không bị trượt khỏi vị trí; cả hai động cơ khi xoay tay có lực cản tương đương nhau. Nếu một động cơ có cảm giác sượng hoặc nặng tay hơn hẳn bên còn lại, hãy ghi nhận và xử lý trước Chương 07 chứ không cố bù bằng cách tăng PWM.
 
 ![Gọi tên đầu vào trước khi chia: hình là dự đoán, hai kim là phép kiểm]({{ site.imgurl }}/generated/gear_train_ratio.png)
 
 ## Ví dụ tính tay
 
-Một động cơ TT đóng dấu 1:48. Ba vòng đầu vào phải cho
+Xét động cơ TT đóng dấu tỉ số 1:48. Khi trục đầu vào quay 3 vòng, góc đầu ra dự đoán là:
 
 $$
 \theta_{\text{out}} = \frac{3}{48} \times 360^\circ = 22.5^\circ.
 $$
 
-Các bạn đo $$24^\circ$$ tại kim bánh. Sai số tương đối là
+Giả sử bạn đo được $$24^\circ$$ tại kim gắn trên bánh xe. Sai số tương đối là:
 
 $$
 \frac{24 - 22.5}{22.5} \approx 0.067,
 $$
 
-khoảng 7 phần trăm, nằm trong dải 10 phần trăm của răng đúc và một kim làm tay. Các bạn ghi $$i = 48$$ và “đã kiểm, 24° so với 22,5°”. Nếu kim rơi gần $$45^\circ$$, sai số là một thừa số hai: một đai 2:1 bị bỏ quên, hoặc một dấu đóng bị chia đôi. Nếu rơi gần $$67.5^\circ$$, các bạn đã dùng $$i = 16$$ hoặc đã xoay nhầm trục. Độ rơ đo bằng cách lắc bánh, chẳng hạn $$5^\circ$$, được ghi cạnh tỉ số và không được “sửa” bằng cách siết cặp ăn đến lúc kẹt.
+tương đương khoảng 7%, nằm trong ngưỡng cho phép 10% đối với hộp số nhựa đúc và kim chỉ thủ công. Bạn ghi vào sổ: $$i = 48$$ và “đã kiểm, 24° so với dự đoán 22,5°”. Nếu góc đo rơi vào khoảng $$45^\circ$$, có thể bạn đã bỏ quên hoặc nhân nhầm một tầng tỉ số 2:1; nếu gần $$67.5^\circ$$, có thể hộp số thực tế là $$i = 16$$ hoặc bạn đã đếm nhầm số vòng trục vào. Độ rơ ước lượng khi lắc bánh (ví dụ $$5^\circ$$) được ghi bên cạnh tỉ số, không cố khử bằng cách ép chặt cặp bánh răng gây kẹt.
 
-Chiều quay: một cặp ăn ngoài, hoặc một số lẻ các cặp ấy, đảo bánh so với động cơ. Dấu firmware ở Bài 05 phải khớp quan sát này, vẫn khi nguồn tắt, bằng cách xoay trục theo chiều động cơ sẽ quay.
+Về chiều quay: một cặp ăn khớp ngoài (hoặc một số lẻ cặp ăn khớp ngoài) làm đầu ra quay ngược chiều đầu vào. Quy ước dấu firmware ở Bài 05 phải khớp với quan sát thực tế này bằng cách xoay trục bằng tay khi tắt nguồn.
 
 ## Lab: hai kim, rồi danh sách
 
 ### An toàn
 
-Nguồn vẫn tắt. Pin ngắt và đặt ở chỗ một cú giật không thể đẩy nó vào cực. Răng bánh kẹp; xoay trục từ kim, không xoay từ trong cặp ăn. Nếu một trục không chịu động, dừng và tìm chỗ cà. Đừng thêm điện áp để “phá kẹt”.
+Nguồn điện luôn tắt; pin đã ngắt kết nối và đặt xa vị trí thao tác để tránh vô tình chạm cực. Cẩn thận tránh kẹp tay vào bánh răng; hãy xoay trục thông qua kim chỉ hoặc phần đầu trục thay vì thò ngón tay vào vùng ăn khớp. Nếu trục bị cứng không quay được, dừng lại kiểm tra chỗ kẹt thay vì cấp điện để “phá kẹt”.
 
 ### BOM
 
@@ -78,16 +80,16 @@ Nguồn vẫn tắt. Pin ngắt và đặt ở chỗ một cú giật không th�
 
 ### Các bước
 
-1. Viết dự đoán. Số răng nếu nhìn thấy, nếu không thì dấu đóng. Tính $$\theta_{\text{out}}$$ cho đúng ba vòng đầu vào.
-2. Dán một kim vào đầu vào và một kim vào đầu ra. Đánh dấu mốc không trên bàn.
-3. Xoay đầu vào đúng ba vòng. Đo góc đầu ra. Đối chiếu với dự đoán và ghi phần trăm chênh lệch.
-4. Giữ đầu vào. Lắc đầu ra. Ước độ rơ theo độ tại bánh.
-5. Đi checklist và tick từng dòng trong sổ: ốc chặt; vít cố định trục trên mặt vát; bánh không cà; caster quay và có đuôi; vòng dây dự phòng, mối hàn yên; pin không trượt; cả hai động cơ xoay bằng tay với lực cản tương đương.
-6. Nếu chỉ có bản vẽ, làm bước 1 và các phác họa, viết “bản vẽ, kết quả trên giấy là sản phẩm nộp”, và vẫn soạn checklist như quy trình các bạn sẽ chạy khi thùng hàng về.
+1. Ghi giá trị dự đoán (từ số răng đếm được hoặc dấu đóng trên vỏ hộp số) và tính $$\theta_{\text{out}}$$ cho đúng ba vòng quay của trục đầu vào.
+2. Gắn một kim chỉ lên trục đầu vào và một kim chỉ lên trục đầu ra, đồng thời đánh dấu mốc $$0^\circ$$ trên mặt bàn.
+3. Xoay trục đầu vào đúng 3 vòng, đo góc quay của kim đầu ra, so sánh với dự đoán và tính phần trăm sai lệch.
+4. Giữ chặt trục đầu vào, lắc nhẹ trục đầu ra và ước lượng độ rơ theo độ tại bánh xe.
+5. Kiểm tra và đánh dấu từng mục trong checklist lắp ráp vào sổ: ốc chặt; vít cố định trục trên mặt vát; bánh không cọ khung; caster xoay trơn và có khoảng đuôi; dây có vòng dự phòng và mối hàn không chịu uốn; pin không trượt; hai động cơ xoay tay có lực cản tương đương.
+6. Nếu mới chỉ có bản vẽ, hoàn thành bước 1 cùng các phác thảo, ghi chú “bản vẽ, kết quả trên giấy là sản phẩm nộp” và chuẩn bị sẵn checklist để chạy ngay khi có phần cứng.
 
 ### Kết quả mong đợi
 
-Một tỉ số nằm trong khoảng 10 phần trăm so với nhãn khi có phần cứng, hoặc một dự đoán trên giấy được dán nhãn rõ khi chưa có. Độ rơ nêu theo độ. Mỗi dòng checklist đánh dấu đạt, không đạt, hoặc “chưa có trên bàn”. Dòng không đạt nêu cách sửa, không nêu kế hoạch phát hiện nó trong buổi lab có điện.
+Một tỉ số truyền có kết quả đo nằm trong ngưỡng 10% so với nhãn (khi có phần cứng) hoặc bản tính dự đoán trên giấy được dán nhãn rõ ràng (khi chưa có phần cứng), kèm giá trị độ rơ tính theo độ. Mỗi dòng trong checklist được đánh dấu “đạt”, “không đạt” hoặc “chưa có trên bàn”; mọi dòng “không đạt” phải ghi rõ biện pháp khắc phục trước khi cấp điện.
 
 ### Lỗi thường gặp
 
@@ -101,7 +103,7 @@ Một tỉ số nằm trong khoảng 10 phần trăm so với nhãn khi có ph�
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Chỉ mua thứ checklist đã chứng minh là thiếu. Một ứng dụng thước đo góc là đủ nếu các bạn ngắm được dọc kim. Một động cơ TT có dấu đóng nhìn thấy được là chi tiết biến bước 1 thành một lần đọc, không phải một lần đoán.
+Chỉ đặt mua những linh kiện mà checklist chỉ ra còn thiếu. Bạn có thể dùng ứng dụng thước đo góc trên điện thoại nếu ngắm chuẩn dọc theo kim chỉ. Nên chọn mua động cơ TT có in rõ tỉ số trên vỏ để bước 1 không phải đoán.
 
 | Mua gì | Từ khóa | Khoảng giá (VND) | Ghi chú |
 |------|----------|------------------|-------|
@@ -109,34 +111,38 @@ Chỉ mua thứ checklist đã chứng minh là thiếu. Một ứng dụng thư
 | Bộ ốc M3, nếu lần phân loại ở Bài 02 bị thiếu | `ốc M3` | 25.000–70.000 | Dòng ốc trên checklist |
 | Bánh caster, nếu mũi vẫn cày | `bánh caster robot` | 12.000–40.000 | Phải có đuôi |
 
-Các trang tìm:
+Các trang tìm mua:
 
 - [Hshop](https://hshop.vn/search?q=%C4%91%E1%BB%99ng+c%C6%A1+gi%E1%BA%A3m+t%E1%BB%91c+TT)
 - [Shopee](https://shopee.vn/search?keyword=%C4%91%E1%BB%99ng%20c%C6%A1%20gi%E1%BA%A3m%20t%E1%BB%91c%20TT%20encoder)
 - [Lazada](https://www.lazada.vn/catalog/?q=%E1%BB%91c%20M3)
 - [Thế Giới IC](https://www.thegioiic.com/search?q=%E1%BB%91c%20M3)
 
-Giá dịch chuyển. Đừng mua hộp giảm tốc thứ hai để tránh đo hộp thứ nhất.
+Giá bán có thể thay đổi theo thời điểm.
 
 ## Video tham khảo
 
-- **Xem trước:** [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Đếm răng, tính tỉ số, rồi quay trục vào để kiểm. Đúng lab đo tỉ số của bài.
-- [How to measure Gear Backlash and Center Distance](https://www.youtube.com/watch?v=8fYwUV6QV8c) — Evolvent Design, tiếng Anh. Nếu cặp bánh có khe, đo khe trước khi kết luận tỉ số sai.
+- **Xem trước:** [Compound Gears Explained:  Calculate Gear Ratio](https://www.youtube.com/watch?v=NmUq2TQ8m2M) — INTEGRAL PHYSICS, tiếng Anh. Đếm số răng, tính tỉ số truyền rồi quay trục vào để đối chiếu — đúng quy trình thực hành của bài này.
+- [How to measure Gear Backlash and Center Distance](https://www.youtube.com/watch?v=8fYwUV6QV8c) — Evolvent Design, tiếng Anh. Đo khe hở độ rơ trước khi vội kết luận tỉ số truyền bị sai.
 
 ## Bài tập
 
-1. Dấu đóng 1:90. Dự đoán góc đầu ra cho ba vòng đầu vào.
-2. Các bạn đo $$12^\circ$$ sau ba vòng ấy trên một động cơ 1:48. Số đó có nằm trong 10 phần trăm của 22,5° không? Kiểm gì tiếp theo?
-3. Một bánh dẫn 20 răng kéo một bánh trung gian 20 răng, bánh ấy kéo một bánh 40 răng. Cho $$i$$ và chiều đầu ra so với bánh dẫn.
-4. Hộp giảm tốc 1:48 và một cấp GT2 với 20 răng trên pulley động cơ, 40 răng trên pulley bánh. Bánh xe thấy $$i$$ bao nhiêu? $$\theta_{\text{out}}$$ cho ba vòng động cơ là bao nhiêu?
-5. Liệt kê bảy dòng checklist và đánh sao hai dòng mà nếu bỏ qua thì trực tiếp bịa odometry ma nhất.
+1. Hộp giảm tốc đóng dấu tỉ số 1:90. Dự đoán góc quay đầu ra sau ba vòng quay của trục đầu vào.
+2. Trên một động cơ đóng dấu 1:48, bạn đo được góc đầu ra $$12^\circ$$ sau ba vòng trục vào. Kết quả này có nằm trong ngưỡng 10% so với $$22.5^\circ$$ không? Bạn cần kiểm tra những gì tiếp theo?
+3. Bánh dẫn 20 răng kéo bánh trung gian 20 răng, sau đó kéo bánh ra 40 răng. Tính tỉ số truyền $$i$$ và cho biết chiều quay đầu ra so với bánh dẫn.
+4. Một hộp giảm tốc 1:48 nối tiếp với bộ đai GT2 gồm pulley động cơ 20 răng và pulley bánh xe 40 răng. Tính tỉ số tổng $$i$$ tại bánh xe và góc $$\theta_{\text{out}}$$ sau ba vòng quay động cơ.
+5. Liệt kê 7 mục trong checklist lắp ráp và đánh dấu sao hai mục mà nếu bỏ qua sẽ trực tiếp gây ra sai số odometry ảo rõ rệt nhất.
 
 ### Gợi ý đáp án
 
-1. $$\theta_{\text{out}} = 3/90 \times 360^\circ = 12^\circ$$. 2. $$|12 - 22.5|/22.5 \approx 47$$ phần trăm, nằm xa ngoài dải. Kiểm rằng các bạn đã xoay trục động cơ ba vòng, rằng các bạn đọc 1:48 chứ không phải một dấu khác, và rằng một đai không bị bỏ quên hoặc bị thêm vào. 3. $$i = 40/20 = 2$$. Bánh trung gian đơn không đổi tỉ số. Hai cặp ăn ngoài trả lại chiều, nên đầu ra cùng chiều bánh dẫn. 4. $$i = 48 \times (40/20) = 96$$. Ba vòng động cơ cho $$3/96 \times 360^\circ = 11.25^\circ$$ tại bánh. 5. Ốc chặt; vít cố định trục trên mặt vát; bánh không cà; caster quay và có đuôi; vòng dây dự phòng với mối hàn yên; pin không trượt; lực cản tay tương đương. Đánh sao vít cố định trục và chỗ cà: cả hai để encoder vui trong khi sàn không đồng ý.
+1. $$\theta_{\text{out}} = \frac{3}{90} \times 360^\circ = 12^\circ$$.
+2. Sai số tương đối $$|12 - 22.5|/22.5 \approx 47\%$$, vượt xa ngưỡng 10%. Cần kiểm tra lại: đã xoay đúng 3 vòng trục vào chưa, nhãn trên vỏ có thực sự là 1:48 không, và có tầng đai hoặc tầng giảm tốc nào bị bỏ sót hoặc tính nhầm hay không.
+3. $$i = 40/20 = 2$$ (bánh trung gian đơn không đổi tỉ số). Có hai cặp ăn khớp ngoài nên chiều quay đảo hai lần, đầu ra quay cùng chiều bánh dẫn.
+4. $$i = 48 \times (40/20) = 96$$. Sau 3 vòng động cơ, góc quay bánh xe là $$\theta_{\text{out}} = \frac{3}{96} \times 360^\circ = 11.25^\circ$$.
+5. Bảy mục: ốc chặt; vít cố định trục trên mặt vát; bánh không cọ khung; caster xoay trơn và có khoảng đuôi; dây có vòng dự phòng và mối hàn không chịu uốn; pin không trượt; lực cản xoay tay hai động cơ tương đương. Hai mục nên đánh dấu sao là vít cố định trục và bánh cọ khung, vì cả hai đều làm encoder đếm xung khác với chuyển động thực trên sàn.
 
 ## Đọc thêm
 
-- [Gear ratio](https://en.wikipedia.org/wiki/Gear_ratio) — chuỗi bánh kép, chính là trường hợp hộp số nhân đai.
-- [Công nghệ bánh răng SDP-SI](https://www.sdp-si.com/resources/elements-of-metric-gear-technology/index.php) — độ rơ như một khe được thiết kế, viết bằng ngôn ngữ danh mục.
-- [diff_drive_controller](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — nơi $$i$$, $$b$$ và $$r$$ các bạn đo sẽ được gõ vào.
+- [Gear ratio](https://en.wikipedia.org/wiki/Gear_ratio) — nguyên lý chuỗi bánh răng kép, áp dụng tương tự cho trường hợp hộp giảm tốc nối tiếp bộ đai.
+- [Công nghệ bánh răng SDP-SI](https://www.sdp-si.com/resources/elements-of-metric-gear-technology/index.php) — giải thích khái niệm độ rơ như một khe hở thiết kế có chủ đích.
+- [diff_drive_controller](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — nơi nhập các tham số $$i$$, $$b$$ và $$r$$ đo được vào hệ thống ROS.

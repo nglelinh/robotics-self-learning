@@ -11,79 +11,81 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: **70–90 phút**. Nếu robot đã lăn được, mười phút trong số đó là xoay tay quanh trung điểm trục. Nếu chưa lăn, mười phút ấy là một phác họa mũi tên vận tốc.
+Thời lượng ước tính: **70–90 phút**. Nếu robot đã lắp lăn được, khoảng 10 phút trong đó dùng để xoay thử bằng tay quanh trung điểm trục; nếu chưa, bạn dùng 10 phút đó để vẽ sơ đồ mũi tên vận tốc.
 
 ## Mục tiêu học
 
-Hết bài này, các bạn vẽ được mũi tên vận tốc bánh cho chuyển động thẳng, cho một cú quay nhẹ, và cho một cú xoay tại chỗ, đồng thời tính được vận tốc góc khi xoay tại chỗ $$\omega = 2 v_r / b$$. Các bạn giải thích được khoảng đuôi của bánh caster, vì sao caster lắp ngược thì lắc, và vì sao bốn bánh cố định lãng phí dòng kẹt mà các bạn đã tính ở Chương 05. Các bạn chỉ được trung điểm trục như tâm quay, và nối `cmd_vel` linear.x cùng angular.z với hai động cơ.
+Sau bài này, các bạn vẽ được sơ đồ vectơ vận tốc hai bánh cho ba trạng thái: đi thẳng, quẹo nhẹ và xoay tại chỗ, đồng thời tính được vận tốc góc xoay tại chỗ $$\omega = 2 v_r / b$$. Các bạn giải thích được vai trò của khoảng đuôi (trail) trên bánh caster, lý do caster lắp ngược bị rung lắc và vì sao cơ cấu bốn bánh cố định tiêu tốn dòng điện gần mức dòng kẹt (Chương 05). Cuối cùng, các bạn xác định đúng trung điểm trục làm tâm quay và liên hệ trực tiếp `cmd_vel` (`linear.x` và `angular.z`) với hai động cơ.
 
 ## Kiến thức cần có
 
-Định nghĩa của Bài 01: $$b$$ giữa hai tâm tiếp xúc, $$r$$ từ phép lăn, và
+Các bạn nắm vững định nghĩa từ Bài 01: khổ vết $$b$$ giữa hai tâm tiếp xúc, bán kính lăn $$r$$ từ phép lăn một vòng và cặp phương trình:
 
 $$
 v = \frac{v_r + v_l}{2}, \qquad \omega = \frac{v_r - v_l}{b}.
 $$
 
-Các bạn biết một $$b$$ sai vẽ thành vòng tròn trên lệnh đi thẳng. Bánh răng (Bài 03) đã đặt cách radian động cơ trở thành radian bánh.
+Các bạn đã hiểu sai số ở $$b$$ sẽ khiến lệnh đi thẳng biến thành quỹ đạo cong, và tỉ số truyền bánh răng (Bài 03) quy đổi góc quay động cơ sang góc quay bánh xe.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Capstone A là hai bánh chủ động cộng một bánh caster. ROS sẽ gửi `geometry_msgs/Twist` với linear.x là $$v$$ và angular.z là $$\omega$$. `diff_drive_controller` đảo hai phương trình và ra lệnh một động cơ trái, một động cơ phải. Sai dấu trên một động cơ là sự thật cơ khí mà bộ điều khiển không nhìn thấy: cả hai bánh “tiến” trong phần mềm, một bánh lùi trên sàn, và quỹ đạo là vòng tròn quanh phía chậm hơn. Các bạn sẽ tìm dấu ấy ở Chương 07 khi bánh được nhấc lên, rồi xác nhận trên sàn, nơi bánh caster và cao su cuối cùng mới có tiếng nói. Những mũi tên vẽ hôm nay là bức tranh các bạn sẽ đối chiếu khi gỡ lỗi.
+Capstone A sử dụng cấu hình hai bánh chủ động kết hợp một bánh caster. Trong ROS, lệnh điều khiển gửi qua thông điệp `geometry_msgs/Twist` với `linear.x` là $$v$$ và `angular.z` là $$\omega$$. Bộ điều khiển `diff_drive_controller` giải ngược hai phương trình trên để xuất lệnh tốc độ cho động cơ trái và động cơ phải.
+
+Nếu một động cơ bị đấu ngược chiều, bộ điều khiển phần mềm không thể tự biết: cả hai bánh cùng nhận lệnh “tiến” nhưng trên sàn một bánh lại chạy lùi, khiến robot xoay tròn thay vì đi thẳng. Ở Chương 07, bạn sẽ kiểm tra dấu chiều quay khi nhấc bánh khỏi sàn rồi mới xác nhận lại trên mặt đất — nơi bánh caster và độ bám lốp bắt đầu phát huy tác dụng. Sơ đồ mũi tên vận tốc hôm nay là chuẩn đối chiếu trực tiếp khi gỡ lỗi.
 
 ## Mũi tên, khoảng đuôi, và bánh bị cà
 
-Đi thẳng, cả hai vết tiếp xúc tiến cùng tốc độ. Khi đó $$v_r = v_l$$, nên $$v$$ bằng tốc độ ấy và $$\omega = 0$$. Tâm tức thời của chuyển động nằm vô cùng về một bên: trục không quay quanh một điểm gần.
+Khi đi thẳng, hai vết tiếp xúc chuyển động cùng vận tốc ($$v_r = v_l$$), do đó $$v$$ bằng vận tốc bánh và $$\omega = 0$$. Tâm quay tức thời nằm ở vô cực trên đường kéo dài của trục bánh.
 
-Một cú quẹo trái nhẹ giữ cả hai bánh tiến và làm bánh phải nhanh hơn. $$\omega$$ dương trong hệ robot thông thường, trục x hướng mũi và trục z hướng lên, tức quay trái. Robot quay quanh một điểm trên đường trục, nằm ngoài bánh trái. Bánh caster xoay để đi theo.
+Khi quẹo trái nhẹ, cả hai bánh vẫn tiến về phía trước nhưng bánh phải nhanh hơn bánh trái. Trong hệ tọa độ robot chuẩn (trục $$x$$ hướng về phía mũi, trục $$z$$ hướng lên trên), $$\omega > 0$$ tương ứng với chuyển động quay sang trái quanh một tâm nằm trên đường trục, phía ngoài bánh trái. Bánh caster lúc này tự xoay theo quỹ đạo.
 
-Xoay tại chỗ là trường hợp thuần. Đặt $$v_l = -v_r$$. Khi đó
+Xoay tại chỗ là trường hợp đặc biệt khi hai bánh quay ngược chiều với cùng độ lớn vận tốc: $$v_l = -v_r$$. Khi đó:
 
 $$
 v = \frac{v_r + (-v_r)}{2} = 0, \qquad \omega = \frac{v_r - (-v_r)}{b} = \frac{2 v_r}{b}.
 $$
 
-Vận tốc thân bằng không và tâm quay là trung điểm trục, nằm giữa hai tâm tiếp xúc. Đánh dấu điểm ấy trên tấm. Nếu xoay robot bằng tay trên sàn nhẵn, dấu phải đứng yên trong khi hai bánh quay quanh nó. Một dấu đặt tại caster, hoặc một dấu đặt giữa hai vỏ động cơ, sẽ đi thành vòng tròn và nói rằng tâm hình học các bạn chọn với tâm động học là hai điểm khác nhau.
+Vận tốc tịnh tiến bằng không và tâm quay trùng với trung điểm đoạn nối hai tâm tiếp xúc. Hãy đánh dấu điểm này lên tấm khung: khi xoay robot chậm bằng tay trên sàn nhẵn, dấu này phải đứng yên tại một điểm trên sàn trong lúc hai bánh lăn quanh nó. Nếu bạn đánh dấu sai vị trí (ví dụ đặt tại bánh caster hoặc giữa hai vỏ động cơ), điểm dấu sẽ vẽ thành một vòng tròn, cho thấy tâm hình học bạn chọn không trùng với tâm động học thực tế.
 
-Khoảng đuôi của bánh caster là lý do bánh thứ ba biết cư xử. Trên bánh caster xoay, vết tiếp xúc ngồi phía sau trục xoay, dọc theo hướng đi. Lực cản tại vết kéo bánh vào thẳng hàng, giống bánh xe đẩy siêu thị tự chỉnh. Khoảng đuôi chính là độ lệch ấy. Lắp caster ngược thì vết tiếp xúc dẫn trước chốt xoay. Bánh khi đó mất ổn định và lắc, nhất là khi tốc độ tăng. Bánh bi gần như không có khoảng đuôi: điểm tiếp xúc nằm trên trục xoay. Nó cà thay vì tự chỉnh, thêm ma sát các bạn chưa dự trù, và vẫn đỡ được mũi. Capstone A muốn một bánh caster xoay có khoảng đuôi nhìn thấy được, lắp sao cho vết tiếp xúc đi sau.
+Khoảng đuôi (trail) của bánh caster là yếu tố giúp điểm tựa thứ ba tự ổn định hướng. Trên bánh caster xoay, vết tiếp xúc nằm lùi phía sau trục xoay dọc theo chiều chuyển động; lực cản lăn tại vết tiếp xúc sẽ tự động kéo bánh thẳng hàng theo hướng đi (giống bánh xe đẩy siêu thị). Nếu lắp ngược caster khiến vết tiếp xúc nằm phía trước chốt xoay, bánh sẽ mất ổn định và rung lắc mạnh, đặc biệt khi tăng tốc. Bánh bi đa hướng hầu như không có khoảng đuôi vì điểm tiếp xúc nằm ngay trên trục xoay, nên dễ bị trượt cà làm tăng ma sát ngoài dự kiến dù vẫn đỡ được mũi xe. Capstone A ưu tiên dùng bánh caster xoay có khoảng đuôi rõ ràng và lắp sao cho vết tiếp xúc đi sau chốt xoay.
 
-Lái bằng trượt đặt động cơ lên bốn bánh cố định, hoặc khóa bánh để không bánh nào xoay được. Mọi cú quay đều buộc lốp cà ngang. Cà là ma sát trượt, và nó đòi động cơ một dòng gần giá trị kẹt mà Chương 05 đã coi là sự cố nhiệt, không phải một cú quay bình thường. Capstone A dành dòng ấy cho việc lăn. Hai bánh chủ động và một bánh caster có đuôi là cơ cấu ấy.
+Cơ cấu lái trượt (skid-steer) sử dụng bốn bánh cố định không xoay hướng. Mỗi khi chuyển hướng, lốp xe buộc phải trượt ngang trên sàn. Ma sát trượt ngang đòi hỏi động cơ kéo dòng điện rất lớn — tiệm cận mức dòng kẹt mà Chương 05 đã cảnh báo là rủi ro quá nhiệt. Capstone A tránh tổn hao này bằng cách dùng hai bánh chủ động kết hợp một bánh caster có đuôi để mọi cú quay đều dựa trên chuyển động lăn.
 
-Đường kính cao su trên túi vẫn không phải bán kính lăn. Dùng lại phép lăn trên giấy của Bài 01 mỗi khi đổi lốp, đổi tải, hoặc đổi độ phồng của lốp mềm. Bán kính bên phải lớn hơn trên một lệnh đi thẳng vốn đều sẽ thành một cú quẹo nhẹ mà các bạn không hề xin.
+Lưu ý rằng đường kính cao su ghi trên bao bì vẫn không phải là bán kính lăn thực tế. Hãy lặp lại phép lăn một vòng trên giấy (Bài 01) mỗi khi thay lốp hoặc thay đổi tải trọng. Nếu bán kính lăn của bánh phải lớn hơn bánh trái, một lệnh đi thẳng đều sẽ khiến robot tự quẹo nhẹ sang trái.
 
 ![Đặt thước ở đâu: tâm tiếp xúc và bán kính đã nén]({{ site.imgurl }}/generated/chassis_measures.png)
 
 ![Mũi tên bằng nhau, mũi tên lệch nhau, và cú xoay đặt tâm quay đúng trung điểm trục]({{ site.imgurl }}/generated/diff_drive_kinematics.png)
 
-Dùng hai hình cùng lúc. Hình thứ nhất giữ $$b$$ và $$r$$ trung thực. Hình thứ hai là ngôn ngữ mũi tên: tiến, xoay tại chỗ, và trường hợp trộn. Khi đi dây động cơ ở Chương 07, dán nhãn dây cho khớp các mũi tên này trước khi tin một PWM dương nghĩa là “tiến”.
+Hãy đối chiếu đồng thời cả hai hình: hình đầu tiên giúp đo đúng $$b$$ và $$r$$, còn hình thứ hai minh họa ngôn ngữ vectơ vận tốc cho ba trạng thái tiến, xoay tại chỗ và quẹo. Khi đấu dây động cơ ở Chương 07, hãy dán nhãn dây theo đúng quy ước mũi tên này trước khi mặc định tín hiệu PWM dương luôn làm xe chạy tiến.
 
 ## Ví dụ tính tay
 
-Lấy khung của Bài 01, $$b = 0.15$$ m, và ra lệnh xoay tại chỗ với $$v_r = 0.20$$ m/s và $$v_l = -0.20$$ m/s.
+Lấy khung xe ở Bài 01 với $$b = 0.15$$ m, ra lệnh xoay tại chỗ ở $$v_r = 0.20$$ m/s và $$v_l = -0.20$$ m/s:
 
 $$
 v = 0, \qquad \omega = \frac{2 \times 0.20}{0.15} = 2.667\ \text{rad/s}.
 $$
 
-Một vòng đủ là $$2\pi$$ radian, nên thời gian xoay một vòng là
+Một vòng quay đầy đủ là $$2\pi$$ radian, nên thời gian hoàn thành một vòng là:
 
 $$
 T = \frac{2\pi}{2.667} \approx 2.36\ \text{s},
 $$
 
-miễn là bánh thực sự đạt 0,20 m/s và không cà. Với $$r = 31.2$$ mm, tốc độ góc của bánh có độ lớn
+giả sử hai bánh đạt đúng vận tốc 0,20 m/s và không bị trượt. Với bán kính lăn $$r = 31.2$$ mm, độ lớn vận tốc góc của mỗi bánh xe là:
 
 $$
 \dot{\theta} = \frac{0.20}{0.0312} \approx 6.41\ \text{rad/s},
 $$
 
-hai động cơ ngược dấu. Nếu một dây động cơ bị đảo, lệnh $$v = 0.20$$, $$\omega = 0$$ (cả hai tốc độ phần mềm đều “dương”) trở thành $$v_l = 0.20$$ và $$v_r = -0.20$$ trên sàn. Đó chính là cú xoay này, không phải đường thẳng. Nhấc bánh ở Chương 07: lệnh dương, cả hai lốp tiến. Thử trên sàn: trung điểm trục chỉ đứng yên khi các bạn đã xin một cú xoay.
+trong đó hai động cơ quay ngược dấu nhau. Nếu một dây động cơ bị đấu ngược, lệnh đi thẳng $$v = 0.20$$ m/s, $$\omega = 0$$ (phần mềm xuất hai giá trị dương) sẽ biến thành $$v_l = 0.20$$ m/s và $$v_r = -0.20$$ m/s trên sàn — tức là robot xoay tại chỗ thay vì đi thẳng. Vì vậy, bước thử nhấc bánh ở Chương 07 là bắt buộc để đảm bảo lệnh dương làm cả hai bánh cùng quay tiến.
 
 ## Lab: tìm tâm quay, hoặc vẽ mũi tên
 
 ### An toàn
 
-Nếu xoay một robot đã lắp bằng tay, pin phải được ngắt để động cơ bị dẫn ngược không đưa điện áp lên mạch cầu. Ngón tay ra khỏi bánh răng. Trên sàn cứng, xoay chậm; một ngón dưới bánh caster là một điểm kẹp.
+Khi xoay robot đã lắp bằng tay, luôn ngắt kết nối pin để tránh việc động cơ bị dẫn ngược phát điện áp ngược về mạch cầu H. Giữ ngón tay tránh xa bánh răng và khe dưới bánh caster khi xoay trên sàn cứng để không bị kẹp tay.
 
 ### BOM
 
@@ -95,15 +97,15 @@ Nếu xoay một robot đã lắp bằng tay, pin phải được ngắt để �
 
 ### Các bước
 
-1. Đánh dấu trung điểm của đoạn nối hai tâm tiếp xúc. Đó là tâm xoay dự đoán.
-2. Nếu robot lăn được, ngắt pin. Xoay khung chậm tại chỗ bằng tay. Nhìn dấu. Một phép đo $$b$$ tốt cho thấy dấu đứng trên một điểm sàn trong khi cả hai bánh quay quanh nó.
-3. Ghi xem bánh caster có đuôi không. Nhìn từ bên: vết tiếp xúc phải ngồi sau chốt xoay theo hướng các bạn đẩy. Nếu càng bị ngược, ghi vào sổ và xoay lại trước Chương 07.
-4. Nếu chưa có khung lăn, vẽ ba hình nhìn từ trên. Tiến: hai mũi tên bằng nhau. Xoay tại chỗ: hai mũi tên ngược chiều, có đánh dấu tâm. Quẹo trái nhẹ: cả hai mũi tên tiến, mũi tên phải dài hơn. Ghi $$v$$ và $$\omega$$ trên mỗi hình.
-5. Viết quy ước dấu các bạn sẽ dùng trong firmware: bánh trái dương và bánh phải dương đều đẩy robot tiến.
+1. Đánh dấu trung điểm của đoạn nối hai tâm tiếp xúc mặt lốp — đây là tâm xoay dự đoán.
+2. Nếu khung xe đã lăn được, ngắt pin rồi xoay chậm khung tại chỗ bằng tay. Quan sát điểm đánh dấu: nếu đo $$b$$ chính xác và bánh không trượt, điểm dấu sẽ đứng yên tại một vị trí trên sàn.
+3. Kiểm tra khoảng đuôi của bánh caster từ góc nhìn ngang: vết tiếp xúc phải nằm sau chốt xoay theo chiều đẩy tiến. Nếu càng bị lắp ngược, ghi chú để xoay lại trước Chương 07.
+4. Nếu chưa có khung xe thực tế, vẽ ba sơ đồ nhìn từ trên xuống: đi thẳng (hai mũi tên tiến bằng nhau), xoay tại chỗ (hai mũi tên ngược chiều bằng nhau, có đánh dấu tâm xoay) và quẹo trái nhẹ (cả hai mũi tên tiến, mũi tên phải dài hơn). Ghi rõ $$v$$ và $$\omega$$ trên từng hình.
+5. Ghi quy ước dấu sẽ áp dụng trong firmware vào sổ tay: giá trị dương cho bánh trái và bánh phải đều đẩy robot tiến về phía trước.
 
 ### Kết quả mong đợi
 
-Một dấu đứng yên trong cú xoay tay cẩn thận, hoặc ba bản vẽ mũi tên đã dán nhãn. Ghi chú nói hướng caster các bạn sẽ lắp: vết tiếp xúc đi sau chốt xoay. Câu quy ước dấu là thứ Chương 07 kiểm được khi bánh được nhấc lên.
+Điểm đánh dấu đứng yên khi xoay thử cẩn thận bằng tay, hoặc bộ ba sơ đồ mũi tên đã ghi chú đầy đủ. Ghi chú trong `lab-notes.md` nêu rõ hướng lắp caster (vết tiếp xúc đi sau chốt xoay) và quy ước dấu chiều quay để kiểm chứng khi nhấc bánh ở Chương 07.
 
 ### Lỗi thường gặp
 
@@ -117,7 +119,7 @@ Một dấu đứng yên trong cú xoay tay cẩn thận, hoặc ba bản vẽ m
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Bài 01 đã mua tấm khung. Bài này là bánh xe và bánh caster, nếu hai dòng ấy còn thiếu. Một bánh bi là phụ tùng hữu ích để cảm một lần “không có đuôi”. Robot các bạn nộp dùng bánh caster xoay.
+Khung xe đã được đề cập ở Bài 01; bài này bổ sung bánh xe và bánh caster nếu bộ kit của bạn chưa có sẵn. Bạn có thể mua thêm một bánh bi đa hướng (tùy chọn) để trực tiếp cảm nhận sự khác biệt khi không có khoảng đuôi, nhưng xe nộp cho Capstone A vẫn dùng bánh caster xoay.
 
 | Mua gì | Từ khóa | Khoảng giá (VND) | Ghi chú |
 |------|----------|------------------|-------|
@@ -125,36 +127,40 @@ Bài 01 đã mua tấm khung. Bài này là bánh xe và bánh caster, nếu hai
 | Bánh caster xoay | `bánh caster robot` | 12.000–40.000 | Khoảng đuôi nhìn thấy phía sau chốt |
 | Bánh bi đa hướng | `bánh đa hướng bi` | 15.000–40.000 | Để đối chiếu, tùy chọn; nó cà |
 
-Các trang tìm:
+Các trang tìm mua:
 
 - [Hshop](https://hshop.vn/search?q=b%C3%A1nh+xe+cao+su)
 - [Shopee](https://shopee.vn/search?keyword=b%C3%A1nh%20xe%20cao%20su%2065mm)
 - [Lazada](https://www.lazada.vn/catalog/?q=b%C3%A1nh%20caster%20robot)
 - [Thế Giới IC](https://www.thegioiic.com/search?q=b%C3%A1nh%20xe%20robot)
 
-Giá dịch chuyển. Khớp moay-ơ với trục chữ D của TT, hoặc với lỗ khớp nối đã đo ở Bài 02.
+Giá bán có thể thay đổi theo thời điểm. Hãy kiểm tra moay-ơ bánh khớp với trục chữ D của động cơ TT hoặc khớp với lỗ khớp nối đã đo ở Bài 02.
 
 ## Video tham khảo
 
-- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Vi sai: vận tốc hai bánh thành tiến và quay. Caster không phải bánh chủ động.
-- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Odometry từ bánh xe. Giữ bán kính bánh và khoảng cách hai bánh là hai số khác nhau.
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Giải thích cơ cấu vi sai chuyển đổi vận tốc hai bánh thành tiến và quay; lưu ý bánh caster không phải bánh chủ động.
+- [Modern Robotics, Chapter 13.4:  Odometry](https://www.youtube.com/watch?v=eQ9E0Zvp9jw) — Northwestern Robotics, tiếng Anh. Trình bày cách tính odometry từ bánh xe, nhấn mạnh sự tách biệt giữa bán kính bánh và khổ vết.
 
 ## Bài tập
 
-1. $$b = 0.18$$ m, $$v_r = 0.15$$ m/s, $$v_l = -0.15$$ m/s. Tìm $$v$$, $$\omega$$, và thời gian cho một vòng xoay đủ.
-2. Cả hai bánh ở $$+0.22$$ m/s, $$b = 0.15$$ m. Tìm $$v$$ và $$\omega$$, và tâm quay nằm ở đâu.
-3. Các bạn đẩy robot và bánh caster lật vòng rồi dao động. Khoảng đuôi sai ở chỗ nào, và các bạn sửa cơ khí thế nào?
-4. Một robot bốn bánh cố định xoay tại chỗ trên thảm. Vì sao dòng leo tới gần dòng kẹt, và Capstone A dùng cơ cấu nào để một cú quay vẫn lăn được?
-5. linear.x = 0,2 và angular.z = 0 mà robot vẫn chạy vòng. Các bạn chưa đổi $$b$$. Sự thật đi dây nào cần thử khi bánh được nhấc lên?
+1. Cho $$b = 0.18$$ m, $$v_r = 0.15$$ m/s và $$v_l = -0.15$$ m/s. Tính $$v$$, $$\omega$$ và thời gian xoay đủ một vòng.
+2. Cả hai bánh cùng chạy ở $$+0.22$$ m/s với $$b = 0.15$$ m. Tính $$v$$, $$\omega$$ và cho biết tâm quay nằm ở đâu.
+3. Khi đẩy robot tiến tới, bánh caster bị lật vòng rồi rung lắc liên tục. Khoảng đuôi đang gặp vấn đề gì và cách khắc phục cơ khí ra sao?
+4. Một robot bốn bánh cố định xoay tại chỗ trên thảm khiến dòng điện tăng sát mức dòng kẹt. Giải thích nguyên nhân và cho biết Capstone A dùng cơ cấu nào để tránh tình trạng này.
+5. Khi gửi lệnh `linear.x = 0.2` và `angular.z = 0` mà chưa thay đổi $$b$$, robot lại chạy xoay tròn. Cần kiểm tra chi tiết đấu dây nào khi nhấc bánh khỏi sàn?
 
 ### Gợi ý đáp án
 
-1. $$v = 0$$, $$\omega = 2\times 0.15/0.18 = 1.667$$ rad/s, $$T = 2\pi/1.667 \approx 3.77$$ s. 2. $$v = 0.22$$ m/s, $$\omega = 0$$. Tâm quay không phải một điểm gần trên trục; hướng mũi không đổi. 3. Vết tiếp xúc đang dẫn trước chốt xoay, nên caster bị ngược hoặc càng không có khoảng đuôi. Lắp lại để vết đi sau. 4. Lốp phải cà ngang, và cà đòi mô-men mức kẹt. Capstone A dùng hai bánh chủ động và một bánh caster có đuôi để bánh tự do xoay theo. 5. Dấu của một động cơ bị đảo. Nhấc bánh, một lệnh dương phải làm cả hai lốp quay theo chiều tiến đã định trong lab.
+1. $$v = 0$$, $$\omega = 2\times 0.15/0.18 = 1.667$$ rad/s, thời gian một vòng $$T = 2\pi/1.667 \approx 3.77$$ s.
+2. $$v = 0.22$$ m/s, $$\omega = 0$$. Tâm quay nằm ở vô cực trên đường kéo dài của trục bánh; hướng mũi xe không thay đổi.
+3. Vết tiếp xúc đang đi trước chốt xoay (caster lắp ngược hoặc càng không có khoảng đuôi). Cần xoay và lắp lại để vết tiếp xúc nằm phía sau chốt xoay.
+4. Bốn bánh cố định buộc lốp phải trượt cà ngang khi quay, tạo ma sát trượt lớn đòi hỏi mô-men và dòng điện gần mức kẹt. Capstone A dùng hai bánh chủ động kết hợp một bánh caster có đuôi để bánh tự xoay theo hướng lăn.
+5. Một trong hai động cơ bị đấu ngược cực (đảo dấu). Cần nhấc bánh khỏi sàn và kiểm tra sao cho lệnh dương làm cả hai bánh cùng quay theo chiều tiến đã quy ước.
 
 ## Đọc thêm
 
-- [diff_drive_controller (ROS 2)](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — linear.x và angular.z trở thành hai vận tốc bánh qua các phương trình của bài này.
-- [Thiết lập odometry trên Nav2](https://navigation.ros.org/setup_guides/odom/setup_odom.html) — thứ các bạn xuất bản sau khi các mũi tên đã trung thực.
-- [Wiki diff_drive_controller ROS 1](https://wiki.ros.org/diff_drive_controller) — cùng cách tách thành khớp bánh trái và bánh phải, viết cho ROS 1 và vẫn là bức tranh đúng.
+- [diff_drive_controller (ROS 2)](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — cách chuyển đổi `linear.x` và `angular.z` thành vận tốc hai bánh theo các phương trình trong bài.
+- [Thiết lập odometry trên Nav2](https://navigation.ros.org/setup_guides/odom/setup_odom.html) — hướng dẫn xuất bản odometry sau khi các quy ước dấu và thông số bánh đã chính xác.
+- [Wiki diff_drive_controller ROS 1](https://wiki.ros.org/diff_drive_controller) — trình bày tương tự về việc tách khớp bánh trái và bánh phải (dù viết cho ROS 1 nhưng mô hình vẫn áp dụng đúng).
 
-Siegwart, Nourbakhsh và Scaramuzza, *Introduction to Autonomous Mobile Robots*, là bản xử lý dài bằng cả cuốn sách cho động học này. Dùng các liên kết phía trên cho những tham số bản ROS của các bạn thực sự đọc.
+Tài liệu tham khảo chuyên sâu hơn là cuốn *Introduction to Autonomous Mobile Robots* của Siegwart, Nourbakhsh và Scaramuzza; với các tham số cụ thể cho phiên bản ROS đang dùng, hãy ưu tiên các liên kết tài liệu ở trên.

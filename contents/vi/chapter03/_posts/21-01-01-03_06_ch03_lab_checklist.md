@@ -13,41 +13,39 @@ draft: false
 
 ## Mục tiêu
 
-Hết bài này bạn khép chương 03 bằng chứng cứ chứ không bằng một cột dấu tick đầy hy vọng. Bạn chỉ được một log serial của nút, các dòng duty PWM hoặc một tấm ảnh LED ở hai mức duty, một số đếm chống dội khớp số lần nhấn với sai số không, và một sơ đồ trạng thái có mũi tên im lặng ghi 300 ms. Bạn chỉ viết câu "PWM bằng không trong FAULT" khi code làm câu đó thành thật, và bạn bác một checklist đánh dấu PWM xong trong khi lệnh duty duy nhất nằm trong `setup()`.
+Bài kiểm tra này chốt lại chương 03 bằng các bằng chứng thực tế thay vì đánh dấu hoàn thành theo cảm tính. Bạn cần xuất trình được log serial của nút nhấn, các dòng duty PWM (hoặc ảnh LED ở hai mức độ sáng rõ rệt), kết quả đếm chống dội khớp số lần nhấn với sai số bằng 0, và sơ đồ máy trạng thái có mũi tên quá thời gian ghi rõ 300 ms. Bạn chỉ được ghi câu "PWM bằng không trong FAULT" khi mã nguồn thực sự ép ngõ ra về 0, và biết cách bác bỏ một bản báo cáo đánh dấu đạt PWM trong khi lệnh `ledcWrite` duy nhất chỉ nằm trong `setup()`.
 
 ## Kiến thức cần có
 
-Bài 1 đến bài 5 là phần việc trang này gác cổng. Bạn cần nhịp tim không chặn đã thay [nhịp chương 02]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}), nút kéo lên, nhịp thở LEDC hoặc `duty_u16`, ISR ngắn, và máy IDLE / TELEOP / FAULT. Phần cứng chưa về không được tính đạt: được phép đọc khô mã của chính mình chỉ khi file đã có và bạn trích được dòng timeout cùng dòng duty về không từ chúng. "Tôi sẽ thêm timeout khi khung xe tới" là không đạt.
+Danh sách này kiểm chứng kết quả từ bài 1 đến bài 5: vòng lặp không chặn (thay thế [nhịp tim chương 02]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %})), nút nhấn kéo lên, PWM bằng LEDC hoặc `duty_u16`, ISR ngắn gọn và máy trạng thái `IDLE` / `TELEOP` / `FAULT`. Nếu chưa có phần cứng, bạn chưa được tính đạt chương; chỉ được kiểm tra sơ bộ trên mã nguồn đã viết hoàn chỉnh khi trích dẫn được đúng dòng kiểm tra timeout và dòng ép duty về 0.
 
 ## Vì sao bài này quan trọng
 
-Các chương sau sẽ nói như thể firmware vi sai đã nhận một lệnh teleop và đã thả cả hai kênh PWM khi lệnh đó im 300 ms. Một đồ thị ROS sẽ phát twist bên trên giả định ấy. Nó sẽ không nhận ra log nút của bạn là một dòng chảy mẫu, rằng duty chỉ được ghi một lần lúc boot, hoặc FAULT vẫn để nguyên `ledcWrite` cuối. Bánh ở trên không cho tới khi những sự thật đó nằm trong sổ. Checklist này là hợp đồng các chương sau được phép giả định, và một dấu tick không kèm hiện vật thì không phải một dòng trong hợp đồng.
+Các chương tiếp theo mặc định rằng firmware vi sai của bạn đã nhận lệnh teleop và tự động ngắt cả hai kênh PWM khi mất lệnh 300 ms. Hệ thống ROS ở tầng trên sẽ gửi lệnh vận tốc dựa trên giả định đó và không thể phát hiện ra việc nút nhấn bị nhiễu, duty chỉ ghi một lần khi khởi động, hay trạng thái `FAULT` quên ghi 0 ra chân PWM. Quy tắc nhấc bánh khỏi bàn vẫn được duy trì cho đến khi toàn bộ các mục kiểm chứng này được ghi nhận đầy đủ trong sổ thực hành.
 
 ## Nội dung
 
-Mỗi cổng là một quan sát cộng hiện vật chứng minh nó. Cảm giác nút "cơ bản là chạy" không phải một cổng. Monitor serial mới là cổng. Làm bằng ngôn ngữ bạn sẽ giữ cho Capstone A. Hôm nay bạn không phải lặp mọi listing ở ngôn ngữ kia, nhưng file bạn nộp phải là kiểu không chặn của bài 1. Một checklist đạt trên `delay(1000)` là đã trượt chương dù LED có đổi.
+Mỗi mục kiểm tra yêu cầu một kết quả quan sát cụ thể kèm bằng chứng (log hoặc ảnh) trong sổ lab. Bạn chỉ cần thực hiện bằng ngôn ngữ mình chọn cho Capstone A (C++ hoặc MicroPython), nhưng mã nguồn bắt buộc phải tuân theo cấu trúc vòng lặp không chặn ở bài 1; bất kỳ bài nộp nào còn dùng `delay(1000)` trong vòng điều khiển đều không đạt dù đèn LED có sáng tắt.
 
-Cổng nút là một đoạn dán từ log lab GPIO: một `press` và một `release` mỗi cử chỉ, không phải một dòng mỗi mili giây. Số chân và chữ `INPUT_PULLUP` hoặc `Pin.PULL_UP` đứng cạnh đoạn dán. Nếu lần đầu chân nhả bị nổi, sổ được nói vậy, và log bạn nộp là log sau khi kéo lên đã trở lại.
-
-Cổng PWM là một tấm ảnh cùng LED rõ tối và rõ sáng, hoặc ba dòng serial có duty khoảng 25%, 50% và 90% của đúng thang bạn đã cấu hình. Vì ESP32 Arduino 3.x không hứa `analogWrite` là 8 bit, ghi chú phải nêu `ledcAttach` cùng độ phân giải, hoặc nêu `duty_u16`. Một dòng "PWM chạy" và một sketch không in con số thì không phải cổng này. Tải trong ảnh là LED và điện trở nối tiếp. Một động cơ trong ảnh làm cổng này trượt, kể cả khi motor đã quay, vì chương này không gắn motor vào GPIO và không đòi VM đã đấu.
-
-Cổng chống dội là một cặp số. Bạn nhấn $N$ lần. Bộ đếm in $N$, nên sai số là
+- **Mục nút nhấn:** dán đoạn log từ bài GPIO thể hiện đúng một `press` và một `release` cho mỗi lần thao tác (không in liên tục mỗi mili giây), ghi kèm số chân GPIO và cấu hình `INPUT_PULLUP` hoặc `Pin.PULL_UP`. Nếu có thử nghiệm chân nổi trước đó, cần ghi rõ log nộp là kết quả sau khi đã bật kéo lên.
+- **Mục PWM:** ảnh chụp cùng một đèn LED ở hai mức tối và sáng rõ rệt, hoặc ba dòng log serial thể hiện duty khoảng 25%, 50% và 90% theo đúng độ phân giải đã cấu hình (ghi rõ `ledcAttach` kèm số bit, hoặc `duty_u16`). Tải trong ảnh phải là LED nối tiếp điện trở; gắn động cơ trực tiếp vào GPIO là không đạt ngay cả khi động cơ quay.
+- **Mục chống dội:** ghi rõ số lần nhấn thực tế $N$ và số lần bộ đếm in ra khớp nhau với sai số bằng 0:
 
 $$
 e = N_{\mathrm{in}} - N_{\mathrm{nhấn}} = 0.
 $$
 
-Log chùm của bài ngắt, bản nhảy một lượng trong khoảng 5–30 khi cửa sổ đứng yên bị bỏ, có thể nằm bên dưới như một đối chiếu. Nó không thay cho $e = 0$. Nếu lần chống dội khá nhất của bạn vẫn tăng hai nhịp mỗi cú nhấn, mục checklist còn mở và bạn quay lại phép thử 20 ms.
+Có thể đính kèm log thử nghiệm khi bỏ bộ lọc (nhảy 5–30 nhịp mỗi lần nhấn) ở bên dưới để đối chiếu, nhưng không thay thế được kết quả $e = 0$. Nếu vẫn bị đếm thừa, cần quay lại chỉnh bộ lọc 20 ms.
 
-Cổng sơ đồ là một hình trong sổ, không phải chỉ một ảnh chụp hình của bài. Chép hình bài làm khung thì được. Mũi tên từ TELEOP sang FAULT phải ghi timeout bạn đã biên dịch, 300 ms, và cả IDLE lẫn FAULT phải được đánh duty 0. Câu trong sổ đúng là điều code khẳng định: "PWM bằng không trong FAULT." Nếu hàm `apply` của bạn thắp LED mỗi khi `duty` khác không, bất kể trạng thái, bạn chưa được viết câu đó.
+- **Mục sơ đồ máy trạng thái:** tự vẽ lại sơ đồ trong sổ (không chỉ chụp lại hình bài giảng) gồm đủ ba trạng thái, mũi tên từ `TELEOP` sang `FAULT` ghi đúng 300 ms, và cả `IDLE` lẫn `FAULT` đều đánh dấu duty 0. Ghi câu "PWM bằng không trong FAULT" chỉ khi hàm `apply()` thực sự khóa ngõ ra về 0 ngoài trạng thái `TELEOP`.
 
 ![Thứ tự cấp nguồn: logic trước, nguồn motor sau, bánh nhấc]({{ site.imgurl }}/generated/power_order.png)
 
-Hình thứ tự nguồn là biên của chương này. USB nuôi vi điều khiển. Rail 3,3 V nuôi kéo lên của nút và nuôi LED. Nguồn motor, VM trên TB6612, là một ô sau trong hình đó, và hôm nay ô ấy để trống. Bánh nhấc lên là tư thế của ngày đầu VM được nối, và ngày đó không phải chữ ký của chương 03. Ký checklist không cho phép một sợi dây motor.
+Sơ đồ thứ tự cấp nguồn nhắc lại giới hạn của chương 03: USB nuôi vi điều khiển, đường 3,3 V nuôi nút kéo lên và LED, còn nguồn động cơ (`VM` trên TB6612) vẫn để trống. Hoàn thành checklist chương 03 không đồng nghĩa với việc đã được đấu dây động cơ.
 
-## Ví dụ tính tay: một checklist nói dối
+## Ví dụ tính tay: phát hiện một checklist chưa đạt
 
-Một sổ nộp đánh dấu "nút," "PWM," "chống dội," và "máy trạng thái." Mã nguồn kèm theo chỉ có thế này:
+Xét một bài nộp đánh dấu hoàn thành cả bốn mục (nút nhấn, PWM, chống dội, máy trạng thái) nhưng mã nguồn đính kèm chỉ gồm:
 
 ```cpp
 const int PIN = 18;
@@ -65,54 +63,52 @@ void loop() {
 }
 ```
 
-Đọc nó theo các cổng. Không có nút, nên log nhấn không thể tồn tại. `ledcWrite` chạy một lần, trong `setup`, ở mức 180 cố định, khoảng 70%, và không bao giờ là 0. Không gì trong `loop` đọc `millis()`, nên im lặng 300 ms không đổi được chân. `delay(1000)` là kiểu hỏng của bài 1: lần đầu vòng lặp kịp nhìn một mốc thời gian thì hạn đã bị trễ gấp ba. Dòng in `PWM done` là một chú thích, không phải một phép đo. Đánh dấu ô PWM vì các chữ `ledcWrite` xuất hiện là cách chương này đẻ ra một robot vừa boot đã chạy.
-
-Buổi soi lại viết dấu tick thành bốn lần trượt. PWM không được chứng minh qua nhiều duty, và không được chứng minh ở 0. Timeout vắng mặt, nên không vào được FAULT và câu "PWM bằng không trong FAULT" sẽ sai: không có FAULT, và chân không ở không. Vòng lặp bị chặn cả giây, dài hơn ngưỡng cắt
+Khi đối chiếu với các tiêu chí: không có nút nhấn nên không thể có log nhấn hay kết quả chống dội; `ledcWrite` chỉ chạy một lần duy nhất trong `setup()` ở mức cố định 180 (khoảng 70%) và không bao giờ đưa về 0; `loop()` không đọc `millis()` và bị chặn bởi `delay(1000)`, lớn hơn nhiều so với ngưỡng cắt:
 
 $$
 1000\,\mathrm{ms} > 300\,\mathrm{ms}.
 $$
 
-Một sketch đã sửa ghi duty từ máy trạng thái mỗi vòng, log duty khi nó đổi, và dùng đồng hồ bài 1. Mục checklist chỉ lật sau khi những dòng đó nằm trong file bạn vừa nạp, và sau khi bạn đã thấy LED tắt khi ngừng gõ.
+Dòng in `PWM done` chỉ là chuỗi văn bản cố định, không phải bằng chứng đo kiểm. Nếu chấp nhận bài nộp này, khi lắp động cơ vào robot sẽ chạy ngay lập tức lúc khởi động và không thể dừng khi mất lệnh. Bài chỉ đạt sau khi mã nguồn cập nhật duty từ máy trạng thái mỗi vòng lặp, không chặn `loop()`, có mức duty 0 và tắt LED khi ngừng gõ lệnh.
 
-Cùng cách soi bắt một bản tinh hơn: máy trạng thái là thật, nhưng `setup` kết thúc bằng `ledcWrite(PIN, 180)` và FAULT quên ghi 0 vì tác giả tin "mình không gọi ledcWrite nữa thì motor tắt." Ngoại vi PWM giữ duty cuối. Không gọi hàm nghĩa là các xung cũ vẫn chạy. FAULT phải ghi không một cách tường minh, mỗi vòng, cho cả hai kênh bạn sau này sẽ nối vào TB6612.
+Một lỗi tinh vi hơn cũng cần kiểm tra: chương trình có máy trạng thái đầy đủ, nhưng `setup()` đã gọi `ledcWrite(PIN, 180)` và nhánh `FAULT` chỉ gán biến `duty = 0` mà không gọi lại `ledcWrite(PIN, 0)`. Ngoại vi PWM phần cứng vẫn giữ nguyên xung cũ cho đến khi được ghi giá trị mới, nên hàm `apply()` phải gọi tường minh lệnh ghi 0 cho cả hai kênh PWM mỗi khi ở `IDLE` hoặc `FAULT`.
 
-## Cái bạn nộp
+## Nội dung cần nộp trong sổ lab
 
-Đi xuống danh sách này trong sổ lab. Mục nào không có hiện vật thì còn mở.
+Kiểm tra lần lượt sáu mục sau trong `lab-notes.md`; mục nào thiếu bằng chứng cụ thể thì giữ ở trạng thái chưa hoàn thành:
 
-1. Log nút. Dán một press và một release, nêu GPIO, và nêu kéo lên. Một cặp mỗi cử chỉ.
-2. Chứng cứ PWM. Chụp LED ở hai độ sáng hoặc dán các duty gần 25%, 50% và 90%, và ghi API (`ledcAttach` cùng độ phân giải, hoặc `duty_u16`). Có một dòng duty bằng 0.
-3. Số chống dội. Viết $N$ lần nhấn và $N$ lần in. Sai số không. Nếu bạn đã chạy bước bỏ lọc, nhắc chùm bạn thấy, như một đối chiếu.
-4. Sơ đồ trạng thái. Ba trạng thái, mũi tên 300 ms vào FAULT, duty 0 được đánh trên IDLE và trên FAULT. Câu "PWM bằng không trong FAULT" xuất hiện trong sổ và khớp `apply`.
-5. Ngôn ngữ và vòng lặp. Nêu C++ hoặc MicroPython, và xác nhận đường điều khiển không gọi `delay` hay `sleep` dài hơn vài mili giây. Trích hằng timeout từ file.
-6. Biên giới motor. Viết "không có motor trên GPIO, VM chưa nối, bánh nhấc lên khi sau này thêm driver." Nếu bạn chưa có driver, câu đó vẫn bắt buộc. Mua thì là module TB6612 giá 45000₫, VM khoảng 4,5 V đến 10 V, khoảng 1,2 A liên tục, từ [trang hshop TB6612](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver), và nó không thuộc dây hôm nay.
+1. **Log nút nhấn:** dán một cặp `press`/`release` sạch cho mỗi thao tác, ghi rõ chân GPIO và cấu hình kéo lên.
+2. **Bằng chứng PWM:** ảnh LED ở hai mức sáng hoặc log các mức duty quanh 25%, 50%, 90% kèm một dòng duty bằng 0; nêu rõ API (`ledcAttach` + độ phân giải, hoặc `duty_u16`).
+3. **Kết quả chống dội:** ghi số lần nhấn $N$ và số lần in $N$ ($e = 0$); có thể ghi thêm số nhịp khi bỏ lọc để đối chiếu.
+4. **Sơ đồ máy trạng thái:** đủ ba trạng thái, mũi tên 300 ms sang `FAULT`, đánh dấu duty 0 ở `IDLE` và `FAULT`, kèm câu "PWM bằng không trong FAULT" khớp với hàm `apply()`.
+5. **Ngôn ngữ và cấu trúc vòng lặp:** nêu rõ C++ hay MicroPython, xác nhận vòng điều khiển không gọi `delay` hay `sleep` dài hơn vài mili giây và trích hằng số timeout từ mã nguồn.
+6. **Xác nhận giới hạn động cơ:** ghi rõ "không nối động cơ vào GPIO, chưa nối VM, luôn nhấc bánh khi lắp driver về sau." (Tham khảo trước cho chương sau: module TB6612 giá 45000₫, dải VM 4,5 V – 10 V, dòng liên tục khoảng 1,2 A tại [Hshop](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver), nhưng chưa đấu dây trong chương này.)
 
-Board chưa về không phải mục 6. Nếu phần cứng trễ, mục 1–3 còn mở. Mục 4 và 5 có thể phác từ mã bạn đã thực sự biên dịch hoặc đã kiểm cú pháp, và chúng giữ nhãn "chỉ mã nguồn" cho tới khi LED đã làm được chúng.
+Nếu bo mạch chưa giao tới, mục 1–3 để trạng thái mở; mục 4 và 5 có thể chuẩn bị trước trên mã nguồn đã biên dịch hoặc kiểm tra cú pháp và ghi nhãn "chỉ mã nguồn" cho đến khi kiểm chứng trên LED thật.
 
 ## Video tham khảo
 
-- **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Checklist chương hỏi máy trạng thái có về IDLE và duty về không. Video này là hình của các trạng thái đó.
+- **Xem trước:** [Understanding State Machines, Part 1: What Are They?](https://www.youtube.com/watch?v=-Yicg2TTMPs) — MATLAB, tiếng Anh. Ôn lại cấu trúc trạng thái và chuyển đổi để đối chiếu với sơ đồ nộp trong checklist.
 
 ## Bài tập
 
-1. Soi sketch trong ví dụ như thể bạn là người chấm. Liệt kê các mục checklist nó trượt, và trích dòng làm câu "PWM bằng không trong FAULT" thành sai.
-2. Sơ đồ của một bạn có IDLE, TELEOP và FAULT, nhưng mũi tên im lặng vẽ từ IDLE sang FAULT và ghi "1 s." Mũi tên sai ở chỗ nào về việc ai được phép hết giờ, và về hằng số của bài 5?
-3. Log chống dội nói bạn nhấn 10 lần và dòng cuối là `presses=12`. Cổng đã khép chưa? Thay đổi mã nào của bài 4 là chỗ bạn nhìn trước?
-4. `setup` ghi duty 200, và nhánh FAULT chỉ gán biến `duty = 0` mà không gọi `ledcWrite`. Sau 300 ms im lặng, trên chân là gì, và dòng nào phải chuyển vào `apply`?
+1. Đóng vai người chấm bài cho đoạn mã ví dụ ở trên: liệt kê các mục checklist bị trượt và chỉ ra dòng mã khiến câu "PWM bằng không trong FAULT" không đúng sự thật.
+2. Sơ đồ của một sinh viên có đủ `IDLE`, `TELEOP` và `FAULT`, nhưng mũi tên quá thời gian lại vẽ từ `IDLE` sang `FAULT` với nhãn "1 s". Sơ đồ này sai ở hai điểm nào?
+3. Log chống dội ghi nhận 10 lần nhấn nhưng dòng cuối in `presses=12`. Mục chống dội đã đạt chưa, và cần kiểm tra điểm nào trong mã nguồn của bài 4 trước tiên?
+4. `setup()` xuất duty 200, còn nhánh `FAULT` chỉ gán `duty = 0` mà không gọi `ledcWrite`. Sau 300 ms im lặng, tín hiệu thực tế trên chân GPIO là gì và cần sửa gì trong `apply()`?
 
 <details>
 <summary>Gợi ý</summary>
 
-1. Nó trượt log nút, chứng cứ PWM nhiều mức, duty không, số chống dội, và sơ đồ trạng thái. `ledcWrite(PIN, 180)` trong `setup`, không có lần ghi 0 về sau, là câu sai. `delay(1000)` là vòng bị chặn.
-2. Im lặng được xét trong TELEOP, không phải trong IDLE. IDLE vốn đã duty 0. Hằng số là 300 ms, không phải 1 s.
-3. Cổng còn mở vì $e = 2$, không phải 0. Nhìn trước vào phép thử đứng yên 20 ms quanh lệnh tăng, và vào việc một ngắt CHANGE có đang đếm cả cú nhả hay không.
-4. Chân tiếp tục phát xung ở duty 200. `apply` phải gọi `ledcWrite` với 0 mỗi khi mode là FAULT hoặc IDLE, ở mọi vòng.
+1. Trượt các mục: log nút nhấn, bằng chứng PWM nhiều mức và mức 0, kết quả chống dội, sơ đồ máy trạng thái và vòng lặp không chặn (`delay(1000)`). Dòng `ledcWrite(PIN, 180)` trong `setup()` mà không có lệnh ghi 0 nào về sau làm câu "PWM bằng không trong FAULT" sai.
+2. Sai thứ nhất: kiểm tra mất lệnh chỉ áp dụng khi đang ở `TELEOP` (vì `IDLE` vốn đã có duty 0). Sai thứ hai: ngưỡng timeout quy định là 300 ms, không phải 1 s.
+3. Chưa đạt vì sai số $e = 2 \neq 0$. Cần kiểm tra bộ lọc ổn định 20 ms bao quanh lệnh tăng bộ đếm và xem cấu hình ngắt `CHANGE` có đang đếm nhầm cạnh nhả hay không.
+4. Chân GPIO vẫn tiếp tục phát xung PWM ở mức duty 200. Hàm `apply()` phải gọi tường minh `ledcWrite` với giá trị 0 mỗi khi trạng thái là `FAULT` hoặc `IDLE`.
 
 </details>
 
 ## Đọc thêm
 
-- [`millis()`](https://www.arduino.cc/reference/en/language/functions/time/millis/) là hàm bạn chờ thấy trong bất kỳ sketch nào khẳng định mũi tên 300 ms là thật.
-- [LEDC trên Arduino ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/ledc.html) là cách kiểm một lần ghi duty trong file nộp có khớp độ phân giải tác giả đã gắn hay không.
-- [micro-ROS](https://micro.ros.org/) sẽ ngồi trên một ảnh firmware đã qua danh sách này. Nó không thay lần ghi duty 0 của FAULT.
+- [`millis()`](https://www.arduino.cc/reference/en/language/functions/time/millis/) — hàm định thời dùng để kiểm chứng mũi tên timeout 300 ms trong mã nộp.
+- [LEDC trên Arduino ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/ledc.html) — tài liệu đối chiếu giá trị ghi duty với độ phân giải đã cấu hình.
+- [micro-ROS](https://micro.ros.org/) — tầng giao tiếp sẽ tích hợp lên firmware đã qua checklist này, nhưng vẫn giữ nguyên yêu cầu ép PWM về 0 tại `FAULT`.

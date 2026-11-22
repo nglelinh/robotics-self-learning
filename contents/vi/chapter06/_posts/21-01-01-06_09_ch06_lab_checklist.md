@@ -11,23 +11,23 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng ước tính: **50–70 phút** để gom các ghi chú các bạn đã viết và lấp chỗ trống. Đây là cổng của chương, không phải một cơ cấu mới.
+Thời lượng ước tính: **50–70 phút** để tổng hợp các ghi chép đã làm và bổ sung những mục còn thiếu. Đây là bài kiểm tra tổng kết (cổng qua chương), không giới thiệu cơ cấu mới.
 
 ## Mục tiêu học
 
-Hết bài này, `lab-notes.md` của các bạn giữ một khổ vết và một bán kính lăn, một cỡ ốc đã nhận dạng, một tỉ số truyền đã dự đoán và đã kiểm, một phép tính Grashof hoặc đai hoặc thanh răng, một ảnh giảm lực kéo dây hoặc một kế hoạch có ngày, và một danh sách linh kiện còn thiếu trước Chương 07. Các bạn nói được, trong một câu, mình đã đạt trên phần cứng hay trên một bản vẽ đã dán nhãn.
+Sau bài này, tệp `lab-notes.md` của bạn có đầy đủ: khổ vết $$b$$ và bán kính lăn $$r$$, kết quả nhận dạng cỡ ốc, tỉ số truyền đã dự đoán và đo kiểm, một phép tính cơ cấu bốn thanh (Grashof), đai hoặc thanh răng, ảnh giảm lực kéo dây (hoặc kế hoạch có ngày thực hiện) và danh sách linh kiện còn thiếu cho Chương 07. Bạn cũng chốt được trong một câu rõ ràng rằng mình đã đạt cổng trên phần cứng thực tế hay trên bản vẽ có dán nhãn.
 
 ## Kiến thức cần có
 
-Bài 01 đến Bài 08. Nếu một lab trong số đó chưa xong, checklist này là mục lục chỉ lab nào cần mở lại. Các bạn cần đúng cuốn sổ đã ghi milimét từ đầu chương.
+Nội dung từ Bài 01 đến Bài 08. Nếu có bài thực hành nào chưa xong, checklist này đóng vai trò mục lục giúp bạn mở lại đúng bài đó. Hãy sử dụng đúng sổ tay đã ghi các số đo milimét từ đầu chương.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Chương 07 đặt điện áp lên khung này. Chương 08 viết các phương trình động học thành mã. `diff_drive_controller` của ROS và URDF sẽ chép $$b$$, $$r$$ và $$i$$ từ một nơi nào đó; nơi ấy phải là trang này, có ngày, có phương pháp đứng cạnh con số. Một bánh caster còn thiếu hoặc một túi nyloc còn thiếu là một dòng mua hàng, không phải một bất ngờ lúc bring-up. Điều kiện đạt là bằng chứng trong sổ. Ký ức “cơ bản là đã đo” không mở được Chương 07.
+Chương 07 sẽ bắt đầu cấp điện cho khung robot và Chương 08 sẽ lập trình các phương trình động học. Cả `diff_drive_controller` lẫn tệp URDF trong ROS đều cần lấy các tham số $$b$$, $$r$$ và $$i$$ từ một nguồn thống nhất: trang tổng hợp có ghi ngày và phương pháp đo này. Việc thiếu bánh caster hay thiếu túi đai ốc nyloc nên nằm trong danh sách mua sắm từ bây giờ thay vì trở thành sự cố bất ngờ lúc lắp ráp. Điều kiện qua chương là bằng chứng ghi rõ trong sổ tay — không thể dựa vào trí nhớ ước chừng để sang Chương 07.
 
 ## Cổng
 
-Chép bảng này vào `lab-notes.md` và điền cột bằng chứng bằng một con số, một tên file ảnh, hoặc các chữ “bản vẽ, chưa phải phần cứng”.
+Chép bảng dưới đây vào `lab-notes.md` và điền cột bằng chứng bằng số đo cụ thể, tên tệp ảnh, hoặc ghi chú “bản vẽ, chưa phải phần cứng”.
 
 | Cổng | “Xong” trông như thế nào | Bằng chứng |
 |------|------------------------|----------|
@@ -39,7 +39,7 @@ Chép bảng này vào `lab-notes.md` và điền cột bằng chứng bằng m�
 | Giảm lực kéo dây | Ảnh trước/sau, hoặc một kế hoạch viết ra nếu chưa có dây | |
 | Linh kiện còn thiếu | Danh sách tường minh cho buổi lắp Chương 07 | |
 
-Đạt, viết thành văn: mọi hàng có bằng chứng, hàng tỉ số nói cách nó được kiểm, và hàng linh kiện thiếu hoặc là “không” hoặc là một danh sách mua được trong tuần này. Con đường chỉ có bản vẽ vẫn đạt cổng lập luận. Sẵn sàng phần cứng là một câu thứ hai trên cùng trang, và các bạn chỉ viết câu ấy khi tấm khung, cả hai bánh, bánh caster, và cả hai động cơ đã ở trong tay cho các phép kiểm của Bài 08. Chương 07 bắt đầu từ sẵn sàng phần cứng.
+**Điều kiện đạt:** Mọi hàng đều có bằng chứng cụ thể; hàng tỉ số truyền nêu rõ cách kiểm chứng; hàng linh kiện còn thiếu ghi rõ “không” hoặc liệt kê danh sách đặt mua trong tuần. Nếu mới chỉ làm trên bản vẽ, bạn vẫn đạt cổng lập luận. Tuy nhiên, trạng thái “sẵn sàng phần cứng” là một xác nhận riêng trên cùng trang đó, chỉ được ghi khi tấm khung, hai bánh xe, bánh caster và hai động cơ đều đã có sẵn trên bàn và hoàn thành kiểm tra ở Bài 08. Chương 07 chỉ bắt đầu khi đạt trạng thái sẵn sàng phần cứng.
 
 ![Hai chiều dài mà cổng không nhận là số đoán]({{ site.imgurl }}/generated/chassis_measures.png)
 
@@ -47,25 +47,25 @@ Chép bảng này vào `lab-notes.md` và điền cột bằng chứng bằng m�
 
 ## Ví dụ tính tay
 
-Một sinh viên lăn một bánh được $$s = 188$$ mm.
+Một sinh viên lăn thử bánh thứ nhất được quãng đường $$s = 188$$ mm, suy ra:
 
 $$
 r = \frac{188}{2\pi} \approx 29.9\ \text{mm}.
 $$
 
-Bánh kia cho 30,4 mm. Họ ghi cả hai và chỉ dùng 30,2 mm như trung bình làm việc sau khi đã ngồi lại lốp và lần đo thứ hai khớp trong một milimét. Khổ vết là $$b = 152$$ mm giữa các tâm tiếp xúc. Dấu đóng hộp số là 1:48, ba vòng đầu vào đo được $$23^\circ$$ so với dự đoán
+Bánh còn lại cho kết quả 30,4 mm. Sinh viên ghi cả hai số đo, kiểm tra lại độ đồng tâm của lốp để xác nhận sai lệch nằm trong 1 mm rồi lấy giá trị trung bình làm việc là 30,2 mm. Khổ vết đo giữa hai tâm tiếp xúc là $$b = 152$$ mm. Hộp số đóng dấu 1:48; sau 3 vòng đầu vào, góc đo được là $$23^\circ$$ so với dự đoán:
 
 $$
 \frac{3}{48}\times 360^\circ = 22.5^\circ,
 $$
 
-cao khoảng 2 phần trăm, nằm trong dải. Dòng Grashof của họ là cặp của Bài 04: $$s + l = 120$$ mm, $$p + q = 125$$ mm. Ảnh giảm lực kéo dây cho thấy một dây rút và một vòng. Linh kiện thiếu: một túi nyloc. Trang ấy là một lần đạt trên phần cứng, với một dòng mua hàng không chặn cú xoay khi bánh được nhấc nếu hai đai ốc nyloc đã nằm trên giá động cơ. Nó sẽ chặn lời tuyên bố rằng mọi mối ốc đã xong.
+sai lệch khoảng 2%, đạt yêu cầu. Mục Grashof ghi đúng ví dụ Bài 04 ($$s + l = 120$$ mm, $$p + q = 125$$ mm). Ảnh giảm lực kéo dây thể hiện rõ dây rút và vòng dây dự phòng. Mục linh kiện còn thiếu ghi: một túi đai ốc nyloc. Như vậy, trang ghi chép này đạt cổng phần cứng (có thể thực hiện bước thử nhấc bánh nếu giá động cơ đã đủ hai đai ốc nyloc, dù chưa thể kết luận toàn bộ mối ốc đã hoàn tất cho tới khi mua đủ túi nyloc).
 
 ## Lab: điền cổng từ bằng chứng đang có
 
 ### An toàn
 
-Buổi này không cấp nguồn. Nếu các bạn lặp một cú xoay tay hoặc một phép giật, pin vẫn ngắt, như ở Bài 05 và Bài 07. Đừng “chạm thử 5 V” để xem một động cơ đã trượt mục lực cản tay có tự thoát không.
+Buổi tổng hợp này không cấp nguồn điện. Nếu cần lặp lại phép xoay tay hoặc kiểm tra lực kéo dây, pin phải được ngắt hoàn toàn như hướng dẫn ở Bài 05 và Bài 07. Không “kích thử 5 V” để kiểm tra một động cơ bị nặng tay khi xoay.
 
 ### BOM
 
@@ -77,15 +77,15 @@ Buổi này không cấp nguồn. Nếu các bạn lặp một cú xoay tay ho�
 
 ### Các bước
 
-1. Mở ghi chú của Bài 01, 02, 03 hoặc 08, 04, và 07. Chép số; đừng gõ lại từ trí nhớ nếu dòng gốc vẫn còn.
-2. Điền bảng. Chỗ nào có ảnh, ghi tên file. Chỗ nào kit về muộn, viết “bản vẽ”.
-3. Tính lại một phép kiểm theo kiểu ví dụ để một lỗi chép số chết ở đây: $$r$$ từ $$s$$, hoặc $$\theta_{\text{out}}$$ từ $$i$$.
-4. Viết câu đạt và, nếu điều đó đúng, câu sẵn sàng phần cứng.
-5. Biến hàng linh kiện thiếu thành danh sách mua bên dưới. GT2 chỉ xuất hiện nếu tỉ số của các bạn có đai.
+1. Mở lại ghi chú của Bài 01, 02, 03 (hoặc 08), 04 và 07; chép chính xác số liệu đã đo thay vì nhập lại theo trí nhớ.
+2. Điền đầy đủ bảng cổng: ghi tên tệp ảnh ở các mục yêu cầu ảnh, hoặc ghi “bản vẽ” nếu bộ kit chưa về.
+3. Tính lại một phép kiểm tra theo mẫu ví dụ ($$r$$ từ $$s$$ hoặc $$\theta_{\text{out}}$$ từ $$i$$) để loại bỏ sai sót do chép nhầm số.
+4. Viết câu xác nhận đạt cổng và (nếu đủ điều kiện) câu xác nhận sẵn sàng phần cứng.
+5. Chuyển mục linh kiện còn thiếu thành danh sách mua sắm cụ thể; chỉ đưa bộ đai GT2 vào nếu truyền động của bạn thực sự dùng đai.
 
 ### Kết quả mong đợi
 
-Một bảng đã điền và hai câu. Một bạn cùng lớp làm được phần chuẩn bị cơ khí của Chương 07 từ sổ của các bạn mà không phải hỏi $$b$$. Ghi chú chỉ có bản vẽ nói điều đó trong câu đạt, và liệt kê phần cứng còn cần cho câu thứ hai.
+Một bảng cổng điền đầy đủ kèm hai câu xác nhận rõ ràng, đủ để một đồng đội khác có thể bắt tay vào phần cơ khí Chương 07 dựa trên sổ tay của bạn mà không cần hỏi lại giá trị $$b$$. Nếu dùng đường bản vẽ, câu xác nhận nêu rõ điều này và liệt kê phần cứng cần bổ sung.
 
 ### Lỗi thường gặp
 
@@ -99,7 +99,7 @@ Một bảng đã điền và hai câu. Một bạn cùng lớp làm được ph
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Chỉ mua các lỗ hổng trên hàng linh kiện thiếu của các bạn. Một bàn đã đủ không cần khung thứ hai “để dự phòng” trước Chương 07. GT2 nằm trong danh sách này chỉ khi tỉ số của Bài 04 dùng đai.
+Chỉ đặt mua đúng những hạng mục còn thiếu trong bảng tổng hợp. Không cần mua dự phòng thêm khung xe thứ hai trước khi vào Chương 07, và chỉ mua đai GT2 khi thiết kế ở Bài 04 có dùng đai.
 
 | Lỗ hổng | Từ khóa | Khoảng giá (VND) | Khi nào |
 |-----|----------|------------------|------|
@@ -108,33 +108,37 @@ Chỉ mua các lỗ hổng trên hàng linh kiện thiếu của các bạn. M�
 | Bánh caster | `bánh caster robot` | 12.000–40.000 | Mũi chưa có bánh có đuôi |
 | Đai và pulley GT2 | `dây đai GT2` | 15.000–40.000 cho một đai | Chỉ khi truyền động của các bạn dùng đai |
 
-Các trang tìm:
+Các trang tìm mua:
 
 - [Hshop: khung](https://hshop.vn/search?q=khung+xe+robot)
 - [Shopee: ốc M3](https://shopee.vn/search?keyword=%E1%BB%91c%20M3)
 - [Lazada: bánh caster](https://www.lazada.vn/catalog/?q=b%C3%A1nh%20caster)
 - [Thế Giới IC: ốc](https://www.thegioiic.com/search?q=%E1%BB%91c%20M3)
 
-Giá dịch chuyển. Đặt dòng còn thiếu trước khi đăng ký bàn Chương 07, và giữ hóa đơn cạnh sổ để chi tiết về tới đúng cỡ các bạn đã đo.
+Giá bán có thể thay đổi theo thời điểm. Hãy đặt sớm các linh kiện còn thiếu trước buổi lab Chương 07 và giữ thông tin đơn hàng để đối chiếu đúng cỡ đã đo khi nhận hàng.
 
 ## Video tham khảo
 
-- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Checklist cơ khí hỏi một tỉ số bạn tính được. Xem lại cách nhân tỉ số trước khi tick.
+- **Xem trước:** [Gear Train Design - How to calculate gear trains mechanical engineering](https://www.youtube.com/watch?v=aGHrhm-Rcp0) — The Engineering Mindset, tiếng Anh. Ôn lại cách tính và nhân tỉ số truyền trước khi đánh dấu hoàn thành checklist cơ khí.
 
 ## Bài tập
 
-1. Hai quãng lăn của các bạn là 196 mm và 191 mm. Tính cả hai bán kính. Đã được lấy trung bình chưa?
-2. Ba vòng, dấu đóng 1:34, góc đầu ra đo được $$33^\circ$$. Dự đoán, phần trăm sai số, và đạt hay phải làm lại?
-3. $$b$$ của một đồng đội là “khoảng cách động cơ, 140 mm”. Các bạn yêu cầu họ đo lại cái gì, và triệu chứng ROS nào các bạn đang tránh?
-4. Ô giảm lực kéo dây ghi “để sau”. Cổng lập luận có đạt không? Sẵn sàng phần cứng có đạt không?
-5. Viết câu đạt của chính các bạn bằng những số các bạn thực sự có, gồm chữ “bản vẽ” nếu đó là sự thật.
+1. Hai phép lăn một vòng cho kết quả 196 mm và 191 mm. Tính bán kính lăn của cả hai bánh; đã nên lấy trung bình ngay chưa?
+2. Với hộp số đóng dấu 1:34, sau ba vòng đầu vào đo được góc đầu ra $$33^\circ$$. Tính góc dự đoán, phần trăm sai số và cho biết kết quả này đạt hay cần đo lại.
+3. Một thành viên ghi khổ vết $$b$$ là “khoảng cách giữa hai động cơ, 140 mm”. Bạn cần yêu cầu họ đo lại kích thước nào, và việc đó giúp tránh triệu chứng gì trên ROS?
+4. Ô giảm lực kéo dây ghi “để sau”. Cổng lập luận và trạng thái sẵn sàng phần cứng có đạt không?
+5. Tự viết câu xác nhận đạt cổng bằng số liệu thực tế bạn có (ghi rõ “bản vẽ” nếu chưa có phần cứng).
 
 ### Gợi ý đáp án
 
-1. $$r \approx 31.2$$ mm và $$30.4$$ mm. Độ lệch là vài milimét, nên ngồi lại lốp và đo lại trước khi lấy trung bình. 2. Dự đoán $$3/34 \times 360^\circ \approx 31.8^\circ$$. Sai số $$|33-31.8|/31.8 \approx 4$$ phần trăm, nằm trong 10 phần trăm, nên hàng tỉ số có thể đạt. 3. Yêu cầu khoảng cách giữa các tâm tiếp xúc của mặt lốp. Các bạn đang tránh một `cmd_vel` đi thẳng lại chạy thành vòng tròn. 4. Lập luận chưa đạt cho đến khi có ảnh hoặc một kế hoạch viết có ngày. Sẵn sàng phần cứng cũng chờ kế hoạch ấy được thực hiện khi dây đã có, cộng phần còn lại của Bài 08. 5. Câu phải nêu $$b$$, $$r$$, $$i$$, kết quả cơ cấu thanh hoặc đai hoặc thanh răng, và kiểu bằng chứng. Không có con số nào các bạn không đo.
+1. Hai bán kính lần lượt là $$r \approx 31.2$$ mm và $$30.4$$ mm. Dù chênh lệch bán kính là 0,8 mm (gần sát ngưỡng 1 mm), chênh lệch quãng lăn tới 5 mm cho thấy lốp có thể lắp chưa đều; nên lắp chỉnh lại lốp và đo kiểm tra thêm một lần nữa trước khi lấy trung bình.
+2. Góc dự đoán: $$\frac{3}{34} \times 360^\circ \approx 31.8^\circ$$. Sai số tương đối: $$|33 - 31.8|/31.8 \approx 4\%$$, nằm gọn trong ngưỡng 10% nên đạt.
+3. Yêu cầu đo lại khoảng cách giữa hai tâm tiếp xúc của mặt lốp. Việc này tránh hiện tượng gửi lệnh `cmd_vel` đi thẳng nhưng robot lại chạy cong thành vòng tròn.
+4. Cổng lập luận chưa đạt cho tới khi có ảnh chụp hoặc một kế hoạch cụ thể có ngày thực hiện. Trạng thái sẵn sàng phần cứng cũng chỉ đạt sau khi hoàn thiện giảm lực kéo dây thực tế cùng toàn bộ checklist Bài 08.
+5. Câu xác nhận cần nêu đầy đủ $$b$$, $$r$$, $$i$$, kết quả mục cơ cấu thanh/đai/thanh răng và loại bằng chứng (phần cứng hay bản vẽ), tuyệt đối không dùng số ước đoán.
 
 ## Đọc thêm
 
-- [diff_drive_controller](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — file nơi $$b$$, $$r$$ và số xung mỗi vòng của bảng này cuối cùng sẽ đi vào.
-- [Wiki diff_drive_controller ROS 1](https://wiki.ros.org/diff_drive_controller) — tên tham số trên một trang. Văn bản ROS 1, cùng hình học.
-- [Thiết lập odometry trên Nav2](https://navigation.ros.org/setup_guides/odom/setup_odom.html) — bên tiêu thụ odometry mà những tham số ấy tạo ra.
+- [diff_drive_controller](https://github.com/ros-controls/ros2_controllers/tree/master/diff_drive_controller) — tệp cấu hình nơi các tham số $$b$$, $$r$$ và số xung mỗi vòng của bảng tổng hợp này sẽ được nhập vào.
+- [Wiki diff_drive_controller ROS 1](https://wiki.ros.org/diff_drive_controller) — tổng hợp tên tham số trên một trang (tài liệu ROS 1 nhưng giữ nguyên mô hình hình học).
+- [Thiết lập odometry trên Nav2](https://navigation.ros.org/setup_guides/odom/setup_odom.html) — hệ thống tiêu thụ trực tiếp dữ liệu odometry sinh ra từ các tham số trên.

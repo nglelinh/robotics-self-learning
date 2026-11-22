@@ -11,126 +11,131 @@ lesson_type: required
 draft: false
 ---
 
-Dành cho bài này 80 phút. Bạn đạt được bằng giấy trước khi bưu kiện tới. Nếu mỏ hàn hoặc cell lithium đã ở trên bàn, các quy tắc áp dụng ngay.
+Hãy dành khoảng 80 phút cho bài học này. Bạn hoàn toàn có thể hoàn thành bài trên giấy trước khi linh kiện giao tới. Nếu trên bàn của bạn đã có sẵn mỏ hàn hoặc cell pin lithium, mọi quy tắc trong bài cần được áp dụng ngay lập tức.
 
 ## Mục tiêu học
 
-Bạn sẽ **gọi tên** ba mối nguy thật sự có trên bàn này: năng lượng tích trữ, bánh đang quay, và firmware quên tắt PWM. Bạn sẽ **viết** một thẻ lên nguồn một trang, thứ tự điện là mass chung, rồi logic từ USB, rồi tín hiệu, rồi VM motor cuối cùng, bánh đã nhấc sẵn. Bạn sẽ **áp** quy tắc lithium: sạc 18650 từng cell một tới 4,2 V, và không bao giờ kẹp TP4056 qua một đế 2S, tức pack 8,4 V khi đầy. Bạn sẽ **từ chối** kế hoạch đưa điện áp motor, hoặc echo 5 V, vào chân 3,3 V, vì điện áp cực đại tuyệt đối của GPIO ESP32 không phải 5 V. Bạn sẽ **chạy** checklist bật nguồn chỉ bằng USB, chưa có motor, và **khớp** triệu chứng với cách xử lý trong bảng lỗi.
+Sau bài học này, bạn sẽ **gọi tên** được ba mối nguy thực tế trên bàn làm việc: năng lượng tích trữ, bánh xe đang quay và firmware quên ngắt PWM. Bạn sẽ **viết** một thẻ quy trình cấp nguồn gọn trên một trang theo đúng thứ tự: nối mass chung, cấp nguồn logic từ USB, nối tín hiệu điều khiển, và cuối cùng mới cấp nguồn VM cho động cơ khi bánh xe đã nhấc khỏi mặt bàn. Bạn sẽ **áp dụng** nguyên tắc an toàn pin lithium: sạc cell 18650 riêng từng viên đến 4,2 V, tuyệt đối không kẹp mạch TP4056 vào đế pin 2S (8,4 V khi đầy). Bạn cũng sẽ **loại bỏ** mọi phương án đưa điện áp động cơ hay tín hiệu echo 5 V trực tiếp vào chân 3,3 V vì giới hạn cực đại tuyệt đối của GPIO ESP32 không chịu được 5 V; đồng thời **thực hiện** danh sách kiểm tra cấp nguồn chỉ bằng USB (không gắn động cơ) và **đối chiếu** sự cố với bảng xử lý lỗi.
 
 ## Cần có trước
 
-Bài 00-01 và 00-02: bạn nói được quy tắc dừng 300 ms, và sổ có một câu lộ trình A hoặc B. Chưa cần linh kiện. Chân GPIO là chân logic, không phải nguồn, và một bánh trên mặt bàn thành cái tời ngay khi PWM khác không.
+Từ bài 00-01 và 00-02, bạn đã nắm rõ quy tắc dừng PWM sau 300 ms và đã chốt Lộ trình A hoặc B trong sổ lab. Lúc này chưa cần có sẵn linh kiện. Hãy ghi nhớ hai nguyên tắc nền tảng: chân GPIO chỉ dùng cho tín hiệu logic chứ không phải nguồn công suất, và một bánh xe còn chạm mặt bàn có thể kéo cả robot trượt đi ngay khi xung PWM khác 0.
 
-## Vì sao việc này dính tới Capstone
+## Vì sao bài này gắn liền với Capstone
 
-Demo Chương 07 chạy khi bạn bảo và im khi lệnh dừng. Nó không đáng tin nếu lần cấp nguồn đầu có thể kéo robot khỏi bàn hoặc đưa pack motor vào chân 3,3 V. Timeout chỉ chạy sau khi chip đã sống. Topic ROS 2 sẽ không sửa một pad bạn đã đốt.
+Bản demo Chương 07 chỉ đáng tin cậy khi xe chạy theo lệnh và dừng ngay khi mất lệnh. Điều đó trở nên vô nghĩa nếu ngay lần cấp nguồn đầu tiên, xe lao khỏi bàn hoặc điện áp pin động cơ đi thẳng vào chân 3,3 V. Cơ chế timeout chỉ hoạt động khi vi điều khiển còn sống và đang chạy chương trình; các topic ROS 2 về sau cũng không thể cứu một chân mạch đã bị cháy.
 
-## Ba mối nguy, và thứ tự khiến chúng nhàm
+## Ba mối nguy chính và trình tự cấp nguồn an toàn
 
-**Năng lượng tích trữ** xả dòng mà không hỏi: cổng USB, pin AA, một cặp 18650, tụ trên board lái. Hư hại là nhiệt trên mạch in, trên một chân, hoặc trên cell bị sạc sai cách. **Bánh đang quay** kéo cáp hoặc bước khỏi bàn ngay lần PWM lên sai. **Firmware quên tắt PWM** là chương trình teleop chết sau lệnh "tiến", cửa sổ serial bạn đóng, laptop ngủ. Quy tắc 300 ms biến phần mềm cũ thành một lệnh dừng. Nó không bảo vệ giây trước khi chương trình của bạn bắt đầu, và không bảo vệ GPIO khỏi quá áp.
+**Năng lượng tích trữ** luôn sẵn sàng xả dòng lớn mà không báo trước, từ cổng USB, pin AA, cặp cell 18650 cho tới tụ điện trên mạch lái. Sự cố biểu hiện thành nhiệt lượng phá hủy mạch in, chân IC hoặc làm nóng phồng cell pin bị sạc sai quy cách. **Bánh xe đang quay** có thể làm giật cáp hoặc kéo khung xe rơi khỏi bàn ngay khi PWM khởi tạo sai. **Firmware quên ngắt PWM** xảy ra khi chương trình teleop bị treo sau lệnh "tiến", cửa sổ serial bị đóng đột ngột hoặc laptop chuyển sang chế độ ngủ. Quy tắc 300 ms giúp chuyển trạng thái mất lệnh thành lệnh dừng, nhưng nó không bảo vệ được khoảnh khắc trước khi chương trình bắt đầu chạy và cũng không bảo vệ chân GPIO khỏi quá áp.
 
-Nghi thức vừa một trang. Làm mỗi lần, kể cả lần bạn muốn gọi là thử nhanh. Mass chung trước: mass vi điều khiển, mass driver, và cực âm pin là một nút, vì dòng motor trở về đó. Tín hiệu nối trước mass đó có thể trở về qua GPIO và giết chân. Nguồn logic kế tiếp, USB vào vi điều khiển, từ đó có 3,3 V cho các chân. Nguồn logic của driver lấy từ ray yên đó, không lấy từ pin motor. Tín hiệu sau cùng trong nhóm logic: PWM, hướng, và standby, đã mang nghĩa dừng nếu firmware đang chạy. VM motor cuối, qua công tắc nếu có. Bánh đã nhấc sẵn. Nhấc sau khi giật là cách bánh caster rời bàn.
+Trình tự cấp nguồn an toàn chỉ gói gọn trong một trang giấy và cần thực hiện mỗi lần bật mạch, kể cả khi bạn chỉ muốn "thử nhanh":
+1. **Mass chung (GND) trước:** nối chung mass của vi điều khiển, mass của mạch lái và cực âm pin thành một điểm tham chiếu chung vì dòng động cơ sẽ quay về đây. Nếu nối dây tín hiệu trước khi có mass chung, dòng điện có thể tìm đường hồi lưu qua chân GPIO và làm hỏng chip.
+2. **Nguồn logic tiếp theo:** cắm USB vào vi điều khiển để tạo đường nguồn 3,3 V ổn định. Nguồn logic của mạch lái phải lấy từ đường nguồn ổn định này, không lấy từ pin động cơ.
+3. **Tín hiệu điều khiển:** nối các đường PWM, chiều quay và chân standby (đảm bảo firmware đang đặt ở trạng thái dừng).
+4. **Nguồn động cơ VM sau cùng:** đóng công tắc cấp VM cuối cùng, sau khi đã chắc chắn bánh xe được nhấc khỏi mặt bàn. Nhấc bánh sau khi xe đã giật chạy luôn là quá muộn.
 
 ![Nguồn lên theo mass chung, logic, tín hiệu, nguồn motor cuối, bánh khỏi mặt bàn]({{ site.imgurl }}/generated/power_order.png)
 
-Chép các ô theo thứ tự đó. "Cuối" nghĩa là công tắc đóng cuối. Bánh đã ở trên không.
+Hãy chép các bước đúng theo thứ tự trong hình. "Sau cùng" nghĩa là công tắc nguồn VM luôn đóng cuối cùng khi bánh xe đã ở trên không.
 
 ![Logic 3,3 V, USB 5 V, mass, và ray motor riêng]({{ site.imgurl }}/generated/power_rails_3v3.png)
 
-Dùng màu như danh sách cấm. USB 5 V nuôi board, không nuôi hai motor TT đang stall. GPIO là thế giới 3,3 V. Mass là nút bạn cố ý dùng chung. Ray motor là pin riêng và không bao giờ đáp xuống GPIO hoặc chân 3,3 V.
+Hãy xem sơ đồ màu dây như ranh giới cách ly: nguồn USB 5 V nuôi mạch vi điều khiển chứ không nuôi hai động cơ TT đang kẹt trục; GPIO thuộc miền logic 3,3 V; mass là điểm nối chung có chủ đích; còn đường nguồn động cơ (VM) lấy từ pin riêng và tuyệt đối không được nối vào chân GPIO hay chân 3,3 V.
 
-## Lithium, đúng kiểu người ta bị thương
+## An toàn pin lithium
 
-Một cell 18650 lithium-ion khoảng 3,6–3,7 V danh định và **4,2 V khi đầy**. Bạn sạc **từng cell một** tới 4,2 V, trên cục sạc có nhãn Li-ion hoặc Li-ion 18650. Hai cell nối tiếp, tức đế 2S, khoảng 7,4 V danh định và **8,4 V khi đầy**. Cặp nối tiếp đó là pack motor. Nó không phải đầu vào của cục sạc.
+Một cell Li-ion 18650 có điện áp danh định khoảng 3,6–3,7 V và **đạt 4,2 V khi sạc đầy**. Bạn phải sạc **từng cell riêng lẻ** tới 4,2 V bằng bộ sạc ghi rõ dùng cho Li-ion / Li-ion 18650. Khi mắc nối tiếp hai cell trong đế 2S, điện áp danh định là 7,4 V và **đạt 8,4 V khi đầy**. Cụm nối tiếp đó dùng để cấp cho chân VM của mạch lái, không phải đầu vào của mạch sạc một cell.
 
-TP4056 cố đưa một cell lên 4,2 V. Kẹp nó qua đế 2S là đặt cục sạc đó lên pack 8,4 V. Đừng. Lấy một cell ra, sạc riêng, rồi mới đặt lại.
+Mạch sạc TP4056 được thiết kế để nạp một cell đơn lên 4,2 V. Kẹp TP4056 vào hai đầu đế 2S đồng nghĩa đặt mạch sạc 4,2 V lên bộ pin 8,4 V — đây là thao tác sai và nguy hiểm. Hãy tháo từng cell ra, sạc riêng lẻ rồi mới lắp lại vào đế.
 
-Cell khoảng 2,1 V nằm rất thấp dưới ngưỡng cắt thường gặp gần 2,5–3,0 V. Sạc nó với dòng bình thường có thể mạ kim loại bên trong và tạo ngắn mạch trong. Đừng "đánh thức" bằng TP4056. Đem đi tái chế. Cell phồng đã hỏng: đừng sạc, đừng chọc, đừng cất "phòng khi". Một viên 18650 trần trong túi cùng chìa khóa có thể hàn thành ngắn mạch. Cell sống trong đế hoặc hộp. Các lần thử motor đầu được phép dùng đế AA để bạn học VM khác logic trước khi sở hữu lithium. Chưa có cell là trạng thái an toàn. Cục sạc không khớp thì không.
+Nếu một cell đo được khoảng 2,1 V, nó đã tụt sâu dưới ngưỡng cắt an toàn thông thường (khoảng 2,5–3,0 V). Cố sạc lại ở dòng bình thường có thể gây kết tủa kim loại bên trong và dẫn đến ngắn mạch nội. Tuyệt đối không dùng TP4056 để "kích pin", mà hãy đưa cell đó đi tái chế. Với cell bị phồng vỏ, pin đã hỏng: không sạc, không chọc thủng và không cất giữ "phòng khi cần". Không để cell 18650 trần trong túi cùng chìa khóa hay vật kim loại vì dễ gây chập cực tức thời; pin luôn phải nằm trong đế hoặc hộp bảo quản. Trong những buổi thử động cơ đầu tiên, bạn hoàn toàn có thể dùng hộp pin AA để làm quen với việc tách nguồn VM khỏi nguồn logic trước khi chuyển sang pin lithium. Chưa mua pin luôn là trạng thái an toàn hơn việc dùng bộ sạc không khớp nhãn.
 
-## Chân, mỏ hàn, và mắt
+## Bảo vệ chân mạch, mỏ hàn và mắt
 
-Điện áp cực đại tuyệt đối trên GPIO của ESP32 **không** phải 5 V. Pad nằm cao hơn ray 3,3 V vài phần mười vôn, không phải ở 5 V và không phải ở điện áp motor. Chân Pico cùng loại đầu vào 3,3 V. Echo của HC-SR04 khoảng 5 V khi cao. Pack thường 7–8 V. Echo cần mạch dịch mức. Pack chỉ được vào VM.
+Điện áp cực đại tuyệt đối trên chân GPIO của ESP32 **không** phải 5 V; giới hạn của pad chỉ cao hơn đường nguồn 3,3 V vài phần mười vôn, hoàn toàn không chịu được mức 5 V hay điện áp pin động cơ. Chân GPIO của Raspberry Pi Pico cũng thuộc nhóm logic 3,3 V tương tự. Vì chân echo của HC-SR04 xuất mức cao khoảng 5 V còn pin động cơ thường ở mức 7–8 V, đường echo bắt buộc phải đi qua mạch chuyển mức logic, còn pin chỉ được nối vào chân VM.
 
-Đeo kính khi cắt chân linh kiện và khi hàn. Mẩu chì bay. Khói rosin cần không khí chuyển động, không phải phòng kín và mặt cúi trên mối hàn. Mỏ nằm trên giá, không nằm trên dây. Hôm nay bạn không hàn. Bạn viết quy tắc đó ở chỗ tay sẽ thấy.
+Luôn đeo kính bảo hộ khi cắt chân linh kiện và khi hàn, vì mẩu chân linh kiện cắt ra có thể bắn mạnh vào mắt. Khói nhựa thông (rosin) gây kích ứng nên cần làm việc ở nơi thông gió tốt, tránh cúi mặt trực tiếp phía trên mối hàn. Mỏ hàn đang nóng phải luôn đặt trên giá đỡ, không đặt lên dây điện hay mặt bàn. Hôm nay bạn chưa cần bật mỏ hàn, chỉ cần ghi rõ các quy tắc này ở vị trí dễ thấy nhất trên bàn làm việc.
 
-Nửa phần mềm của nghi thức là timeout bạn đã viết:
+Phần bảo vệ bằng phần mềm vẫn là quy tắc timeout đã học ở bài trước:
 
 $$
 t_{\mathrm{silence}} > 300\,\mathrm{ms} \implies \text{duty PWM} = 0.
 $$
 
-Hôm nay bạn chưa nạp vòng lặp đó. Đừng gọi một bố trí là sẵn sàng nếu cách dừng duy nhất là rút USB sau khi robot đã rời thảm. Một đường teleop im phải là dừng, không phải giữ tốc độ cuối.
+Hôm nay bạn chưa nạp đoạn mã này, nhưng cần nhớ rằng một bố trí không được coi là sẵn sàng nếu cách duy nhất để dừng robot là rút dây USB sau khi xe đã chạy khỏi thảm. Khi mất tín hiệu điều khiển, xe bắt buộc phải dừng thay vì duy trì tốc độ cũ.
 
-## Lỗi nên nhận ra trước khi gặp
+## Bảng nhận diện lỗi trước khi gặp
 
-| Bạn thấy hoặc sắp làm | Thường là | Bạn làm |
+| Tình huống thấy hoặc sắp làm | Nguyên nhân thường gặp | Cách xử lý |
 | --- | --- | --- |
-| Cổng serial mất khi motor buộc vào chân 5 V của board | Cổng USB không nuôi nổi hai motor stall; ray 3,3 V sụp | Motor trên VM riêng, mass chung, logic chỉ từ USB |
-| GPIO chết sau khi nối echo siêu âm | 5 V vào chân có cực đại tuyệt đối không phải 5 V | Dừng; chân có thể đã hỏng; dịch mức trên echo trước khi thử lại |
-| TP4056 kẹp qua đế 2S | Cục sạc 4,2 V trên pack 8,4 V | Tháo ra; sạc từng cell, ngoài robot |
-| Cell đo khoảng 2,1 V, hoặc vỏ phồng | Lithium xả quá hoặc đã hỏng | Không sạc; không bỏ túi; tái chế |
-| Bánh trên bàn, firmware mới, "thử một tí" | Chuyển động bất ngờ, PWM có thể khác 0 trước vòng lặp | Bánh nhấc trước; VM cuối; timeout vẫn cần khi code chạy |
-| Mỏ nằm trên dây, hoặc mắt không có kính khi cắt chân | Bỏng, dây chảy, hoặc mẩu chì vào mắt | Giá, kính, thông gió; rút điện nếu bố trí đã sai |
+| Cổng serial biến mất khi nối động cơ vào chân 5 V của mạch | Cổng USB không cấp nổi dòng khi hai động cơ kẹt; đường 3,3 V sụp áp | Tách động cơ sang nguồn VM riêng, giữ mass chung, chỉ dùng USB cho phần logic |
+| Chân GPIO hỏng sau khi nối trực tiếp echo siêu âm | Đưa mức 5 V vào chân không chịu được 5 V | Dừng ngay; chân có thể đã hỏng; lắp mạch chuyển mức cho đường echo trước khi thử lại |
+| Mạch TP4056 kẹp lên hai đầu đế pin 2S | Đặt mạch sạc 4,2 V lên bộ pin 8,4 V | Ngắt kết nối ngay; tháo từng cell ra sạc riêng ngoài robot |
+| Cell 18650 đo khoảng 2,1 V hoặc vỏ bị phồng | Pin xả quá sâu hoặc đã hư hại bên trong | Không sạc, không bỏ túi; đưa đi tái chế |
+| Để bánh chạm bàn khi nạp firmware mới "thử một chút" | Chuyển động ngoài ý muốn vì PWM có thể khác 0 trước khi vào vòng lặp | Nhấc bánh khỏi bàn trước; cấp VM sau cùng; vẫn giữ timeout trong mã nguồn |
+| Đặt mỏ hàn đè lên dây hoặc cắt chân linh kiện không đeo kính | Gây bỏng, chảy vỏ dây hoặc mẩu chân linh kiện bắn vào mắt | Dùng giá đỡ, đeo kính bảo hộ, đảm bảo thông gió; rút điện nếu bố trí chưa đạt |
 
-## Lab: thẻ, rồi bật nguồn chỉ bằng USB
+## Thực hành: viết thẻ cấp nguồn và kiểm tra chỉ bằng USB
 
-Làm với motor **ở ngoài mạch**. Nếu chưa có board, vẫn viết thẻ và ghi `chưa có board` ở chỗ lẽ ra là tên cổng.
+Thực hiện bài lab này khi **không gắn động cơ vào mạch**. Nếu chưa có mạch vi điều khiển, bạn vẫn viết thẻ quy trình và ghi `chưa có board` vào vị trí tên cổng serial.
 
-Xé một trang. Đặt tên `LÊN NGUỒN`. Bốn dòng: (1) GND chung, (2) logic từ USB, (3) tín hiệu PWM và hướng, đã mang nghĩa dừng, (4) VM motor cuối. Bên dưới viết `BÁNH NHẤC TRƯỚC VM`, `IM > 300 ms → PWM 0`, `CẤM: pin hoặc echo 5 V trên GPIO 3,3 V`, và `18650: từng cell, 4,2 V, không TP4056 qua đế 2S`. Dán trang ở chỗ tay làm việc. Không có băng dính thì để dưới bàn phím bạn dùng để ghi chú.
+Lấy một tờ giấy rời, đặt tiêu đề `LÊN NGUỒN` và ghi bốn bước theo đúng thứ tự: (1) Mass chung (GND), (2) Nguồn logic từ USB, (3) Tín hiệu PWM và chiều quay ở trạng thái dừng, (4) Nguồn động cơ VM cuối cùng. Phía dưới ghi thêm bốn dòng cảnh báo: `NHẤC BÁNH TRƯỚC KHI CẤP VM`, `MẤT LỆNH > 300 ms → PWM = 0`, `CẤM: đưa nguồn pin hoặc echo 5 V vào GPIO 3,3 V`, và `18650: sạc từng cell tới 4,2 V, không kẹp TP4056 qua đế 2S`. Dán tờ giấy này ngay trước khu vực làm việc hoặc đặt cạnh bàn phím.
 
-Rồi chạy checklist chỉ USB, theo thứ tự này.
+Sau đó, thực hiện kiểm tra cấp nguồn chỉ bằng USB theo đúng trình tự:
+1. Kiểm tra mặt bàn để chắc chắn không có động cơ, không có pin động cơ và không có dây VM. Ngắt hoàn toàn pin trước khi cắm USB; nếu đã có bánh xe, không để chúng nối với mạch lái đang cấp điện.
+2. Chỉ cắm vi điều khiển vào máy tính bằng cáp USB truyền dữ liệu. Kiểm tra xem cổng serial mới (hoặc ổ đĩa BOOTSEL nếu dùng Pico) có xuất hiện không.
+3. Dán tên cổng vào sổ lab; nếu chưa có mạch, ghi `không có — chưa có board` kèm kế hoạch: "khi có mạch sẽ chỉ cắm USB, không nối VM, ghi lại tên cổng rồi rút ra". Sau khi kiểm tra xong thì rút cáp, không vội gắn động cơ.
 
-Nhìn bàn và xác nhận không có motor, không pin motor, không dây VM. Ngắt pin trước khi cắm USB. Bánh, nếu bạn có, không nằm trên driver đang có điện và không thuộc bài thử này. Chỉ cắm vi điều khiển, bằng cáp bạn tin là truyền được dữ liệu. Tìm cổng serial hoặc, với Pico ở BOOTSEL, một ổ đĩa. Dán tên cổng, hoặc viết `không có — chưa có board` và kế hoạch "khi tới, chỉ USB, không VM, ghi cổng, rồi rút". Rút. Đừng gắn motor để ăn mừng.
+Nếu bạn đã có sẵn cell lithium, hãy chụp ảnh nhãn bộ sạc và ghi lại chính xác thông số hóa học pin trên nhãn; nếu bộ sạc mất nhãn thì ghi `sẽ không sạc`. Nếu chưa có pin, ghi `chưa mua cell`. Nếu đã có mỏ hàn, hãy kiểm tra chắc chắn đã có giá đỡ trước khi nghĩ đến việc cắm điện, đồng thời ghi chú kính bảo hộ đang có sẵn hay còn thiếu.
 
-Nếu đã có cell lithium, chụp nhãn cục sạc và gõ các chữ hóa học bạn đọc được. Nhãn mất nghĩa là `sẽ không sạc`. Chưa có lithium nghĩa là `chưa mua cell`. Nếu có mỏ hàn, xác nhận giá đỡ trước khi bật, và ghi kính bảo hộ đang ở trên bàn hay còn thiếu.
+**Kết quả cần đạt:** Thẻ quy trình đặt ở chỗ nhìn thấy ngay mà không cần mở lại bài học. Sổ lab có ảnh chụp hoặc bản phác thẻ, có tên cổng serial thực tế (hoặc kế hoạch cụ thể), và có trạng thái sạc pin rõ ràng (`khớp`, `sẽ không sạc` hoặc `chưa mua cell`). Toàn bộ bước USB không có sự xuất hiện của động cơ.
 
-**Bạn sẽ thấy gì.** Thẻ nhìn thấy mà không cần mở bài. Sổ có ảnh hoặc phác thẻ, trường serial là tên cổng thật hoặc một kế hoạch rõ, và quyết định sạc: "khớp", "sẽ không sạc", hoặc "chưa mua cell". Không có motor trong bước USB.
-
-**Khi lệch.** Nếu VM đứng đầu danh sách, viết lại thẻ. Bánh nhấc cho mọi lần thử firmware mới đầu tiên, kể cả trên bàn. Video nuôi motor từ chân 5 V của DevKit là `cấm`. Cục sạc kẹp vào vì giắc vừa thì tháo ra. Từng cell một.
+**Cách xử lý khi lệch chuẩn:** Nếu trên thẻ có mục cấp VM trước, hãy viết lại ngay. Luôn nhấc bánh cho mọi lần thử firmware mới đầu tiên. Mọi hướng dẫn lấy nguồn chân 5 V của DevKit để chạy động cơ đều xếp vào mục cấm. Nếu bộ sạc đang kẹp vào đế 2S chỉ vì vừa giắc, hãy tháo ra ngay và sạc từng cell riêng lẻ.
 
 ## Ví dụ làm sẵn
 
-Một bạn muốn bánh hạ xuống "chỉ để xem sketch mới". PWM chưa được chứng minh là bắt đầu ở 0, và timer 300 ms chưa chạy được trước khi setup xong. Giữ bánh nhấc, VM hở, chỉ logic USB, rồi lần chạy đầu trên không. Bánh hạ có thể kéo board khỏi bàn trước khi dòng đó chạy.
+Một sinh viên định để bánh xe chạm mặt bàn "chỉ để thử nhanh đoạn mã mới". Tuy nhiên, PWM chưa được kiểm chứng là khởi tạo ở mức 0, và bộ đếm timeout 300 ms chưa hoạt động trước khi hàm khởi tạo chạy xong. Cách làm đúng là giữ bánh nhấc khỏi bàn, ngắt nguồn VM, chỉ cấp nguồn logic qua USB trước, rồi mới chạy thử lần đầu ở trạng thái bánh trên không để tránh việc xe giật rơi khỏi bàn.
 
-Cùng buổi chiều một viên 18650 đo 2,1 V và có người đưa TP4056 "hồi sức". Cell nằm dưới ngưỡng còn lành. Sổ ghi sẽ không sạc, không bỏ túi, không kẹp qua đế 2S. Cell lành, nếu có, được sạc riêng tới 4,2 V rồi mới đặt vào đế.
+Trong cùng buổi chiều, một viên 18650 đo được 2,1 V và có người định dùng TP4056 để "hồi sức". Vì cell đã tụt sâu dưới ngưỡng an toàn, sổ lab ghi rõ không sạc, không bỏ túi và không kẹp lên đế 2S; chỉ những cell còn tốt mới được sạc riêng lẻ đến 4,2 V rồi mới lắp vào đế.
 
-Sợi echo trong cùng đống sắp đáp vào GPIO ESP32. Cực đại tuyệt đối của pad đó không phải 5 V, nên dây chờ mạch dịch mức. Điện áp motor là lệnh cấm cùng loại, chỉ lớn hơn.
+Cũng trên bàn đó, sợi dây echo từ HC-SR04 suýt được cắm thẳng vào chân GPIO của ESP32. Do giới hạn cực đại tuyệt đối của pad không phải 5 V, dây này phải chờ lắp mạch chuyển mức logic — cùng nguyên tắc cấm như đối với điện áp pin động cơ.
 
 ## Video tham khảo
 
-- **Xem trước:** [What is ESD and How to Prevent it – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=pWhtyz-UFZc) — DigiKey, tiếng Anh. ESD: vì sao chạm linh kiện khi chưa xả tĩnh điện làm hỏng board trước khi robot chạy.
-- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Cầu chì làm gì trên đường nguồn. Đặt cạnh quy tắc ngắt nguồn của bài này.
+- **Xem trước:** [What is ESD and How to Prevent it – ATM | Digi-Key Electronics](https://www.youtube.com/watch?v=pWhtyz-UFZc) — DigiKey, tiếng Anh. Giải thích về phóng tĩnh điện (ESD) và lý do chạm tay vào linh kiện khi chưa xả tĩnh điện có thể làm hỏng mạch trước khi robot kịp chạy.
+- [What is a fuse? the basics explained](https://www.youtube.com/watch?v=W770Z1yvXs8) — The Engineering Mindset, tiếng Anh. Giải thích vai trò của cầu chì trên đường nguồn, đặt song song với quy tắc ngắt nguồn an toàn trong bài.
 
 ## Bài tập
 
-Đây là tình huống. Viết hành động, không viết định nghĩa.
+Các câu hỏi dưới đây là tình huống thực tế; hãy nêu hành động xử lý cụ thể thay vì chép lại định nghĩa.
 
-1. Một bạn để khung xe trên bàn, bánh hạ, và muốn nạp firmware "chỉ một giây". Điều gì phải đúng trước khi VM được đóng, và vì sao quy tắc 300 ms không đủ cho lần nạp đầu?
-2. Cell trên bàn đọc 2,1 V. Có người đưa TP4056. Bạn làm gì với cell, và từ chối làm gì với đế 2S?
-3. Dây echo HC-SR04 sắp đi thẳng vào GPIO ESP32. Dây đó bao nhiêu vôn khi cảm biến trả lời, và vì sao "ESP32 cứng" không phải là thông số?
-4. Bạn thấy TP4056 đã kẹp qua đế chứa hai cell nối tiếp. Đế đó sau này sẽ nuôi VM. Bạn ngắt cái gì, và nếu cell còn lành thì sạc thế nào?
-5. Teleop đang chạy thì laptop ngủ. Firmware không có timer im. Bánh làm gì, và phép gán nào phải có trong vòng lặp?
+1. Một bạn đặt khung xe trên bàn, bánh vẫn chạm mặt bàn và muốn nạp firmware "chỉ một giây". Những điều kiện nào phải đảm bảo trước khi đóng nguồn VM, và vì sao quy tắc dừng 300 ms không đủ bảo vệ cho lần nạp đầu tiên?
+2. Một cell 18650 đo được 2,1 V và có người đưa mạch TP4056 cho bạn. Bạn phải làm gì với cell đó và từ chối làm gì với đế pin 2S?
+3. Dây echo của HC-SR04 sắp được cắm thẳng vào chân GPIO ESP32. Điện áp của dây này ở mức cao là bao nhiêu, và vì sao nhận xét "ESP32 chịu tốt" không phải là thông số kỹ thuật?
+4. Bạn phát hiện mạch TP4056 đang kẹp vào đế chứa hai cell 18650 mắc nối tiếp (dùng cho nguồn VM sau này). Bạn cần ngắt bộ phận nào ngay lập tức, và nếu các cell còn tốt thì quy trình sạc đúng là gì?
+5. Robot đang chạy teleop thì laptop chuyển sang chế độ ngủ, trong khi firmware chưa có bộ đếm thời gian mất lệnh. Bánh xe sẽ phản ứng thế nào, và điều kiện gán nào bắt buộc phải có trong vòng lặp điều khiển?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Bánh nhấc, mass rồi logic rồi tín hiệu đã xong, VM vẫn hở cho tới khi bạn nhìn được bánh trên không. Timeout chỉ chạy khi firmware đang thực thi. Reset có thể kéo chân trước, và bánh trên bàn có thể kéo board xuống sàn.
-2. Không sạc cell, không bỏ túi, không kẹp TP4056 vào cell hoặc vào đế 2S. Đem tái chế.
-3. Echo khoảng 5 V khi cao. Cực đại tuyệt đối GPIO ESP32 không phải 5 V. Dây cần mạch dịch mức. Chân có thể đã hỏng.
-4. Ngắt TP4056 ngay. Sạc mỗi cell lành riêng tới 4,2 V, ngoài robot. Đế chỉ là pack cho VM sau bước đó.
-5. Bánh giữ lệnh cuối. Vòng lặp phải đưa duty PWM về 0 khi im quá khoảng 300 ms.
+1. Phải nhấc bánh khỏi mặt bàn, nối xong mass chung, nguồn logic rồi tín hiệu, và giữ VM hở cho tới khi chắc chắn bánh đang trên không. Quy tắc timeout chỉ chạy sau khi firmware đã khởi động và vào vòng lặp; trong lúc nạp hoặc reset, trạng thái chân có thể thay đổi bất ngờ khiến bánh kéo cả mạch rơi khỏi bàn.
+2. Không sạc lại cell này, không cất trong túi, không kẹp TP4056 vào cell hay vào đế 2S; mang cell đi tái chế đúng quy định.
+3. Chân echo ở mức cao khoảng 5 V, trong khi giới hạn cực đại tuyệt đối của GPIO ESP32 không phải 5 V. Dây này bắt buộc qua mạch chuyển mức; nối thẳng có thể làm hỏng chân vi điều khiển.
+4. Ngắt TP4056 khỏi đế 2S ngay lập tức. Tháo từng cell lành ra sạc riêng lẻ tới 4,2 V ngoài robot, sau đó mới lắp vào đế 2S để cấp nguồn VM.
+5. Bánh xe sẽ giữ nguyên lệnh chạy cuối cùng. Vòng lặp firmware bắt buộc phải đưa duty PWM về 0 khi khoảng thời gian mất lệnh vượt quá khoảng 300 ms.
 
 </details>
 
-Trước khi lắp khung ở chương 07, làm tiếp [Pin, nguồn và an toàn trước khi lắp Capstone]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}). Bài đó tách Li-ion 18650, LiPo và LiFePO4, chọn cầu chì, và vẽ cây buck. Thẻ một trang của buổi này vẫn là luật. Bài kia là sơ đồ dây.
+Trước khi bước vào lắp khung ở Chương 07, bạn sẽ học tiếp bài [Pin, nguồn và an toàn trước khi lắp Capstone]({% multilang_post_url contents/chapter07/07_00_batteries_power_safety %}) để phân biệt chi tiết Li-ion 18650, LiPo và LiFePO4, tính chọn cầu chì và vẽ sơ đồ mạch hạ áp (buck). Thẻ một trang của buổi hôm nay vẫn là nguyên tắc bắt buộc, còn bài ở Chương 07 sẽ cụ thể hóa thành sơ đồ dây.
 
 ## Đọc thêm
 
-- [Mức logic, SparkFun](https://learn.sparkfun.com/tutorials/logic-levels) — vì sao 5 V và 3,3 V không thay nhau, tức bài toán chân echo thu nhỏ.
-- [Battery University, BU-409, sạc lithium-ion](https://batteryuniversity.com/article/bu-409-charging-lithium-ion) — ý 4,2 V khi đầy, và vì sao lithium-ion không phải "pin sạc" chung chung.
+- [Mức logic, SparkFun](https://learn.sparkfun.com/tutorials/logic-levels) — giải thích vì sao mức 5 V và 3,3 V không thể thay thế trực tiếp cho nhau, chính là bài toán của chân echo.
+- [Battery University, BU-409, sạc lithium-ion](https://batteryuniversity.com/article/bu-409-charging-lithium-ion) — trình bày nguyên lý ngưỡng đầy 4,2 V và lý do pin Li-ion cần quy trình sạc chuyên biệt.
 
 ## Mua ở Việt Nam
 
-Giỏ robot là [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Giá ở đây là snapshot Hshop ngày **23 tháng 9 năm 2026**. Mua một đồng hồ: [UNI-T UT33D+](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang) giá 285000 ₫ hoặc [Wadfow WDM1501](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms) giá 185000 ₫. Mỏ và giá là một cặp: [Wadfow 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) giá 75000 ₫ và [giá tròn](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) giá 40000 ₫. Mỏ không có giá là thất bại đúng quy tắc bạn vừa viết. Thiếc, kìm cắt và breadboard nằm ở bài 00-04.
+Danh sách mua sắm đầy đủ cho robot nằm ở [bài 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Các mức giá dưới đây được ghi nhận từ Hshop ngày **23 tháng 9 năm 2026**. Bạn chỉ cần mua một đồng hồ vạn năng: [UNI-T UT33D+](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang) giá 285.000 ₫ hoặc [Wadfow WDM1501](https://hshop.vn/dong-ho-van-nang-ky-thuat-so-vom-wadfow-wdm1501-digital-multimeter-true-rms) giá 185.000 ₫. Mỏ hàn và giá đỡ phải đi thành một cặp: [Wadfow 60 W](https://hshop.vn/mo-han-60w-wadfow-wel3616-soldering-iron) giá 75.000 ₫ và [giá đỡ tròn](https://hshop.vn/de-gac-mo-han-tron-b-2-co-khay-roi) giá 40.000 ₫ — mua mỏ hàn mà thiếu giá đỡ là vi phạm đúng quy tắc an toàn vừa học. Thiếc hàn, kìm cắt và breadboard được liệt kê ở bài 00-04.
 
-Kính và cục sạc một cell là trang tìm kiếm, không phải slug sản phẩm bịa. [Shopee, kính bảo hộ](https://shopee.vn/search?keyword=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99), [Lazada, kính bảo hộ](https://www.lazada.vn/catalog/?q=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99), [Shopee, sạc pin 18650](https://shopee.vn/search?keyword=s%E1%BA%A1c%20pin%2018650), [Lazada, sạc pin 18650](https://www.lazada.vn/catalog/?q=s%E1%BA%A1c%20pin%2018650). Các URL đó là trang tìm kiếm. Chỉ mua cục sạc nếu nhãn nói một cell Li-ion tới 4,2 V. [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/) là trang chủ cửa hàng, không phải link sản phẩm. Đừng mua LiDAR từ các lần tìm này.
+Với kính bảo hộ và bộ sạc một cell, bạn có thể tra cứu qua các trang tìm kiếm sau: [Shopee, kính bảo hộ](https://shopee.vn/search?keyword=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99), [Lazada, kính bảo hộ](https://www.lazada.vn/catalog/?q=k%C3%ADnh%20b%E1%BA%A3o%20h%E1%BB%99), [Shopee, sạc pin 18650](https://shopee.vn/search?keyword=s%E1%BA%A1c%20pin%2018650) và [Lazada, sạc pin 18650](https://www.lazada.vn/catalog/?q=s%E1%BA%A1c%20pin%2018650). Vì đây là các trang tìm kiếm chung, hãy đọc kỹ nhãn sản phẩm và chỉ chọn bộ sạc hỗ trợ nạp riêng từng cell Li-ion tới 4,2 V. Bạn cũng có thể tham khảo trang chủ của [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/) khi tìm linh kiện. Đừng mua LiDAR trong giai đoạn này.

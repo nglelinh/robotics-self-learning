@@ -11,117 +11,119 @@ lesson_type: required
 draft: false
 ---
 
-Datasheet là trang duy nhất được phép cho một sợi dây tồn tại. Bài này chốt một thứ tự đọc, rồi dùng cho module TB6612FNG của xe hai bánh và cho chân ESP32 không được chạm xung echo 5 V.
+Datasheet là tài liệu kỹ thuật duy nhất có giá trị quyết định xem một kết nối dây có hợp lệ hay không. Bài học này thiết lập một trình tự đọc datasheet chuẩn gồm sáu bước, sau đó áp dụng trực tiếp cho module lái động cơ TB6612FNG của xe hai bánh và giới hạn chân GPIO trên ESP32 trước xung echo 5 V.
 
 ## Mục tiêu
 
-Bạn mở một PDF lạ và đi đúng một vòng: thông số cực đại tuyệt đối, sơ đồ chân và tên chân, điều kiện làm việc khuyến nghị, vài dòng đặc tính điện bạn sẽ dùng thật, sơ đồ ứng dụng mẫu, rồi bản vẽ vỏ để biết chân 1 nằm đâu. Với module kiểu TB6612, bạn chép được cửa sổ nguồn động cơ, cửa sổ nguồn logic, quy tắc chân STBY, dòng liên tục và dòng đỉnh, rồi đặt được AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, AO1, AO2, BO1, BO2 lên một tờ giấy. Bạn chỉ vào hàng cực đại của ESP32 và nói vì sao dây echo của HC-SR04 không được cắm thẳng vào GPIO. Nhãn in trên board clone chỉ là tin đồn, cho đến khi đồng hồ và datasheet cùng một ý.
+Sau bài học này, bạn có thể mở bất kỳ tài liệu PDF datasheet nào và tra cứu theo đúng một trình tự thống nhất: thông số cực đại tuyệt đối, sơ đồ và tên chân, điều kiện làm việc khuyến nghị, các đặc tính điện thực sự cần dùng, sơ đồ ứng dụng mẫu, và bản vẽ cơ khí vỏ IC để xác định chân số 1. Với module TB6612FNG, bạn sẽ trích xuất chính xác dải điện áp nguồn động cơ, dải nguồn logic, quy tắc chân STBY, dòng liên tục và dòng đỉnh, đồng thời vẽ lại sơ đồ các chân AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, AO1, AO2, BO1, BO2 ra giấy. Bạn cũng sẽ chỉ ra đúng dòng thông số cực đại trên datasheet ESP32 cấm nối thẳng dây echo của HC-SR04 vào GPIO, và hiểu vì sao ký hiệu in trên các mạch tương thích giá rẻ chỉ được tin tưởng sau khi đã đối chiếu với đồng hồ đo và datasheet.
 
 ## Kiến thức cần có
 
-Cần định luật Ohm ở bài 01, thói quen đo của bài 02, và cực tính ở bài 04. Hôm nay không cấp nguồn mô-tơ. Mang một trang sổ còn đọc được ở chương 02.
+Bạn cần nắm định luật Ohm (bài 01), thói quen đo an toàn bằng đồng hồ vạn năng (bài 02) và cực tính linh kiện (bài 04). Bài này không cấp nguồn động cơ; bạn chỉ cần một quyển sổ ghi chép rõ ràng để mang sang dùng tiếp ở Chương 02.
 
 ## Vì sao bài này quan trọng
 
-Xe capstone là dẫn động vi sai: hai mô-tơ TT, module TB6612FNG, board 3,3 V kiểu ESP32 hoặc Pico. VM lấy pin động cơ, không lấy USB. VCC được ngồi trên rail 3,3 V. Echo của HC-SR04 là ngõ ra 5 V, còn GPIO thì không chịu 5 V. Học tên chân như học nhãn dán thì buổi chạy đầu trông như lỗi phần mềm: bánh kẹt ở chế độ chờ, hoặc GPIO chết lúc cảm biến trả lời. Thứ tự dưới đây tìm con số cấm sợi dây, trước khi sợi dây được nối.
+Xe Capstone là hệ dẫn động vi sai gồm hai động cơ TT, module TB6612FNG và vi điều khiển 3,3 V (ESP32 hoặc Pico). Nguồn VM lấy từ pin động cơ (không lấy từ USB), nguồn VCC nối vào đường 3,3 V, còn chân echo của HC-SR04 xuất 5 V nên không được nối trực tiếp vào GPIO 3,3 V. Nếu chỉ nhớ tên chân một cách máy móc theo nhãn dán, buổi chạy thử đầu tiên rất dễ gặp các lỗi tưởng như do phần mềm: bánh xe đứng yên vì quên kéo chân STBY, hoặc cháy chân GPIO ngay khi cảm biến phản hồi. Trình tự đọc datasheet giúp bạn phát hiện các giới hạn cấm trước khi đấu dây.
 
 ![Cầu H đang làm gì với các chân ra mô-tơ]({{ site.imgurl }}/generated/hbridge_concept.png)
 
-Mỗi mô-tơ nằm giữa một cặp chân ra. Chiều là chân nào cao, tốc độ là PWM, và cả hai vô nghĩa khi STBY còn tắt cầu. Xem hình sau khi đã có tên chân.
+Mỗi động cơ được mắc giữa một cặp chân ngõ ra (AO1/AO2 hoặc BO1/BO2). Chiều quay quyết định bởi cặp chân logic hướng, tốc độ quyết định bởi xung PWM, và cả hai đều vô hiệu nếu chân STBY đang giữ cầu H ở trạng thái chờ.
 
-## Thứ tự đọc, không đảo
+## Trình tự sáu bước đọc datasheet
 
-**1. Thông số cực đại tuyệt đối.** Đây là hàng rào hỏng. Vượt qua thì hãng không còn hứa linh kiện sống. Không phải điểm để vận hành. Chép một ô khớp sợi dây định nối: điện áp nguồn, điện áp chân logic, hoặc dòng ra. Vượt ô đó thì phương án bị cấm.
+Hãy luôn đi theo đúng thứ tự sau mà không đảo lộn:
 
-**2. Sơ đồ chân và tên chân.** Bảng chân là từ điển. AO1 chưa phải "bánh trái" cho đến khi bạn quyết định phích nào cắm vào AO1. Trên module TB6612FNG, những tên phải chỉ được bằng bút chì là AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, AO1, AO2, BO1, BO2, cùng VM, VCC, GND và STBY. Chân vào là chỗ GPIO được phép điều khiển. Chân ra là chỗ được phép chạm mô-tơ. Trộn hai nhóm là cách đưa dòng mô-tơ vào vi điều khiển.
+**1. Thông số cực đại tuyệt đối (Absolute Maximum Ratings).** Đây là ngưỡng gây hỏng linh kiện — vượt qua giới hạn này nhà sản xuất không đảm bảo IC còn sống, tuyệt đối không phải điểm vận hành bình thường. Hãy chép đúng các dòng liên quan tới dây bạn định nối (điện áp nguồn, điện áp chân logic, dòng ngõ ra); phương án nào vượt ngưỡng này phải bị loại bỏ ngay.
 
-**3. Điều kiện làm việc khuyến nghị.** Robot sống ở vùng này, nơi các bảng còn lại được đo. Trang bán module có thể chặt hơn con chip trần, vì đồng và header là một phần của món bạn mua. Trang bán chặt hơn thì trang bán thắng.
+**2. Sơ đồ chân và tên chân (Pinout & Pin Functions).** Bảng mô tả chân đóng vai trò từ điển kết nối: ví dụ AO1 chỉ trở thành "bánh trái" khi bạn quy ước rõ động cơ nào gắn vào đó. Trên TB6612FNG, bạn cần ghi rõ đầy đủ các chân `AIN1`, `AIN2`, `PWMA`, `BIN1`, `BIN2`, `PWMB`, `AO1`, `AO2`, `BO1`, `BO2`, cùng `VM`, `VCC`, `GND` và `STBY`. Phân tách rạch ròi nhóm chân đầu vào logic (nối GPIO) và nhóm chân ngõ ra công suất (nối động cơ) để tránh đưa dòng động cơ về vi điều khiển.
 
-**4. Đặc tính điện bạn sẽ dùng.** Bỏ những dòng chưa đo được. Với driver này, chép điện áp tối thiểu vẫn được tính là mức cao, việc STBY phải ở mức cao nếu không mọi hàng khác vô nghĩa, rồi dòng liên tục và dòng đỉnh.
+**3. Điều kiện làm việc khuyến nghị (Recommended Operating Conditions).** Đây là vùng hoạt động ổn định mà mọi thông số đặc tính điện phía sau được đo đạc. Lưu ý rằng giới hạn trên trang thông số của module có thể chặt hơn giới hạn của con chip trần do ảnh hưởng của đường mạch đồng và hàng chân header; khi hai tài liệu khác nhau, luôn tuân theo giới hạn chặt hơn.
 
-**5. Sơ đồ ứng dụng mẫu.** Chép ý: tụ gần VM, tụ gần VCC, một mass chung, các chân vào do chip khác điều khiển. Module có thể đã gắn sẵn tụ nhỏ. Thêm một tụ không cứu được mass bị quên giữa ESP32 và driver.
+**4. Các đặc tính điện cần dùng (Electrical Characteristics).** Không cần đọc hết toàn bộ bảng dài mà chỉ trích đúng thông số bạn áp dụng: với mạch lái động cơ, đó là điện áp tối thiểu được nhận là mức cao ($V_{IH,\min}$), điều kiện kéo mức cao cho chân `STBY`, dòng liên tục và dòng đỉnh.
 
-**6. Bản vẽ vỏ, để tìm chân 1.** Hình là nhìn từ trên: mắt nhìn xuống mặt nhựa, chân cắm xuống board. Chân 1 nằm cạnh chấm hoặc cạnh vát. Ảnh chụp từ đáy sẽ lật hàng. Chấm và nhãn in không thống nhất chân AO1 thì đồng hồ phân xử.
+**5. Sơ đồ ứng dụng mẫu (Typical Application Circuit).** Ghi nhận cấu trúc chuẩn: tụ lọc đặt sát chân VM, tụ lọc đặt sát chân VCC, nối mass chung, và các chân vào điều khiển từ vi điều khiển. Ngay cả khi module đã hàn sẵn tụ nhỏ, tụ lọc vẫn không thể thay thế sợi dây mass chung giữa ESP32 và mạch lái.
 
-Board clone nói dối bằng mực. Nhãn "5V" dán lên chân logic 3,3 V, GND đổi chỗ với VM, mũi tên ECHO chỉ vào chân trigger: hàng đó vẫn được giao. Chỉ cấp nguồn cho rail nghi ngờ, nguồn có hạn dòng, que đen ở mass, rồi ghi số vôn lên tờ giấy. Sau bước đó, nhãn in không còn quyền biểu quyết.
+**6. Bản vẽ cơ khí vỏ IC (Package Outline) để tìm chân số 1.** Bản vẽ tiêu chuẩn là hình chiếu nhìn từ mặt trên xuống (top view), trong đó chân số 1 nằm cạnh dấu chấm hoặc cạnh vát; lưu ý rằng nhìn từ mặt đáy sẽ bị lật ngược hàng chân. Nếu ký hiệu in lụa trên module mâu thuẫn với dấu chấm định vị, hãy dùng đồng hồ vạn năng đo kiểm tra để phân xử.
 
-## TB6612FNG, đi một vòng
+Các mạch tương thích giá rẻ đôi khi in sai nhãn lụa (chẳng hạn ghi "5V" ở chân logic 3,3 V, đảo vị trí GND với VM, hoặc in lệch mũi tên chân ECHO/TRIG). Khi nghi ngờ một đường nguồn, hãy đo trực tiếp bằng đồng hồ ở chế độ DC V (que đen đặt tại mass) trên nguồn có giới hạn dòng rồi ghi kết quả thực tế ra giấy — số đo luôn có giá trị cao hơn chữ in.
 
-Dùng cửa sổ của module mà khóa này mua, và cách hoạt động Toshiba được Pololu tóm trên trang carrier ở mục đọc thêm. Ô trên trang ấy khác bài này thì trang ấy đúng. Listing module của bạn còn chặt hơn cả hai thì listing thắng.
+## Áp dụng sáu bước cho TB6612FNG
 
-Cực đại tuyệt đối đi trước để pin ngược hoặc quá áp bị loại trước khi giắc khớp. Bảng đó là hàng rào. Đoạn sau mới là chỗ được sống.
+Hãy đối chiếu thông số của module TB6612FNG dùng trong khóa học với tài liệu tóm tắt chip Toshiba trên trang Pololu ở mục Đọc thêm (nếu thông số trên trang nhà sản xuất module chặt hơn thì ưu tiên làm theo mức chặt hơn).
 
-Tên chân đi thứ hai. Mô-tơ A nhận lệnh từ AIN1 và AIN2, chân tốc độ là PWMA. Mô-tơ B là BIN1, BIN2 và PWMB. Miếng đồng chạm dây mô-tơ là AO1 với AO2, hoặc BO1 với BO2. STBY không phải GPIO dư. Trên chip này nó là công tắc tắt cả hai cầu. Bảng điều khiển không có chuyển động nào cho đến khi STBY ở mức cao. Nhiều module kéo STBY xuống sẵn trên board, nên quên một sợi dây là cả hai bánh đứng yên trong khi sổ tay ghi "tiến".
+**Bước 1 (Cực đại tuyệt đối):** Kiểm tra trước để loại bỏ mọi phương án ngược cực hoặc quá áp trước khi cắm giắc.
 
-Điều kiện khuyến nghị đi thứ ba. Module mà khóa này coi là món cần mua có VM từ 4,5 V đến 10 V. Một cell lithium khoảng 3,7 V nằm dưới sàn đó. Bộ pin khi sạc no vượt 10 V thì vượt trần module, dù PDF của chip trần có vẻ rộng rãi hơn. VCC logic từ 2,7 V đến 5,5 V, nên rail 3,3 V là nguồn logic hợp lệ. USB 5 V cũng nằm trong cửa sổ logic ấy, và vẫn là nguồn mô-tơ tồi. Chuyện đó là bài 09. VM và VCC là hai chân khác nhau có chủ đích.
+**Bước 2 (Tên chân):** Động cơ A nhận tín hiệu chiều quay từ `AIN1`, `AIN2` và tín hiệu tốc độ từ `PWMA`; động cơ B tương ứng là `BIN1`, `BIN2` và `PWMB`. Hai cặp ngõ ra nối dây động cơ là `AO1`/`AO2` và `BO1`/`BO2`. Chân `STBY` không phải chân dư mà là công tắc bật/tắt cả hai cầu H: bảng chân lý chỉ cho phép động cơ chạy khi `STBY` ở mức cao. Vì nhiều module thiết kế kéo sẵn `STBY` xuống mức thấp, quên nối chân này sẽ khiến cả hai bánh đứng yên dù mã nguồn đang gửi lệnh tiến.
 
-Những dòng sẽ dùng đi thứ tư. Dòng liên tục khoảng 1,2 A mỗi kênh, dòng đỉnh khoảng 3,2 A. Hai mô-tơ TT quay không tải nằm rất thấp so với 1,2 A. Kẹt rotor thì không. Để trạng thái kẹt ngồi trên dòng liên tục thì driver thành cầu chì ngoài ý muốn. Chép luôn quy tắc mức cao. Nhiều bản in đặt
+**Bước 3 (Điều kiện khuyến nghị):** Module của khóa học có dải `VM` từ 4,5 V đến 10 V. Một cell lithium đơn (~3,7 V) nằm dưới ngưỡng thấp này, còn bộ pin sạc đầy vượt 10 V lại vượt ngưỡng trên của module dù datasheet chip trần có thể cho phép cao hơn. Nguồn logic `VCC` nằm trong dải 2,7 V đến 5,5 V, hoàn toàn tương thích với đường 3,3 V của vi điều khiển. Nguồn USB 5 V tuy nằm trong dải logic nhưng không dùng để cấp cho động cơ (xem chi tiết ở bài 09). Hai chân `VM` và `VCC` được thiết kế tách biệt hoàn toàn.
+
+**Bước 4 (Đặc tính điện cần dùng):** Dòng liên tục mỗi kênh khoảng 1,2 A và dòng đỉnh khoảng 3,2 A. Hai động cơ TT quay không tải rút dòng rất nhỏ so với 1,2 A, nhưng khi kẹt trục dòng tăng rất mạnh; duy trì trạng thái kẹt vượt mức liên tục sẽ làm cháy mạch lái. Đồng thời, cần lưu ý ngưỡng nhận diện mức logic cao:
 
 $$
 V_{IH,\min} = 0{,}7 \times V_{CC}
 $$
 
-Tại $$V_{CC} = 3{,}3\,\mathrm{V}$$ thì được $$2{,}31\,\mathrm{V}$$. GPIO kéo lên 3,3 V vượt qua được. Cùng hệ số ấy ở 5 V là $$3{,}5\,\mathrm{V}$$, và GPIO 3,3 V không vượt 3,5 V. Một con số đó cấm câu "cấp logic 5 V vì nhãn in nói vậy, rồi điều khiển chân vào từ ESP32". Hãy nuôi VCC bằng 3,3 V. Đừng sống trong khoảng trống rồi hy vọng chân vào "gần đúng".
+Tại $$V_{CC} = 3{,}3\,\mathrm{V}$$, ngưỡng này là $$2{,}31\,\mathrm{V}$$, nên tín hiệu mức cao 3,3 V từ GPIO vượt qua dễ dàng. Ngược lại, nếu cấp $$V_{CC} = 5\,\mathrm{V}$$, ngưỡng tối thiểu tăng lên $$3{,}5\,\mathrm{V}$$ và chân GPIO 3,3 V **không đạt** mức cao tiêu chuẩn. Phép tính này khẳng định bắt buộc phải cấp `VCC` bằng 3,3 V khi điều khiển từ ESP32 hay Pico, không cấp 5 V rồi trông chờ mạch tự nhận.
 
-Sơ đồ đi thứ năm. VM tới pin động cơ, VCC tới 3,3 V, mass nối nhau, mô-tơ trên AO1/AO2 và BO1/BO2, bốn GPIO cho AIN1, AIN2, PWMA và STBY. Tụ đệm mắc ngang VM, đúng cực; bài 09 chọn dung lượng. Bản vẽ vỏ đi thứ sáu: đánh dấu chân 1 dù bạn chỉ đụng header.
+**Bước 5 & 6 (Sơ đồ ứng dụng và bản vẽ vỏ):** Nối `VM` vào pin động cơ, `VCC` vào 3,3 V, nối mass chung, đấu động cơ vào `AO1`/`AO2` và `BO1`/`BO2`, và nối bốn chân GPIO tới `AIN1`, `AIN2`, `PWMA`, `STBY` kèm tụ đệm đúng cực ngang chân `VM` (sẽ chọn trị số cụ thể ở bài 09). Cuối cùng, đánh dấu rõ vị trí chân số 1 trên bản vẽ.
 
-"Thuận chiều kim đồng hồ" trong datasheet theo dây mô-tơ, không theo mũi xe. STBY cao, AIN1 khác AIN2, PWMA cao thì mô-tơ chạy; đảo AIN1 với AIN2 thì đảo chiều; STBY thấp thì vẫn chờ. Lần chạy sau: STBY cao, hai chân hướng khác nhau, PWM vừa.
+Lưu ý rằng chiều "thuận kim đồng hồ" (CW) trong bảng chân lý datasheet phụ thuộc vào cách bạn đấu hai dây động cơ chứ không tự động khớp hướng tiến của khung xe. Khi `STBY` ở mức cao, `AIN1` khác trạng thái `AIN2` và `PWMA` có xung thì động cơ quay; đảo trạng thái `AIN1`/`AIN2` sẽ đảo chiều quay; đưa `STBY` xuống thấp sẽ chuyển mạch về chế độ chờ.
 
-## GPIO của ESP32 không phải chỗ để sống ở 5 V
+## Giới hạn 5 V trên chân GPIO của ESP32
 
-Mở PDF Espressif và đi cùng thứ tự. Điện áp cực đại trên GPIO nằm ở rail 3,3 V, cao hơn rail ấy vài trăm milivôn, không phải 5 V. Vùng khuyến nghị là nguồn vào/ra 3,3 V đó. Hàng cực đại chỉ là hàng rào, không phải chỗ để ở. Xung 5 V nằm ngoài hàng rào.
+Áp dụng đúng trình tự trên cho tài liệu PDF của Espressif: điện áp cực đại tuyệt đối trên chân GPIO của ESP32 chỉ cao hơn đường nguồn 3,3 V vài trăm milivôn, **không phải 5 V**. Vùng làm việc khuyến nghị là mức nguồn vào/ra 3,3 V; mọi xung 5 V đều nằm ngoài hàng rào an toàn.
 
-HC-SR04 làm hàng rào ấy cụ thể. Cảm biến nuôi bằng 5 V, dây echo vọt lên khoảng 5 V khi có xung phản hồi. Ô cực đại ấy cấm nối thẳng vào bất kỳ GPIO nào của ESP32. Trigger là ngõ vào của cảm biến, thường kéo được từ 3,3 V. Echo thì không. Mạch chia áp là việc sau; hôm nay tờ MCU ghi "echo không nối thẳng" và chép điện áp đã buộc quyết định đó. Pico cùng giới hạn: tài liệu Raspberry Pi mô tả chân 3,3 V không chịu 5 V, và code dùng số GP trên hình, không phải đếm pad từ đầu USB.
+Với cảm biến **HC-SR04** (nuôi bằng 5 V), chân `Echo` xuất mức cao xấp xỉ 5 V khi có xung phản hồi, nên bảng thông số cực đại cấm tuyệt đối việc nối thẳng `Echo` vào bất kỳ chân GPIO nào của ESP32. Chân `Trig` (ngõ vào kích cảm biến) thường nhận được mức cao 3,3 V, nhưng chân `Echo` bắt buộc phải hạ mức. Tờ sơ đồ chân MCU hôm nay cần ghi rõ cảnh báo "không nối thẳng Echo" kèm con số giới hạn điện áp. Raspberry Pi Pico cũng có giới hạn tương tự (chân GPIO 3,3 V không chịu 5 V), đồng thời lưu ý khi lập trình phải dùng số chân `GP` trên sơ đồ chứ không đếm theo số thứ tự chân vật lý từ đầu USB.
 
-Board clone in "5V" cạnh một lỗ bạn tưởng là GPIO thì hãy đo khi chỉ cắm USB. Lỗ nào ngồi gần 5 V là chân nguồn. Không phải chỗ nhận echo, cũng không phải chỗ gắn LED khi chưa có điện trở.
+Nếu gặp mạch tương thích in nhãn "5V" cạnh một lỗ cắm bạn tưởng là GPIO, hãy cắm riêng USB và đo kiểm tra: bất kỳ lỗ nào đo được gần 5 V đều là chân nguồn, không phải chân nhận tín hiệu echo hay chân đấu LED trực tiếp.
 
 ## Thực hành
 
-Không có gì quay. Bạn nộp hai tờ.
+Bài thực hành này không quay động cơ; sản phẩm đầu ra là hai trang sơ đồ chân hoàn chỉnh.
 
-1. Đặt tên hai trang: "sơ đồ chân MCU" và "sơ đồ chân driver". Ghi ngày. Board chưa về thì làm tờ MCU từ PDF ESP32 và ghi "chưa mua board".
-2. Tờ driver phải thấy đủ sáu bước. Chép VM 4,5–10 V, VCC 2,7–5,5 V, "STBY phải mức cao", 1,2 A liên tục, 3,2 A đỉnh. Phác header và gắn nhãn AIN1, AIN2, PWMA, BIN1, BIN2, PWMB, AO1, AO2, BO1, BO2, VM, VCC, GND, STBY. Nhãn in khác chữ thì giữ hai cột.
-3. Tờ MCU chép điện áp cực đại của GPIO và tên bảng. Ghi echo của HC-SR04 là ngõ ra 5 V, không được rơi vào GPIO. Gán chân ra hợp lệ cho AIN1, AIN2, PWMA và STBY. ESP32 kiểu module thông dụng thì tránh chân flash và chân chỉ vào.
-4. Không cấp VM. Nếu nuôi được riêng rail logic bằng nguồn 3,3 V có hạn dòng, đo chân nhãn "5V" và chân nhãn "3V3", que đen ở mass. Không làm an toàn được thì viết các bước đo và đánh dấu "dry-run".
-5. Cất hai tờ vào sổ. Ảnh `ch01-07-mcu-card` và `ch01-07-driver-card` là đủ nếu chương 02 còn đọc được.
+1. Tạo hai trang ghi chép trong sổ lab mang tên "Sơ đồ chân MCU" và "Sơ đồ chân driver", ghi rõ ngày thực hiện (nếu mạch chưa về, lập trang MCU từ PDF ESP32 và ghi chú `chưa mua board`).
+2. Trên trang **driver**, trình bày đủ sáu bước: ghi rõ `VM` 4,5–10 V, `VCC` 2,7–5,5 V, quy tắc `STBY` phải ở mức cao, dòng 1,2 A liên tục và 3,2 A đỉnh. Phác thảo hàng chân header và gắn đủ nhãn `AIN1`, `AIN2`, `PWMA`, `BIN1`, `BIN2`, `PWMB`, `AO1`, `AO2`, `BO1`, `BO2`, `VM`, `VCC`, `GND`, `STBY` (nếu chữ in lụa trên module khác datasheet, kẻ hai cột đối chiếu).
+3. Trên trang **MCU**, chép lại giới hạn điện áp cực đại của GPIO cùng tên bảng thông số gốc; ghi rõ lệnh cấm nối thẳng chân `Echo` 5 V của HC-SR04 vào GPIO. Gán trước các chân ngõ ra hợp lệ cho `AIN1`, `AIN2`, `PWMA` và `STBY` (với ESP32 thông dụng, tránh chọn các chân dùng cho bộ nhớ flash và các chân chỉ hỗ trợ ngõ vào).
+4. Không cấp nguồn `VM`. Nếu có nguồn 3,3 V giới hạn dòng để cấp riêng phần logic (hoặc chỉ cắm USB cho mạch phát triển), đo kiểm tra chân ghi `5V` và chân ghi `3V3` với que đen đặt tại mass; nếu chưa có thiết bị để đo an toàn, viết rõ các bước đo và đánh dấu `dry-run`.
+5. Lưu ảnh chụp hai trang ghi chép vào sổ với tên `ch01-07-mcu-card` và `ch01-07-driver-card` (đảm bảo đủ rõ nét để dùng lại ở Chương 02).
 
-Dừng nếu một chân nóng, hoặc lỗ bạn sắp gọi là GPIO đo được gần 5 V.
+Dừng ngay nếu phát hiện chân nào nóng bất thường hoặc một chân bạn định dùng làm GPIO lại đo được gần 5 V.
 
 ## Video tham khảo
 
-- **Xem trước:** [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Thứ tự đọc một datasheet: tính năng, điện áp tối đa, rồi sơ đồ chân.
-- [How To Read A Datasheet - Phil's Lab #123](https://www.youtube.com/watch?v=1EXXqWweTkI) — Phil’s Lab, tiếng Anh. Cùng việc, đi sâu hơn vào bảng điện và đồ thị. Dừng ở bảng chân của con IC bạn đang cầm.
+- **Xem trước:** [How To Read A Datasheet - Electronics with Becky Stern | DigiKey](https://www.youtube.com/watch?v=v2d5H5k_SAc) — DigiKey, tiếng Anh. Hướng dẫn trình tự đọc một datasheet cơ bản: tính năng, điện áp tối đa rồi tới sơ đồ chân.
+- [How To Read A Datasheet - Phil's Lab #123](https://www.youtube.com/watch?v=1EXXqWweTkI) — Phil’s Lab, tiếng Anh. Đi sâu hơn vào bảng đặc tính điện và đồ thị; bạn có thể dừng ở phần bảng chân của con IC mình đang sử dụng.
 
 ## Bài tập
 
-Mỗi câu trả lời gồm một con số, bảng chứa nó, và sợi dây mà con số ấy cấm.
+Với mỗi câu hỏi dưới đây, hãy nêu rõ con số thông số, tên bảng chứa thông số đó và kết nối dây bị cấm tương ứng:
 
-1. Có người nối ECHO của HC-SR04 thẳng vào GPIO 4 của ESP32 và nói bảng cực đại sẽ gánh được. Con số nào cấm sợi dây, và bạn ghi gì nếu đo xung echo khi cảm biến nuôi 5 V?
-2. Nhãn driver nói chân logic cần 5 V. Mức cao của ESP32 là 3,3 V. Tính $$0{,}7 \times 5$$ và $$0{,}7 \times 3{,}3$$. Kết quả nào cấm ESP32 điều khiển các chân vào đó, và VCC nào gỡ lệnh cấm?
-3. Hai mô-tơ TT sắp bị cột vào chân 5 V của ESP32 "chỉ để thử". USB khoảng 500 mA. Driver chịu 1,2 A liên tục. Con số nào vỡ trước, và vì sao con số lớn hơn không phải giấy phép dùng USB làm VM?
-4. STBY để hở và chương trình không kéo nó. Hành vi nào của chip cấm PWM làm bánh quay, và một thao tác GPIO nào gỡ được?
-5. Về một board DRV8833 thay vì TB6612. Điều gì cấm chép AIN1, PWMA và STBY từ tờ hôm nay lên nhãn đó, và phải mở trang nào ở mục đọc thêm?
+1. Một người định nối thẳng chân `ECHO` của HC-SR04 vào chân GPIO 4 của ESP32 với suy nghĩ bảng cực đại sẽ chịu được. Thông số nào cấm kết nối này, và bạn sẽ ghi nhận mức điện áp nào nếu đo xung echo khi cảm biến nuôi bằng 5 V?
+2. Một mạch lái ghi chân logic cần 5 V trong khi mức cao của ESP32 là 3,3 V. Tính $$0{,}7 \times 5$$ và $$0{,}7 \times 3{,}3$$. Kết quả nào cho thấy ESP32 không đạt chuẩn điều khiển, và cần cấp `VCC` bao nhiêu để khắc phục?
+3. Có người định đấu tạm hai động cơ TT vào chân 5 V của ESP32 "chỉ để thử". Biết cổng USB cấp khoảng 500 mA còn mạch lái chịu 1,2 A liên tục. Giới hạn nào bị vượt quá trước, và vì sao mức 1,2 A của mạch lái không cho phép lấy USB làm nguồn `VM`?
+4. Nếu chân `STBY` để hở và chương trình không kích lên mức cao, cơ chế nào của IC ngăn xung PWM làm bánh xe quay, và thao tác GPIO nào giải quyết việc này?
+5. Giả sử bạn nhận được module DRV8833 thay vì TB6612. Vì sao không được chép nguyên các tên chân `AIN1`, `PWMA`, `STBY` từ trang ghi chép hôm nay sang module mới, và bạn phải mở tài liệu nào ở mục Đọc thêm?
 
 <details markdown="1">
 <summary>Gợi ý đáp án</summary>
 
-1. Lệnh cấm là điện áp cực đại của GPIO ESP32, nằm ở rail 3,3 V chứ không phải 5 V. Echo xung lên gần điện áp nuôi cảm biến, khoảng 5 V. Ghi mức cao đo được cạnh ô đó. Nối thẳng đã sai; mạch chia là việc sau.
-2. $$0{,}7 \times 5 = 3{,}5\,\mathrm{V}$$, GPIO 3,3 V không tới, nên VCC = 5 V bị cấm với các chân vào ấy. $$0{,}7 \times 3{,}3 = 2{,}31\,\mathrm{V}$$, GPIO tới được. Nuôi VCC bằng 3,3 V.
-3. Ngân sách USB 500 mA vỡ trước. Dòng kẹt của một mô-tơ TT đã vượt mức đó, hai mô-tơ còn nặng hơn. Con số 1,2 A là trần liên tục của driver, không phải lời hứa USB cấp được ngần ấy. VM ở lại trên pin động cơ.
-4. STBY bị giữ thấp, kể cả chân không được điều khiển và bị kéo xuống, giữ cả hai cầu ở chế độ chờ. Kéo STBY lên cao và giữ trong lúc được phép chạy.
-5. Tên chân không đi theo họ driver. Mở trang TI DRV8833 và làm lại sáu bước. Gắn đúng tên mà datasheet của chip đó in.
+1. Thông số cấm là giới hạn điện áp cực đại tuyệt đối (Absolute Maximum Ratings) của GPIO ESP32, vốn nằm sát mức nguồn 3,3 V chứ không phải 5 V. Xung echo khi cảm biến nuôi 5 V sẽ lên gần 5 V, nên không được nối thẳng mà cần mạch chuyển mức hoặc cầu chia áp.
+2. $$0{,}7 \times 5 = 3{,}5\,\mathrm{V}$$, lớn hơn mức cao 3,3 V của GPIO nên cấp `VCC = 5 V` sẽ không đạt chuẩn mức cao. Với $$0{,}7 \times 3{,}3 = 2{,}31\,\mathrm{V}$$, chân GPIO 3,3 V vượt qua dễ dàng; do đó phải cấp `VCC = 3,3 V`.
+3. Giới hạn 500 mA của cổng USB bị vượt quá trước (ngay cả một động cơ TT kẹt trục đã rút vượt mức này). Thông số 1,2 A chỉ là khả năng chịu dòng liên tục của mạch lái, không phải năng lực cấp dòng của cổng USB; nguồn `VM` bắt buộc phải lấy từ pin động cơ.
+4. Khi `STBY` ở mức thấp (hoặc bị kéo xuống thấp do để hở), IC khóa cả hai cầu H ở chế độ chờ (standby) nên mọi lệnh PWM đều vô hiệu. Chỉ cần xuất mức logic cao giữ ổn định trên chân `STBY` trong thời gian cho phép chạy.
+5. Mỗi họ IC có sơ đồ và tên chân riêng (ví dụ DRV8833 dùng `nSLEEP` thay vì `STBY`). Cần mở trang thông số TI DRV8833 ở mục Đọc thêm và thực hiện lại đủ 6 bước đọc datasheet cho đúng con chip đó.
 
 </details>
 
 ## Đọc thêm
 
-- [Module TB6612FNG của Pololu](https://www.pololu.com/product/713) — cách Toshiba hoạt động, viết ngắn: dải logic, STBY, và chuyện 1,2 A / 3,2 A. Trang này sửa bài học nếu một ô khác, và listing module thắng khi nó chặt hơn.
-- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — cực đại tuyệt đối và danh sách GPIO cho câu echo.
-- [TI DRV8833](https://www.ti.com/product/DRV8833) — driver còn lại mà checklist chương cho phép ghi tên. Chip trong ảnh không phải TB6612 thì bắt đầu từ đây.
-- [Tài liệu Raspberry Pi Pico](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html) — vào/ra 3,3 V, chân 1, và số GP mà code phải dùng.
+- [Module TB6612FNG của Pololu](https://www.pololu.com/product/713) — tóm tắt rõ ràng cách hoạt động của IC Toshiba: dải logic, chân STBY và mức dòng 1,2 A / 3,2 A (ưu tiên giới hạn chặt hơn nếu trang nhà sản xuất module quy định khác).
+- [Datasheet ESP32 (PDF)](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf) — bảng thông số cực đại tuyệt đối và danh sách chân GPIO.
+- [TI DRV8833](https://www.ti.com/product/DRV8833) — tài liệu chính thức cho phương án mạch lái thay thế nếu bạn sử dụng DRV8833.
+- [Tài liệu Raspberry Pi Pico](https://www.raspberrypi.com/documentation/microcontrollers/raspberry-pi-pico.html) — giới hạn vào/ra 3,3 V, vị trí chân số 1 và bảng ánh xạ số chân `GP` cho lập trình.
 
 ## Mua ở Việt Nam
 
-ESP32 hoặc Pico, module kiểu TB6612, mô-tơ TT và HC-SR04 đã nằm trong danh sách kit ở chương 00, bài 05, [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Mua theo bài đó. Đừng lập một bộ thứ hai ở đây, và đừng mua TB6612FNG rời, chân nhỏ, để hàn tay cho capstone.
+Các linh kiện chính (ESP32 hoặc Pico, module TB6612, động cơ TT và HC-SR04) đã nằm trong danh sách ở bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Không mua rời IC TB6612FNG dạng chip dán chân mịn để tự hàn tay cho đồ án.
 
-Chưa có đồng hồ thì chưa kiểm được nhãn in. Một trang đã kiểm là UNI-T UT33D tại [Hshop](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang). Đọc giá đang bán. So shop thì xem [Hshop](https://hshop.vn/), [Thế Giới IC](https://www.thegioiic.com/) và [IC Đầy Rồi](https://icdayroi.com/).
+Nếu chưa có đồng hồ vạn năng để kiểm tra nhãn in trên mạch, bạn có thể tham khảo [UNI-T UT33D+ tại Hshop](https://hshop.vn/dong-ho-van-nang-dien-tu-digital-multimeter-uni-t-ut33d-chinh-hang) (kiểm tra giá hiện hành trước khi đặt) hoặc đối chiếu thêm tại [Hshop](https://hshop.vn/), [Thế Giới IC](https://www.thegioiic.com/) và [IC Đây Rồi](https://icdayroi.com/).

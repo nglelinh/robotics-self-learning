@@ -11,33 +11,35 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~50 phút**. Capstone B đã có hai lab. Cửa này hỏi bằng chứng, không hỏi lại định nghĩa SLAM.
+Thời lượng: **~50 phút**. Sau hai bài lab Capstone B, mục kiểm tra này yêu cầu minh chứng thực tế cho các kết quả đã chạy, không lặp lại định nghĩa lý thuyết SLAM.
 
 ## Mục tiêu
 
-Bạn ký: tour khái niệm đã có câu TF, lab SLAM có ảnh bản đồ hoặc log `/map`, lab Nav2 có một goal và một `Twist`, và bạn tách được phần sim khỏi phần robot thật. Thiếu lidar thật không làm trượt phần sim. Im lặng về phần thật thì trượt, vì thiếu câu hoãn.
+Bạn cần xác nhận đủ các hạng mục: câu tóm tắt chuỗi TF từ phần khái niệm, ảnh bản đồ hoặc log `/map` từ lab SLAM, một lượt gửi goal sinh `Twist` từ lab Nav2, và sự tách bạch rõ ràng giữa phần mô phỏng với phần xe thật. Việc chưa có lidar thật không làm trượt phần mô phỏng, nhưng bỏ trống không ghi chú kế hoạch hoãn cho phần xe thật thì chưa đạt.
 
 ## Kiến thức cần trước
 
-Bài 11-01 đến 11-07. Odometry chương 08 đã có dấu đúng nếu bạn đã ký chương đó. Lidar là LD06 hoặc RPLIDAR A1 khi bạn làm phần sàn.
+Hoàn thành các bài từ 11-01 đến 11-07. Đảm bảo odometry chương 08 đã đúng dấu nếu bạn triển khai trên xe thật, và chuẩn bị lidar LD06 hoặc RPLIDAR A1 khi chạy trên sàn.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Chương 12 sẽ nói policy. Policy không dựng `/map` hộ bạn. Cửa này chặn việc gọi một video TurtleBot là "robot nhà đã tự hành".
+Chương 12 sẽ chuyển sang các chính sách học máy (policy), nhưng policy không tự dựng `/map` thay cho tầng điều hướng. Checklist này giúp phân biệt rạch ròi giữa việc chạy thành công mô phỏng TurtleBot3 với việc xe tự chế đã sẵn sàng tự hành ngoài thực tế.
 
-## Đạt và trượt
+## Tiêu chí đạt và không đạt
 
-**Khái niệm.** Một câu có `map` → `odom` → `base_link` và một câu vì sao một tia ToF không phải `LaserScan`.
+**Khái niệm.** Một câu mô tả đúng chuỗi `map → odom → base_link` và một câu giải thích vì sao cảm biến ToF đơn điểm không thay thế được `LaserScan`.
 
-**SLAM sim.** Ảnh hoặc mô tả lưới khi `slam:=True` trên launch TurtleBot3 của Nav2 Jazzy, hoặc log nói launch fail kèm dòng lỗi gốc. "Không chạy vì máy yếu" không kèm lệnh là trượt.
+**SLAM mô phỏng.** Ảnh chụp hoặc mô tả lưới bản đồ khi chạy `slam:=True` với mô phỏng TurtleBot3 của Nav2 Jazzy (hoặc log lỗi launch nguyên văn nếu máy không đủ tài nguyên). Ghi chung chung "không chạy vì máy yếu" mà không kèm lệnh và log là chưa đạt.
 
-**SLAM thật.** Ảnh bản đồ phòng, hoặc câu hoãn có ngày và lý do (chưa có lidar). Bản đồ cong như quả chuối mà không nhắc dấu encoder là trượt nếu bạn đã có xe.
+**SLAM thực tế.** Ảnh bản đồ phòng thực tế, hoặc ghi chú hoãn có ngày cụ thể và lý do (ví dụ chưa có lidar). Nếu đã chạy trên xe thật mà bản đồ bị cong nhưng không ghi nhận nguyên nhân dấu encoder thì chưa đạt.
 
-**Nav2.** Một goal trong sim tạo `cmd_vel` khác 0, rồi robot dừng khi goal hủy hoặc khi bạn gửi 0. Trên sàn: cùng chuyện với bánh nhấc ở lần đầu, rồi mới hạ bánh. Chưa ra sàn: câu hoãn.
+**Nav2.** Một mục tiêu gửi trong mô phỏng tạo ra `/cmd_vel` khác 0 rồi dừng khi hủy goal hoặc gửi lệnh 0. Trên sàn thực tế: thực hiện tương tự với bước nhấc bánh ban đầu trước khi hạ xuống sàn (nếu chưa chạy sàn thì ghi chú hoãn).
 
-**An toàn.** Lần đầu trên sàn có người đứng ở công tắc pin. Thiếu câu đó mà bạn đã hạ bánh là trượt cả cửa Nav2 thật.
+**An toàn.** Ghi nhận rõ có người túc trực ở công tắc nguồn pin trong lần đầu hạ bánh chạy tự hành; nếu đã hạ bánh mà thiếu xác nhận này thì tiêu chí Nav2 thực tế chưa đạt.
 
 ## Lab
+
+Sao chép mẫu sau vào sổ thực hành và điền đầy đủ kết quả:
 
 ```text
 ## Ky duyet chuong 11
@@ -51,25 +53,27 @@ Cong tat pin khi ha banh: co / chua ha
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Cần kiểm |
+| Hiện tượng | Hướng kiểm tra |
 | --- | --- |
-| Costmap trống, Gazebo vẫn có tia | QoS scan, hoặc sai `frame_id` |
-| Bản đồ quay khi xe đi thẳng | Dấu encoder hoặc trái/phải |
-| Goal xong mà bánh thật không dừng | `cmd_vel` còn publisher khác, hoặc watchdog firmware |
+| Costmap trống dù Gazebo vẫn hiển thị tia laser | Kiểm tra QoS của `/scan` hoặc lệch `frame_id` |
+| Bản đồ bị xoay cong khi xe chạy thẳng | Kiểm tra dấu encoder hoặc thứ tự trái/phải |
+| Hoàn thành goal nhưng bánh xe thật không dừng | Còn publisher khác phát lên `/cmd_vel` hoặc watchdog firmware chưa hoạt động |
 
 ## Video tham khảo
 
-- **Xem trước:** [Making robot navigation easy with Nav2 and ROS!](https://www.youtube.com/watch?v=jkoGkAd0GYk) — Articulated Robotics, tiếng Anh. Checklist chương hỏi một đường trong sim. Video Nav2 là hình của đường đó.
+- **Xem trước:** [Making robot navigation easy with Nav2 and ROS!](https://www.youtube.com/watch?v=jkoGkAd0GYk) — Articulated Robotics (tiếng Anh). Minh họa trực quan tuyến đường điều hướng trong mô phỏng cần đạt trước khi xác nhận checklist.
 
 ## Bài tập
 
-1. Cửa nào đạt nếu bạn chỉ có ảnh TurtleBot3 và một câu hoãn lidar ghi ngày?
-2. Vì sao ảnh RViz không thay được câu "công tắc pin"?
-3. Hai bản đồ, một cong một thẳng. Bạn ký bản nào, và việc sửa nằm ở chương nào?
+1. Nếu bạn chỉ có ảnh chạy mô phỏng TurtleBot3 và một ghi chú hoãn lidar có ngày cụ thể, những tiêu chí nào được tính là đạt?
+2. Vì sao ảnh chụp RViz không thể thay thế cho xác nhận "có người đứng ở công tắc pin"?
+3. Giữa hai bản đồ thu được (một bản bị cong, một bản thẳng), bạn xác nhận bản nào và bước khắc phục bản bị cong nằm ở chương nào?
 
 ### Gợi ý đáp án
 
-1. Sim đạt, thật đạt theo đường hoãn, với điều kiện câu hoãn có ngày. 2. Ảnh không ngắt nguồn. Công tắc là phần cứng. 3. Ký bản thẳng sau khi đã sửa dấu. Sửa ở odometry chương 08, không phải ở tham số SLAM.
+1. Phần mô phỏng đạt và phần thực tế đạt theo diện hoãn hợp lệ (với điều kiện ghi rõ ngày và lý do).
+2. RViz chỉ là giao diện hiển thị, không thể ngắt nguồn điện động cơ khi có sự cố; công tắc pin là lớp bảo vệ phần cứng bắt buộc.
+3. Xác nhận bản đồ thẳng sau khi đã sửa lỗi dấu; phần khắc phục nằm ở odometry chương 08, không phải ở tham số SLAM.
 
 ## Đọc thêm
 

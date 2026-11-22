@@ -11,33 +11,35 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~40 phút**. Không có checkpoint nào được phép là bằng chứng thay cho một đoạn văn.
+Thời lượng: **~40 phút**. Bất kỳ tệp checkpoint nào tải về cũng không thay thế được phần phân tích bằng văn bản trong sổ thực hành.
 
 ## Mục tiêu
 
-Bạn ký năm cửa đọc và một cửa tay SO-101: dataset card, đoạn đa mode, bảng VLA, câu lộ trình tháng tới, và lab tay hoặc giấy hoãn có ngày. Train xong trên GPU không bù một card thiếu đơn vị.
+Bạn cần hoàn thành và xác nhận bốn tiêu chí đọc hiểu cùng một tiêu chí thực hành tay SO-101: dataset card, đoạn phân tích đa phương án (diffusion), bảng đối chiếu VLA, kế hoạch lộ trình tháng tới và log lab tay SO-101 (hoặc ghi chú hoãn có ngày). Việc chạy huấn luyện thành công trên GPU không bù đắp được cho một dataset card thiếu đơn vị.
 
 ## Kiến thức cần trước
 
-Bài 12-01 đến 12-06. Capstone vẫn là $(v, \omega)$ trừ khi card nói khác và bạn đang nói về tay.
+Hoàn thành các bài từ 12-01 đến 12-06. Xe Capstone vẫn giữ cặp hành động $(v, \omega)$ trừ khi dataset card chỉ rõ đang mô tả cánh tay 6 khớp.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Đây là cửa cuối của khóa. Nó giữ bạn khỏi gán một ô action của OpenVLA lên PWM của xe, và khỏi gọi một lần `lerobot-train` lỗi CUDA là bài trượt.
+Đây là chốt kiểm tra cuối cùng của toàn khóa học, giúp bạn tránh nhầm lẫn khi ghép kênh đầu ra của OpenVLA sang PWM xe vi sai, đồng thời không hiểu nhầm lỗi thiếu bộ nhớ CUDA khi chạy `lerobot-train` là trượt bài lab.
 
-## Đạt và trượt
+## Tiêu chí đạt và không đạt
 
-**Card.** Có `fps`, tên khóa ảnh, tên khóa action, đơn vị. Card xe dùng m/s và rad/s. Card SO-101 dùng đúng số trục bạn đếm được (sáu trên follower) và không ghi đơn vị nếu file dataset không ghi. Bịa đơn vị là trượt.
+**Dataset card.** Ghi đầy đủ `fps`, tên khóa ảnh, tên khóa hành động và đơn vị. Card cho xe Capstone dùng m/s và rad/s; card cho SO-101 ghi đúng số trục thực tế (6 khớp trên follower) và chỉ ghi đơn vị nếu metadata dataset có khai báo (tuyệt đối không tự bịa đơn vị).
 
-**Diffusion.** Đoạn có hai demonstration, một trung bình đâm vào vật, và một câu không train. Đoạn chỉ khen "đa mode" là trượt.
+**Diffusion Policy.** Đoạn phân tích nêu rõ hai phiên mẫu đi hai phía, chứng minh lệnh trung bình đâm vào vật cản và có câu xác nhận không huấn luyện. Đoạn chỉ khen chung chung "xử lý đa mode tốt" là chưa đạt.
 
-**VLA.** Hai dòng bảng, không dòng nào nói train ở nhà là có. Một dòng SO-101 nói vector 6 khớp không phải action của RT-1 hay OpenVLA.
+**Bảng VLA.** Điền đủ hai dòng bảng so sánh, không có dòng nào trả lời "có" cho việc huấn luyện tại nhà, kèm một dòng đối chiếu SO-101 khẳng định vector 6 khớp không trùng với hành động của RT-1 hay OpenVLA.
 
-**Lộ trình.** Bài 12-05 có một tháng bạn chọn, một link đã mở, và một việc bạn sẽ không làm (không mua lidar chỉ vì một bài báo).
+**Lộ trình tiếp theo.** Chọn duy nhất một hướng cho tháng tới từ bài 12-05, ghi rõ một đường dẫn đầu tiên sẽ mở và nêu ít nhất một món sẽ không mua theo cảm tính.
 
-**Tay.** Lab 12-06: hoặc log cổng và một lần calibrate / teleop, hoặc giấy hoãn vì chưa có tay, kèm dataset card giấy. Mua tay trong tuần này không phải điều kiện đạt.
+**Thực hành tay SO-101.** Theo bài 12-06: có log cổng kết nối cùng một lần hiệu chỉnh/teleop, hoặc có ghi chú hoãn ghi rõ ngày (do chưa có phần cứng) đi kèm dataset card trên giấy. Việc mua tay máy không phải điều kiện bắt buộc để đạt.
 
 ## Lab
+
+Sao chép mẫu sau vào sổ thực hành và điền đầy đủ kết quả:
 
 ```text
 ## Ky duyet chuong 12
@@ -51,25 +53,27 @@ Train tai nha: khong
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Cần kiểm |
+| Hiện tượng | Hướng kiểm tra |
 | --- | --- |
-| Card action là PWM nhưng lời ghi là rad/s | Hai robot. Chọn một |
-| "CUDA out of memory" trong ô đạt | Lab không chấm GPU. Viết đoạn văn |
-| Bảng VLA để Twist là có | Đọc lại embodiment. Viết không |
+| Card ghi hành động là PWM nhưng chú thích lại ghi rad/s | Lệch đơn vị giữa hai hệ khác nhau; chọn thống nhất một hệ |
+| Dán lỗi `CUDA out of memory` vào mục kết quả đạt | Bài lab không chấm GPU; hoàn thiện đúng phần phân tích văn bản |
+| Điền "có" vào cột `Twist` trong bảng VLA | Xem lại khái niệm hình thái phần cứng (embodiment) và sửa lại thành "không" |
 
 ## Video tham khảo
 
-- **Xem trước:** [How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)](https://www.youtube.com/watch?v=7tGT8hqRSAo) — Brogan M. Pratt, tiếng Anh. Checklist chương hỏi một lần teleop hoặc một tờ dataset card. Xem tay SO-101 trước khi tick đường có phần cứng.
+- **Xem trước:** [How to Train an AI Robotic Arm With No Code (Hugging Face LeRobot + SO-101)](https://www.youtube.com/watch?v=7tGT8hqRSAo) — Brogan M. Pratt (tiếng Anh). Quan sát trực quan cấu trúc tay SO-101 trước khi xác nhận lộ trình phần cứng hoặc lập dataset card.
 
 ## Bài tập
 
-1. Cửa nào trượt nếu đoạn diffusion đúng nhưng card không có `fps`?
-2. Giấy hoãn SO-101 không ghi ngày. Bạn ký không?
-3. Vì sao một checkpoint OpenVLA tải được vẫn không làm cửa tay đạt?
+1. Nếu đoạn phân tích Diffusion Policy đạt chuẩn nhưng dataset card lại thiếu `fps`, tiêu chí nào chưa đạt?
+2. Một ghi chú hoãn thực hành tay SO-101 nhưng không ghi ngày cụ thể có được tính là đạt không?
+3. Vì sao việc tải thành công một checkpoint OpenVLA vẫn không làm tiêu chí thực hành tay SO-101 đạt yêu cầu?
 
 ### Gợi ý đáp án
 
-1. Cửa card. Đoạn văn không điền đơn vị của log. 2. Không. Hoãn không ngày là im lặng. 3. Checkpoint đó không chứng minh bạn đã calibrate STS3215, cũng không chứng minh action 6 số khớp.
+1. Tiêu chí Dataset card chưa đạt, vì đoạn phân tích lý thuyết không thay thế được thông số tần số lấy mẫu của dữ liệu.
+2. Không — ghi chú hoãn bắt buộc có ngày cụ thể và lý do rõ ràng.
+3. Checkpoint tải về không chứng minh bạn đã hiệu chỉnh servo STS3215 hay khớp đúng không gian hành động 6 chiều của SO-101.
 
 ## Đọc thêm
 

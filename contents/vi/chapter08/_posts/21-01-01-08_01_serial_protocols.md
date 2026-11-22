@@ -11,49 +11,49 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~90 phút**.
+Thời lượng ước tính: **~90 phút**.
 
 ## Mục tiêu
 
-Hết bài này bạn thiết kế được một khung lệnh bánh xe còn nguyên vẹn dù USB giao từng mẩu, viết được phía máy tính bằng Python và phía ESP32 hoặc Pico, và giải thích được vì sao `println` chuỗi `"40,-15"` chưa phải giao thức. Bạn tính được byte XOR, chỉ ra khoảng timeout phải đưa động cơ về 0, và lưu một khung đúng cùng một khung cố ý hỏng vào `lab-notes.md`. Đây là hợp đồng mà cầu nối ROS 2 ở chương 10 sẽ dùng lại, để `cmd_vel` không biến thành “vài byte tình cờ nằm trong bộ đệm.”
+Sau bài này, bạn thiết kế được một định dạng khung lệnh bánh xe bền vững ngay cả khi cổng USB giao dữ liệu bị cắt mảnh, cài đặt được phía gửi bằng Python và phía nhận trên ESP32/Pico, đồng thời giải thích được vì sao dùng `println` gửi chuỗi `"40,-15"` chưa phải là một giao thức tin cậy. Bạn cũng tính được byte kiểm tra XOR, xác định ngưỡng timeout để đưa động cơ về 0, và ghi lại cả một khung hợp lệ lẫn một khung cố ý làm hỏng vào `lab-notes.md`. Đây chính là giao ước truyền thông mà node cầu nối ROS 2 ở Chương 10 sẽ sử dụng để `cmd_vel` không bao giờ biến thành các byte rời rạc trong bộ đệm.
 
 ## Kiến thức cần trước
 
-Bạn đã nhấp nháy LED và in một dòng ở chương 02, và đã có bản teleop Capstone A ở chương 07, kể cả khi bản đó vẫn gửi chữ thô. Bạn biết một byte là 8 bit và `115200 8N1` nghĩa là 115200 bit/giây, 8 bit dữ liệu, không parity, một bit dừng. Máy tính có Python 3 là đủ cho buổi chạy khô. ESP32 hoặc Pico là bản có phần cứng của cùng lab đó.
+Bạn đã biết điều khiển LED và in dữ liệu qua cổng nối tiếp (Chương 02), cũng như hoàn thiện phiên bản teleop Capstone A ở Chương 07. Bạn hiểu 1 byte gồm 8 bit và cấu hình `115200 8N1` nghĩa là tốc độ 115200 bit/giây, 8 bit dữ liệu, không bit chẵn lẻ, 1 bit dừng. Máy tính cài Python 3 là đủ cho phần chạy mô phỏng (dry-run); bo ESP32 hoặc Pico dùng cho phiên bản có phần cứng.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Chương 07 cho thấy robot chạy được khi bạn gõ trên cổng serial. Chương 08 biến đường đó thành thứ một chương trình có thể tin. Chương 09 giới thiệu topic ROS 2, cũng là thông điệp có khung và có kiểu. Node cầu nối ở chương 10 chỉ là bộ dịch: `geometry_msgs/Twist` đi vào, khung này đi ra. Khung mơ hồ thì Nav2, vòng thị giác, hay một policy học được ở chương 12 đều kế thừa một robot giật khi mất một byte. Phần robot learning giả định kênh lệnh tầng dưới đã hỏng theo hướng an toàn.
+Chương 07 chứng minh robot có thể chạy khi người dùng gõ lệnh qua cổng nối tiếp. Chương 08 nâng cấp đường truyền đó thành giao thức mà chương trình máy tính có thể vận hành tự động và tin cậy. Sang Chương 09, ROS 2 giới thiệu các topic cũng dựa trên thông điệp có cấu trúc và kiểu dữ liệu rõ ràng; node cầu nối ở Chương 10 chỉ làm nhiệm vụ phiên dịch `geometry_msgs/Twist` thành đúng khung lệnh này. Nếu khung truyền thiếu chặt chẽ, mọi tầng phía trên như Nav2, vòng thị giác hay chính sách điều khiển học máy (Chương 12) đều sẽ gặp tình trạng robot giật cục mỗi khi rơi mất một byte.
 
 ![Các trường của khung serial]({{ site.imgurl }}/generated/ch08_serial_frame.png)
 
 ## Khái niệm
 
-UART chuyển byte, không chuyển thông điệp. Chip USB-serial đưa những gì đã tới, có thể là nửa dòng, hai dòng, hoặc mẩu sót từ lần đọc trước. `Serial.println("40,-15")` trông ổn trên Serial Monitor vì cửa sổ đó đợi ký tự xuống dòng rồi mới vẽ chữ. Parser trong vòng lặp nhanh không được ưu đãi đó. Nó phải trả lời ba câu: thông điệp bắt đầu ở đâu, dài bao nhiêu, và có đến nguyên vẹn không.
+Giao tiếp UART truyền từng byte riêng lẻ chứ không tự động gom theo gói tin. Chip chuyển đổi USB-serial trả về bất kỳ lượng dữ liệu nào đã đến bộ đệm: có thể là nửa dòng, hai dòng dính liền hoặc phần dư từ lần đọc trước. Lệnh `Serial.println("40,-15")` nhìn có vẻ ổn trên Serial Monitor chỉ vì phần mềm đó chờ ký tự xuống dòng mới hiển thị; còn bộ phân tích (parser) trong vòng lặp điều khiển tốc độ cao buộc phải trả lời rõ ba câu hỏi: bản tin bắt đầu ở đâu, dài bao nhiêu byte và dữ liệu có toàn vẹn không.
 
-Khóa học này dùng hai cách đóng khung. **Khung ngăn cách** kết thúc bằng `\n` (byte `0x0A`), dễ gõ trên terminal. **Khung độ dài** mở bằng một dấu, rồi một số đếm, rồi đúng bấy nhiêu byte tải, rồi một byte kiểm. Cách thứ hai vẫn đúng khi phần tải chứa dấu phẩy hoặc dấu xuống dòng. Cầu nối chương 10 nói khung độ dài. Giữ khung ngăn cách làm cửa sổ gỡ lỗi bạn gõ tay được.
+Khóa học này sử dụng hai kiểu đóng khung: **khung phân cách** (kết thúc bằng ký tự `\n` — byte `0x0A`, tiện gõ tay trên terminal) và **khung theo độ dài** (gồm byte mở đầu, byte độ dài, đúng số byte tải tương ứng và byte kiểm tra). Khung theo độ dài vẫn hoạt động chính xác kể cả khi phần tải chứa dấu phẩy hay ký tự xuống dòng. Node cầu nối ở Chương 10 sẽ dùng khung theo độ dài, còn khung phân cách có thể giữ lại để gỡ lỗi thủ công.
 
-Phần tải vẫn đọc được bằng mắt:
+Phần tải (payload) vẫn giữ dạng văn bản dễ đọc bằng mắt:
 
 ```text
 V,40,-15
 ```
 
-`V` là lệnh vận tốc, `40` là bánh trái theo thang −100…100 của chương 07, `-15` là bánh phải. Đơn vị nằm trong chú thích đầu cả hai chương trình. Đừng lặng lẽ đổi một phía sang mét trên giây.
+Trong đó `V` là mã lệnh vận tốc, `40` là lệnh bánh trái và `-15` là lệnh bánh phải (theo thang −100…100). Quy ước đơn vị phải được ghi rõ ở chú thích đầu cả hai chương trình, tránh việc một bên tự ý đổi sang m/s mà bên kia không biết.
 
-Phép kiểm của bài này là XOR mọi byte tải, gói trong một byte. Nó bắt nhiều lỗi một bit và hầu hết khung bị cắt. Nó không phải tính năng bảo mật. CRC là bước sau nếu bạn rời bàn lab; chưa cần CRC để học máy trạng thái.
+Phép kiểm tra toàn vẹn trong bài này là phép XOR tất cả các byte trong phần tải thành một byte duy nhất, giúp phát hiện phần lớn lỗi lật bit đơn và khung bị cắt thiếu. Đây là cơ chế kiểm tra lỗi truyền dẫn chứ không phải mã hóa bảo mật (nếu triển khai ngoài môi trường lab, bạn có thể nâng cấp lên CRC sau khi đã làm chủ máy trạng thái):
 
 $$
 c = b_0 \oplus b_1 \oplus \cdots \oplus b_{n-1}
 $$
 
-Ảnh trên dây là `STX | LEN | payload | c | END`, với `STX = 0xAA` và `END = 0x0A`. `LEN` là độ dài phần tải, không phải độ dài cả khung. Từ chối `LEN` lớn hơn 32 để một byte hỏng không bắt vi điều khiển cấp phát bộ đệm khổng lồ.
+Cấu trúc đầy đủ trên đường dây là `STX | LEN | payload | c | END`, với `STX = 0xAA` và `END = 0x0A`. Trường `LEN` chỉ độ dài của riêng phần `payload` (không tính các byte khung) và cần giới hạn tối đa 32 byte để một byte nhiễu không khiến vi điều khiển cấp phát bộ đệm quá lớn.
 
-Bên nhận là máy trạng thái nhỏ: săn `0xAA`, đọc `LEN`, đọc đúng `LEN` byte, đọc byte kiểm, đọc byte kết thúc, so XOR, rồi mới áp lệnh. Bất ngờ nào cũng quay về trạng thái săn. Nếu 300 ms không có khung tốt, lệnh bánh xe đang áp dụng trở thành `0,0`. Timeout đó mới là tính chất an toàn. Parser đẹp mà không có timeout sẽ phát lại lệnh cuối mãi khi rút cáp USB.
+Bên nhận được cài đặt như một máy trạng thái gọn: tìm byte mở đầu `0xAA`, đọc `LEN`, đọc đủ `LEN` byte tải, đọc byte kiểm tra `c`, đọc byte kết thúc `END`, đối chiếu giá trị XOR rồi mới áp dụng lệnh. Bất kỳ sai lệch nào đều đưa máy trạng thái quay về bước tìm `0xAA`. Quan trọng nhất là cơ chế an toàn: nếu quá 300 ms không nhận được khung hợp lệ nào, lệnh động cơ phải tự động đặt về `0,0`. Một bộ phân tích khung đẹp nhưng thiếu timeout sẽ để robot chạy mãi theo lệnh cuối khi tuột cáp USB.
 
 ## Ví dụ làm từng bước
 
-Dựng khung cho bánh trái = 40 và bánh phải = −15.
+Đoạn mã Python sau dựng khung truyền cho lệnh bánh trái = 40 và bánh phải = −15:
 
 ```python
 def frame(left: int, right: int) -> bytes:
@@ -70,11 +70,11 @@ print(raw.hex(" "))
 print("payload", raw[2:-2])
 ```
 
-Bạn sẽ thấy một dòng bắt đầu bằng `aa` và kết thúc bằng `0a`, phần tải giải mã thành `V,40,-15`. Gọi `frame(40, -15)` hai lần: chuỗi hex phải y hệt. Đổi bánh phải thành `-16` thì chỉ phần tải và byte XOR đổi. Tự sửa một byte tải rồi tính lại XOR: byte kiểm cũ không còn khớp. Đó là bài kiểm bạn sẽ tự động hóa ở phần bài tập.
+Kết quả in ra bắt đầu bằng `aa`, kết thúc bằng `0a`, và phần tải giải mã thành `V,40,-15`. Khi gọi `frame(40, -15)` hai lần, chuỗi hex thu được phải giống hệt nhau. Nếu đổi bánh phải thành `-16`, chỉ phần tải và byte XOR thay đổi; nếu tự ý sửa một byte tải mà giữ nguyên byte XOR cũ, phép kiểm tra sẽ phát hiện sai lệch ngay.
 
-Trên vi điều khiển, đừng `delay()` trong lúc đợi byte. Nối những gì `read()` trả về vào bộ đệm nhỏ và chạy máy trạng thái một lần mỗi vòng. Bài 08-05 đo vòng đó. Bài này cần khung đúng trước đã.
+Trên vi điều khiển, tuyệt đối không dùng `delay()` để chờ đủ byte. Hãy gom các byte đọc được từ `read()` vào một bộ đệm nhỏ và chạy máy trạng thái trong mỗi chu kỳ vòng lặp (tốc độ vòng lặp này sẽ được đo ở Bài 08-05).
 
-Phía máy tính, với `pyserial`:
+Ở phía máy tính, gửi khung bằng `pyserial`:
 
 ```python
 import serial, time
@@ -89,18 +89,18 @@ time.sleep(0.5)
 send(0, 0)
 ```
 
-Khi robot không ở trên bàn, thay cổng bằng PTY của `socat` trong lab. Hễ driver động cơ đã nối thì bánh xe phải được nhấc khỏi mặt đất.
+Nếu chưa nối robot thật, bạn có thể thay tên cổng bằng cặp thiết bị giả lập PTY tạo bởi `socat` trong phần Lab. Khi đã nối mạch driver động cơ thật, luôn kê bánh xe rời khỏi mặt bàn.
 
 ## Lab
 
-Chạy khô, chưa cần robot.
+Thực hành chạy khô trên máy tính (chưa cần phần cứng robot):
 
 ```bash
 python3 -m pip install pyserial
 socat -d -d pty,raw,echo=0 pty,raw,echo=0
 ```
 
-`socat` in hai tên thiết bị, ví dụ `/dev/pts/3` và `/dev/pts/4`. Bên gửi dùng một cổng, parser dùng cổng kia.
+Lệnh `socat` sẽ in ra hai tên thiết bị nối thông nhau (ví dụ `/dev/pts/3` và `/dev/pts/4`). Bên gửi mở một cổng, bộ phân tích mở cổng còn lại:
 
 ```python
 import serial
@@ -137,13 +137,13 @@ while True:
         print("OK", payload.decode())
 ```
 
-**Kết quả mong đợi** sau `send(40, -15)` từ PTY bên kia:
+**Kết quả mong đợi** sau khi gọi `send(40, -15)` từ cổng PTY bên kia:
 
 ```text
 OK V,40,-15
 ```
 
-Gửi mười khung. Phải có mười dòng `OK` và không có `DROP`. Rồi gửi một khung hỏng `b"\xAA\x05V,40"` thiếu byte kiểm: parser không được in `OK`. Rút cáp được giả lập bằng cách ngừng bên gửi: ghi chú firmware phải nói lệnh cuối hết hạn. Trên mạch thật, log serial phải cho thấy hai chân PWM tắt trong khoảng 300 ms.
+Hãy gửi liên tiếp 10 khung hợp lệ: kết quả phải hiện đủ 10 dòng `OK` và không có dòng `DROP`. Sau đó thử gửi một khung bị cắt thiếu byte kiểm tra như `b"\xAA\x05V,40"`: bộ phân tích tuyệt đối không được in `OK`. Để mô phỏng tình huống rút cáp, hãy ngừng bên gửi; trên firmware thực tế, nhật ký serial phải ghi nhận hai kênh PWM tự đưa về 0 trong khoảng 300 ms.
 
 **Khi hỏng thì thường vì**
 
@@ -157,7 +157,7 @@ Gửi mười khung. Phải có mười dòng `OK` và không có `DROP`. Rồi 
 
 ## Mua ở Việt Nam
 
-Buổi chạy khô chỉ cần laptop. Bản có mạch dùng đúng board Capstone A.
+Phần thực hành chạy khô chỉ cần máy tính; phần chạy mạch thật sử dụng lại đúng bo mạch của Capstone A.
 
 | Món | Cửa hàng | Từ khóa Shopee hoặc Lazada | Khoảng giá 2026, kiểm tra lúc mua |
 | --- | --- | --- | --- |
@@ -165,24 +165,24 @@ Buổi chạy khô chỉ cần laptop. Bản có mạch dùng đúng board Capst
 | USB-TTL CP2102 hoặc CH340, mức 3,3 V | cùng chỗ | `CP2102 USB TTL 3.3V` | khoảng 25.000–60.000 đồng |
 | Pico hoặc Pico W nếu bạn ở MicroPython | [hshop.vn](https://hshop.vn/) tìm “Raspberry Pi Pico” | `Raspberry Pi Pico` | khoảng 120.000–250.000 đồng |
 
-Module USB-TTL 5 V vẫn phải nói logic 3,3 V vào chân RX của ESP32. Nguồn động cơ lấy từ pack robot, không lấy từ cổng USB laptop. Giá đổi; khoảng trên chỉ để kiểm tra túi tiền, không phải báo giá.
+Lưu ý: mạch chuyển USB-TTL cấp nguồn 5 V vẫn phải xuất mức logic 3,3 V khi nối vào chân RX của ESP32. Nguồn động cơ luôn lấy từ pack pin robot, không lấy từ cổng USB máy tính. Khoảng giá trên chỉ mang tính tham khảo và có thể thay đổi theo thời điểm.
 
 ## Video tham khảo
 
-- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Khung byte trên UART, không phải một dòng println. Đối chiếu với bộ đệm và checksum của bài.
-- [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs, tiếng Anh. UART đứng cạnh I2C và SPI để thấy vì sao teleop của xe dùng UART.
+- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Giải thích cấu trúc khung byte trên đường truyền UART để thấy sự khác biệt với việc gửi chuỗi `println` đơn thuần.
+- [Serial Communications Explained: UART, I2C, and SPI](https://www.youtube.com/watch?v=IyGwvGzrqp8) — Electronoobs, tiếng Anh. Đặt UART cạnh I2C và SPI để hiểu vì sao giao tiếp teleop giữa máy tính và vi điều khiển chọn UART.
 
 ## Bài tập
 
-1. Tính tay XOR các byte ASCII của `V,0,0`, rồi đối chiếu với hàm `frame()`. Gợi ý: XOR giao hoán, thứ tự byte không đổi kết quả, và kết quả là một byte trong `0x00`–`0xFF`.
-2. Viết ba câu về một tình huống parser theo dấu xuống dòng nhận một lệnh mà parser theo độ dài từ chối. Gợi ý: phần tải có sẵn `\n`, hoặc hai lệnh dính vào nhau trước khi bạn đọc xong lệnh đầu.
-3. Log có `OK V,40,-15` rồi im 2 giây trong khi bánh vẫn quay. Firmware thiếu dòng nào? Gợi ý: mốc thời gian của khung tốt cuối và so với `millis()`.
-4. Sửa giao thức để lệnh ngoài −100…100 bị bỏ, không bị kẹp. Phía nào phải chặn, máy tính hay MCU? Gợi ý: MCU phải chặn. Phía máy tính chỉ là tiện.
-5. Viết câu bạn sẽ dán vào chú thích cầu nối chương 10: đơn vị trên dây, đơn vị trong ROS, và timeout. Gợi ý: phía ROS sau này là m/s và rad/s; dây này vẫn là −100…100 cho đến khi bài đó quy đổi trong một hàm.
+1. Tính tay giá trị XOR của các byte ASCII trong chuỗi `V,0,0`, sau đó đối chiếu với hàm `frame()`. Gợi ý: phép XOR có tính giao hoán nên thứ tự không đổi kết quả, và kết quả luôn nằm trong một byte `0x00`–`0xFF`.
+2. Viết ba câu mô tả một tình huống mà bộ phân tích theo ký tự xuống dòng chấp nhận nhầm dữ liệu nhưng bộ phân tích theo độ dài sẽ từ chối. Gợi ý: phần tải chứa sẵn ký tự `\n` hoặc hai khung bị dính vào nhau trước khi kịp đọc xong khung đầu.
+3. Nhật ký hiển thị `OK V,40,-15` rồi im lặng suốt 2 giây nhưng bánh xe vẫn quay. Firmware đang thiếu thành phần nào? Gợi ý: lưu mốc thời gian của khung hợp lệ cuối cùng và so sánh với `millis()`.
+4. Nếu sửa giao thức sao cho các lệnh nằm ngoài dải −100…100 bị loại bỏ hoàn toàn thay vì kẹp giá trị, bên nào bắt buộc phải kiểm tra chặn — máy tính hay vi điều khiển? Gợi ý: vi điều khiển bắt buộc phải chặn để đảm bảo an toàn phần cứng; kiểm tra ở phía máy tính chỉ mang tính hỗ trợ.
+5. Viết một câu chú thích rõ ràng để dán vào đầu mã nguồn cầu nối Chương 10, nêu đủ: đơn vị trên đường truyền serial, đơn vị trong ROS và thời gian timeout. Gợi ý: phía ROS dùng m/s và rad/s, đường truyền serial vẫn giữ thang −100…100 cho tới khi được quy đổi tập trung trong một hàm duy nhất.
 
 ## Đọc thêm
 
-- [Tài liệu pyserial](https://pyserial.readthedocs.io/en/latest/shortintro.html) về cổng, timeout và `flush`.
-- [Tham chiếu Serial của Arduino](https://www.arduino.cc/reference/en/language/functions/communication/serial/) nếu firmware Capstone viết bằng C++.
-- [REP-103](https://www.ros.org/reps/rep-0103.html) về chiều trục mà sau này bạn ánh xạ lên khung này.
-- Ghi chú teleop chương 07 trong khóa, và bài 04 chương 10, nơi tiêu thụ khung bạn vừa chốt.
+- [Tài liệu pyserial](https://pyserial.readthedocs.io/en/latest/shortintro.html) về mở cổng, thiết lập timeout và hàm `flush`.
+- [Tham chiếu Serial của Arduino](https://www.arduino.cc/reference/en/language/functions/communication/serial/) dành cho firmware Capstone viết bằng C++.
+- [REP-103](https://www.ros.org/reps/rep-0103.html) về quy ước chiều trục tọa độ sẽ ánh xạ lên khung lệnh này.
+- Ghi chú giao thức teleop ở Chương 07 và Bài 04 Chương 10 — nơi trực tiếp tiêu thụ khung truyền bạn vừa thiết kế.

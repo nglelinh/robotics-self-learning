@@ -11,46 +11,46 @@ lesson_type: required
 draft: false
 ---
 
-Bài 03 đã chốt các dòng. Bài này là sketch ESP32 đọc chúng, kẹp chúng, kéo chúng dần, và đưa về không khi máy chủ im. ROS vẫn chưa có trong vòng. Bánh ở trên không.
+Bài 03 đã chốt đặc tả khung lệnh. Bài này trình bày chương trình (sketch) cho ESP32 để đọc chuỗi lệnh, kẹp giá trị an toàn, tăng giảm PWM mượt theo bước (slew rate) và tự động đưa về 0 khi máy chủ ngừng gửi. Hệ thống vẫn chưa dùng ROS và hai bánh xe vẫn phải kê trên không.
 
 ## Mục tiêu học
 
-1. Tách `V` và `S` bằng `sscanf`, kẹp từng target vào $$\pm 180$$, và bỏ dòng sai.
-2. Đưa cả hai target về 0 sau $$250~\mathrm{ms}$$ im lặng, và kéo PWM đang áp tiến 15 nấc mỗi $$20~\mathrm{ms}$$.
-3. Đẩy hai kênh cầu H với STBY cao, rồi sửa các chân ví dụ cho khớp bảng dấu bài 02.
-4. Gửi `V l r\n` từ Python, giết tiến trình, và thấy cả hai lốp dừng trong $$0{,}5~\mathrm{s}$$ trong khi MCU vẫn ăn buck.
+1. Phân tích lệnh `V` và `S` bằng `sscanf`, kẹp từng giá trị mục tiêu vào khoảng $$\pm 180$$ và bỏ qua hoàn toàn các dòng sai cú pháp.
+2. Tự động đặt cả hai mục tiêu về 0 sau $$250~\mathrm{ms}$$ không nhận lệnh mới, đồng thời điều chỉnh PWM thực tế tiến dần về mục tiêu tối đa 15 nấc mỗi $$20~\mathrm{ms}$$.
+3. Điều khiển hai kênh cầu H với chân `STBY` ở mức cao, và cập nhật số chân ví dụ khớp với bảng dấu đã lập ở Bài 02.
+4. Gửi lệnh `V l r\n` từ Python, ngắt tiến trình đột ngột và xác nhận cả hai lốp dừng hẳn trong vòng $$0{,}5~\mathrm{s}$$ trong khi vi điều khiển vẫn được cấp nguồn từ mạch buck.
 
 ## Kiến thức cần có
 
-Cần cây nguồn bài 07-01, bảng dấu bài 07-02, và ngữ pháp bài 07-03: 115200 8N1, chữ kết thúc newline, máy chủ $$200~\mathrm{ms}$$, hạn firmware $$250~\mathrm{ms}$$, kẹp $$-180..180$$. Trên TB6612, STBY thấp thì ngõ ra tắt, và PWM 0 trong khi STBY vẫn cao là thắng ngắn, không phải thả trôi trở kháng cao. $$b$$ và $$r$$ của chương 06 nằm trong ghi chú; sketch này không đọc chúng. Dương vẫn nghĩa là lốp ấy về phía mũi. Twist, với `linear.x` và `angular.z`, đến sau khi chương 08 hiệu chuẩn và chương 09 mang topic. Hôm nay không tạo workspace ROS.
+Cây nguồn từ Bài 07-01, bảng dấu từ Bài 07-02 và giao thức từ Bài 07-03 (115200 8N1, văn bản kết thúc bằng `\n`, chu kỳ máy chủ $$200~\mathrm{ms}$$, quá hạn firmware $$250~\mathrm{ms}$$, kẹp $$-180..180$$). Trên TB6612, khi `STBY` ở mức thấp thì ngõ ra bị ngắt; khi `STBY` cao, việc đặt PWM bằng 0 (khi hai chân `IN` khác mức) sẽ hãm ngắn mạch, còn đặt cả hai chân `IN` xuống thấp sẽ ngắt cầu (trở kháng cao). Hai kích thước $$b$$ và $$r$$ từ Chương 06 được lưu sẵn trong sổ tay nhưng chưa dùng trong sketch này. Quy ước dương vẫn là chiều lốp lăn về phía mũi xe. Thông điệp `Twist` (`linear.x`, `angular.z`) sẽ được tích hợp sau khi hiệu chuẩn ở Chương 08 và mở topic ở Chương 09; hôm nay chưa tạo workspace ROS.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Lỗi đáng sợ là lệnh bị dính: máy chủ chết mà duty cuối trong LEDC vẫn kéo robot bằng pin. Hạn nằm trong firmware. Luồng Twist sau này cần cùng hạn khi bản tin ngừng. Chương 09 thay parser, không thay cái dừng.
+Lỗi nguy hiểm nhất khi điều khiển robot là lệnh bị giữ kẹt: máy chủ ngừng hoạt động nhưng thanh ghi PWM (LEDC) vẫn duy trì mức duty cũ khiến xe tiếp tục chạy bằng nguồn pin. Cơ chế quá hạn (timeout) bắt buộc phải nằm trực tiếp trong firmware. Về sau, luồng `Twist` trên ROS 2 cũng đòi hỏi đúng cơ chế dừng này khi node phát bị tắt; Chương 09 chỉ thay bộ phân tích chuỗi bằng bộ nhận topic chứ không bỏ cơ chế dừng an toàn.
 
-Ô cảm và ô tính trong hình là encoder và PID bạn chưa có. Bài này là ô hành động: PWM, và timeout ép về không.
+Trong sơ đồ vòng lặp cảm biến – tính toán – chấp hành dưới đây, khối cảm biến (encoder) và khối tính toán (PID) sẽ học ở chương sau; bài này hoàn thiện khối chấp hành gồm xuất PWM và ép về 0 khi quá hạn.
 
 ![Hành động là PWM tới driver; timeout ép về không đã nằm trong ô ấy]({{ site.imgurl }}/generated/sense_compute_act.png)
 
 ## Kẹp, hạn, và bước kéo đếm được
 
-Target là điều dòng hợp lệ cuối xin, sau khi kẹp. PWM đang áp là thứ cầu đang nhận, và được phép đi sau target. Mỗi $$20~\mathrm{ms}$$, giá trị đang áp bước tối đa 15 nấc về phía target:
+Giá trị **target** là mục tiêu mà dòng lệnh hợp lệ gần nhất yêu cầu (sau khi đã kẹp trong $$\pm 180$$). Giá trị **đang áp** (`applied`) là mức PWM thực tế đang cấp cho mạch cầu, được phép thay đổi từ từ theo sau `target`. Cứ mỗi $$20~\mathrm{ms}$$, giá trị đang áp tiến thêm tối đa 15 nấc về phía `target`:
 
 $$
 \text{số bước} = \left\lceil \frac{|\text{target} - \text{đang áp}|}{15} \right\rceil, \qquad t = \text{số bước} \times 20~\mathrm{ms}.
 $$
 
-Từ 0 lên 60 là 4 bước, $$80~\mathrm{ms}$$. Từ 0 lên 180 là 12 bước, $$240~\mathrm{ms}$$. Cuộn dây không bị đạp một bậc đầy.
+Như vậy, tăng từ 0 lên 60 cần 4 bước ($$80~\mathrm{ms}$$), còn từ 0 lên 180 cần 12 bước ($$240~\mathrm{ms}$$), giúp tránh sốc dòng đột ngột lên cuộn dây động cơ và nguồn pin.
 
-Nếu `millis()` trừ mốc dòng hợp lệ cuối vượt $$250~\mathrm{ms}$$, cả hai target về 0 và bước kéo đưa duty xuống. Sau `V 60 60` không được gửi lại, target rơi ở $$250~\mathrm{ms}$$ và PWM đang áp về 0 khoảng $$80~\mathrm{ms}$$ sau:
+Nếu khoảng thời gian tính từ `millis()` đến mốc nhận dòng hợp lệ cuối cùng vượt quá $$250~\mathrm{ms}$$, cả hai `target` lập tức đặt về 0 và bộ giới hạn tốc độ thay đổi (slew) sẽ hạ dần duty về 0. Ví dụ, sau lệnh `V 60 60` cuối cùng mà không có lệnh mới, `target` rơi về 0 ở mốc $$250~\mathrm{ms}$$ và PWM thực tế về 0 sau thêm $$80~\mathrm{ms}$$:
 
 $$
 250~\mathrm{ms} + 4 \times 20~\mathrm{ms} = 330~\mathrm{ms}.
 $$
 
-Con số ấy nằm trong mức dừng $$0{,}5~\mathrm{s}$$ của lab. Lệnh 180 mất $$250+240 = 490~\mathrm{ms}$$, nên trần kẹp và bước kéo được chọn cùng nhau. `S` đưa target về 0 ngay; bước kéo vẫn làm thắng mềm. Dòng sai không làm mới hạn.
+Thời gian này nằm gọn trong giới hạn dừng $$0{,}5~\mathrm{s}$$ của bài thực hành. Ngay cả khi đang chạy ở trần 180, tổng thời gian dừng cũng chỉ là $$250 + 240 = 490~\mathrm{ms}$$ — đó là lý do trần kẹp và bước kéo được chọn đồng bộ với nhau. Lệnh `S` lập tức đặt `target` về 0 để giảm tốc mềm về dừng, còn các dòng sai cú pháp bị bỏ qua và không làm mới bộ đếm thời gian quá hạn.
 
-Chân ví dụ, bạn phải sửa theo bảng dấu bài 02: STBY 4, AIN1 16, AIN2 17, PWMA 18, BIN1 19, BIN2 21, PWMB 22. Đảo cặp IN trong code hoặc đảo vít motor, không cả hai. Arduino-ESP32 3.x dùng `ledcAttach(pin, freq, resolution)`; core 2.x dùng `ledcSetup` và `ledcAttachPin`. Sketch ghi cả hai. `Serial.setTimeout(10)` để `readBytesUntil` không chặn bước kéo cả một giây.
+Các chân ví dụ trong mã nguồn (bạn cần chỉnh lại theo bảng dấu Bài 02): `STBY = 4`, `AIN1 = 16`, `AIN2 = 17`, `PWMA = 18`, `BIN1 = 19`, `BIN2 = 21`, `PWMB = 22`. Nếu cần đảo chiều một bánh, chỉ đảo cặp `IN` trong mã nguồn hoặc đảo dây trên cầu vít động cơ, không làm cả hai. Lưu ý sự khác biệt phiên bản: Arduino-ESP32 core 3.x dùng `ledcAttach(pin, freq, resolution)`, trong khi core 2.x dùng `ledcSetup` và `ledcAttachPin` (cả hai đều có chú thích trong mã). Hàm `Serial.setTimeout(10)` đảm bảo `readBytesUntil` không làm treo vòng lặp bước kéo tới 1 giây nếu thiếu ký tự xuống dòng.
 
 ```cpp
 // Edit pins and IN polarity to the lesson 07-02 sign map.
@@ -157,9 +157,9 @@ void loop() {
 }
 ```
 
-Mở cổng thường reset ESP32 qua DTR. `setup` đưa PWM về 0 trước khi STBY cao, nên reset ấy là một lần dừng. Đừng tin DTR lúc đóng cổng. Timeout dừng robot khi MCU còn ăn buck. Rút USB chỉ là bài kiểm hạn nếu buck đang nuôi ESP32. Nuôi chỉ bằng USB thì rút dây làm chân nổi.
+Khi máy tính mở cổng nối tiếp, tín hiệu DTR thường làm ESP32 khởi động lại. Vì hàm `setup()` luôn đặt PWM về 0 trước khi kéo `STBY` lên cao, lần khởi động lại đó luôn an toàn. Tuy nhiên, không được trông chờ vào DTR khi đóng cổng; việc dừng robot khi máy chủ ngừng gửi phải do cơ chế timeout thực hiện trong lúc ESP32 vẫn đang được nuôi bởi mạch buck. Rút cáp USB chỉ kiểm chứng đúng cơ chế timeout nếu ESP32 đang ăn nguồn buck — nếu chỉ nuôi qua USB, rút dây sẽ làm mất nguồn MCU và các chân tín hiệu bị thả nổi.
 
-Dùng cổng chương 02, `/dev/ttyUSB0` hoặc `/dev/ttyACM0`. `sleep(0.2)` là nhịp $$200~\mathrm{ms}$$, và `close()` là im lặng.
+Trên máy tính, dùng đúng tên cổng từ Chương 02 (`/dev/ttyUSB0` hoặc `/dev/ttyACM0`). Lệnh `sleep(0.2)` tạo nhịp gửi $$200~\mathrm{ms}$$ và `close()` sẽ ngắt chuỗi lệnh:
 
 ```python
 import time
@@ -176,13 +176,13 @@ while time.time() - t0 < 1.0:
 port.close()
 ```
 
-Lần chạy thứ hai ghi `V 60 -60\n` trong một giây. Trái tiến, phải lùi là yaw phải theo bảng dấu bài 02. Cờ không khớp thì sửa cặp IN của kênh đó, không đảo vít trong phiên này.
+Ở lượt chạy thứ hai, đổi lệnh thành `V 60 -60\n` trong 1 giây: bánh trái tiến, bánh phải lùi tương ứng với quay phải theo bảng dấu Bài 02. Nếu chiều quay thực tế không khớp, hãy sửa cặp chân `IN` của kênh đó trong mã nguồn, không đảo thêm dây trên cầu vít.
 
 ## Lab
 
 ### An toàn
 
-Cả hai lốp ở trên không, xa mép bàn, và một tay với tới công tắc pin. Lệnh đầu là `V 60 60`, không phải 255. Bài này không xuống sàn. Có mùi hoặc lá không chạm được thì ngắt công tắc. Không để đầu pin lithium trần trên bàn khi script đã nạp.
+Kê cả hai lốp rời khỏi mặt bàn, đặt xe xa mép bàn và giữ một tay trong tầm công tắc pin. Lệnh thử đầu tiên là `V 60 60`, không dùng 255; bài này chưa đặt robot xuống sàn. Ngắt công tắc ngay nếu có mùi khét hoặc tản nhiệt quá nóng. Không để đầu dây pin lithium trần trên bàn trong khi thử nghiệm.
 
 ### BOM
 
@@ -196,15 +196,15 @@ Cả hai lốp ở trên không, xa mép bàn, và một tay với tới công t
 
 ### Các bước
 
-1. Sửa chân và cực IN cho dương khớp bài 02. Nạp. STBY cao, duty bắt đầu từ 0.
-2. Bánh trên không. Gửi `V 60 60` khoảng một giây. Cả hai cờ đi về mũi.
-3. Giết script. Cả hai lốp dừng trong $$0{,}5~\mathrm{s}$$ trong khi công tắc pin vẫn bật.
-4. Gửi `V 60 -60` một giây. Yaw khớp bảng (quay phải: trái tiến, phải lùi). Giết máy gửi lần nữa.
-5. Gõ `S`, rồi gõ riêng `V 60`. `S` dừng. Dòng gãy không kéo một bánh.
+1. Cập nhật số chân và cực tính `IN` trong sketch khớp với bảng dấu Bài 02 rồi nạp vào ESP32. Xác nhận `STBY` cao và PWM khởi đầu bằng 0.
+2. Đảm bảo bánh treo trên không, chạy script Python gửi `V 60 60` trong khoảng 1 giây và quan sát cả hai mảnh băng dính đều quay về phía mũi xe.
+3. Ngắt tiến trình Python (hoặc để script đóng cổng). Xác nhận cả hai bánh dừng hẳn trong vòng $$0{,}5~\mathrm{s}$$ trong khi công tắc nguồn pin vẫn đang bật.
+4. Chạy lại với lệnh `V 60 -60` trong 1 giây, xác nhận chiều quay phải (trái tiến, phải lùi) khớp bảng dấu rồi ngắt tiến trình để kiểm tra dừng.
+5. Gửi thử `S`, sau đó gửi riêng `V 60`. Xác nhận `S` dừng xe ngay, còn dòng thiếu tham số `V 60` không làm giật hay quay riêng một bánh.
 
 ### Kết quả mong đợi
 
-Ghi chú có chân thật sự dùng, thời gian dừng (khoảng $$330~\mathrm{ms}$$ sau `V 60 60` cuối), và hướng yaw của `V 60 -60`. Robot vẫn trên hộp. Duty còn dính sau khi tiến trình chết là lab hỏng.
+Sổ tay `lab-notes.md` ghi rõ sơ đồ chân thực tế đã dùng, thời gian dừng đo được (khoảng $$330~\mathrm{ms}$$ sau lệnh `V 60 60` cuối cùng) và chiều quay của `V 60 -60`. Robot vẫn đặt trên hộp kê trong suốt bài. Nếu bánh vẫn tiếp tục quay sau khi tiến trình Python kết thúc, bài thực hành chưa đạt.
 
 ### Lỗi thường gặp
 
@@ -218,233 +218,39 @@ Ghi chú có chân thật sự dùng, thời gian dừng (khoảng $$330~\mathrm
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Không thêm đồ nếu bài 01 và 02 đã làm thật. Chỗ thiếu thường là cáp USB có data, hoặc pyserial. ESP32 devkit khoảng 70.000–150.000 đồng, TB6612 25.000–70.000, L298N khoảng 45.000 nếu bạn map ENA/ENB vào chân PWM và vẫn giữ buck. Giá đổi.
+Không cần mua thêm linh kiện nếu đã hoàn thành đầy đủ Bài 01 và 02; thứ hay thiếu nhất ở bước này chỉ là cáp USB có đường truyền dữ liệu (data) hoặc thư viện `pyserial`. Giá tham khảo (có thể thay đổi): ESP32 devkit 70.000–150.000 đồng, TB6612 25.000–70.000 đồng, L298N khoảng 45.000 đồng (nếu dùng L298N, nối `ENA`/`ENB` vào chân PWM và vẫn cấp nguồn ESP32 qua mạch buck).
 
 - L298N đã kiểm, khoảng 45.000 đồng: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - [Hshop ESP32](https://hshop.vn/search?q=ESP32), [TB6612](https://hshop.vn/search?q=TB6612)
 - [Shopee ESP32](https://shopee.vn/search?keyword=ESP32%20devkit), [TB6612](https://shopee.vn/search?keyword=TB6612)
 - [Lazada cáp USB](https://www.lazada.vn/catalog/?q=cap%20micro%20USB%20data), [ESP32](https://www.lazada.vn/catalog/?q=ESP32)
 - [Thế Giới IC ESP32](https://www.thegioiic.com/search?q=ESP32)
-
-Ô cảm và ô tính trong hình là encoder và PID bạn chưa có. Bài này là ô hành động: PWM, và timeout ép về không.
 
 ## Video tham khảo
 
-- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Byte đi từ máy tính tới MCU. Firmware bài này chỉ chấp nhận khung đúng, rồi tắt PWM khi im.
-- [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. PWM ra cầu H là đầu cuối của vòng teleop. Xem duty đổi tốc trước khi gắn giao thức.
+- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Giải thích cách truyền byte từ máy tính xuống vi điều khiển; firmware bài này chỉ chấp nhận khung đúng cú pháp và tự tắt PWM khi mất tín hiệu.
+- [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. Minh họa cách PWM điều khiển tốc độ cầu H ở đầu cuối của vòng teleop.
 
-Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
-![Hành động là PWM tới driver; timeout ép về không đã nằm trong ô ấy]({{ site.imgurl }}/generated/sense_compute_act.png)
+Các video ngắn (Facebook Reel) dưới đây của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)):
 
-- **Xem trước:** [Understanding UART](https://www.youtube.com/watch?v=sTHckUyxwp8) — Rohde & Schwarz, tiếng Anh. Byte đi từ máy tính tới MCU. Firmware bài này chỉ chấp nhận khung đúng, rồi tắt PWM khi im.
-- [TB6612FNG H-Bridge Motor Controller - Better than L298N?](https://www.youtube.com/watch?v=JPPTRj0KWbg) — DroneBot Workshop, tiếng Anh. PWM ra cầu H là đầu cuối của vòng teleop. Xem duty đổi tốc trước khi gắn giao thức.
-
-Target là điều dòng hợp lệ cuối xin, sau khi kẹp. PWM đang áp là thứ cầu đang nhận, và được phép đi sau target. Mỗi $$20~\mathrm{ms}$$, giá trị đang áp bước tối đa 15 nấc về phía target:
-Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
-
-$$
-\text{số bước} = \left\lceil \frac{|\text{target} - \text{đang áp}|}{15} \right\rceil, \qquad t = \text{số bước} \times 20~\mathrm{ms}.
-$$
-
-Từ 0 lên 60 là 4 bước, $$80~\mathrm{ms}$$. Từ 0 lên 180 là 12 bước, $$240~\mathrm{ms}$$. Cuộn dây không bị đạp một bậc đầy.
-
-Nếu `millis()` trừ mốc dòng hợp lệ cuối vượt $$250~\mathrm{ms}$$, cả hai target về 0 và bước kéo đưa duty xuống. Sau `V 60 60` không được gửi lại, target rơi ở $$250~\mathrm{ms}$$ và PWM đang áp về 0 khoảng $$80~\mathrm{ms}$$ sau:
-
-$$
-250~\mathrm{ms} + 4 \times 20~\mathrm{ms} = 330~\mathrm{ms}.
-$$
-
-Con số ấy nằm trong mức dừng $$0{,}5~\mathrm{s}$$ của lab. Lệnh 180 mất $$250+240 = 490~\mathrm{ms}$$, nên trần kẹp và bước kéo được chọn cùng nhau. `S` đưa target về 0 ngay; bước kéo vẫn làm thắng mềm. Dòng sai không làm mới hạn.
-
-Chân ví dụ, bạn phải sửa theo bảng dấu bài 02: STBY 4, AIN1 16, AIN2 17, PWMA 18, BIN1 19, BIN2 21, PWMB 22. Đảo cặp IN trong code hoặc đảo vít motor, không cả hai. Arduino-ESP32 3.x dùng `ledcAttach(pin, freq, resolution)`; core 2.x dùng `ledcSetup` và `ledcAttachPin`. Sketch ghi cả hai. `Serial.setTimeout(10)` để `readBytesUntil` không chặn bước kéo cả một giây.
-
-```cpp
-// Edit pins and IN polarity to the lesson 07-02 sign map.
-// Positive rolls that tire toward the nose.
-
-const int PIN_STBY = 4;
-const int PIN_AIN1 = 16;
-const int PIN_AIN2 = 17;
-const int PIN_PWMA = 18;
-const int PIN_BIN1 = 19;
-const int PIN_BIN2 = 21;
-const int PIN_PWMB = 22;
-
-const int PWM_FREQ = 20000;
-const int PWM_RES  = 8;
-const int PWM_LIM  = 180;
-const unsigned long TIMEOUT_MS = 250;
-const int SLEW_STEP = 15;
-const unsigned long SLEW_MS = 20;
-
-int targetL = 0, targetR = 0;
-int appliedL = 0, appliedR = 0;
-unsigned long lastRx = 0;
-unsigned long lastSlew = 0;
-
-int approach(int applied, int target) {
-  if (applied < target) return min(applied + SLEW_STEP, target);
-  if (applied > target) return max(applied - SLEW_STEP, target);
-  return applied;
-}
-
-void drive(int in1, int in2, int pwmPin, int cmd) {
-  int mag = abs(cmd);
-  if (cmd > 0) {
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW);
-  } else if (cmd < 0) {
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, HIGH);
-  } else {
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, LOW);
-  }
-  ledcWrite(pwmPin, mag);
-}
-
-void setup() {
-  Serial.begin(115200);
-  Serial.setTimeout(10);
-  pinMode(PIN_STBY, OUTPUT);
-  pinMode(PIN_AIN1, OUTPUT);
-  pinMode(PIN_AIN2, OUTPUT);
-  pinMode(PIN_BIN1, OUTPUT);
-  pinMode(PIN_BIN2, OUTPUT);
-  digitalWrite(PIN_AIN1, LOW);
-  digitalWrite(PIN_AIN2, LOW);
-  digitalWrite(PIN_BIN1, LOW);
-  digitalWrite(PIN_BIN2, LOW);
-  // Arduino-ESP32 3.x:
-  ledcAttach(PIN_PWMA, PWM_FREQ, PWM_RES);
-  ledcAttach(PIN_PWMB, PWM_FREQ, PWM_RES);
-  // Core 2.x: đừng gọi ledcAttach / ledcWrite(pin, duty).
-  // ledcSetup(0, PWM_FREQ, PWM_RES); ledcAttachPin(PIN_PWMA, 0);
-  // ledcSetup(1, PWM_FREQ, PWM_RES); ledcAttachPin(PIN_PWMB, 1);
-  // rồi ledcWrite(0, duty) và ledcWrite(1, duty) — số kênh, không phải số chân.
-  ledcWrite(PIN_PWMA, 0);
-  ledcWrite(PIN_PWMB, 0);
-  digitalWrite(PIN_STBY, HIGH);
-  lastRx = millis();
-  lastSlew = millis();
-}
-
-void loop() {
-  if (Serial.available()) {
-    char line[32];
-    size_t n = Serial.readBytesUntil('\n', line, sizeof(line) - 1);
-    line[n] = '\0';
-    if (n > 0 && line[n - 1] == '\r') line[n - 1] = '\0';
-    int L = 0, R = 0;
-    if (line[0] == 'S' && (line[1] == '\0' || line[1] == ' ')) {
-      targetL = 0;
-      targetR = 0;
-      lastRx = millis();
-    } else if (sscanf(line, "V %d %d", &L, &R) == 2) {
-      targetL = constrain(L, -PWM_LIM, PWM_LIM);
-      targetR = constrain(R, -PWM_LIM, PWM_LIM);
-      lastRx = millis();
-    }
-    // Any other line is ignored.
-  }
-
-  if (millis() - lastRx > TIMEOUT_MS) {
-    targetL = 0;
-    targetR = 0;
-  }
-
-  if (millis() - lastSlew >= SLEW_MS) {
-    lastSlew = millis();
-    appliedL = approach(appliedL, targetL);
-    appliedR = approach(appliedR, targetR);
-    drive(PIN_AIN1, PIN_AIN2, PIN_PWMA, appliedL);
-    drive(PIN_BIN1, PIN_BIN2, PIN_PWMB, appliedR);
-  }
-}
-```
-
-Mở cổng thường reset ESP32 qua DTR. `setup` đưa PWM về 0 trước khi STBY cao, nên reset ấy là một lần dừng. Đừng tin DTR lúc đóng cổng. Timeout dừng robot khi MCU còn ăn buck. Rút USB chỉ là bài kiểm hạn nếu buck đang nuôi ESP32. Nuôi chỉ bằng USB thì rút dây làm chân nổi.
-
-Dùng cổng chương 02, `/dev/ttyUSB0` hoặc `/dev/ttyACM0`. `sleep(0.2)` là nhịp $$200~\mathrm{ms}$$, và `close()` là im lặng.
-
-```python
-import time
-import serial
-
-port = serial.Serial("/dev/ttyUSB0", 115200, timeout=0.1)
-time.sleep(2.0)
-
-t0 = time.time()
-while time.time() - t0 < 1.0:
-    port.write(b"V 60 60\n")
-    time.sleep(0.2)
-
-port.close()
-```
-
-Lần chạy thứ hai ghi `V 60 -60\n` trong một giây. Trái tiến, phải lùi là yaw phải theo bảng dấu bài 02. Cờ không khớp thì sửa cặp IN của kênh đó, không đảo vít trong phiên này.
-
-## Lab
-
-### An toàn
-
-Cả hai lốp ở trên không, xa mép bàn, và một tay với tới công tắc pin. Lệnh đầu là `V 60 60`, không phải 255. Bài này không xuống sàn. Có mùi hoặc lá không chạm được thì ngắt công tắc. Không để đầu pin lithium trần trên bàn khi script đã nạp.
-
-### BOM
-
-| Món | Việc |
-|------|------|
-| Robot đã lắp, bánh trên không | Phần bị điều khiển |
-| ESP32 ăn buck 5,0 V, USB để nạp | Logic còn sống khi giết script |
-| Bảng dấu bài 07-02 | Cực tính chân |
-| Python 3 và pyserial | Máy chủ |
-| Đồng hồ hoặc phép millis | Mức dừng 0,5 s |
-
-### Các bước
-
-1. Sửa chân và cực IN cho dương khớp bài 02. Nạp. STBY cao, duty bắt đầu từ 0.
-2. Bánh trên không. Gửi `V 60 60` khoảng một giây. Cả hai cờ đi về mũi.
-3. Giết script. Cả hai lốp dừng trong $$0{,}5~\mathrm{s}$$ trong khi công tắc pin vẫn bật.
-4. Gửi `V 60 -60` một giây. Yaw khớp bảng (quay phải: trái tiến, phải lùi). Giết máy gửi lần nữa.
-5. Gõ `S`, rồi gõ riêng `V 60`. `S` dừng. Dòng gãy không kéo một bánh.
-
-### Kết quả mong đợi
-
-Ghi chú có chân thật sự dùng, thời gian dừng (khoảng $$330~\mathrm{ms}$$ sau `V 60 60` cuối), và hướng yaw của `V 60 -60`. Robot vẫn trên hộp. Duty còn dính sau khi tiến trình chết là lab hỏng.
-
-### Lỗi thường gặp
-
-| Bạn thấy | Thường là |
-|----------|-----------|
-| Không gì chuyển động | STBY còn thấp, sai chân PWM, hoặc VM tắt |
-| Còn chạy sau khi giết Python | Thiếu timeout, hoặc MCU không thực sự còn chạy |
-| Chỉ lốp trái khớp bảng | Cặp IN phải lệch bài 02; sửa firmware hoặc vít, không cả hai |
-| `V 60` giật một bánh | Không bắt `sscanf` trả về 2 |
-| Lỗi biên dịch `ledcAttach` | Core 2.x; dùng `ledcSetup` và `ledcAttachPin` |
-
-## Mua ở Việt Nam / Where to buy in Vietnam
-
-Không thêm đồ nếu bài 01 và 02 đã làm thật. Chỗ thiếu thường là cáp USB có data, hoặc pyserial. ESP32 devkit khoảng 70.000–150.000 đồng, TB6612 25.000–70.000, L298N khoảng 45.000 nếu bạn map ENA/ENB vào chân PWM và vẫn giữ buck. Giá đổi.
-
-- L298N đã kiểm, khoảng 45.000 đồng: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
-- [Hshop ESP32](https://hshop.vn/search?q=ESP32), [TB6612](https://hshop.vn/search?q=TB6612)
-- [Shopee ESP32](https://shopee.vn/search?keyword=ESP32%20devkit), [TB6612](https://shopee.vn/search?keyword=TB6612)
-- [Lazada cáp USB](https://www.lazada.vn/catalog/?q=cap%20micro%20USB%20data), [ESP32](https://www.lazada.vn/catalog/?q=ESP32)
-- [Thế Giới IC ESP32](https://www.thegioiic.com/search?q=ESP32)
-- [Test hệ thống điều khiển Chinbi](https://www.facebook.com/reel/1092867967065031). Chú thích: test hệ thống điều khiển Chinbi Robot. Đối chiếu với firmware bài này: có lệnh gửi đi, và có chỗ lệnh phải về không.
-- [Demo robot](https://www.facebook.com/reel/1057849570224248). Chú thích chỉ có hai chữ "Demo robot". Đó là lần mang robot ra chạy sau khi vòng teleop đã có timeout.
+- [Test hệ thống điều khiển Chinbi](https://www.facebook.com/reel/1092867967065031) — Chú thích: test hệ thống điều khiển Chinbi Robot. Đối chiếu với firmware bài này ở cơ chế nhận lệnh chạy và tự đưa lệnh về 0 khi ngừng điều khiển.
+- [Demo robot](https://www.facebook.com/reel/1057849570224248) — Chú thích: “Demo robot”. Minh họa bước đưa robot ra chạy thử sau khi vòng teleop đã có cơ chế quá hạn an toàn.
 
 ## Bài tập
 
-1. PWM đang áp là 0 và target thành 180. Bao nhiêu bước, bao nhiêu mili giây, thì cầu thấy 180?
-2. `V 60 60` cuối đến ở $$t = 0$$ và không còn gì theo sau. Target về 0 lúc nào, và PWM đang áp về 0 lúc nào?
-3. Dòng `V 200 -300` được tách. `constrain` cất target nào? `V 60` làm gì với các target ấy?
-4. Bạn xóa mỗi phép kiểm timeout và giữ bước kéo. Tiến trình Python chết và cổng không reset chip. Lốp làm gì, và vì sao bài 05 từ chối lỗi này?
-5. Bài 02 nói phải dương là BIN1 thấp, BIN2 cao. Sửa dòng nào, và vì sao vít motor giữ nguyên?
+1. PWM đang áp là 0 và mục tiêu đổi thành 180. Cần bao nhiêu bước kéo và bao nhiêu miligiây để mạch cầu đạt mức 180?
+2. Lệnh `V 60 60` cuối cùng đến tại $$t = 0$$ và sau đó máy chủ ngừng gửi. Tại thời điểm nào `target` về 0, và tại thời điểm nào PWM đang áp về hẳn 0?
+3. Khi nhận dòng `V 200 -300`, hàm `constrain` lưu giá trị mục tiêu nào? Sau đó nếu nhận thêm dòng `V 60`, hai giá trị mục tiêu bị ảnh hưởng ra sao?
+4. Giả sử bạn xóa phần kiểm tra timeout nhưng vẫn giữ bộ bước kéo. Nếu tiến trình Python bị tắt đột ngột mà cổng serial không reset chip, bánh xe sẽ làm gì và vì sao Bài 05 sẽ đánh trượt lỗi này?
+5. Theo bảng dấu Bài 02, bánh phải tiến khi `BIN1` thấp và `BIN2` cao. Bạn cần sửa phần nào trong firmware, và vì sao phải giữ nguyên dây trên cầu vít động cơ?
 
 ### Gợi ý đáp án
 
-1. $$180/15 = 12$$ bước, $$240~\mathrm{ms}$$. 2. Target về 0 tại $$250~\mathrm{ms}$$; PWM đang áp cần thêm 4 bước, nên về 0 khoảng $$330~\mathrm{ms}$$. 3. Target thành $$180$$ và $$-180$$. `V 60` bị bỏ, target giữ nguyên. 4. Duty cuối còn đó và lốp quay tiếp. Bài 05 khi ấy trượt bài dừng bằng cách giết máy gửi. 5. Đổi cách ghi BIN1 và BIN2 cho lệnh phải dương. Giữ vít. Đảo thêm lần nữa sẽ phá chỗ sửa.
+1. Cần $$180/15 = 12$$ bước, tương ứng $$12 \times 20 = 240~\mathrm{ms}$$.
+2. `target` về 0 tại $$t = 250~\mathrm{ms}$$; PWM đang áp cần thêm 4 bước ($$80~\mathrm{ms}$$) nên về hẳn 0 vào khoảng $$330~\mathrm{ms}$$.
+3. `constrain` kẹp thành $$180$$ và $$-180$$. Dòng `V 60` sai cú pháp nên bị bỏ qua hoàn toàn, hai mục tiêu giữ nguyên cho tới khi hết hạn timeout.
+4. Mức duty cuối cùng vẫn được giữ nguyên trong thanh ghi PWM nên bánh xe tiếp tục quay vô thời hạn. Bài 05 sẽ đánh trượt tiêu chí dừng an toàn khi ngắt máy gửi.
+5. Đảo mức ghi `HIGH`/`LOW` của `BIN1` và `BIN2` trong hàm `drive()` (hoặc truyền lệnh đảo dấu cho kênh phải) và giữ nguyên hai dây trên cầu vít động cơ; nếu đảo cả dây lẫn code thì hai lần đảo sẽ triệt tiêu nhau.
 
 ## Đọc thêm
 

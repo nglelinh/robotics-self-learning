@@ -12,29 +12,29 @@ draft: false
 
 ## Mục tiêu
 
-Bạn cài một toolchain ESP32 và để đường kia yên cho đến khi có một lần nhấp LED đáng tin. Đường Arduino IDE 2: thêm chỉ mục board của Espressif, cài gói `esp32`, chọn mục Dev Module hoặc NodeMCU-32S khớp silk. Đường PlatformIO: viết `platformio.ini` với board `esp32dev` và monitor 115200. Bạn nhấp `LED_BUILTIN` khi core có định nghĩa macro đó, và chỉ dùng GPIO 2 sau khi đã kiểm tra board của mình thực sự mắc đèn ở đó. Bạn nhận ra cổng không xuất hiện, cáp chỉ sạc, driver CH340, và brownout vì nguồn motor vẫn còn nối trong lúc nạp.
+Trong bài này, bạn sẽ cài đặt một bộ công cụ (toolchain) duy nhất cho ESP32 và tạm bỏ qua lựa chọn còn lại cho đến khi nạp thành công chương trình nháy LED ổn định. Với Arduino IDE 2, bạn thêm đường dẫn quản lý bo mạch của Espressif, cài gói `esp32` và chọn đúng mục ESP32 Dev Module hoặc NodeMCU-32S khớp với nhãn in trên mạch. Với PlatformIO, bạn cấu hình tệp `platformio.ini` với bo mạch `esp32dev` và tốc độ monitor 115200 baud. Bạn dùng macro `LED_BUILTIN` nếu gói phần mềm có định nghĩa sẵn, và chỉ dùng GPIO 2 sau khi đã xác minh bo mạch thực tế mắc đèn ở chân này. Bạn cũng nắm được cách nhận diện các lỗi phổ biến: không hiện cổng kết nối, cáp chỉ sạc, thiếu driver CH340 và sụt áp (brownout) do còn nối nguồn động cơ trong lúc nạp.
 
 ## Cần gì trước khi học
 
-Bài bản đồ phải đã ghi bo mạch ESP32 là vi điều khiển chính. Nếu bạn đã chốt Pico, hãy đọc trang này như một bản đồ rồi sang bài Pico. Cài cả hai toolchain trong một buổi chiều là cách để id board sai được lưu vào project. Cần laptop và một cáp USB từng copy file được. Danh mục đầy đủ vẫn là bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
+Bạn cần đã chốt bo mạch ESP32 làm vi điều khiển chính từ bài trước. Nếu bạn chọn dòng Pico, hãy đọc nhanh bài này để nắm tổng quan rồi chuyển sang bài về Pico. Cài đặt cả hai bộ công cụ trong cùng một buổi rất dễ dẫn đến nhầm lẫn cấu hình bo mạch trong dự án. Về phần cứng, bạn cần một laptop và một sợi cáp USB có hỗ trợ truyền dữ liệu. Danh mục linh kiện đầy đủ nằm ở bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
 ## Vì sao bài này gắn với Capstone A
 
-Teleop vi sai ở chương 07 là một file firmware trên chính con chip này: PWM trái và phải hướng tới TB6612, phép thử im lặng khoảng 300 ms, bánh nhấc khỏi bàn. File đó chưa đáng tin cho đến khi board này nhận binary, đảo một chân bạn đã chọn, và in một dòng ở baud bạn đã ghi. Teleop Wi-Fi ở chương 08 đi cùng đường nạp này. Board chỉ nhấp trong video của người khác thì chưa vào robot của bạn. Monitor serial, một cổng và 115200 baud, là console bạn tin trước khi radio được phép làm rối log.
+Chương trình điều khiển từ xa (teleop) cho xe vi sai ở chương 07 chạy trực tiếp trên chính vi điều khiển này, thực hiện xuất PWM cho hai bánh qua TB6612, tự ngắt sau khoảng 300 ms không có lệnh và yêu cầu nhấc bánh khi thử nghiệm lần đầu. Firmware đó chỉ đáng tin cậy khi bo mạch của bạn đã nhận được tệp nạp (binary), điều khiển chính xác một chân GPIO đã chọn và gửi được dữ liệu lên máy tính ở đúng tốc độ baud. Phần teleop qua Wi-Fi ở chương 08 cũng sử dụng chung quy trình nạp này. Trước khi bật kết nối không dây, Serial Monitor ở tốc độ 115200 baud là công cụ quan sát chính để kiểm tra hoạt động của hệ thống.
 
-## Chọn một đường cài
+## Chọn một bộ công cụ
 
-Hai đường dùng chung core Arduino của Espressif. Chọn đường máy lab đã có sẵn. Tuần này chưa yêu cầu ESP-IDF.
+Cả Arduino IDE 2 và PlatformIO đều sử dụng chung lõi (core) Arduino của Espressif. Hãy chọn công cụ đã được cài sẵn trên máy thực hành; tuần này chưa yêu cầu dùng ESP-IDF.
 
-Arduino IDE 2 là đường bấm chuột. Cài IDE. Mở Preferences (hoặc Settings) và dán URL Additional Boards Manager này:
+Arduino IDE 2 phù hợp nếu bạn ưu tiên thao tác qua giao diện đồ họa. Sau khi cài IDE, mở Preferences (hoặc Settings) và dán đường dẫn sau vào mục Additional Boards Manager URLs:
 
 ```text
 https://espressif.github.io/arduino-esp32/package_esp32_index.json
 ```
 
-Mở Boards Manager, tìm `esp32`, cài **esp32 by Espressif Systems**. Rồi mở menu board và chọn mục khớp silk. DevKit 30 chân hoặc 38 chân kiểu chung là **ESP32 Dev Module**. Board có silk NodeMCU-32S thì dùng mục **NodeMCU-32S** khi mục đó có trong danh sách. Chọn cổng là thiết bị serial vừa xuất hiện. Nếu lần nạp đầu báo lỗi sync hoặc timeout, đặt Upload Speed bằng 115200. IDE thường bắt đầu ở 921600, và cáp dài hoặc bản clone CH340 làm rơi byte ở tốc độ đó.
+Tiếp theo, mở Boards Manager, tìm từ khóa `esp32` và cài gói **esp32 by Espressif Systems**. Sau khi cài xong, mở danh sách bo mạch và chọn mục khớp với nhãn in trên mạch: các bản DevKit 30 chân hoặc 38 chân thông dụng chọn **ESP32 Dev Module**, còn bo mạch có nhãn NodeMCU-32S chọn **NodeMCU-32S** nếu có trong danh sách. Chọn đúng cổng serial vừa xuất hiện. Nếu lần nạp đầu báo lỗi đồng bộ (sync) hoặc quá thời gian chờ (timeout), hãy hạ Upload Speed xuống 115200 vì mức mặc định 921600 thường dễ rơi dữ liệu trên cáp dài hoặc một số bản mạch dùng chip CH340.
 
-PlatformIO là đường có file để so diff. Cài Visual Studio Code, rồi extension PlatformIO IDE, và đợi lần tải đầu chạy xong. Tạo project và đặt đoạn này trong `platformio.ini`:
+PlatformIO phù hợp khi bạn muốn quản lý cấu hình bằng tệp văn bản để dễ theo dõi thay đổi (diff). Cài Visual Studio Code, thêm tiện ích PlatformIO IDE và chờ quá trình tải các gói khởi đầu hoàn tất. Tạo dự án mới và cấu hình tệp `platformio.ini` như sau:
 
 ```ini
 [env:esp32dev]
@@ -44,13 +44,13 @@ framework = arduino
 monitor_speed = 115200
 ```
 
-`esp32dev` là đích ESP32 cổ điển kiểu chung: module họ WROOM và một chip USB-serial. Nó khớp NodeMCU-32S và các DevKit V1 thường gặp trong môn. Nó sai với board ESP32-S3 dùng USB nội. Đó là lý do nữa để bài trước bảo mua dev board cổ điển, trừ khi bạn sẵn sàng đổi cả file này lẫn sơ đồ chân.
+Đích `esp32dev` áp dụng cho các bo mạch ESP32 cổ điển gồm module họ WROOM và một chip USB-serial rời, tương thích với NodeMCU-32S và hầu hết DevKit V1 dùng trong môn học. Cấu hình này không đúng cho các bo mạch ESP32-S3 sử dụng USB tích hợp sẵn trong chip. Đây cũng là lý do bài trước khuyến nghị mua bo mạch ESP32 cổ điển, trừ khi bạn chủ động điều chỉnh lại cả tệp cấu hình lẫn sơ đồ chân.
 
-## Cái đèn và cái cổng
+## Đèn LED và cổng giao tiếp
 
-`LED_BUILTIN` là macro mà một số biến thể board có định nghĩa. Nếu board bạn chọn có macro đó, dùng nó cho lần nhấp đầu. Nếu header không định nghĩa, dùng GPIO 2. GPIO 2 là LED onboard trên nhiều DevKit V1, và cũng là cách mắc hay gặp trên bản clone NodeMCU-32S. Đó không phải lời hứa. Có board để đèn ở GPIO khác, và có board chỉ có LED nguồn mà firmware không nhấp được. Đọc silk hoặc sơ đồ hãng, ghi số vào sổ, và đổi hằng số nếu GPIO 2 vẫn tối. Đừng cài lại IDE chỉ vì một macro lạc quan.
+`LED_BUILTIN` là macro được định nghĩa sẵn cho một số biến thể bo mạch. Nếu bo mạch bạn chọn có macro này, hãy dùng nó cho bài thử nháy LED đầu tiên; nếu không, dùng GPIO 2 — chân LED tích hợp phổ biến trên nhiều bản DevKit V1 và NodeMCU-32S. Tuy nhiên, đây không phải quy chuẩn bắt buộc cho mọi nhà sản xuất: một số mạch gắn đèn ở chân khác, thậm chí chỉ có đèn báo nguồn không thể điều khiển bằng phần mềm. Hãy đọc nhãn in trên mạch hoặc tra sơ đồ của hãng, ghi số chân vào sổ tay và đổi hằng số nếu GPIO 2 không sáng, thay vì vội cài lại IDE.
 
-Sketch ngắn khớp lab này:
+Đoạn mã ngắn dưới đây dùng cho bài thực hành này:
 
 ```cpp
 #ifndef LED_BUILTIN
@@ -73,77 +73,75 @@ void loop() {
 }
 ```
 
-`Serial.begin(115200)` phải khớp monitor. Lệch baud trông không giống im lặng. Nó trông như những ký tự suýt là chữ. Sketch này dùng `delay` để lần thành công đầu dễ thấy. Bài nhịp tim sẽ bỏ cấu trúc đó, vì lệnh dừng sau này không thể ngồi trong `delay` để đợi ngưỡng 300 ms.
+Tốc độ trong `Serial.begin(115200)` phải khớp với tốc độ trên Serial Monitor. Khi lệch tốc độ baud, màn hình sẽ không im lặng mà hiển thị các ký tự lỗi (rác). Chương trình này tạm dùng `delay` để dễ quan sát ở lần chạy đầu tiên; sang bài nhịp tim, chúng ta sẽ bỏ cấu trúc này vì lệnh dừng an toàn không thể bị chặn bên trong `delay` khi cần kiểm tra ngưỡng 300 ms.
 
-Con chip sát phích USB không phải ESP32. Trên dev board cổ điển nó là CH340 hoặc CP2102. Cổng CP2102 thường hiện bằng driver có sẵn của hệ điều hành. Board CH340 trên Windows thường biến mất cho đến khi bạn cài driver CH340 của WCH; Device Manager lúc đó mới có cổng COM mới. Trên Linux các chip này hiện thành `/dev/ttyUSB0` (rồi `ttyUSB1` nếu cắm thêm một adapter). Trên Windows tên là `COM3`, `COM4`, hoặc một `COMx` khác chưa có trước lúc cắm cáp. Tài khoản Linux cần nằm trong nhóm `dialout`, và quyền đó chỉ có hiệu lực sau khi đăng xuất rồi đăng nhập lại.
+Con chip nằm sát cổng USB không phải ESP32 mà là chip chuyển đổi USB-serial, thường là CH340 hoặc CP2102 trên các bo mạch cổ điển. CP2102 thường được hệ điều hành tự nhận diện. Với CH340 trên Windows, bạn thường phải cài thêm driver CH340 của hãng WCH để cổng COM mới xuất hiện trong Device Manager. Trên Linux, các chip này xuất hiện dưới dạng `/dev/ttyUSB0` (hoặc `ttyUSB1` nếu cắm thêm thiết bị); trên Windows là `COM3`, `COM4` hoặc một tên `COMx` mới. Trên Linux, tài khoản người dùng cần thuộc nhóm `dialout`, và thay đổi này chỉ có hiệu lực sau khi đăng xuất rồi đăng nhập lại.
 
-Cáp USB chỉ sạc không được máy tính nhận. LED nguồn vẫn có thể sáng, vì dây nguồn còn và dây dữ liệu không có. Đổi sang cáp từng dùng để copy file. Sợi trong mục mua hàng là dạng đã biết cho các board micro-USB này.
+Cáp USB chỉ sạc không thể dùng để kết nối máy tính: đèn báo nguồn trên mạch vẫn có thể sáng vì dây nguồn còn, nhưng không có dây dữ liệu. Hãy thay bằng cáp từng dùng để chép tệp dữ liệu thành công.
 
-Chế độ nạp là chuyện cái nút. GPIO 0 được lấy mẫu mức thấp lúc reset thì ESP32 cổ điển vào bootloader serial. Nút BOOT (đôi khi ghi IO0) giữ chân đó. EN, RST, hoặc RESET khởi động lại chip. Nhiều dev board tự vào bootloader qua dây DTR và RTS của chip USB-serial. Khi mạch đó không có, lần nạp bị timeout. Giữ BOOT, bắt đầu nạp, và thả BOOT khi log báo đang connecting. Nếu khó thao tác, giữ BOOT, chạm EN, thả BOOT, rồi nạp trong lúc chip còn ở chế độ đó.
+Để nạp chương trình, ESP32 cổ điển cần vào chế độ bootloader serial bằng cách kéo chân GPIO 0 xuống mức thấp tại thời điểm reset. Nút BOOT (đôi khi ghi IO0) điều khiển chân này, còn nút EN, RST hoặc RESET dùng để khởi động lại chip. Phần lớn bo mạch phát triển có mạch tự động kích hoạt chế độ nạp qua tín hiệu DTR và RTS của chip USB-serial. Nếu bo mạch không tự vào chế độ nạp và quá trình nạp bị timeout, hãy giữ nút BOOT, bấm nạp và thả BOOT khi màn hình log báo đang kết nối (`connecting`). Nếu thao tác chưa ổn định, hãy giữ BOOT, nhấn nhả EN, thả BOOT rồi tiến hành nạp ngay sau đó.
 
-## Lần nạp hỏng thường là gì
+## Các nguyên nhân thường gặp khi nạp lỗi
 
-Ba lỗi phủ gần hết các báo “board chết” của lab này.
+Ba nhóm lỗi sau chiếm phần lớn các trường hợp tưởng nhầm là "bo mạch hỏng" trong bài thực hành này:
 
-Menu board sai. Mục S3 hoặc C3, hoặc một mục “ESP32 Pico Kit” ngẫu nhiên, không khớp NodeMCU-32S. Lần nạp kêu, hoặc tưởng thành công mà chân bạn nhấp không phải chân bạn tưởng. Đặt Dev Module hoặc NodeMCU-32S, hoặc `board = esp32dev`, cho khớp silk.
+- **Chọn sai bo mạch:** Chọn nhầm mục ESP32-S3, C3 hoặc một biến thể khác như "ESP32 Pico Kit" không khớp với NodeMCU-32S sẽ khiến quá trình nạp báo lỗi, hoặc nạp xong nhưng chân điều khiển không đúng như mong đợi. Hãy chọn đúng ESP32 Dev Module, NodeMCU-32S hoặc `board = esp32dev` theo nhãn mạch.
+- **Không hiện cổng kết nối:** Kiểm tra cáp trước tiên, sau đó kiểm tra driver CH340 trên Windows hoặc quyền nhóm `dialout` trên Linux. Cũng cần tránh chọn nhầm cổng còn sót lại từ thiết bị khác (chẳng hạn `/dev/ttyACM0` của Pico trong khi ESP32 là `/dev/ttyUSB0`).
+- **Chip tự reset trong lúc nạp:** Nếu động cơ hoặc chân VM của mạch cầu H vẫn đang nối vào chân 5 V của bo mạch, dòng tải đột ngột sẽ làm sụt nguồn và ngắt quá trình nạp giữa chừng. Hãy rút hoàn toàn dây VM cùng mọi dây động cơ, chỉ giữ lại cáp USB rồi nạp lại. Trong lúc chạy chương trình (bài nhịp tim), hiện tượng này sẽ làm chữ `hello` in lặp lại liên tục; còn trong lúc nạp, nó biểu hiện thành lỗi timeout.
 
-Không có cổng. Bắt đầu từ cáp. Rồi tới driver: CH340 trên Windows, và `dialout` trên Linux. Cổng còn sót từ Pico hôm qua (`/dev/ttyACM0` trong khi ESP32 là `/dev/ttyUSB0`) cùng một lớp lỗi.
-
-Chip reset trong lúc bootloader đang nói chuyện. Nếu còn động cơ, hoặc driver có chân VM vẫn buộc vào chân 5 V của board, xung dòng làm sụt ray và bản nạp chết giữa chừng. Rút VM. Rút mọi dây motor. Nạp lại chỉ với cáp USB. Bài nhịp tim sẽ cho bạn thấy cùng kiểu reset dưới dạng chữ `hello` lặp lại khi sketch đã chạy. Trong lúc nạp, nó trông như timeout.
-
-GPIO 1 và GPIO 3 là chân UART mà chip USB-serial đang dùng. Nhấp LED trên hai chân đó biến console thành nhiễu. Hôm nay để yên.
+Lưu ý thêm: GPIO 1 và GPIO 3 là hai chân UART mà chip USB-serial đang sử dụng. Điều khiển nháy LED trên hai chân này sẽ gây nhiễu dữ liệu hiển thị trên Serial Monitor, vì vậy không sử dụng chúng trong bài này.
 
 ## Ví dụ đã làm
 
-Board của Bình là NodeMCU-32S của Hshop, CH340, trên laptop Windows. Lần cắm đầu làm sáng LED nguồn và Device Manager không thêm gì. Cài driver CH340 thì có `COM5`. Sketch ở trên được dán vào Arduino IDE 2, mục board NodeMCU-32S, tốc độ nạp 115200. Lần nạp đầu vẫn hỏng. Một TB6612 từ ca trước còn VM nhảy sang chân 5 V của dev board. Bình rút sợi VM đó, giữ BOOT, nạp lại. Monitor ở 115200 in `hello`, rồi `high` và `low` cùng nhịp với đèn. GPIO 2 khớp silk board này, nên nhánh `#ifndef` và LED thật là cùng một chân. Chỉ đổi monitor xuống 9600 thì khung đầy ký tự rác trong lúc LED vẫn nhấp, tách được lỗi baud khỏi chip chết.
+Bình dùng bo mạch NodeMCU-32S (chip CH340) mua từ Hshop trên laptop Windows. Lần cắm đầu tiên, đèn nguồn sáng nhưng Device Manager không xuất hiện cổng mới. Sau khi cài driver CH340, cổng `COM5` hiện ra. Bình dán đoạn mã ở trên vào Arduino IDE 2, chọn bo mạch NodeMCU-32S và tốc độ nạp 115200, nhưng lần nạp đầu vẫn thất bại do một mạch TB6612 từ ca thực hành trước còn dây VM nối vào chân 5 V của bo mạch. Bình rút dây VM, giữ nút BOOT và nạp lại thành công. Serial Monitor ở 115200 baud in `hello`, sau đó luân phiên `high` và `low` đồng bộ với đèn LED. Vì GPIO 2 khớp với nhãn trên mạch này, nhánh `#ifndef` điều khiển đúng đèn tích hợp. Khi thử đổi tốc độ monitor xuống 9600, màn hình hiện toàn ký tự rác trong khi LED vẫn nháy đều — giúp phân biệt rõ lỗi tốc độ baud với lỗi hỏng chip.
 
 ## Lab
 
-1. Chọn Arduino IDE 2 hoặc PlatformIO. Cài đúng một đường, bằng URL hoặc bằng `platformio.ini` ở trên.
-2. Cắm cáp dữ liệu. Xác nhận cổng mới: `/dev/ttyUSB0` trên Linux hoặc một `COMx` mới trên Windows. Ghi tên đó.
-3. Chọn ESP32 Dev Module hoặc NodeMCU-32S, hoặc `board = esp32dev`. Đặt monitor 115200.
-4. Dán sketch. Nếu LED trên silk không phải GPIO 2 và `LED_BUILTIN` vẫn tối, đổi chân và ghi số mới vào `lab-notes.md`.
-5. Nạp. Nếu log timeout, giữ BOOT và thử lại một lần. Nếu còn motor hoặc dây VM, rút VM rồi thử lại.
-6. Mở monitor ở 115200. Bạn phải thấy một dòng `hello` rồi các dòng `high` / `low` trong lúc LED onboard nhấp. Chép tám dòng vào sổ, kèm tên cổng và chip USB (CH340 hoặc CP2102).
+1. Chọn Arduino IDE 2 hoặc PlatformIO và chỉ cài đặt đúng một công cụ theo đường dẫn hoặc tệp `platformio.ini` ở trên.
+2. Cắm cáp dữ liệu và xác nhận tên cổng mới xuất hiện (`/dev/ttyUSB0` trên Linux hoặc `COMx` trên Windows), ghi lại tên cổng.
+3. Chọn bo mạch ESP32 Dev Module, NodeMCU-32S hoặc cấu hình `board = esp32dev`; đặt tốc độ monitor ở 115200 baud.
+4. Dán đoạn mã mẫu. Nếu LED theo nhãn mạch không nằm ở GPIO 2 và `LED_BUILTIN` không sáng, sửa lại số chân và ghi chú vào `lab-notes.md`.
+5. Tiến hành nạp chương trình. Nếu quá trình nạp bị timeout, giữ nút BOOT và thử lại; nếu còn nối động cơ hoặc dây VM, rút ra hoàn toàn rồi mới nạp lại.
+6. Mở Serial Monitor ở 115200 baud. Quan sát một dòng `hello` tiếp theo là các dòng `high` / `low` đồng bộ với nhịp nháy của LED tích hợp. Chép tám dòng log vào sổ tay kèm tên cổng và loại chip USB-serial (CH340 hoặc CP2102).
 
-Đạt khi có cái đèn bạn đã nhìn và một đoạn log đã dán. LED nguồn sáng mỗi khi cắm USB không được tính.
+Bài thực hành đạt khi đèn LED tích hợp nháy theo chương trình bạn nạp và có đoạn log dán kèm; đèn báo nguồn sáng sẵn khi cắm USB không được tính.
 
-An toàn: chỉ USB. Không pin, không motor, không nối VM. Chân 5 V không phải nguồn motor, và một lần kẹt bánh trong lúc nạp đúng là brownout mà lab này bảo bạn gỡ ra.
+An toàn: chỉ cấp nguồn qua cổng USB; không nối pin, động cơ hay dây VM. Chân 5 V trên bo mạch không dùng để cấp nguồn cho động cơ, và dòng kẹt bánh trong lúc nạp chính là nguyên nhân gây sụt áp cần tránh.
 
 ## Video tham khảo
 
-- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. Tạo project PlatformIO, chọn board ESP32, nạp một chương trình. Đúng toolchain của bài.
-- [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Cùng ESP32 nhưng nạp bằng Arduino IDE, tiếng Việt. Bài dùng PlatformIO; video này chỉ để thấy board đã sống.
+- **Xem trước:** [Get started with PlatformIO and the ESP 32](https://www.youtube.com/watch?v=3ATDCi4ApY4) — John Green Dev, tiếng Anh. Hướng dẫn tạo dự án PlatformIO, chọn bo mạch ESP32 và nạp chương trình — đúng bộ công cụ trong bài.
+- [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Hướng dẫn nạp chương trình cho ESP32 bằng Arduino IDE bằng tiếng Việt để đối chiếu quy trình kiểm tra bo mạch hoạt động.
 
 ## Bài tập
 
-1. Viết bốn khóa `platformio.ini` bài này yêu cầu, và viết URL board của Arduino IDE theo trí nhớ.
-2. `LED_BUILTIN` để board tối, còn monitor vẫn in `high` và `low`. Bạn kiểm gì trên silk, và vì sao “GPIO 2” là giả thuyết chứ không phải sự thật?
-3. Nạp chỉ chạy khi đang giữ BOOT. Nút đó là chân nào, và EN dùng thế nào?
-4. Log in `hello` liên tục và không ở lại trong `loop`. Driver motor vẫn trên bàn, VM buộc vào chân 5 V. Rút cái gì, và sự kiện điện nào đang reset chip?
-5. LED nhấp và monitor toàn rác. Hai số baud nào đang lệch? Vì sao bản thân chip vẫn ổn?
+1. Viết lại bốn dòng cấu hình chính trong `platformio.ini` theo yêu cầu của bài và ghi lại đường dẫn quản lý bo mạch ESP32 cho Arduino IDE.
+2. Dùng `LED_BUILTIN` nhưng đèn trên mạch không sáng, trong khi Serial Monitor vẫn in `high` và `low`. Bạn cần kiểm tra thông tin gì trên bo mạch, và vì sao "GPIO 2" chỉ là giả thuyết ban đầu chứ không phải mặc định cho mọi mạch?
+3. Quá trình nạp chỉ thành công khi giữ nút BOOT. Nút này nối với chân nào, và nút EN đóng vai trò gì trong thao tác nạp thủ công?
+4. Serial Monitor in `hello` lặp lại liên tục mà không chạy ổn định trong `loop`, trong khi mạch cầu H vẫn nối dây VM vào chân 5 V. Bạn cần tháo dây nào và hiện tượng điện nào đang khiến chip reset?
+5. Đèn LED vẫn nháy bình thường nhưng Serial Monitor toàn ký tự rác. Hai thông số baud nào đang bị lệch nhau, và vì sao có thể kết luận bản thân chip vẫn hoạt động bình thường?
 
 <details>
 <summary>Đáp án</summary>
 
-1. `platform = espressif32`, `board = esp32dev`, `framework = arduino`, `monitor_speed = 115200`. URL board là `https://espressif.github.io/arduino-esp32/package_esp32_index.json`, rồi gói **esp32 by Espressif Systems**.
-2. Tìm GPIO của LED onboard trên pinout board của bạn. GPIO 2 là đèn trên nhiều DevKit V1 và nhiều bản clone NodeMCU-32S, board khác thì khác. Đổi hằng số sang chân mà silk ghi, rồi ghi lại.
-3. BOOT kéo GPIO 0 xuống thấp để lúc reset chip vào bootloader serial. Giữ BOOT, chạm EN (reset), thả BOOT, và nạp khi chip còn ở chế độ đó. Board có mạch auto-reset chạy tốt thì giấu thao tác này.
-4. Rút VM, và rút mọi motor. Dòng thêm làm sụt ray (brownout) và bootloader reset trước khi nạp xong.
-5. Sketch ở 115200 còn monitor ở số khác, thường là 9600. LED đang đảo, nên chương trình đang chạy. Sửa tốc độ monitor. Đừng cài lại toolchain.
+1. Bốn khóa cấu hình: `platform = espressif32`, `board = esp32dev`, `framework = arduino`, `monitor_speed = 115200`. Đường dẫn cho Arduino IDE là `https://espressif.github.io/arduino-esp32/package_esp32_index.json`, sau đó cài gói **esp32 by Espressif Systems**.
+2. Cần tra cứu chân GPIO nối với LED tích hợp trên nhãn mạch hoặc sơ đồ chân (pinout) của đúng bo mạch đang dùng. GPIO 2 phổ biến trên nhiều bản DevKit V1 và NodeMCU-32S nhưng không giống nhau trên mọi biến thể. Hãy đổi hằng số sang chân thực tế và ghi chú lại.
+3. Nút BOOT kéo chân GPIO 0 xuống mức thấp để chip vào chế độ bootloader serial khi reset. Thao tác thủ công là giữ BOOT, nhấn nhả EN (reset), thả BOOT rồi nạp trong lúc chip đang chờ. Các bo mạch có mạch tự động reset (auto-reset) hoạt động tốt sẽ tự thực hiện bước này.
+4. Cần rút dây VM và toàn bộ dây động cơ. Dòng tải làm sụt đường nguồn (brownout), khiến chip reset liên tục trước khi chạy ổn định hoặc nạp xong.
+5. Tốc độ baud trong chương trình là 115200, còn tốc độ trên Serial Monitor đang đặt ở giá trị khác (thường là 9600). Việc đèn LED nháy đều chứng tỏ chương trình đang chạy bình thường; chỉ cần chỉnh lại tốc độ trên monitor mà không cần cài lại bộ công cụ.
 
 </details>
 
 ## Mua ở Việt Nam
 
-Nếu bo mạch và cáp dữ liệu của bài trước đã được máy tính nhận, không mua thêm. Nếu cổng không bao giờ hiện, thay cáp trước khi thay board. Giá đọc từ listing công khai của Hshop ngày 23 tháng 9 năm 2026.
+Nếu bo mạch và cáp dữ liệu từ bài trước đã kết nối ổn định với máy tính, bạn không cần mua thêm gì. Nếu cổng kết nối không xuất hiện, hãy ưu tiên thay cáp trước khi nghĩ đến việc đổi bo mạch. Mức giá dưới đây được ghi nhận từ trang công khai của Hshop vào ngày 23 tháng 9 năm 2026.
 
-Board mặc định: [ESP32 NodeMCU-32S CH340, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker). Board hoàn chỉnh khác: [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32). [ESP32-S3-WROOM-1 giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif) là module trần và tự nó không hiện thành `/dev/ttyUSB0` hay `COMx`. Cáp: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen).
+Bo mạch mặc định: [ESP32 NodeMCU-32S CH340, 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker). Lựa chọn bo mạch hoàn chỉnh khác: [Vietduino ESP32, 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32). Lưu ý [ESP32-S3-WROOM-1 giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif) là module trần, không thể tự hiển thị thành `/dev/ttyUSB0` hay `COMx`. Cáp dữ liệu: [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen).
 
-Nếu so shop: [Shopee ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340). [Trang DevKitC-32U của Thế Giới IC](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz) là listing kiểu board; xác nhận đó là dev board có USB và xem anten có phải bản U.FL. [IC Đây Rồi](https://icdayroi.com/) là quầy linh kiện, không phải chỗ lấy module trần rồi gọi là bộ khởi đầu của lab này. Phần còn lại của giỏ robot vẫn ở [chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
+Nếu so sánh thêm ở các cửa hàng khác: [Shopee ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340). [Trang DevKitC-32U của Thế Giới IC](https://www.thegioiic.com/esp32-devkitc-32u-module-wifi-bluetooth-2-4ghz) là mẫu bo mạch phát triển; cần xác nhận có cổng USB và kiểm tra chuẩn đầu nối anten U.FL. [IC Đây Rồi](https://icdayroi.com/) là cửa hàng linh kiện, không nên mua module trần tại đây để dùng làm bộ khởi đầu cho bài thực hành này. Các linh kiện còn lại của robot nằm ở [chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
 ## Đọc thêm
 
-- [Trang board `esp32dev` của PlatformIO](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — id board trong file ini của bài này.
-- [Cài core Arduino cho ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — URL board và các bước IDE, từ Espressif.
-- [Trang tải tài liệu Espressif](https://www.espressif.com/en/support/download/documents) — datasheet và hướng dẫn thiết kế khi chân LED của bản clone không phải GPIO 2.
+- [Trang board `esp32dev` của PlatformIO](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — tài liệu về mã bo mạch dùng trong tệp `platformio.ini` của bài này.
+- [Cài core Arduino cho ESP32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — đường dẫn quản lý bo mạch và các bước cài đặt chính thức từ Espressif.
+- [Trang tải tài liệu Espressif](https://www.espressif.com/en/support/download/documents) — datasheet và tài liệu thiết kế để tra cứu khi chân LED trên mạch không phải GPIO 2.

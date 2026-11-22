@@ -11,62 +11,62 @@ lesson_type: required
 draft: false
 ---
 
-Hết bài trên hộp. Bài này đặt robot xuống một làn trống, chạy bốn hướng ở PWM đã kẹp, và viết một log để chương sau tin được. Đạt là một tập quan sát, không phải cảm giác "cũng chạy được".
+Đã kết thúc giai đoạn thử trên hộp kê. Trong bài này, bạn đặt robot xuống một làn sàn trống, chạy thử đủ bốn hướng ở mức PWM đã giới hạn và lập nhật ký (log) đủ tin cậy làm cơ sở cho chương sau. Tiêu chuẩn đạt dựa trên tập các quan sát đo được cụ thể, không dựa vào cảm tính “xe chạy được là ổn”.
 
 ## Mục tiêu học
 
-1. Chạy một chuỗi trên sàn, làn trống $$2~\mathrm{m}$$: tiến khoảng $$2~\mathrm{s}$$, dừng, lùi, quay trái, quay phải, tất cả trong khoảng $$\pm 180$$, tay cầm công tắc pin.
-2. Cho thấy giết máy gửi hoặc rút USB, trong khi MCU còn ăn buck, làm chuyển động hết trong $$0{,}5~\mathrm{s}$$.
-3. Ghi điện áp pin trước và sau lượt chạy, và coi sụt lớn là lỗi pack, dây, hoặc cầu chì.
-4. Điền log gỡ lỗi (giờ, lệnh, robot làm gì, điện áp, giả thuyết lỗi) và chỉ nhận xe khi bảng dấu, timeout, pin đã buộc, và hình học chương 06 đều có trong ghi chú.
+1. Thực hiện chuỗi thử nghiệm trên làn sàn trống dài $$2~\mathrm{m}$$: tiến khoảng $$2~\mathrm{s}$$, dừng, lùi, quay trái và quay phải trong giới hạn $$\pm 180$$, luôn giữ tay sẵn sàng tại công tắc nguồn pin.
+2. Chứng minh rằng khi ngắt chương trình gửi lệnh hoặc rút cáp USB (trong khi ESP32 vẫn ăn nguồn từ mạch buck), robot dừng hẳn chuyển động trong vòng $$0{,}5~\mathrm{s}$$.
+3. Đo điện áp pin trước và sau lượt chạy; nếu thấy sụt áp bất thường khi có tải, xác định ngay là lỗi pack pin, dây dẫn hoặc cầu chì.
+4. Ghi chép đầy đủ nhật ký gỡ lỗi (thời điểm, lệnh gửi, hành vi thực tế, điện áp, giả thuyết lỗi) và chỉ nghiệm thu xe khi bảng dấu, timeout, cố định pin và kích thước hình học Chương 06 đều có đầy đủ trong sổ.
 
 ## Kiến thức cần có
 
-Bài 07-01 đến 07-04 là cả phần bị điều khiển: pin buộc, cực dương có chì, buck 5,0 V, bảng dấu, giao thức chữ, bước kéo, và timeout. Chương 05 là stall và luật driver nóng. $$b$$ và $$r$$ chương 06 đã nằm trong `lab-notes.md` (ví dụ khóa học $$b = 0{,}15~\mathrm{m}$$ hoặc $$148~\mathrm{mm}$$ bạn đo, và $$r = 31{,}2~\mathrm{mm}$$). Bạn vẫn chưa publish Twist. Bạn được ghi quãng đường và thời gian. Bạn không được đóng chúng thành luật của PWM. Chương 08 mới được phép nói m/s.
+Các bài 07-01 đến 07-04 đã hoàn thiện toàn bộ hệ thống cơ sở: pin buộc chắc chắn, cực dương qua cầu chì, mạch buck 5,0 V, bảng dấu chiều quay, giao thức chữ, bước kéo PWM và timeout. Chương 05 cung cấp kiến thức về dòng kẹt và kiểm soát nhiệt mạch cầu. Hai kích thước $$b$$ và $$r$$ từ Chương 06 đã được lưu trong `lab-notes.md` (ví dụ mẫu $$b = 0{,}15~\mathrm{m}$$ hoặc $$148~\mathrm{mm}$$ đo thực tế, và $$r = 31{,}2~\mathrm{mm}$$). Bài này vẫn chưa dùng `Twist`; bạn có thể ghi lại quãng đường và thời gian chạy như một số liệu quan sát, nhưng không được gán cứng thành hệ số quy đổi cho PWM — phần hiệu chuẩn sang m/s thuộc Chương 08.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-PID chương 08 giả định dấu đúng và lệnh mất thì bánh dừng. Bánh phải ngược làm số hạng tỉ lệ cộng thêm yaw sai. Chương 09 giả định đế an toàn khi publisher chết, và laptop ngủ chính là publisher ấy. Nghiệm thu là cổng: bốn hướng khớp bảng dấu, im lặng thì xe dừng, pin không rơi, và ghi chú có ảnh đi dây, đoạn giao thức, điện áp, cùng $$b$$ và $$r$$.
+Bộ điều khiển PID ở Chương 08 hoạt động dựa trên giả định chiều quay hai bánh đã đúng dấu và bánh tự dừng khi mất lệnh. Nếu bánh phải bị đảo chiều, khâu tỉ lệ sẽ khuếch đại sai số quay theo hướng ngược lại. Tương tự, Chương 09 giả định khung xe luôn dừng an toàn khi node phát lệnh bị tắt (hoặc laptop rơi vào chế độ ngủ). Buổi nghiệm thu này là cổng kiểm tra cuối cùng của phần cứng cơ bản: bốn hướng khớp bảng dấu, dừng an toàn khi mất tín hiệu, pin cố định an toàn và sổ tay lưu đủ ảnh đi dây, đặc tả giao thức, điện áp cùng $$b$$, $$r$$.
 
 ![Hình học log phải dẫn: $$b$$ giữa hai vết lốp, $$r$$ từ phép lăn]({{ site.imgurl }}/generated/chassis_measures.png)
 
 ![Tiến, quay, và trường hợp trộn mà bạn sắp xin bằng PWM, không bằng m/s]({{ site.imgurl }}/generated/diff_drive_kinematics.png)
 
-Mũi tên trong hình thứ hai là các chuyển động. `V 80 80` là cả hai mũi tên tiến. `V -60 60` là vòng quay có mũi tên phải tiến và mũi tên trái lùi, yaw trái khi bảng dấu trung thực. Công thức trên hình ở đơn vị tốc độ. Lệnh của bạn ở đơn vị nấc.
+Các mũi tên trong hình thứ hai biểu diễn trực quan từng trạng thái chuyển động: `V 80 80` đẩy cả hai bánh tiến, còn `V -60 60` cho bánh phải tiến và bánh trái lùi để quay trái khi bảng dấu chính xác. Lưu ý rằng công thức trên hình viết theo đơn vị vận tốc, trong khi lệnh bạn gửi hiện tại vẫn đang ở đơn vị nấc PWM.
 
 ## Làn, công tắc giết, và điện áp biết động
 
-Dọn một làn $$2~\mathrm{m}$$, không có mép bàn trong khoảng phanh. Tay cầm công tắc pin. Máy chủ $$200~\mathrm{ms}$$, hạn firmware $$250~\mathrm{ms}$$, duty 60 hoặc 80, không phải 255.
+Dọn một làn sàn trống dài ít nhất $$2~\mathrm{m}$$ (không có mép bậc hay vật cản trong quãng phanh) và luôn giữ công tắc pin trong tầm với. Thiết lập máy chủ gửi lặp lại mỗi $$200~\mathrm{ms}$$, firmware quá hạn $$250~\mathrm{ms}$$ và giữ mức duty ở 60 hoặc 80 (không dùng 255).
 
-Chuỗi, mỗi lệnh được gửi lại cho đến khi bạn chuyển lệnh:
+Thực hiện tuần tự chuỗi năm bước sau (duy trì gửi lặp cho tới khi chuyển lệnh):
 
-1. `V 80 80` khoảng $$2~\mathrm{s}$$, cả hai lốp tiến, xe bám làn.
-2. `V 0 0`, hoặc ngừng gửi để timeout nổ. Xe dừng.
-3. `V -80 -80` khoảng $$2~\mathrm{s}$$, lùi thẳng.
-4. `V -60 60` một vòng ngắn. Mũi sang trái.
-5. `V 60 -60` một vòng ngắn. Mũi sang phải.
+1. `V 80 80` trong khoảng $$2~\mathrm{s}$$: cả hai lốp quay tiến, xe bám thẳng làn.
+2. `V 0 0` (hoặc ngừng gửi để kích hoạt timeout): xe dừng lại.
+3. `V -80 -80` trong khoảng $$2~\mathrm{s}$$: xe lùi thẳng.
+4. `V -60 60` trong một đoạn ngắn: mũi xe quay sang trái.
+5. `V 60 -60` trong một đoạn ngắn: mũi xe quay sang phải.
 
-Rồi giết máy gửi, hoặc rút USB trong khi ESP32 còn ăn buck. Chuyển động hết trong $$0{,}5~\mathrm{s}$$. Bài 04 dự đoán khoảng $$330~\mathrm{ms}$$ sau `V 60 60` cuối. Lăn ba giây là trượt, dù bốn hướng trông đẹp.
+Tiếp theo, tắt đột ngột tiến trình máy gửi hoặc rút cáp USB trong khi ESP32 vẫn nhận nguồn từ mạch buck. Xe phải dừng hẳn trong vòng $$0{,}5~\mathrm{s}$$ (theo tính toán ở Bài 04 là khoảng $$330~\mathrm{ms}$$ sau lệnh `V 60 60` cuối). Nếu xe vẫn trôi tới 3 giây thì bài nghiệm thu trượt, dù bốn hướng chạy đều đẹp.
 
-Điện áp nghỉ trước và sau: một lượt ngắn khỏe có thể từ $$8{,}15~\mathrm{V}$$ xuống $$8{,}05~\mathrm{V}$$. Nếu đo được lúc có tải, lấy $$8{,}20~\mathrm{V}$$ lúc nghỉ và $$6{,}90~\mathrm{V}$$ ở khoảng $$0{,}60~\mathrm{A}$$:
+Đo điện áp nghỉ trước và sau lượt chạy: một pack pin tốt sau lượt thử ngắn thường chỉ giảm nhẹ, ví dụ từ $$8{,}15~\mathrm{V}$$ xuống $$8{,}05~\mathrm{V}$$. Nếu đo được khi đang có tải — giả sử nghỉ $$8{,}20~\mathrm{V}$$ nhưng sụt xuống $$6{,}90~\mathrm{V}$$ ở dòng $$0{,}60~\mathrm{A}$$ — ta ước lượng tổng nội trở mạch nguồn là:
 
 $$
 R \approx \frac{1{,}30}{0{,}60} \approx 2{,}2~\Omega.
 $$
 
-Khoảng $$2{,}2~\Omega$$ là lớn so với vài trăm miliohm của pack khỏe. Nghi cell mỏi, dây mỏng, polyfuse đang ấm, hoặc tiếp xúc đế. Sửa nguồn trước khi nhận đế. Chì sai hiện ra thành sụt, nhảy, hoặc reset giữa làn. `setup` đã ghi PWM 0 trước khi kéo STBY.
+Giá trị $$2{,}2~\Omega$$ là rất lớn so với mức vài trăm miliôm của một pack pin khỏe. Nguyên nhân thường nằm ở cell đã chai, dây dẫn quá mảnh, cầu chì tự phục hồi (polyfuse) bị nóng hoặc tiếp xúc đế pin kém. Cần xử lý triệt để lỗi nguồn này trước khi nghiệm thu vì nguồn yếu sẽ gây sụt áp và làm reset MCU giữa làn chạy (lưu ý hàm `setup()` đã đặt PWM về 0 trước khi kéo `STBY` cao).
 
-Một quãng có bấm giờ chỉ là quan sát. Đi $$1{,}6~\mathrm{m}$$ trong $$4{,}0~\mathrm{s}$$ là
+Nếu bạn bấm giờ một đoạn chạy thử — ví dụ xe đi $$1{,}6~\mathrm{m}$$ trong $$4{,}0~\mathrm{s}$$ — tốc độ trung bình quan sát được là:
 
 $$
-v_{obs} = \frac{1{,}6}{4{,}0} = 0{,}40~\mathrm{m/s}
+v_{obs} = \frac{1{,}6}{4{,}0} = 0{,}40~\mathrm{m/s}.
 $$
 
-của lượt ấy, sàn ấy, duty ấy. Viết "ở PWM 80, lượt này, khoảng $$0{,}40~\mathrm{m/s}$$." Đừng viết "PWM 80 nghĩa là $$0{,}40~\mathrm{m/s}$$" như hằng số Twist.
+Hãy ghi nhận chính xác bối cảnh: “ở PWM 80, lượt thử trên sàn này đạt khoảng $$0{,}40~\mathrm{m/s}$$”, tuyệt đối không quy ước cứng “PWM 80 = $$0{,}40~\mathrm{m/s}$$” như một hằng số cho `Twist`.
 
 ## Log là dụng cụ nghiệm thu
 
-Mỗi hàng là một sự kiện. Cột giả thuyết để trống khi sự kiện khớp bảng dấu. Bắt buộc điền khi có chuyện khác.
+Mỗi hàng trong bảng nhật ký tương ứng với một sự kiện thực tế. Cột “Giả thuyết” để trống khi robot hành xử đúng bảng dấu, và bắt buộc phải ghi chẩn đoán khi có sai lệch:
 
 | Giờ | Lệnh | Robot làm gì | Điện áp | Giả thuyết |
 |-----|------|--------------|---------|------------|
@@ -76,15 +76,15 @@ Mỗi hàng là một sự kiện. Cột giả thuyết để trống khi sự k
 | 0:30 | `V -60 60` | mũi trái | 8,0 V | |
 | 0:40 | `V 60 -60` | mũi phải | 8,0 V | |
 
-Đừng lấy trung bình một hàng xấu thành đạt. Máy gửi chết mà xe còn lăn tới băng dính thì timeout chưa được viết và PWM cuối còn trong LEDC. Đưa phép kiểm bài 04 trở lại, chứng minh dừng trên hộp, rồi chạy lại làn. `V 80 80` mà xe quay thì một dấu sai: đảo dây motor đó hoặc cực tính firmware, không cả hai. Chương 08 không bắt đầu khi một trong hai hàng còn mở.
+Không được bỏ qua một hàng lỗi để chấm đạt chung. Nếu ngắt máy gửi mà xe vẫn chạy tiếp tới vạch băng dính thì cơ chế timeout chưa hoạt động (thanh ghi LEDC vẫn giữ PWM cũ); bạn phải quay lại Bài 04 để kiểm chứng dừng trên hộp kê trước khi chạy lại trên sàn. Nếu lệnh `V 80 80` khiến xe xoay tròn thì một bên động cơ bị ngược dấu — chỉ đảo dây hoặc đảo cực tính firmware một lần duy nhất. Không chuyển sang Chương 08 khi còn bất kỳ lỗi nào chưa khép lại.
 
-Đạt nghĩa là tất cả các điều sau: bốn hướng khớp bảng dấu; dừng theo timeout hoạt động; pin được buộc, không có đầu lithium hàn trần; ghi chú có ảnh đi dây, đoạn giao thức (`V`, `S`, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), bảng dấu, các điện áp, và $$b$$ cùng $$r$$.
+**Tiêu chí nghiệm thu đạt:** Đủ cả bốn hướng khớp bảng dấu; cơ chế dừng theo timeout hoạt động trong $$0{,}5~\mathrm{s}$$; pin buộc chắc chắn và không có đầu hàn lithium trần; sổ tay lưu đầy đủ ảnh đi dây, đặc tả giao thức (`V`, `S`, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), bảng dấu, các mức điện áp và kích thước $$b$$, $$r$$.
 
 ## Lab
 
 ### An toàn
 
-Làn trống $$2~\mathrm{m}$$ cộng chỗ dừng, và bạn cầm công tắc pin. Duty ở mức đã tập. Xe lao về người hoặc về chỗ hụt thì ngắt công tắc. Stall vào tường là một giây, rồi ngắt. Có mùi hoặc lá không chạm được thì kết thúc.
+Chuẩn bị làn sàn trống dài $$2~\mathrm{m}$$ có thêm khoảng trống phanh và giữ công tắc pin sẵn sàng trong tay. Duy trì mức duty đã kiểm thử; ngắt công tắc ngay nếu xe lao về phía người hoặc mép bậc. Nếu xe kẹt vào tường, tối đa 1 giây phải ngắt nguồn; dừng ngay toàn bộ thử nghiệm nếu thấy mùi khét hoặc mạch driver quá nóng.
 
 ### BOM
 
@@ -98,15 +98,15 @@ Làn trống $$2~\mathrm{m}$$ cộng chỗ dừng, và bạn cầm công tắc p
 
 ### Các bước
 
-1. Xác nhận bánh đã xuống, caster chạm, pin buộc, ảnh đã có trong ghi chú. Đọc điện áp nghỉ.
-2. Đứng với công tắc. Tiến khoảng $$2~\mathrm{s}$$, dừng, lùi, quay trái, quay phải. Đọc lệnh lúc gửi để log không bịa.
-3. Giết máy gửi hoặc rút USB trong khi buck vẫn nuôi ESP32. Bấm giờ lần dừng. Phải trong $$0{,}5~\mathrm{s}$$.
-4. Đọc lại điện áp nghỉ. Nếu thấy sụt sâu lúc có tải, ước lượng $$R$$ và viết giả thuyết.
-5. Đánh đạt hoặc trượt theo bốn tiêu chí. Trượt thì chỉ một chỗ sửa, rồi chạy lại cả chuỗi.
+1. Kiểm tra bánh xe đã chạm sàn, bánh caster bám tốt, pin buộc chắc chắn và ảnh đi dây đã lưu trong sổ. Đo điện áp nghỉ của pack pin.
+2. Sẵn sàng tay ở công tắc nguồn. Chạy lần lượt chuỗi: tiến khoảng $$2~\mathrm{s}$$, dừng, lùi, quay trái và quay phải; đọc to hoặc ghi ngay lệnh vừa gửi để nhật ký trung thực.
+3. Ngắt tiến trình máy gửi hoặc rút cáp USB (trong khi ESP32 vẫn ăn nguồn từ buck) và bấm giờ thời gian dừng; yêu cầu dưới $$0{,}5~\mathrm{s}$$.
+4. Đo lại điện áp nghỉ sau lượt chạy. Nếu phát hiện sụt áp mạnh khi có tải, tính ước lượng nội trở $$R$$ và ghi giả thuyết nguyên nhân.
+5. Chấm đạt hoặc trượt dựa theo đủ bốn tiêu chí nghiệm thu. Nếu trượt, sửa đúng một lỗi gốc rồi chạy lại toàn bộ chuỗi thử.
 
 ### Kết quả mong đợi
 
-Một log đã điền, một lần dừng trong nửa giây, điện áp nghỉ không sập, và chữ đạt chỉ khi hướng, timeout, pin, và ghi chú (ảnh, giao thức, bảng dấu, $$b$$, $$r$$) đều có. Tốc độ quan sát được ghi như một quan sát có nhãn. Nó không được nối vào giao thức.
+Một bảng nhật ký đã điền đầy đủ, xác nhận dừng hẳn trong nửa giây khi mất tín hiệu, điện áp nghỉ ổn định không sụt sâu, và chỉ ghi “đạt” khi hội tụ đủ hướng chạy, timeout, an toàn pin và bộ hồ sơ ghi chú (ảnh, giao thức, bảng dấu, $$b$$, $$r$$). Mọi số đo tốc độ đều được gắn nhãn là số liệu quan sát riêng lẻ, không gắn cứng vào giao thức.
 
 ### Lỗi thường gặp
 
@@ -120,7 +120,7 @@ Một log đã điền, một lần dừng trong nửa giây, điện áp nghỉ
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 
-Nghiệm thu hay trượt vì thiếu dây buộc, đế mỏi, hoặc cầu chì chưa mua. Giá đổi. Khoảng 2026: pack 2S hoặc đế 80.000–180.000 đồng, công tắc 8.000–20.000, đế chì và chì 2–3 A 10.000–25.000, LM2596 10.000–25.000, TB6612 25.000–70.000. L298N đã kiểm khoảng 45.000 đồng chỉ là cầu thay thế. Đừng mua khung mới để tránh đảo một dây motor.
+Các buổi nghiệm thu thường trượt do thiếu dây buộc cố định pin, đế pin tiếp xúc kém hoặc chưa lắp cầu chì. Giá tham khảo khoảng năm 2026 (có thể thay đổi): pack 2S hoặc đế 18650 80.000–180.000 đồng, công tắc 8.000–20.000 đồng, đế chì kèm cầu chì 2–3 A 10.000–25.000 đồng, mạch buck LM2596 10.000–25.000 đồng, TB6612 25.000–70.000 đồng (L298N giá khoảng 45.000 đồng là phương án thay thế tạm).
 
 - L298N đã kiểm, khoảng 45.000 đồng: [hshop.vn/mach-dieu-khien-dong-co-dc-l298](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298)
 - [Hshop cầu chì](https://hshop.vn/search?q=cau+chi), [LM2596](https://hshop.vn/search?q=LM2596)
@@ -130,19 +130,23 @@ Nghiệm thu hay trượt vì thiếu dây buộc, đế mỏi, hoặc cầu ch�
 
 ## Video tham khảo
 
-- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Xe đi thẳng khi hai bánh cùng tốc, quay khi hai bánh lệch. Đó là thứ buổi nghiệm thu phải thấy.
+- **Xem trước:** [Differential Drive & Odometry Explained: How It Works](https://www.youtube.com/watch?v=2QE3LG5h2tw) — Netizen Robotics, tiếng Anh. Minh họa trực quan chuyển động đi thẳng khi hai bánh cùng tốc độ và quay khi có chênh lệch tốc độ — đúng các hành vi cần xác nhận trong buổi nghiệm thu.
 
 ## Bài tập
 
-1. Pack nghỉ $$8{,}20~\mathrm{V}$$, lúc cả hai motor chạy $$6{,}90~\mathrm{V}$$ ở khoảng $$0{,}60~\mathrm{A}$$. Ước lượng $$R$$. Nguồn ấy đạt, hay là sụt phải dừng?
-2. Quãng tiến đi $$1{,}6~\mathrm{m}$$ trong $$4{,}0~\mathrm{s}$$ ở PWM 80. Bạn ghi tốc độ quan sát nào, và câu nào bị cấm ghi vào ghi chú Twist?
-3. USB rút, ESP32 còn ăn buck, xe lăn khoảng $$3~\mathrm{s}$$. Dòng nghiệm thu nào trượt, và code bài nào thiếu?
-4. Xe đã chạy làn, ghi chú có điện áp và ảnh, nhưng $$b$$ và $$r$$ trống. Vì sao vẫn trượt trước chương 08?
-5. `V 60 -60` làm mũi quay trái. Nêu một chỗ sửa. Thay đổi thứ hai nào sẽ hủy chỗ sửa ấy?
+1. Pack pin đo lúc nghỉ được $$8{,}20~\mathrm{V}$$, khi cả hai động cơ chạy sụt xuống $$6{,}90~\mathrm{V}$$ ở dòng khoảng $$0{,}60~\mathrm{A}$$. Ước lượng tổng điện trở $$R$$ và đánh giá hệ nguồn này có đạt chuẩn nghiệm thu hay không.
+2. Xe chạy thẳng $$1{,}6~\mathrm{m}$$ trong $$4{,}0~\mathrm{s}$$ ở mức PWM 80. Bạn ghi tốc độ quan sát là bao nhiêu, và nhận định nào không được phép đưa vào ghi chú `Twist`?
+3. Khi rút cáp USB trong lúc ESP32 vẫn được nuôi bằng mạch buck, xe vẫn lăn tiếp khoảng $$3~\mathrm{s}$$. Tiêu chí nghiệm thu nào bị trượt và phần mã nguồn ở bài nào đang thiếu?
+4. Xe đã hoàn thành chuỗi chạy trên sàn, sổ tay có đủ điện áp và ảnh đi dây nhưng để trống $$b$$ và $$r$$. Vì sao vẫn chưa thể nghiệm thu để sang Chương 08?
+5. Lệnh `V 60 -60` làm mũi xe quay sang trái thay vì quay phải. Nêu một cách sửa đúng và cho biết thao tác thứ hai nào sẽ vô tình hủy bỏ cách sửa đó.
 
 ### Gợi ý đáp án
 
-1. $$R \approx 1{,}30/0{,}60 \approx 2{,}2~\Omega$$. Lớn so với pack khỏe vài trăm miliohm. Dừng, và nghi cell, đế, dây mỏng, hoặc polyfuse đang ấm. 2. $$v_{obs} = 1{,}6/4{,}0 = 0{,}40~\mathrm{m/s}$$ chỉ cho lượt này. Không viết "PWM 80 = $$0{,}40~\mathrm{m/s}$$" như hằng số bộ chuyển. Chương 08 hiệu chuẩn. 3. Dòng dừng theo timeout trượt. Hạn $$250~\mathrm{ms}$$ của bài 04 thiếu hoặc không tới, nên PWM cuối còn đó. 4. Động học và PID chương 08 cần bề rộng và bán kính lăn. Hình học trống nghĩa là bộ điều khiển sẽ bịa $$b$$. Nghiệm thu đã đòi hai số ấy từ chương 06. 5. Đảo dây motor phải hoặc dấu firmware bên phải, một trong hai. Làm cả hai thì yaw trái quay lại. Rồi chạy lại bốn hướng.
+1. $$R \approx 1{,}30/0{,}60 \approx 2{,}2~\Omega$$ — quá lớn so với mức vài trăm miliôm của pack pin khỏe. Cần dừng nghiệm thu để kiểm tra cell pin, tiếp xúc đế pin, tiết diện dây hoặc polyfuse đang nóng.
+2. Tốc độ quan sát $$v_{obs} = 1{,}6/4{,}0 = 0{,}40~\mathrm{m/s}$$ cho riêng lượt thử đó. Không được viết “PWM 80 = $$0{,}40~\mathrm{m/s}$$” như hằng số quy đổi cố định vì bước hiệu chuẩn thuộc Chương 08.
+3. Tiêu chí dừng theo timeout bị trượt. Đoạn kiểm tra quá hạn $$250~\mathrm{ms}$$ ở Bài 04 đang bị thiếu hoặc không được thực thi, khiến thanh ghi PWM giữ nguyên mức duty cuối.
+4. Mô hình động học và vòng điều khiển ở Chương 08 bắt buộc cần khổ vết $$b$$ và bán kính lăn $$r$$ đã đo ở Chương 06; để trống sẽ buộc bộ điều khiển phải dùng số ước đoán.
+5. Đảo hai dây động cơ phải trên cầu vít **hoặc** đảo cực tính điều khiển bánh phải trong firmware (chỉ chọn một). Nếu làm cả hai cùng lúc thì hai lần đảo triệt tiêu nhau và lỗi quay ngược sẽ tái diễn; sau khi sửa cần chạy lại đủ bốn hướng.
 
 ## Đọc thêm
 

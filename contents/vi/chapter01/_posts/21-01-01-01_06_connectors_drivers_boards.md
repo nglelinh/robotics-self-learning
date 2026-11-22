@@ -13,123 +13,123 @@ draft: false
 
 ## Mục tiêu
 
-Học xong, bạn tách được dây Dupont bước 2,54 mm — đó là dây tín hiệu — khỏi giắc được phép mang dòng mô-tơ. Bạn từ chối ép vỏ JST-XH vào phích servo hoặc XT30 vào XT60. Bạn tính điện áp mô-tơ TT thực sự thấy từ pin 7,4 V khi đi qua TB6612 so với khi đi qua L298N, và gọi DRV8833 là phương án nhỏ hơn với trần 1,5 A, nóng khi kẹt. Bạn phân biệt board ESP32 với module WROOM trần, chỉ VBUS với 3V3 trên Pico, và giải thích vì sao echo của HC-SR04 không được rơi thẳng vào GPIO 3,3 V.
+Sau bài học này, bạn sẽ phân biệt rõ dây cắm Dupont bước 2,54 mm (chỉ dùng cho tín hiệu) với các loại giắc nối được phép mang dòng động cơ, đồng thời tránh ép nhầm vỏ JST-XH vào giắc servo hay XT30 vào XT60. Bạn sẽ tính được điện áp thực tế động cơ TT nhận từ bộ pin 7,4 V khi qua TB6612 so với L298N, và hiểu giới hạn của phương án thay thế DRV8833 (tối đa 1,5 A, nhanh nóng khi kẹt). Bạn cũng sẽ phân biệt được mạch phát triển ESP32 có sẵn USB với module WROOM trần, chỉ ra đúng chân VBUS và 3V3 trên Raspberry Pi Pico, và giải thích vì sao chân echo của HC-SR04 không được nối thẳng vào GPIO 3,3 V.
 
 ## Cần có gì trước
 
-Bạn đo được điện áp một chiều song song, biết GPIO chỉ vài chục miliampe, và biết mô-tơ TT kẹt thì không phải vậy. Chưa cần PWM cho mô-tơ. Bài dừng ở chữ trên chip, tên chân, và một phép sụt áp trước khi bánh đầu tiên quay.
+Bạn đã biết đo điện áp một chiều song song, nắm rõ dòng giới hạn của chân GPIO chỉ ở mức vài chục miliampe và biết động cơ TT kẹt trục tiêu thụ dòng lớn hơn nhiều. Bài này chưa điều khiển PWM động cơ mà dừng ở việc đọc ký hiệu IC, tên chân và tính toán sụt áp trước khi quay bánh xe đầu tiên.
 
-## Vì sao xe hai bánh chết ở giắc và ở driver
+## Vì sao xe hai bánh thường hỏng ở giắc nối và mạch lái
 
-Đồ án là hai mô-tơ TT, một TB6612, ESP32 hoặc Pico ở 3,3 V, và một HC-SR04. Dây Dupont đúng cho AIN1, AIN2, PWMA và STBY. Chúng là cách nghèo để mang dòng kẹt vào VM, và là cách tệ hơn nữa để giả vờ GPIO chính là VM.
+Hệ thống xe đồ án gồm hai động cơ TT, một mạch lái TB6612, vi điều khiển ESP32 hoặc Pico chạy mức 3,3 V và cảm biến siêu âm HC-SR04. Dây cắm Dupont phù hợp để nối các chân điều khiển AIN1, AIN2, PWMA và STBY, nhưng không phù hợp để dẫn dòng kẹt động cơ vào chân VM — và càng không thể coi chân GPIO là nguồn VM.
 
-Pin 2S danh định khoảng 7,4 V. Cầu MOSFET rơi vài phần mười vôn. L298N, cùng giá vào ngày đã kiểm, rơi khoảng hai vôn, nên mô-tơ sống ở đầu chậm của dải điện áp. Echo của HC-SR04 là ngõ ra 5 V, còn GPIO của ESP32 hoặc Pico không phải ngõ vào 5 V. Mạch chuyển mức là món 10 000 ₫. Không việc nào trong số này cần firmware. Chúng cần đọc lụa trước khi cắm pin.
+Với bộ pin 2S danh định 7,4 V, cầu H MOSFET chỉ sụt vài phần mười vôn, còn L298N (dù có cùng giá bán tại thời điểm khảo sát) lại sụt tới khoảng 2 V khiến động cơ chạy ở vùng yếu. Bên cạnh đó, chân echo của HC-SR04 xuất mức 5 V trong khi chân GPIO của ESP32 và Pico không chịu được 5 V; chỉ cần thêm một mạch chuyển mức giá khoảng 10.000 ₫ là giải quyết triệt để. Toàn bộ các vấn đề này đều được phòng tránh bằng cách đọc kỹ nhãn in trên mạch trước khi cắm pin.
 
-## Giắc: bước chân không phải gợi ý
+## Các họ giắc nối: bước chân không thể ép vừa
 
-Dupont, jumper chân vuông rời, làm trên bước 2,54 mm. Nó hợp breadboard và hợp tín hiệu logic vào TB6612. Tiếp điểm và sợi dây mảnh phía sau không phải giắc mô-tơ. Cú kẹt gần một ampe làm ấm một mối bấm đã mỏi và rơi mất điện áp bạn vừa tính kỹ ở driver. Dupont cho tín hiệu. Dây dày hơn, được cố định tử tế, cho dòng mô-tơ và cho dây pin vào VM.
+**Dây Dupont** (đầu cắm vuông đơn bước chân 2,54 mm) được thiết kế cho breadboard và đường tín hiệu logic nối vào TB6612. Do tiết diện lõi đồng mảnh và tiếp điểm nhỏ, dòng kẹt gần 1 A đi qua đầu bấm Dupont dễ gây nóng và làm sụt áp. Do đó, chỉ dùng Dupont cho tín hiệu; đường pin vào VM và đường ra động cơ cần dây tiết diện lớn hơn và được bắt chặt qua trạm vít hoặc hàn cố định.
 
-JST-XH là họ khác. Bước chân 2,50 mm, không phải 2,54 mm, đủ gần để cám dỗ ép, và đủ khác để bẻ chân. Nó hay gặp trên dây cân bằng và trên đuôi pin nhỏ. Servo dùng phích ba chân kiểu JR, cũng gần 2,54 mm, với vai định hướng dễ bị phá nếu bạn gọt đi. XT30 và XT60 là giắc đạn cho dòng lớn hơn. Chúng không cắm vào nhau, và không cắm vào JST. Không trượt vào với một tiếng khớp và không có kim loại bị cong thì dừng. Ép vỏ là cách pin bị đảo cực lên VM.
+**JST-XH** là chuẩn giắc có bước chân 2,50 mm (thường gặp ở dây sạc cân bằng và giắc pin nhỏ). Dù 2,50 mm gần giống 2,54 mm, việc cố ép cắm vào hàng chân 2,54 mm sẽ làm cong gãy chân. **Giắc servo kiểu JR** có ba chân bước 2,54 mm kèm gờ định hướng chống cắm ngược — tuyệt đối không gọt bỏ gờ này. Với dòng công suất lớn hơn, **XT30** và **XT60** dùng chân đồng dạng đạn và hoàn toàn không tương thích lẫn nhau hay với JST. Nếu hai đầu giắc không trượt vào nhẹ nhàng và khớp khít, hãy dừng ngay; cố dùng lực rất dễ làm đảo cực pin trên chân VM.
 
-## Sụt áp của driver, tính ở 7,4 V
+## So sánh sụt áp mạch lái ở nguồn 7,4 V
 
-Cầu H lái dòng mô-tơ. Nó không sản xuất dòng đó. Vi điều khiển bảo cầu đóng khoá chiều nào. Pin trên VM cấp ampe.
+Cầu H chỉ đóng vai trò đóng cắt điều hướng dòng điện cho động cơ chứ không tự sinh ra dòng: vi điều khiển ra lệnh chọn chiều quay và PWM, còn nguồn pin nối vào chân VM mới là nơi cung cấp dòng điện.
 
 ![Vi điều khiển lái cầu; pin cấp dòng cho mô-tơ]({{ site.imgurl }}/generated/hbridge_concept.png)
 
-Module TB6612FNG trong giỏ là cầu MOSFET. Trang Hshop, đọc ngày 23 tháng 9 năm 2026, cho VM từ 4,5 V đến 10 V, logic từ 2,7 V đến 5,5 V, 1,2 A liên tục và 3,2 A đỉnh. GPIO 3,3 V là mức cao hợp lệ. Độ sụt hợp lý của kiểu cầu này, ở dòng vừa phải, là vài phần mười vôn. Lấy 0,3 V làm số để tính:
+**Module TB6612FNG** dùng cầu MOSFET. Theo thông số trên Hshop (ngày 23 tháng 9 năm 2026), mạch hỗ trợ VM từ 4,5 V đến 10 V, nguồn logic từ 2,7 V đến 5,5 V, dòng liên tục 1,2 A và dòng đỉnh 3,2 A mỗi kênh; mức cao 3,3 V của GPIO hoàn toàn hợp lệ. Với độ sụt áp thực tế khoảng 0,3 V ở dòng trung bình:
 
 $$
 V_\mathrm{motor} \approx 7.4 - 0.3 = 7.1\ \mathrm{V}
 $$
 
-Module L298N cùng giá 45 000 ₫ và là món ta không chọn làm mặc định. Nó là cầu Darlington. Tính khoảng 2 V sụt ở dòng mô-tơ:
+Ngược lại, **module L298N** (cùng giá 45.000 ₫ nhưng không chọn làm mặc định) sử dụng cầu Darlington nên sụt khoảng 2,0 V khi có tải:
 
 $$
 V_\mathrm{motor} \approx 7.4 - 2.0 = 5.4\ \mathrm{V}
 $$
 
-Mô-tơ TT trong khóa này thuộc lớp 3 V đến 9 V. 5,4 V vẫn quay được. Nó quay chậm hơn và yếu hơn 7,1 V, và pin không còn tươi làm khoảng cách tệ thêm. Cũng đừng dùng ổn áp 5 V onboard của module L298N để chạy ESP32.
+Động cơ TT của khóa học hoạt động trong dải 3–9 V; ở 5,4 V động cơ vẫn quay nhưng chậm và yếu hơn hẳn mức 7,1 V, đặc biệt khi pin vơi dần. Ngoài ra, không nên lấy nguồn 5 V từ ổn áp tích hợp trên module L298N để nuôi ESP32.
 
 ![Module kiểu L298N: kéo được tải, và sụt áp lớn]({{ site.imgurl }}/wikimedia/Dosmotorsl298n.jpg)
 
-DRV8833 là phương án nhỏ hơn, niêm yết 25 000 ₫, VM từ 2,7 V đến 10,8 V và 1,5 A tối đa mỗi kênh trên trang Hshop đó. Một mô-tơ TT mỗi kênh là dùng đúng. Kẹt lâu làm vỏ nhỏ nóng rất nhanh. Đừng song song cả hai mô-tơ dẫn động lên một kênh DRV8833 rồi gọi đó là phương án dự phòng. Trên TB6612, STBY phải được giữ cao, nếu không cầu ngủ và mô-tơ đứng im trong khi firmware trông hoàn hảo.
+**DRV8833** (giá tham khảo 25.000 ₫ trên Hshop) là lựa chọn thay thế gọn hơn, dải VM 2,7–10,8 V và tối đa 1,5 A mỗi kênh. Mạch hoạt động tốt khi mỗi kênh kéo một động cơ TT, nhưng vỏ nhỏ khiến chip nóng nhanh nếu bánh xe kẹt lâu; tuyệt đối không đấu song song hai động cơ lên cùng một kênh DRV8833. Riêng với TB6612, luôn nhớ kéo chân **STBY** lên mức cao, bởi nếu để thấp hoặc bỏ nổi, cầu H sẽ ở chế độ ngủ và động cơ đứng yên dù mã nguồn không báo lỗi.
 
-## Board: 5 V được phép tồn tại ở đâu
+## Mạch vi điều khiển và giới hạn điện áp 5 V
 
-Board phát triển ESP32 có ổ USB, một chip UART như CH340 hoặc CP2102 gần ổ đó, một ổn áp 3,3 V, và một module vỏ kim loại. Module ESP32-WROOM trần là cái vỏ và các pad, không USB và không có ổn áp để cắm cáp. Túi không có ổ USB thì bạn chưa mua board phát triển mà giỏ hàng yêu cầu, kể cả khi vỏ ghi ESP32.
+Một **mạch phát triển (dev board) ESP32** hoàn chỉnh có sẵn cổng USB, chip chuyển đổi USB-UART (như CH340 hoặc CP2102) nằm cạnh cổng USB, mạch ổn áp 3,3 V và module ESP32 bọc vỏ kim loại. Ngược lại, **module ESP32-WROOM trần** chỉ gồm phần vỏ kim loại cùng hàng chân hàn viền ngoài, không có cổng USB lẫn mạch ổn áp. Nếu sản phẩm không có cổng USB, đó không phải mạch phát triển yêu cầu trong BOM.
 
 ![ESP32 trên board phát triển nhỏ, có USB và ổn áp]({{ site.imgurl }}/wikimedia/ESP32_on_Lolin32_Lite_clone_board_cropped.jpg)
 
 ![Những thứ cần nhìn trên board vi điều khiển: USB, ổn áp, module, header]({{ site.imgurl }}/generated/pcb_mcu_anatomy.png)
 
-Raspberry Pi Pico có header hai hàng và không có module Wi-Fi vỏ kim loại riêng trên bản gốc. VBUS là rail 5 V của USB khi board cắm vào máy. 3V3 là ngõ ra đã ổn áp. Logic GPIO là 3,3 V. Đừng nuôi mô-tơ TT từ 3V3, và đừng coi VBUS là một GPIO.
+**Raspberry Pi Pico** có hai hàng chân header song song (bản gốc không có module Wi-Fi bọc kim loại). Trên board này, **VBUS** là đường nguồn 5 V lấy từ cổng USB khi cắm máy tính, **3V3** là đầu ra đã ổn áp, và các chân GPIO chạy ở mức logic 3,3 V. Không lấy nguồn từ chân 3V3 để chạy động cơ TT và không nhầm VBUS là chân tín hiệu GPIO.
 
 ![Raspberry Pi Pico: header hai hàng, logic 3,3 V]({{ site.imgurl }}/wikimedia/Raspberry_Pi_Pico.jpg)
 
 ![Logic 3,3 V, USB 5 V, nguồn mô-tơ tách khỏi rail đó]({{ site.imgurl }}/generated/power_rails_3v3.png)
 
-Chân trig của HC-SR04 thường nhận mức cao 3,3 V. Chân echo đẩy ra khoảng 5 V. Echo đó không được vào thẳng GPIO của ESP32 hoặc Pico. Mạch chuyển mức 4 kênh, món 10 000 ₫ trong giỏ, là cách thẳng: phía 3,3 V về vi điều khiển, phía 5 V về cảm biến, mass chung. Cầu chia chỉ trên echo là cách kia. Hai điện trở, 10 kΩ phía trên và 20 kΩ phía dưới, cho
+Đối với cảm biến siêu âm **HC-SR04**, chân `Trig` thường nhận tốt xung kích 3,3 V từ vi điều khiển, nhưng chân `Echo` xuất mức cao xấp xỉ 5 V nên tuyệt đối không cắm thẳng vào GPIO 3,3 V của ESP32 hay Pico. Cách an toàn và gọn nhất là dùng mạch chuyển mức logic 4 kênh (giá khoảng 10.000 ₫): nối phía 3,3 V với vi điều khiển, phía 5 V với cảm biến và nối mass chung. Cách thay thế là lắp cầu chia áp riêng cho chân `Echo` bằng điện trở 10 kΩ (phía trên) và 20 kΩ (phía dưới):
 
 $$
 V_\mathrm{out} = 5 \times \frac{20}{10 + 20} \approx 3.3\ \mathrm{V}
 $$
 
-mức mà chân 3,3 V chịu được. Đừng đặt cầu chia đó lên một chân mà cảm biến đang muốn đọc như ngõ vào 5 V, trừ khi bạn đã kiểm 3,3 V là mức cao hợp lệ với nó. Trig từ GPIO thường ổn, không cần cầu chia. Echo mới là chân cắn.
+mức điện áp hoàn toàn an toàn cho chân 3,3 V. Không lắp cầu chia áp lên chân đầu vào cần mức cao 5 V nếu chưa kiểm chứng cảm biến có nhận được 3,3 V hay không; thông thường chỉ cần hạ mức chân `Echo`, còn chân `Trig` có thể nối trực tiếp từ GPIO.
 
 ## Thực hành
 
-Làm khi pin đã tháo và mô-tơ chưa cắm. Nhận dạng trước.
+Thực hiện toàn bộ các bước sau khi **đã tháo pin và chưa gắn động cơ**:
 
-1. Chụp chip driver, đủ gần để đọc chữ. Ghi TB6612FNG, DRV8833, hoặc L298N, đúng cái đang in. Nếu chỉ là nhãn của nhà bán module chứ không phải silic, hãy nói vậy.
-2. Chụp chip UART của vi điều khiển. CH340 và CP2102 là hai con hay gặp trên board ESP32 của khóa này. Không ổ USB và không chip nối tiếp thì bạn đang cầm module trần.
-3. Từ mô tả TB6612 trên Hshop, gắn nhãn một tờ phác: AIN1, AIN2, PWMA, STBY, VM, VCC và GND. Khớp các tên đó với lụa trên module nếu đã có. VM là nguồn mô-tơ, khoảng 4,5 V đến 10 V. VCC là logic, 2,7 V đến 5,5 V, nên chân 3,3 V của ESP32 hoặc Pico được phép nuôi nó. GND là mass chung với vi điều khiển. STBY phải được kéo cao, nếu không ngõ ra tắt.
-4. Trên Pico hoặc ESP32, chỉ 3V3, nút 5 V của USB (VBUS hoặc chân ghi 5V), và một GPIO. Nói to chân nào trong ba chân đó được chạm echo của HC-SR04. Câu trả lời là không chân nào, cho đến khi echo đã được chuyển mức hoặc chia áp.
+1. Chụp ảnh cận cảnh IC trên mạch lái đủ nét để đọc rõ ký hiệu (`TB6612FNG`, `DRV8833` hoặc `L298N`). Nếu ảnh chỉ thấy nhãn của bên bán module mà không thấy ký hiệu trên thân IC, hãy ghi chú rõ điều này.
+2. Chụp ảnh chip USB-UART trên mạch vi điều khiển (thường là `CH340` hoặc `CP2102` nằm gần cổng USB của ESP32). Nếu mạch không có cổng USB và chip nối tiếp, bạn đang cầm module trần.
+3. Dựa theo thông số TB6612, vẽ nhanh sơ đồ chân lên giấy và ghi nhãn đầy đủ: `AIN1`, `AIN2`, `PWMA`, `STBY`, `VM`, `VCC` và `GND`, sau đó đối chiếu với ký hiệu in lụa trên module (nếu đã có hàng). Xác nhận rõ: `VM` là nguồn động cơ (4,5–10 V), `VCC` là nguồn logic (2,7–5,5 V, nối từ chân 3,3 V của MCU), `GND` nối mass chung, và `STBY` phải kéo lên mức cao.
+4. Trên ESP32 hoặc Pico, chỉ ra đúng ba vị trí: chân `3V3`, chân `5V` (hoặc `VBUS`) và một chân `GPIO`. Tự kiểm tra xem chân nào trong ba chân đó được phép nối thẳng vào chân `Echo` của HC-SR04 — đáp án đúng là **không chân nào** cho đến khi tín hiệu echo đã đi qua mạch chuyển mức hoặc cầu chia áp.
 
-Bạn kết thúc với hai bức ảnh và một tờ đã gắn nhãn, mọi dây mô-tơ vẫn trong túi. Tờ đúng cho thấy VM và VCC là hai chân khác nhau. Nếu module của bạn nối chúng làm một, đó không phải đường tắt; đó là module không thể nhận pin 7,4 V mà không ép điện áp ấy lên chân logic. Đừng cấp nguồn theo cách đó.
+**Kết quả kỳ vọng:** Bạn có hai ảnh chụp sắc nét và một bản vẽ chân có nhãn rõ ràng (toàn bộ dây động cơ vẫn để trong túi), thể hiện `VM` và `VCC` là hai chân tách biệt hoàn toàn. Nếu một module lạ nối chung hai chân này làm một, tuyệt đối không cấp pin 7,4 V vào đó vì sẽ đưa quá áp lên chân logic.
 
-| Bạn thấy | Nguyên nhân hay gặp | Cách xử lý |
+| Hiện tượng quan sát | Nguyên nhân thường gặp | Cách khắc phục |
 | --- | --- | --- |
-| Mô-tơ im, firmware tin là đang lái | STBY để nổi hoặc ở mức thấp | Kéo STBY lên cao cùng nguồn logic, đúng chân lụa ghi. |
-| Xe bò trên pin 7,4 V còn tươi | Sụt của L298N, mô-tơ chỉ thấy khoảng 5,4 V | Dùng TB6612. Đừng nâng pin quá định mức VM của driver để bù. |
-| Giắc Dupont nóng ở VM | Jumper tín hiệu đang mang dòng mô-tơ | Đưa dòng pin và mô-tơ sang dây dày hơn. Dupont chỉ còn trên AIN1, AIN2, PWMA, STBY. |
-| GPIO chết sau khi cắm HC-SR04 | Echo 5 V vào chân 3,3 V | Thêm mạch chuyển mức hoặc cầu chia echo trước khi cảm biến quay lại. |
-| Vỏ không vào nếu không dùng sức | JST-XH, JR, XT30 và XT60 là các họ khác nhau | Dừng. Đúng họ mới cắm. Đừng gọt vai định hướng. |
+| Động cơ đứng yên dù firmware đang xuất PWM đúng | Chân STBY bị bỏ nổi hoặc ở mức thấp | Kéo chân STBY lên mức cao theo đúng đường nguồn logic 3,3 V |
+| Xe chạy yếu trên bộ pin 7,4 V mới sạc | Sụt áp lớn của cầu Darlington L298N (chỉ còn ~5,4 V) | Chuyển sang dùng TB6612; không nâng áp pin vượt giới hạn VM để bù |
+| Đầu cắm Dupont nối vào chân VM bị nóng | Dùng dây tín hiệu mảnh dẫn dòng động cơ | Thay bằng dây nguồn tiết diện lớn hơn; chỉ dùng Dupont cho AIN1, AIN2, PWMA, STBY |
+| Chân GPIO bị hỏng sau khi nối HC-SR04 | Đưa trực tiếp tín hiệu Echo 5 V vào chân 3,3 V | Lắp mạch chuyển mức hoặc cầu chia áp cho Echo trước khi thử lại |
+| Hai đầu giắc không thể cắm vừa nếu không ấn mạnh | Nhầm lẫn giữa các họ JST-XH, JR, XT30, XT60 | Dừng lại, dùng đúng chuẩn giắc tương thích và không gọt gờ định hướng |
 
-An toàn: bánh nhấc khỏi bàn dù lab này không quay chúng. Pin tháo. Đừng dò pin khi ngón tay chạm kim loại đầu que. Phép tính 7,4 V làm trên giấy cho đến bài sau, khi đo VM bằng đồng hồ ở thang cao hơn 10 V.
+**Lưu ý an toàn:** Luôn nhấc bánh xe khỏi mặt bàn và tháo rời pin trong bài này; giữ ngón tay cách xa đầu kim loại que đo khi thao tác với nguồn điện. Mọi phép tính với nguồn 7,4 V hiện thực hiện trên giấy cho tới khi bạn đo thực tế trên thang DC lớn hơn 10 V ở các bài sau.
 
 ## Video tham khảo
 
-- **Xem trước:** [H Bridge Motor Control Basics Explained](https://www.youtube.com/watch?v=YYMsS50x1UY) — The Engineering Mindset, tiếng Anh. Cầu H là khối trên driver motor. Xem bốn công tắc trước khi nhận mặt module.
-- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Mạch chuyển mức khi một chân 5 V gặp board 3,3 V. Đọc chiều của từng kênh.
+- **Xem trước:** [H Bridge Motor Control Basics Explained](https://www.youtube.com/watch?v=YYMsS50x1UY) — The Engineering Mindset, tiếng Anh. Giải thích nguyên lý bốn khóa đóng cắt của mạch cầu H trước khi làm việc với module thực tế.
+- [Logic Level Converters - Learn & Example Project - TXS0108E](https://www.youtube.com/watch?v=f7aySy_0URE) — DIY Machines, tiếng Anh. Minh họa cách đấu nối mạch chuyển mức logic giữa thiết bị 5 V và vi điều khiển 3,3 V.
 
 ## Bài tập
 
-1. Pin 7,4 V. Lặp phép sụt cho cầu MOSFET 0,3 V và cầu Darlington 2,0 V. Mô-tơ TT thích điện áp nào, và vì sao câu trả lời không phải "mua L298N vì nó cũng 45 000 ₫"?
-2. Trang DRV8833 ghi 1,5 A tối đa mỗi kênh. Kẹt vài giây và chip nóng không dám chạm. Bạn đã chạm giới hạn nào, và vì sao "tối đa" không phải kế hoạch chạy liên tục cho hai mô-tơ trên một kênh?
-3. Kể ba chân trên module TB6612 mà jumper Dupont được mang, và một mạng nó không nên mang lâu.
-4. Một túi có ESP32-WROOM trần và một board NodeMCU-32S. Cái nào hiện cổng serial khi cắm cáp, và chip nào cạnh ổ USB cần được chụp?
-5. Dây echo của HC-SR04 rơi vào GPIO của Pico. Dây đó đang muốn ở điện áp nào, VBUS là gì, và món nào trong giỏ phải nằm giữa chúng?
+1. Với nguồn pin 7,4 V, tính lại điện áp tại động cơ khi qua cầu MOSFET (sụt 0,3 V) và cầu Darlington (sụt 2,0 V). Động cơ TT hoạt động tốt hơn ở mức nào, và vì sao không chọn L298N dù cùng giá 45.000 ₫?
+2. Thông số DRV8833 ghi tối đa 1,5 A mỗi kênh, nhưng khi bánh kẹt vài giây thì chip nóng bỏng. Bạn đã chạm vào giới hạn nào, và vì sao con số "tối đa" không cho phép mắc song song hai động cơ lên cùng một kênh?
+3. Liệt kê ba chân trên module TB6612 phù hợp để nối bằng dây Dupont, và một đường điện không nên dùng dây Dupont lâu dài.
+4. Trong túi có một module ESP32-WROOM trần và một mạch NodeMCU-32S. Mạch nào sẽ hiện cổng serial khi cắm cáp USB, và cần chụp ảnh con chip nào nằm cạnh cổng USB?
+5. Dây Echo của HC-SR04 sắp nối vào một chân GP của Raspberry Pi Pico. Dây Echo xuất mức điện áp bao nhiêu, chân VBUS dùng để làm gì, và linh kiện nào trong giỏ hàng phải đặt giữa Echo và chân GP?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. Cầu MOSFET: $7{,}4 - 0{,}3 = 7{,}1\ \mathrm{V}$. Darlington: $7{,}4 - 2{,}0 = 5{,}4\ \mathrm{V}$. Mô-tơ thích 7,1 V, trong lớp 3 V đến 9 V, nhanh và khoẻ hơn. Cùng giá không có nghĩa cùng điện áp ở đầu cực.
-2. Bạn đã chạm giới hạn nhiệt của vỏ nhỏ, và đang ở trần 1,5 A. Tối đa là trần, không phải lúc chạy đều. Một mô-tơ mỗi kênh, và một cú kẹt bị để yên vẫn sẽ nóng. Đừng song song cả hai bánh dẫn động trên một kênh.
-3. Dupont hợp AIN1, AIN2, PWMA và STBY. Nó không nên là đường lâu dài cho dòng VM.
-4. NodeMCU-32S có USB. Chụp CH340 hoặc CP2102 cạnh ổ cắm. WROOM trần không có chip UART cho đến khi bạn thêm.
-5. Echo muốn khoảng 5 V. VBUS là ngõ vào USB 5 V của Pico, không phải GPIO và không phải chỗ để echo rơi vào. Mạch chuyển mức 4 kênh nằm giữa echo và GPIO, mass chung. Cầu chia chỉ trên echo là cách kia.
+1. Cầu MOSFET: $7{,}4 - 0{,}3 = 7{,}1\ \mathrm{V}$; cầu Darlington: $7{,}4 - 2{,}0 = 5{,}4\ \mathrm{V}$. Động cơ TT (dải 3–9 V) chạy khỏe và nhanh hơn rõ rệt ở 7,1 V; cùng giá bán nhưng hiệu suất điện áp khác nhau hoàn toàn nên TB6612 là lựa chọn đúng.
+2. Chip đã chạm giới hạn tản nhiệt của vỏ nhỏ gần trần dòng 1,5 A. Thông số tối đa là giới hạn chịu đựng đỉnh chứ không phải dòng vận hành liên tục cho hai động cơ mắc song song trên một kênh.
+3. Dây Dupont phù hợp cho các chân tín hiệu như AIN1, AIN2, PWMA và STBY; không nên dùng lâu dài cho đường nguồn động cơ VM.
+4. NodeMCU-32S có sẵn cổng USB để hiện cổng serial; cần chụp ảnh chip chuyển đổi USB-UART (CH340 hoặc CP2102) nằm cạnh cổng cắm. Module WROOM trần không có chip này.
+5. Dây Echo xuất mức cao khoảng 5 V. VBUS là đường nguồn USB 5 V của Pico (không phải GPIO và không nối Echo vào đây). Cần đặt mạch chuyển mức 4 kênh (nối mass chung) hoặc cầu chia áp ở giữa dây Echo và chân GP.
 
 </details>
 
 ## Đọc thêm
 
-Trang carrier TB6612FNG của Pololu nói rõ chip dùng để làm gì, tách khỏi một listing sàn: [Pololu TB6612FNG carrier](https://www.pololu.com/product/713). Trang sản phẩm của phương án nhỏ hơn: [DRV8833](https://www.ti.com/product/DRV8833). Bài mức logic của SparkFun là chuyện 3,3 V với 5 V mà HC-SR04 tạo ra: [Logic levels](https://learn.sparkfun.com/tutorials/logic-levels). Con số GPIO phía sau cảnh báo nằm trong datasheet của Espressif: [ESP32 datasheet](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf).
+Trang sản phẩm của Pololu mô tả chi tiết mạch lái [Pololu TB6612FNG carrier](https://www.pololu.com/product/713), kèm trang thông số của phương án thay thế [DRV8833](https://www.ti.com/product/DRV8833). Bài viết [Logic levels](https://learn.sparkfun.com/tutorials/logic-levels) của SparkFun giải thích rõ sự chênh lệch mức logic 3,3 V và 5 V, còn giới hạn chân GPIO cụ thể nằm trong [ESP32 datasheet](https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf).
 
 ## Mua ở Việt Nam
 
-Phần còn lại của robot, gồm khung, pin và đồng hồ, nằm ở [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Giá dưới đây là listing Hshop đọc ngày 23 tháng 9 năm 2026. Xem lại trước khi trả.
+Các hạng mục còn lại của xe nằm ở bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Dưới đây là các mức giá tham khảo trên Hshop ngày 23 tháng 9 năm 2026 (cần kiểm tra lại giá hiện hành trước khi đặt):
 
-Driver mặc định giá 45 000 ₫: [TB6612FNG](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver), VM 4,5–10 V, logic 2,7–5,5 V, 1,2 A liên tục và 3,2 A đỉnh. Phương án nhỏ hơn giá 25 000 ₫: [DRV8833](https://hshop.vn/mach-dieu-khien-dong-co-drv8833-dc-motor-driver), VM 2,7–10,8 V, 1,5 A tối đa mỗi kênh. L298N cũng 45 000 ₫ và không phải mặc định, vì độ sụt vừa tính: [module L298N](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298).
+Mạch lái mặc định giá 45.000 ₫: [TB6612FNG](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver) (VM 4,5–10 V, logic 2,7–5,5 V, 1,2 A liên tục / 3,2 A đỉnh). Phương án nhỏ hơn giá 25.000 ₫: [DRV8833](https://hshop.vn/mach-dieu-khien-dong-co-drv8833-dc-motor-driver) (VM 2,7–10,8 V, tối đa 1,5 A/kênh). Mạch [module L298N](https://hshop.vn/mach-dieu-khien-dong-co-dc-l298) cũng có giá 45.000 ₫ nhưng không dùng làm mặc định do sụt áp lớn.
 
-Mạch chuyển mức cho echo HC-SR04 giá 10 000 ₫: [mạch chuyển mức 4 kênh](https://hshop.vn/mach-chuyen-muc-tin-hieu-logic-4-kenh). Board ESP32 có USB giá 190 000 ₫: [NodeMCU-32S CH340](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker). Pico trên Hshop là trang tìm kiếm, không phải một slug trong danh sách này: [tìm Raspberry Pi Pico](https://hshop.vn/search?q=raspberry+pi+pico). Ngày 23 tháng 9 năm 2026 trang đó hiện Pico 2 giá 195 000 ₫ và Pico 2 W giá 275 000 ₫. Đọc lại tiêu đề trước khi cho vào giỏ. Mua board có USB, không mua module trần, trừ khi bạn đã có mạch nạp.
+Mạch chuyển mức cho chân Echo của HC-SR04 giá 10.000 ₫: [mạch chuyển mức 4 kênh](https://hshop.vn/mach-chuyen-muc-tin-hieu-logic-4-kenh). Mạch phát triển ESP32 có sẵn USB giá 190.000 ₫: [NodeMCU-32S CH340](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker). Với Raspberry Pi Pico, bạn có thể tra cứu qua trang tìm kiếm Hshop: [tìm Raspberry Pi Pico](https://hshop.vn/search?q=raspberry+pi+pico) (ngày 23 tháng 9 năm 2026 ghi nhận Pico 2 giá 195.000 ₫ và Pico 2 W giá 275.000 ₫). Luôn chọn mạch phát triển có sẵn cổng USB thay vì module trần trừ khi bạn đã có mạch nạp riêng.

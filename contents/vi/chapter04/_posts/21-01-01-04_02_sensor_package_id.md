@@ -11,99 +11,94 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **60–80 phút**. Đây là bài nhận diện trên bàn. Bạn làm được với ảnh những module đang có, cộng một tab datasheet cho món chưa mua.
+Thời lượng: **60–80 phút**. Đây là bài thực hành nhận diện linh kiện trực tiếp trên bàn; bạn có thể kết hợp ảnh chụp các module đang có với tài liệu datasheet của những món chưa mua.
 
 ## Mục tiêu học
 
-Bạn gọi tên module từ hình dáng và chữ trên chân trước khi nối dây, nêu được điện áp nuôi và loại bus (trig/echo, I2C, analog hay USB), và không đưa chân echo 5 V thẳng vào ESP32. Bạn lập một phiếu nhận diện để Capstone A dùng lại, nên phần đo khoảng cách và đếm bánh được chọn có chủ đích. Bạn cũng nói được món nào phải có trước Chương 07 và món nào để dành cho nhận thức ở Chương 11.
+Sau bài này, bạn nhận diện được đúng loại cảm biến dựa trên hình dáng vật lý và nhãn chân trước khi cấp điện, xác định được điện áp nuôi và chuẩn giao tiếp (trig/echo, I2C, analog hay USB), đồng thời tuyệt đối không đưa tín hiệu Echo 5 V trực tiếp vào chân ESP32. Bạn lập được một phiếu nhận diện dùng lại cho Capstone A để chọn đúng cảm biến đo khoảng cách và encoder bánh xe, cũng như phân biệt rõ linh kiện cần chuẩn bị trước Chương 07 với các thiết bị thị giác để dành cho Chương 11.
 
 ## Kiến thức cần có
 
-Bài 04-01 (I2C, SPI, UART) và thói quen đọc pinout từ Chương 01. Một cái đồng hồ vạn năng. Không cần mọi module có mặt cùng lúc.
+Bạn đã hoàn thành bài 04-01 (I2C, SPI, UART), nắm thói quen đọc sơ đồ chân từ Chương 01 và có sẵn đồng hồ vạn năng. Không bắt buộc phải có đầy đủ mọi loại cảm biến ngay trên bàn.
 
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
-Capstone A cần một cách biết robot sắp đâm tường, và một cách đếm vòng bánh nếu bạn muốn bài nghiệm thu hơn câu “nó có nhúc nhích”. HC-SR04 hoặc VL53L0X lo chuyện bức tường. Động cơ giảm tốc kèm encoder từ tính lo chuyện đếm. IMU không bắt buộc cho lần teleop đầu và sau này mới thành `sensor_msgs/Imu`. Camera là việc của Chương 11: nó ngốn băng thông USB và CPU mà ESP32 trần không có. Mua camera lúc robot còn chưa dừng khi mất lệnh là cách làm hết tiền.
+Capstone A cần một cảm biến phát hiện vật cản phía trước và (nếu muốn kiểm chứng định lượng tốt hơn) encoder đếm vòng quay bánh xe. Cảm biến siêu âm HC-SR04 hoặc laser ToF VL53L0X đảm nhiệm việc đo khoảng cách; động cơ giảm tốc có encoder từ tính đảm nhiệm việc đếm xung. IMU chưa bắt buộc cho lần chạy teleop đầu tiên và sẽ được dùng sau cho `sensor_msgs/Imu`. Riêng camera thuộc phạm vi Chương 11 vì đòi hỏi băng thông USB và năng lực xử lý vượt quá khả năng của ESP32 thuần; mua camera quá sớm khi robot chưa dừng an toàn được chỉ gây lãng phí ngân sách.
 
 ![Phiếu nhận diện module cảm biến]({{ site.imgurl }}/generated/sensor_package_id.png)
 
-## Mắt cần bắt được gì
+## Cách nhận diện bằng mắt thường
 
-Nhìn kim loại, cửa sổ quang, và số chân. Rồi đọc chữ in. Rồi tra điện áp. Đúng thứ tự đó. Một module “giống” HC-SR04 nhưng có năm chân có thể là RCWL-1601 hoặc US-100 có chế độ UART. Thư viện copy-dán không cứu được.
+Hãy quan sát theo đúng trình tự: hình dáng vật lý (vỏ kim loại, cửa sổ quang học, số chân), sau đó đọc chữ in cạnh hàng chân, cuối cùng tra điện áp và giao thức trong datasheet. Một module có hình dáng tương tự HC-SR04 nhưng có 5 chân có thể là RCWL-1601 hoặc US-100 hỗ trợ UART — việc sao chép mã nguồn mẫu mà không kiểm tra nhãn chân sẽ không hoạt động.
 
-**HC-SR04.** Hai ống nhôm trên PCB nhỏ, bốn chân: VCC, TRIG, ECHO, GND. Nó cần 5 V. TRIG là xung vào khoảng 10 µs. ECHO là xung ra, độ rộng bằng thời gian đi và về, và trên module phổ biến xung đó là 5 V. GPIO của ESP32 không phải chân 5 V. Cầu chia (1 kΩ từ ECHO tới GPIO, 2 kΩ từ GPIO xuống mass) đưa 5 V xuống khoảng 3,3 V. Hai ống nhôm có nón âm rộng, cỡ 15 độ, nên khung cửa và tấm rèm không cho cùng một số.
+- **HC-SR04:** có hai đầu thu phát siêu âm vỏ nhôm hình trụ gắn trên bo mạch nhỏ với bốn chân `VCC`, `TRIG`, `ECHO`, `GND`. Module dùng nguồn 5 V; chân `TRIG` nhận xung kích khoảng 10 µs, còn chân `ECHO` xuất xung có độ rộng tỉ lệ với thời gian sóng âm đi và về. Trên bản phổ biến, mức cao của `ECHO` là 5 V, vượt giới hạn chịu áp của ESP32 nên phải hạ áp qua cầu chia (1 kΩ từ `ECHO` tới GPIO, 2 kΩ từ GPIO xuống mass để đưa về khoảng 3,3 V). Chùm sóng âm có góc mở khá rộng (khoảng 15°), nên bề mặt cứng như khung cửa và bề mặt mềm như rèm vải sẽ cho kết quả rất khác nhau.
+- **VL53L0X và họ cảm biến ToF:** đặc trưng bởi cửa sổ quang màu đen rất nhỏ (thường đặt trên bo mạch breakout màu tím), gồm các chân `VIN`, `GND`, `SCL`, `SDA`, đôi khi có thêm `XSHUT` và `GPIO1`. Giao tiếp bằng I2C với địa chỉ mặc định `0x29`, trả về trực tiếp khoảng cách tính bằng milimét do chip tự tính toán. Nhiều bo breakout có sẵn ổn áp nên `VIN` nhận 3,3–5 V, nhưng mức logic I2C vẫn phải khớp với vi điều khiển. Khi dùng hai module VL53L0X trên cùng bus, chúng sẽ trùng địa chỉ `0x29` trừ khi dùng chân `XSHUT` để bật từng con và gán địa chỉ mới.
+- **MPU-6050 / GY-521:** bo mạch phẳng nhỏ (thường màu xanh dương) với hàng chân `VCC`, `GND`, `SCL`, `SDA`, `XDA`, `XCL`, `AD0`, `INT`, giao tiếp I2C ở địa chỉ `0x68` hoặc `0x69` tùy mức chân `AD0`. Đây là cảm biến quán tính gồm gia tốc kế và con quay hồi chuyển, không dùng để đo khoảng cách.
+- **Cảm biến hồng ngoại phản xạ / vật cản:** gồm một LED phát trong suốt và một phototransistor thu màu đen đặt cạnh nhau, thường có ba chân `VCC`, `GND` và `OUT` (hoặc `AO`). Loại ngõ ra số chuyển mức khi ánh sáng phản xạ vượt ngưỡng chỉnh bằng biến trở; loại ngõ ra tương tự (`AO`) cần nối vào chân ADC. Cảm biến dò line TCRT5000 cũng thuộc nhóm này — chúng không phải cảm biến ToF laser và dễ bị bão hòa dưới ánh nắng mạnh.
+- **Encoder bánh xe:** thường gặp hai dạng là đĩa có rãnh đi qua cặp thu phát quang, hoặc đĩa nam châm nhỏ gắn phía sau trục động cơ TT vàng đi kèm cảm biến Hall. Loại có hai kênh tín hiệu `A` và `B` (quadrature) cho biết cả tốc độ lẫn chiều quay; loại chỉ có một kênh tín hiệu chỉ đo được tốc độ và không tự phân biệt được chiều tiến hay lùi.
+- **Camera:** nhận diện dễ dàng qua cáp dẹt mềm bản rộng (FPC) cắm trên bo mạch như ESP32-CAM (OV2640), hoặc cáp USB của webcam chuẩn UVC. Webcam USB kết nối với máy tính chủ (laptop/Pi), không nối vào GPIO. ESP32-CAM không phù hợp làm bộ điều khiển chính cho Capstone A vì camera chiếm phần lớn chân GPIO, mạch ổn áp dễ sụt nguồn và không thuận tiện ghép thêm mạch cầu H động cơ.
 
-**VL53L0X và họ hàng.** Cửa sổ đen rất nhỏ, thường trên breakout tím, chân VIN, GND, SCL, SDA, đôi khi thêm XSHUT và GPIO1. Hội thoại là I2C, địa chỉ mặc định `0x29`. Con số bạn đọc là milimét, chip đã tính sẵn. VIN của nhiều breakout chịu 3,3–5 V vì có ổn áp trên board; đường I2C vẫn phải khớp MCU. Hai board VL53L0X chưa sửa sẽ trùng địa chỉ và không trả lời đủ cả hai. Chân XSHUT để bạn bật từng con và gán địa chỉ mới.
+## Ví dụ tính tay: hạ áp chân Echo 5 V
 
-**MPU-6050 / GY-521.** PCB phẳng nhỏ, thường màu xanh, chip có nắp kim loại, chân VCC, GND, SCL, SDA, XDA, XCL, AD0, INT. Địa chỉ I2C `0x68` hoặc `0x69` tùy AD0. Đây là gia tốc kế cộng con quay. Nó không đo khoảng cách. Người mới hay mua nhầm vì cả hai đều được gọi là “cảm biến robot”.
-
-**Hồng ngoại phản xạ và vật cản.** Một LED trong và một phototransistor đen nằm cạnh nhau, ba chân: VCC, GND, và OUT hoặc AO. Board số nhảy mức khi phản xạ vượt ngưỡng chiết áp. Board analog (AO) cần chân ADC. Cảm biến dò line TCRT5000 thuộc họ này. Chúng không phải ToF laser, và chúng bão hòa dưới nắng gắt.
-
-**Encoder bánh xe.** Hoặc đĩa có rãnh nằm giữa cặp quang trên trục motor, hoặc một viên từ nhỏ phía sau hộp số TT vàng với cảm biến Hall. Hai chân tín hiệu (A và B) nghĩa là quadrature và có chiều. Một chân tín hiệu chỉ cho tốc độ nếu bạn đã biết chiều từ driver. Đếm chân trước khi hứa đo odometry.
-
-**Camera.** Cáp mềm bản rộng (FPC) cắm vào board lớn (ESP32-CAM, OV2640) hoặc cáp USB (webcam UVC). Thấy phích USB thì máy chủ là máy tính, không phải chân analog. ESP32-CAM là bộ não Capstone khá tệ: camera chiếm nhiều chân, ổn áp dễ sụt, và bạn vẫn nợ một driver motor. Để sau.
-
-## Ví dụ tính tay: echo 5 V
-
-Chân echo của HC-SR04 ở 5 V khi xung mức cao. Bạn dựng cầu chia với $$R_1 = 1~\mathrm{k}\Omega$$ từ ECHO tới chân ESP32 và $$R_2 = 2~\mathrm{k}\Omega$$ từ chân đó xuống mass. Điện áp tại chân là
+Khi phát xung phản hồi, chân `ECHO` của HC-SR04 ở mức 5 V. Mắc cầu chia áp gồm $$R_1 = 1~\mathrm{k}\Omega$$ từ `ECHO` tới chân ESP32 và $$R_2 = 2~\mathrm{k}\Omega$$ từ chân đó xuống mass, điện áp tại chân vi điều khiển là:
 
 $$
 V_{pin} = 5 \times \frac{R_2}{R_1 + R_2} = 5 \times \frac{2}{3} \approx 3{,}33~\mathrm{V}.
 $$
 
-Mức đó nằm trong vùng ESP32 chịu được. Bỏ cầu chia “vì lần trước vẫn chạy” là cách biến một GPIO thành cục nóng. VL53L0X trên I2C không cần cầu chia này nếu breakout đã nói logic 3,3 V. Module khác, quy tắc khác. Ghi quy tắc đó lên phiếu, cạnh ảnh.
+Mức 3,33 V nằm trong giới hạn an toàn của ESP32. Bỏ qua cầu chia áp sẽ khiến chân GPIO chịu quá áp, nóng lên và hỏng. Ngược lại, VL53L0X dùng bus I2C 3,3 V không cần cầu chia này nếu bo mạch breakout đã hỗ trợ mức logic 3,3 V. Mỗi loại module có yêu cầu điện riêng và cần ghi chú rõ trên phiếu nhận diện.
 
-## Lab: phiếu nhận diện một trang
+## Lab: lập phiếu nhận diện một trang
 
 ### An toàn
 
-Nhận diện lúc chưa cấp nguồn. Khi có cấp nguồn, chỉ USB vào MCU. Không nối VCC 5 V của cảm biến vào chân 3,3 V của ESP32, và không nối ECHO vào GPIO khi chưa có cầu chia.
+Thực hiện bước nhận diện khi chưa cấp điện. Khi cấp nguồn kiểm tra, chỉ cấp qua cổng USB cho vi điều khiển; không nối đường `VCC` 5 V của cảm biến vào chân `3V3` của ESP32 và không nối chân `ECHO` vào GPIO khi chưa có cầu chia áp.
 
 ### BOM
 
 | Món | Vai trò |
 |-----|---------|
-| Bất kỳ hai trong: HC-SR04, module VL53, GY-521, board IR, motor encoder, webcam | Thứ bạn sẽ mua thật |
-| Camera điện thoại | Phiếu |
-| Đồng hồ | Kiểm VCC sau khi cấp nguồn |
-| Tab datasheet | Điện áp và bus |
+| Bất kỳ hai loại nào trong: HC-SR04, VL53L0X, GY-521, module IR, động cơ encoder, webcam | Linh kiện thực tế cần nhận diện |
+| Điện thoại chụp ảnh | Lưu hình vào phiếu |
+| Đồng hồ vạn năng | Đo kiểm `VCC` sau khi cấp nguồn |
+| Datasheet tương ứng | Xác minh điện áp và chuẩn giao tiếp |
 
 ### Các bước
 
-1. Chưa cấp nguồn, chụp từng module sao cho đọc được chân.
-2. Điền một dòng: tên, chữ chân nhìn thấy, bus đoán, điện áp đoán, “dùng cho Capstone ngay / để sau”.
-3. Mở datasheet hoặc sơ đồ người bán và sửa dòng đó. Đánh dấu chỗ đoán sai.
-4. Chỉ cấp nguồn cho module I2C 3,3 V như bài 04-01, hoặc dừng ở phiếu giấy nếu hàng còn đang giao.
-5. Cất phiếu trong `lab-notes.md`. Chương 07 sẽ hỏi đến.
+1. Khi chưa cấp nguồn, chụp cận cảnh từng module sao cho đọc rõ nhãn in tại hàng chân.
+2. Ghi vào bảng nháp cho mỗi module: tên gọi, các nhãn chân nhìn thấy, chuẩn giao tiếp dự đoán, điện áp dự đoán và phân loại ("dùng ngay cho Capstone A" hoặc "để sau").
+3. Mở datasheet hoặc sơ đồ của nhà sản xuất để kiểm tra lại, sửa và đánh dấu rõ các điểm ban đầu dự đoán sai.
+4. Nếu đã có module I2C 3,3 V, cấp nguồn và kiểm tra lại như bài 04-01; nếu linh kiện đang vận chuyển, dừng ở bước hoàn thiện phiếu giấy.
+5. Lưu phiếu vào `lab-notes.md` để đối chiếu lại ở Chương 07.
 
 ### Kết quả mong đợi
 
-Ít nhất hai module đã được sửa đúng điện áp và bus. Một câu ghi HC-SR04 ECHO là 5 V và VL53L0X là I2C ở `0x29`. Một quyết định: đã chọn cảm biến khoảng cách, camera để sau.
+Tối thiểu hai module được xác minh chính xác điện áp và chuẩn bus; có câu ghi chú rõ `ECHO` của HC-SR04 ở mức 5 V và VL53L0X dùng I2C tại `0x29`; nêu rõ lựa chọn cảm biến khoảng cách và quyết định hoãn camera sang chương sau.
 
 ### Lỗi thường gặp
 
-| Nhầm | Hệ quả |
-|------|--------|
-| Cứ cửa sổ đen là IMU | Quét I2C một cảm biến khoảng cách, hoặc đòi đọc mét từ con quay |
-| 5 V vào ESP32 | Chân nóng, kẹt input, hoặc chết GPIO |
-| Hai board VL53, không tính XSHUT | Quét ra một địa chỉ hoặc không ra gì |
-| Encoder một kênh | Không phân biệt tiến và lùi |
-| Mua ESP32-CAM làm não Capstone | Chân motor và sụt áp đánh nhau với camera |
+| Nhầm lẫn | Hệ quả |
+|----------|--------|
+| Thấy cửa sổ đen nhỏ đều tưởng là IMU | Quét I2C nhầm cảm biến khoảng cách, hoặc cố đọc mét từ con quay hồi chuyển |
+| Đưa thẳng 5 V vào chân ESP32 | Chân GPIO quá nhiệt, treo trạng thái hoặc hỏng vĩnh viễn |
+| Nối hai bo VL53L0X mà không dùng `XSHUT` | Quét chỉ thấy một địa chỉ hoặc xung đột bus |
+| Dùng encoder một kênh | Không tự phân biệt được chiều tiến và lùi |
+| Chọn ESP32-CAM làm bộ điều khiển Capstone A | Thiếu chân điều khiển động cơ và dễ sụt nguồn |
 
-## Mua ở Việt Nam / Where to buy in Vietnam
+## Mua ở Việt Nam
 
-Mua cảm biến khoảng cách và, nếu ví cho phép, motor TT đã kèm encoder. Để camera tới Chương 11.
+Ưu tiên mua cảm biến khoảng cách và (nếu ngân sách cho phép) cặp động cơ TT có gắn sẵn encoder; để dành camera cho Chương 11.
 
 | Món | Từ khóa | Khoảng giá (VND) | Thay thế |
 |-----|---------|------------------|----------|
-| HC-SR04 | `cảm biến siêu âm HC-SR04` | 15.000–40.000 | [Hshop HC-SR04](https://hshop.vn/cam-bien-sieu-am-srf04) từng niêm yết khoảng 20.000. US-100 chỉ thay khi bạn đọc rõ chế độ UART/GPIO của nó. |
-| Module VL53L0X | `VL53L0X ToF` | 35.000–90.000 | [Hshop VL53L0X](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x). VL53L1X xa hơn và khác thư viện. |
-| GY-521 | `MPU6050 GY-521` | 35.000–90.000 | MPU6500 nếu code mẫu khớp. |
-| IR vật cản hoặc TCRT5000 | `cảm biến hồng ngoại vật cản` | 8.000–25.000 | Hợp dò line, yếu nếu là cảm biến va chạm duy nhất |
-| Motor TT + encoder | `động cơ TT encoder Hall` | 40.000–90.000 một cái | N20 hộp số kim loại kèm encoder nếu lỗ khung khớp; kiểm tra trục 3 mm hay 4 mm |
-| Trở cầu chia | `điện trở 1k 2k` | 10.000–20.000 một thanh | Thế Giới IC cho điện trở rời |
+| HC-SR04 | `cảm biến siêu âm HC-SR04` | 15.000–40.000 | [Hshop HC-SR04](https://hshop.vn/cam-bien-sieu-am-srf04) từng niêm yết khoảng 20.000. Chỉ thay bằng US-100 khi đã kiểm tra rõ chế độ UART/GPIO. |
+| Module VL53L0X | `VL53L0X ToF` | 35.000–90.000 | [Hshop VL53L0X](https://hshop.vn/cam-bien-khoang-cach-tof-laser-radar-vl53l0x). Lưu ý VL53L1X đo xa hơn nhưng dùng thư viện khác. |
+| GY-521 | `MPU6050 GY-521` | 35.000–90.000 | MPU6500 nếu mã mẫu tương thích thanh ghi. |
+| IR vật cản hoặc TCRT5000 | `cảm biến hồng ngoại vật cản` | 8.000–25.000 | Phù hợp dò line, không đủ tin cậy làm cảm biến tránh va chạm duy nhất. |
+| Motor TT + encoder | `động cơ TT encoder Hall` | 40.000–90.000 một cái | Có thể dùng N20 hộp số kim loại có encoder nếu khớp lỗ gá khung (kiểm tra đường kính trục 3 mm hay 4 mm). |
+| Trở cầu chia | `điện trở 1k 2k` | 10.000–20.000 một thanh | Thế Giới IC phù hợp mua điện trở rời. |
 
-Ô tìm kiếm:
+Liên kết tìm kiếm nhanh:
 
 - [Hshop, từ khóa HC-SR04](https://hshop.vn/search?q=HC-SR04)
 - [Shopee, motor encoder](https://shopee.vn/search?keyword=dong%20co%20TT%20encoder)
@@ -112,25 +107,29 @@ Mua cảm biến khoảng cách và, nếu ví cho phép, motor TT đã kèm enc
 
 ## Video tham khảo
 
-- **Xem trước:** [HC-SR04 Ultrasonic Distance Sensor and Arduino (Lesson #9)](https://www.youtube.com/watch?v=n-gJ00GTsNg) — Science Buddies, tiếng Anh. HC-SR04: hai chân echo và trig, không phải I2C.
-- [What is an Inertial Measurement Unit (IMU)?](https://www.youtube.com/watch?v=qS9GwaekLW4) — Phidgets Inc., tiếng Anh. IMU là một vỏ có gia tốc và gyro. Nhận module trước khi đọc thanh ghi.
-- [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Encoder quay có hai kênh. Nhìn đĩa và cảm biến, đừng nhầm với biến trở.
+- **Xem trước:** [HC-SR04 Ultrasonic Distance Sensor and Arduino (Lesson #9)](https://www.youtube.com/watch?v=n-gJ00GTsNg) — Science Buddies, tiếng Anh. Giải thích nguyên lý hai chân `TRIG` và `ECHO` của HC-SR04 (không phải I2C).
+- [What is an Inertial Measurement Unit (IMU)?](https://www.youtube.com/watch?v=qS9GwaekLW4) — Phidgets Inc., tiếng Anh. Tổng quan cấu tạo IMU gồm gia tốc kế và con quay hồi chuyển.
+- [How Rotary Encoder Works and How To Use It with Arduino](https://www.youtube.com/watch?v=v4BbSzJ-hz4) — How To Mechatronics, tiếng Anh. Minh họa cấu tạo hai kênh của encoder quay, phân biệt với biến trở.
 
 ## Bài tập
 
-1. Board có hai ống kim loại và chân VCC, TRIG, ECHO, GND. ECHO lên bao nhiêu vôn, và bạn thêm hai điện trở nào cho ESP32?
-2. Board tím có cửa sổ đen và SCL/SDA. Họ nào, địa chỉ lần quét đầu thường là gì?
-3. Bạn cần biết bánh trái quay tới hay quay lui. Một cảm biến Hall có đủ không? Phải mua gì?
-4. Chia thành “trước Capstone A” và “sau khi robot đã teleop”: HC-SR04, camera USB, motor encoder, ESP32-CAM, VL53L0X.
-5. Hai module VL53L0X đều nằm ở `0x29`. Chân nào gỡ rối, và lần quét trông thế nào khi bạn chưa dùng chân đó?
+1. Một bo mạch có hai đầu hình trụ bằng nhôm cùng bốn chân `VCC`, `TRIG`, `ECHO`, `GND`. Chân `ECHO` xuất mức cao bao nhiêu vôn và cần thêm cặp điện trở nào khi nối với ESP32?
+2. Một bo mạch màu tím có cửa sổ quang nhỏ màu đen cùng hai chân `SCL`, `SDA`. Đây thuộc dòng cảm biến nào và địa chỉ I2C mặc định là gì?
+3. Bạn cần biết bánh trái đang quay tiến hay quay lùi. Một cảm biến Hall đơn kênh có đủ không? Bạn cần chọn loại nào?
+4. Phân loại các linh kiện sau vào hai nhóm "cần trước Capstone A" và "để sau khi robot đã chạy teleop": HC-SR04, camera USB, động cơ có encoder, ESP32-CAM, VL53L0X.
+5. Hai module VL53L0X đều có địa chỉ mặc định `0x29`. Chân nào dùng để xử lý xung đột địa chỉ, và kết quả quét sẽ ra sao nếu chưa sử dụng chân đó?
 
 ### Gợi ý đáp án
 
-1. Khoảng 5 V; 1 kΩ và 2 kΩ như cầu chia ở trên, khoảng 3,3 V tại chân MCU. 2. ToF, thường `0x29`. 3. Không đủ; mua cặp quadrature A và B, hoặc chấp nhận chiều chỉ lấy từ lệnh motor và sẽ mất đoạn trôi bánh. 4. Trước: HC-SR04 hoặc VL53L0X, và encoder nếu muốn đếm. Sau: camera USB và ESP32-CAM. 5. XSHUT; lần quét chỉ ra một địa chỉ hoặc bus rối cho đến khi bạn cấp nguồn tách và gán lại.
+1. Khoảng 5 V; cần cầu chia áp 1 kΩ (từ `ECHO` tới GPIO) và 2 kΩ (từ GPIO xuống mass) để hạ xuống xấp xỉ 3,33 V.
+2. Cảm biến khoảng cách ToF (như VL53L0X), địa chỉ mặc định thường là `0x29`.
+3. Không đủ; cần encoder hai kênh lệch pha (quadrature A và B), nếu không thì chiều quay chỉ suy đoán từ lệnh điều khiển động cơ và không phát hiện được lúc bánh tự trôi.
+4. Trước Capstone A: HC-SR04 hoặc VL53L0X, và động cơ có encoder (nếu muốn đo quãng đường). Để sau: camera USB và ESP32-CAM.
+5. Chân `XSHUT`. Nếu không dùng `XSHUT` để tắt/bật riêng từng chip và đổi địa chỉ, quá trình quét sẽ bị xung đột (chỉ hiện một địa chỉ hoặc lỗi bus).
 
 ## Đọc thêm
 
 - [Datasheet HC-SR04 (bản SparkFun lưu)](https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf)
 - [Datasheet ST VL53L0X](https://www.st.com/resource/en/datasheet/vl53l0x.pdf)
 - [Datasheet TDK MPU-6000/6050](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
-- [Ghi chú board Pololu VL53L0X](https://www.pololu.com/product/2490) — địa chỉ và mức logic, dùng được dù bạn mua breakout khác.
+- [Ghi chú board Pololu VL53L0X](https://www.pololu.com/product/2490) — thông tin về địa chỉ và mức logic có thể tham khảo cho cả các bo breakout khác.

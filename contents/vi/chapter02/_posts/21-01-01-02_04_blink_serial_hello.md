@@ -12,41 +12,41 @@ draft: false
 
 ## Mục tiêu
 
-Bạn chứng minh toolchain của lab trước vẫn sống, và bạn thay một lần nhấp chặn bằng một vòng lặp làm được nhiều hơn một việc. Bạn đảo LED mỗi 250 ms và in một dòng nhịp tim mỗi 500 ms, gồm thời gian mili giây và trạng thái LED. Bạn viết vòng đó bằng `millis()` trên ESP32 hoặc `time.ticks_ms()` trên Pico, và bạn chỉ chạy listing khớp board của mình. Bạn giải thích được vì sao `delay(1000)` hoặc `time.sleep` không được đứng chắn một lệnh dừng 300 ms sau này. Bạn nhận ra vòng reset, sai chân LED, và monitor còn để ở 9600.
+Bài thực hành này xác nhận bộ công cụ (toolchain) đã cài ở bài trước hoạt động ổn định, đồng thời thay thế đoạn mã nháy LED kiểu chặn (blocking) bằng một vòng lặp không chặn có thể xử lý nhiều tác vụ song song. Bạn sẽ đảo trạng thái LED mỗi 250 ms và in một dòng nhịp tim (heartbeat) mỗi 500 ms gồm mốc thời gian tính bằng mili giây và trạng thái LED. Vòng lặp được viết bằng `millis()` trên ESP32 hoặc `time.ticks_ms()` trên Pico, và bạn chỉ chạy đoạn mã dành cho bo mạch của mình. Qua bài này, bạn giải thích được vì sao không thể dùng `delay(1000)` hay `time.sleep` khi cần giám sát ngưỡng dừng an toàn 300 ms, đồng thời nhận diện được vòng lặp reset, lỗi chọn sai chân LED và lỗi đặt tốc độ monitor ở 9600 baud.
 
 ## Cần gì trước khi học
 
-Đường ESP32: một lần nạp đã xong từ bài PlatformIO hoặc Arduino IDE, một cổng bạn gọi được tên, và hai phía cùng 115200. Đường Pico: MicroPython đã ở trên board, Thonny hoặc `mpremote` nhằm đúng Pico, và một cái đèn đã trả lời `Pin("LED")` hoặc GPIO 25. Chỉ cần một trong hai. Không driver, không pin, không khung xe. Nếu cáp đang ở mức tạm được, lab này sẽ phơi nó ra.
+Nếu dùng ESP32, bạn cần đã nạp thành công chương trình từ bài PlatformIO hoặc Arduino IDE, xác định được tên cổng và đặt tốc độ 115200 baud ở cả hai phía. Nếu dùng Pico, bo mạch cần đã cài MicroPython, Thonny hoặc `mpremote` kết nối đúng cổng và đèn LED đã hoạt động với `Pin("LED")` hoặc GPIO 25. Chỉ cần chuẩn bị một trong hai hệ thống; chưa dùng mạch cầu H, pin hay khung xe. Nếu cáp USB có chất lượng kém, bài thực hành này sẽ làm lộ rõ vấn đề.
 
 ## Vì sao bài này gắn với Capstone A
 
-Vòng teleop chương 07 là nhịp tim này, với LED được thay bằng duty bánh trái và duty bánh phải trên TB6612. Mốc thời gian là cách bạn chứng minh vòng lặp đang chạy đúng tốc độ bạn tưởng. Cùng vòng đó phải nhận ra khoảng 300 ms không có lệnh mới và ghi cả hai duty về không. Lần đầu các duty được phép khác không, bánh phải nhấc lên. Sketch dành thời gian bên trong `delay(1000)` thì không thấy sự im lặng cho đến khi `delay` trả về, nên bánh giữ PWM cũ tới một giây sau khi người lái đã buông. Chương 08 có thể đưa cùng các lệnh đó lên Wi-Fi sau. Thời gian chờ vẫn phải là một phép so trong vòng lặp này, không phải một khoảng dừng.
+Vòng lặp điều khiển từ xa (teleop) ở chương 07 có cấu trúc tương tự vòng nhịp tim này, chỉ thay việc bật tắt LED bằng việc cập nhật hệ số chu kỳ (duty) cho bánh trái và bánh phải qua TB6612. Mốc thời gian giúp bạn kiểm chứng vòng lặp đang chạy đúng chu kỳ thiết kế. Đồng thời, vòng lặp đó phải phát hiện được khoảng 300 ms không có lệnh mới để đưa cả hai duty về 0, và ở lần đầu cho phép duty khác 0, bánh xe phải được nhấc khỏi bàn. Nếu chương trình bị chặn bên trong `delay(1000)`, vi điều khiển không thể kiểm tra tình trạng mất lệnh cho đến khi `delay` kết thúc, khiến bánh xe tiếp tục quay theo mức PWM cũ thêm tới một giây sau khi người điều khiển đã thả nút. Đến chương 08, khi truyền lệnh qua Wi-Fi, cơ chế kiểm tra quá thời gian (timeout) vẫn dựa trên phép so sánh thời gian không chặn như bài này.
 
-## Hai bộ đếm, không chờ chặn
+## Hai bộ định thời không chặn
 
-Nhịp tim ở đây là một dòng firmware phát theo lịch, dù bạn có đang gõ hay không. LED đổi mỗi 250 ms. Một chu kỳ sáng-tắt đủ vì thế là 500 ms, tức 2 Hz:
+Nhịp tim (heartbeat) là dòng thông điệp mà firmware tự động gửi ra theo chu kỳ cố định, bất kể bạn có nhập lệnh hay không. Trong bài này, LED đảo trạng thái mỗi 250 ms nên một chu kỳ sáng–tắt trọn vẹn là 500 ms, tương ứng tần số 2 Hz:
 
 $$
 T_{\text{nhấp}} = 2 \times 250\,\mathrm{ms} = 500\,\mathrm{ms}, \qquad f = \frac{1}{0{,}5\,\mathrm{s}} = 2\,\mathrm{Hz}.
 $$
 
-Dòng serial được in mỗi 500 ms và mang hai trường: đồng hồ mili giây, và trạng thái LED là 0 hoặc 1. Bạn sẽ thấy khoảng hai dòng mỗi giây. Nhìn đèn trong năm giây và đếm số lần nhấp trọn. Khoảng mười lần là nhịp 2 Hz. Khoảng mười dòng trong năm giây đó là tốc độ serial khớp, vì chu kỳ in cũng là 500 ms.
+Dòng serial được in mỗi 500 ms với hai trường dữ liệu: thời gian mili giây hiện tại và trạng thái LED (`0` hoặc `1`). Trong 5 giây quan sát, bạn sẽ thấy khoảng 10 lần nháy trọn vẹn và khoảng 10 dòng dữ liệu in ra, vì chu kỳ in cũng bằng 500 ms.
 
-Có một cái bẫy lấy mẫu đáng thấy một lần. Chu kỳ in đúng bằng hai lần đảo. Nếu hai bộ đếm xuất phát cùng nhau và bạn in trạng thái ngay sau một lần đảo, cột in có thể lặp cùng một giá trị trong lúc đèn vẫn nhấp. Hãy nhìn đèn để xét nhịp. Hãy nhìn cột mili giây để xét bộ lập lịch: mỗi dòng phải tăng khoảng 500. Sketch dưới đây in theo bộ đếm 500 ms sau khi lần đảo 250 ms đã được áp. Log mẫu cho thấy một lần chạy thật trông thế nào. Nếu cột trạng thái của bạn đứng yên, cái đèn vẫn là bằng chứng của cạnh 250 ms. Sau này bạn có thể in trên mỗi lần đảo. Đừng “sửa” bằng cách nhét `delay`.
+Cần lưu ý một hiện tượng lấy mẫu dễ gặp: vì chu kỳ in (500 ms) đúng bằng hai lần chu kỳ đảo đèn (250 ms), nếu hai bộ đếm khởi tạo cùng thời điểm và trạng thái được in ngay sau bước đảo đèn, giá trị ở cột trạng thái có thể lặp lại cùng một số (luôn là `0` hoặc luôn là `1`) dù ngoài thực tế đèn vẫn nháy đều. Hãy quan sát trực tiếp đèn LED để kiểm tra nhịp nháy, và kiểm tra cột mili giây để đánh giá bộ định thời: hiệu giữa hai dòng liên tiếp phải xấp xỉ 500 ms. Nếu cột trạng thái đứng yên nhưng đèn vẫn nháy đúng 2 Hz, chương trình vẫn hoạt động bình thường; không nên chèn thêm `delay` để cố thay đổi cột này.
 
-Nguồn đồng hồ khác nhau theo board, ý nghĩa thì không. Trên core Arduino của ESP32, `millis()` đếm mili giây từ lúc boot. Nó quay vòng sau
+Hàm lấy thời gian khác nhau tùy nền tảng nhưng cùng một nguyên lý. Trên core Arduino của ESP32, `millis()` đếm số mili giây kể từ lúc khởi động và sẽ tràn bộ đếm (quay vòng về 0) sau:
 
 $$
-2^{32}\,\mathrm{ms} \approx 49{,}7\,\text{ngày},
+2^{32}\,\mathrm{ms} \approx 49{,}7\,\text{ngày}.
 $$
 
-tuần này bạn không chạm tới. Phép trừ không dấu `now - last` vẫn đúng qua lần quay đó nếu cả hai giá trị là `uint32_t`. Trên Pico, `time.ticks_ms()` cũng đếm mili giây, và phép trừ hợp lệ là `time.ticks_diff(now, last)`. Phép trừ Python trần sẽ nói dối khi bộ đếm quay vòng. Một trong hai số, mỗi dòng in tăng khoảng 500, là bằng chứng bạn cần. Một số nhảy về giá trị nhỏ, nhất là khi banner boot in lại, có nghĩa chip đã reset.
+Phép trừ số nguyên không dấu `now - last` vẫn cho kết quả chính xác ngay cả khi bộ đếm tràn, miễn cả hai biến đều thuộc kiểu `uint32_t`. Trên Pico, `time.ticks_ms()` cũng đếm mili giây, và cần dùng hàm `time.ticks_diff(now, last)` để tính hiệu thời gian thay vì phép trừ thông thường của Python (vốn sẽ sai khi bộ đếm quay vòng). Ở cả hai nền tảng, mốc thời gian tăng đều khoảng 500 ms mỗi dòng là bằng chứng vòng lặp chạy ổn định; ngược lại, nếu con số đột ngột nhảy về giá trị nhỏ — đặc biệt kèm theo dòng tiêu đề khởi động lặp lại — chip đã bị reset.
 
-`delay(1000)` là mẫu mà lab này cho nghỉ. Trong lúc `delay` chạy, CPU không xét `now - lastCmdMs > 300`. Một lệnh dừng đến hạn sau 50 ms kể từ lúc vào `delay` sẽ bị áp trễ 950 ms. `time.sleep(1)` trên Pico cũng vậy. Vòng không chặn kiểm bất đẳng thức mỗi vòng. Phần chuyển động thêm sau timeout là một lần đi qua `loop`, rất nhỏ so với 300 ms, thay vì bằng độ dài của sleep. Dòng motor vẫn là chú thích. Trên bàn không có driver.
+Bài này loại bỏ hoàn toàn kiểu viết dùng `delay(1000)` hay `time.sleep(1)`. Trong suốt thời gian CPU dừng ở hàm chặn, phép kiểm tra `now - lastCmdMs > 300` không được thực thi: nếu ngưỡng timeout xảy ra sau 50 ms kể từ khi vào `delay(1000)`, lệnh dừng bánh sẽ bị trễ tới 950 ms. Với vòng lặp không chặn, điều kiện được kiểm tra ở mỗi vòng lặp, nên độ trễ sau timeout chỉ bằng thời gian của một chu kỳ vòng lặp — rất nhỏ so với 300 ms. Trong mã mẫu dưới đây, dòng điều khiển động cơ chỉ để dạng chú thích vì trên bàn chưa nối driver.
 
-Chạy listing của board bạn. Đọc listing kia để biết bàn bên đang thấy gì. Nạp cả hai lên hai board trong một buổi là cách để sổ tay bị tráo.
+Chỉ chạy đoạn mã dành cho bo mạch của bạn; đoạn mã còn lại chỉ dùng để đọc tham khảo.
 
-ESP32, core Arduino. Đổi chân nếu silk không đồng ý với GPIO 2. Nếu gói board định nghĩa `LED_BUILTIN` và macro đó đúng là cái đèn, bạn được dùng. Hằng số dưới đây là dạng viết rõ.
+**ESP32 (core Arduino):** đổi hằng số chân nếu nhãn trên mạch không dùng GPIO 2 (hoặc dùng `LED_BUILTIN` nếu đã đối chiếu khớp với bo mạch).
 
 ```cpp
 const int kLedPin = 2;  // DevKit V1 thường dùng GPIO 2; đối chiếu silk
@@ -86,7 +86,7 @@ void loop() {
 }
 ```
 
-Pico, MicroPython. `"LED"` phủ Pico W và Pico 2 W. GPIO 25 phủ Pico gốc và Pico 2 không W khi bí danh không có.
+**Raspberry Pi Pico (MicroPython):** `"LED"` dùng cho Pico W và Pico 2 W; nhánh dự phòng GPIO 25 dùng cho Pico bản gốc và Pico 2 không W khi firmware chưa hỗ trợ bí danh `"LED"`.
 
 ```python
 from machine import Pin
@@ -117,15 +117,15 @@ while True:
     # sau: if time.ticks_diff(now, last_cmd) > 300: cả hai duty = 0
 ```
 
-Bánh nhấc lên là một câu bạn ghi vào sổ ngay bây giờ, khi chưa có bánh nào được gắn. Nghĩa là lốp không chạm mặt bàn khi có một lệnh có thể làm chúng quay. Robot “chỉ giật một cái” trên bàn sẽ tự đi khỏi bàn. TB6612 và pin ở trong hộp linh kiện.
+Hãy ghi sẵn quy tắc "nhấc bánh khỏi bàn" vào sổ tay ngay từ bây giờ dù chưa lắp khung xe: bất cứ khi nào nạp hoặc thử nghiệm lệnh có thể làm động cơ quay, lốp xe không được chạm mặt bàn để tránh robot tự chạy rơi khỏi bàn. Hiện tại, mạch TB6612 và pin vẫn để nguyên trong hộp linh kiện.
 
 ![Thứ tự nguồn: logic trước, nguồn motor sau, bánh nhấc lên]({{ site.imgurl }}/generated/power_order.png)
 
-Hình là chuỗi mà nhịp tim này đang tập. USB và ray 3,3 V yên lặng đi trước. Một lần nhấp và một dòng serial là bằng chứng. Driver và pin nằm bên phải một vạch bạn chưa bước qua.
+Sơ đồ minh họa đúng trình tự đang thực hành: nguồn USB và đường 3,3 V ổn định đi trước, được kiểm chứng bằng bài nháy LED và dòng nhịp tim serial; phần driver và pin nằm ở giai đoạn sau.
 
-## Một log đọc lại được
+## Đọc và kiểm tra log
 
-Sau đúng một banner `heartbeat`, chép mười dòng. Một log ESP32 từ lần chạy khỏe, thời gian theo mili giây:
+Sau một dòng tiêu đề `heartbeat` duy nhất, hãy chép lại 10 dòng kế tiếp. Dưới đây là mẫu log hoạt động bình thường trên ESP32 (thời gian tính bằng mili giây):
 
 ```text
 heartbeat
@@ -141,59 +141,59 @@ heartbeat
 6352,0
 ```
 
-Giá trị tuyệt đối của mốc đầu phụ thuộc `setup` và adapter USB đã trễ bao lâu. Hiệu giữa các dòng phải ngồi gần 500 ms. Vài mili giây trôi là bình thường. Hai bộ đếm trong sketch xuất phát cùng lúc, và 500 ms đúng bằng hai lần đảo, nên lần in cứ rơi vào cùng một cạnh và cột trạng thái lặp lại. Đèn vẫn phải nhấp hai lần mỗi giây. Cột lặp như vậy là đạt khi đèn đúng. Đó không phải chân bị kẹt. Mốc thời gian trở về số nhỏ, hoặc một banner `heartbeat` thứ hai xen giữa mười dòng, có nghĩa bạn đã ghi một lần reset. Lab chưa đạt cho đến khi một đoạn mười dòng sau đó tăng đơn điệu.
+Giá trị tuyệt đối của dòng đầu tiên phụ thuộc vào thời gian khởi động `setup` và độ trễ mở cổng USB. Điều quan trọng là hiệu giữa các dòng liên tiếp phải xấp xỉ 500 ms (sai lệch vài mili giây là bình thường). Do hai bộ đếm khởi phát cùng lúc và 500 ms đúng bằng hai lần 250 ms, lần in luôn rơi vào cùng một trạng thái nên cột thứ hai lặp lại giá trị `0`; miễn đèn LED vẫn nháy 2 Hz thì đây không phải lỗi kẹt chân. Ngược lại, nếu mốc thời gian quay về số nhỏ hoặc xuất hiện thêm dòng `heartbeat` thứ hai giữa 10 dòng, chip đã bị reset và bài thực hành chưa đạt cho đến khi thu được chuỗi 10 dòng tăng đơn điệu.
 
-Nếu board reset mà không có motor nối, nghi cáp hoặc một chỗ chập, không nghi driver bạn chưa đi dây. Cáp chỉ sạc mỏng có thể làm cổng hiện rồi sụt. Một sợi nhảy từ 3V3 xuống GND là chập và gây cùng việc. Rút mọi jumper, đổi cáp, và lấy một khối log sạch. Baud 9600 đối sketch 115200 để LED vẫn nhấp và khung đầy rác. Sửa monitor. LED tối mà cột mili giây vẫn khỏe là hằng số chân, không phải toolchain: đọc silk, và trên Pico W thì ngừng ghi GPIO 25.
+Khi không nối động cơ mà bo mạch vẫn reset, hãy kiểm tra cáp USB hoặc các điểm chạm chập (như dây nối vô tình chập từ `3V3` xuống `GND`). Cáp sạc mỏng, kém chất lượng có thể khiến cổng kết nối chập chờn rồi sụt áp. Hãy tháo hết dây nối ngoài, đổi cáp tốt và ghi lại một khối log sạch. Nếu monitor hiển thị toàn ký tự rác trong khi LED vẫn nháy 2 Hz, nguyên nhân là lệch tốc độ baud (chẳng hạn monitor để 9600 còn chương trình là 115200). Nếu cột mili giây tăng đều nhưng đèn không sáng, hãy kiểm tra lại hằng số chân LED theo nhãn mạch (và trên Pico W thì dùng `Pin("LED")` thay vì GPIO 25).
 
 ## Ví dụ đã làm
 
-Board chính của Dũng là DevKit ESP32 cổ điển, LED silk ở GPIO 2, CH340, monitor 115200. Sketch là listing C++. Ca đầu in `heartbeat` hai lần trong sáu giây và mốc thời gian khởi động lại gần 200 ms. Không có motor. Cáp là loại chỉ sạc, chỉ thỉnh thoảng được nhận. Một cáp dữ liệu cho một banner và một cầu thang khoảng 501 ms. Đèn nhấp hai lần mỗi giây. Mười dòng vào `lab-notes.md`, cộng câu “bánh nhấc lên trước mọi lệnh TB6612; VM và pin chưa nối.”
+Dũng sử dụng bo mạch ESP32 DevKit cổ điển (LED ở GPIO 2, chip CH340), nạp đoạn mã C++ và mở monitor ở 115200 baud. Lần chạy đầu in hai dòng `heartbeat` trong vòng 6 giây kèm mốc thời gian tụt về gần 200 ms dù không nối động cơ. Nguyên nhân là sợi cáp chỉ sạc hoạt động chập chờn. Sau khi đổi sang cáp dữ liệu, log chỉ hiện một dòng `heartbeat` duy nhất và mốc thời gian tăng đều khoảng 501 ms mỗi dòng, đèn nháy 2 Hz. Dũng dán 10 dòng log vào `lab-notes.md` kèm ghi chú: "Nhấc bánh khỏi bàn trước mọi lệnh điều khiển TB6612; chưa nối VM và pin."
 
-Bàn Pico chạy listing MicroPython. `Pin("LED")` chạy trên Pico W. `ticks_ms` tăng khoảng 500. Sổ ghi “Pico W, bí danh LED, không dùng GPIO 25, bánh nhấc, không motor.” Cả hai bàn đã qua cổng. Không bàn nào nạp firmware của bàn kia.
+Ở bàn Pico, sinh viên chạy đoạn mã MicroPython với `Pin("LED")` trên Pico W. Giá trị `ticks_ms` tăng đều khoảng 500 ms mỗi dòng, sổ ghi rõ: "Pico W, dùng bí danh LED, không dùng GPIO 25, nhấc bánh khi thử động cơ, chưa nối động cơ."
 
-Phép tính Dũng ghi bên lề là lý do `delay(1000)` đã ra khỏi file. Một lệnh im từ $$t = 0$$ phải ép PWM về không khi $$t > 300\,\mathrm{ms}$$. Bên trong `delay(1000)` phép so không chạy, nên duty cuối có thể sống đến $$t = 1000\,\mathrm{ms}$$. Vòng không chặn xét phép so ở vòng kế tiếp sau 300 ms.
+Dũng cũng ghi thêm phép đối chiếu bên lề giải thích lý do bỏ `delay(1000)`: nếu mất lệnh từ thời điểm $$t = 0$$, hệ thống phải đưa PWM về 0 ngay khi $$t > 300\,\mathrm{ms}$$. Trong `delay(1000)`, điều kiện không được kiểm tra nên mức duty cũ có thể duy trì tới $$t = 1000\,\mathrm{ms}$$, trong khi vòng lặp không chặn sẽ ngắt ngay ở vòng kế tiếp sau mốc 300 ms.
 
 ## Lab
 
-1. Mở project đã nạp được, hoặc phiên MicroPython đã nhấp được. Thay lần nhấp chặn bằng listing của board bạn. Đừng dán ngôn ngữ kia “cho có.”
-2. Xác nhận chân LED: GPIO 2 hoặc `LED_BUILTIN` chỉ khi silk đồng ý. `Pin("LED")` hoặc GPIO 25 như bài Pico.
-3. Mở monitor hoặc REPL ở 115200 nơi có baud. Bạn phải thấy một banner `heartbeat`, rồi các dòng cách nhau khoảng 500 ms, và đèn nhấp hai lần mỗi giây.
-4. Chép mười dòng vào `lab-notes.md`. Cùng trang đó ghi chân LED, tên board, và câu bánh nhấc lên. Gọi tên VM và pin là những chân và món bạn chưa dùng.
-5. Nếu banner lặp, dừng và sửa cáp hoặc chỗ chập trước khi sửa câu lệnh in.
+1. Mở dự án đã nạp thành công (hoặc phiên MicroPython đang chạy) từ bài trước. Thay chương trình nháy LED kiểu chặn bằng đoạn mã không chặn tương ứng với bo mạch của bạn.
+2. Kiểm tra lại chân LED: dùng GPIO 2 hoặc `LED_BUILTIN` nếu khớp nhãn mạch trên ESP32; dùng `Pin("LED")` hoặc GPIO 25 tùy phiên bản Pico.
+3. Mở Serial Monitor hoặc REPL ở tốc độ 115200 baud (nếu nền tảng yêu cầu chọn baud). Xác nhận xuất hiện một dòng `heartbeat`, tiếp theo là các dòng cách nhau khoảng 500 ms và đèn nháy 2 Hz.
+4. Chép 10 dòng log vào `lab-notes.md`, ghi kèm tên bo mạch, chân LED, quy tắc nhấc bánh và xác nhận chưa nối chân VM hay pin.
+5. Nếu dòng `heartbeat` lặp lại, dừng lại kiểm tra cáp hoặc chạm chập phần cứng trước khi chỉnh sửa mã nguồn.
 
-Dừng ở đó. Đừng thêm Wi-Fi, driver, hay pin để log “thật hơn.”
+Hoàn thành đến đây là đủ; không gắn thêm Wi-Fi, mạch cầu H hay pin trong bài thực hành này.
 
 ## Video tham khảo
 
-- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Nạp chương trình nhấp LED cho ESP32. Serial hello của bài là bước ngay sau khi LED đã nhấp.
-- [ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output](https://www.youtube.com/watch?v=zCzchrkpHzk) — Alvin Pribadi, tiếng Anh. Một nút và một LED trên GPIO. Đúng cặp chân mà lab blink sẽ dùng lại.
+- **Xem trước:** [Lập trình ESP32 - Bài 1 - Cách nạp chương trình cho ESP32 bằng Arduino IDE - Tự học lập trình IOT](https://www.youtube.com/watch?v=sJtJJU3c3xE) — Điện thông minh E-smart, tiếng Việt. Hướng dẫn nạp chương trình nháy LED trên ESP32; bước in dòng serial nhịp tim trong bài này là bước tiếp nối ngay sau đó.
+- [ESP32 LED + Push Button Tutorial for Beginners | ESP32 GPIO Input & Output](https://www.youtube.com/watch?v=zCzchrkpHzk) — Alvin Pribadi, tiếng Anh. Ví dụ kết hợp nút nhấn và LED trên GPIO, tương ứng với các thao tác vào/ra cơ bản tiếp theo.
 
 ## Bài tập
 
-1. Một nhịp đủ là 500 ms và LED đảo mỗi 250 ms. Trong 4 giây bạn chờ bao nhiêu lần nhấp trọn, và bao nhiêu dòng nhịp tim?
-2. Vì sao một cột trạng thái cứ đứng ở `1` vẫn có thể là một lần nhấp đạt? Bạn nhìn cái gì thay vào?
-3. Lệnh dừng đến hạn 300 ms sau gói cuối. Vòng lặp đang ở trong `delay(1000)`. Muộn nhất là bao lâu thì duty thực sự về không, tính từ lúc timeout trở thành đúng?
-4. Một log có banner `heartbeat` thứ hai giữa dòng 4 và dòng 5, và trường mili giây rơi từ 2600 xuống 180. Không có motor. Nêu hai nguyên nhân hợp và một nguyên nhân chưa hợp.
-5. Monitor còn để 9600. LED vẫn nhấp 2 Hz. Bạn đổi gì, và vì sao cài lại core là nước đi đầu sai?
+1. Với chu kỳ nháy 500 ms (đảo LED mỗi 250 ms) và chu kỳ in nhịp tim 500 ms, trong 4 giây bạn sẽ quan sát được bao nhiêu chu kỳ nháy trọn vẹn và bao nhiêu dòng nhịp tim?
+2. Vì sao cột trạng thái trong log luôn hiển thị `1` nhưng bài thực hành vẫn có thể đạt yêu cầu? Bạn cần kiểm tra những yếu tố nào để xác nhận?
+3. Giả sử lệnh dừng an toàn cần kích hoạt sau 300 ms kể từ gói lệnh cuối, nhưng vòng lặp lại dùng `delay(1000)`. Tính từ lúc điều kiện quá thời gian (timeout) trở thành đúng, lệnh đưa duty về 0 có thể bị trễ tối đa bao lâu?
+4. Một đoạn log có dòng `heartbeat` thứ hai chen vào giữa dòng 4 và dòng 5, đồng thời cột mili giây tụt từ 2600 xuống 180 dù không nối động cơ. Nêu hai nguyên nhân hợp lý và một nguyên nhân chưa phù hợp để kết luận.
+5. Monitor đang đặt ở 9600 baud, màn hình toàn ký tự rác nhưng đèn LED vẫn nháy đều 2 Hz. Bạn cần chỉnh thông số nào, và vì sao không nên vội cài lại core?
 
 <details>
 <summary>Đáp án</summary>
 
-1. Bốn giây chứa $$4 / 0{,}5 = 8$$ lần nhấp trọn, và $$4 / 0{,}5 = 8$$ dòng nhịp tim. Dòng đầu có thể trễ nhẹ vì `setup` hoặc REPL. Khoảng cách giữa các dòng mới là số đo.
-2. Chu kỳ in là bội nguyên của chu kỳ đảo, nên một mẫu khóa pha có thể lặp một trạng thái. Đèn phải nhấp hai lần mỗi giây. Cột mili giây phải bước khoảng 500.
-3. Phép so không chạy trong lúc delay, nên lần ghi số không có thể muộn tới 1000 ms sau khi timeout đã đúng. Vòng không chặn ghi số không ở vòng đầu tiên sau 300 ms im lặng.
-4. Vòng reset. Trên board không tải, nghi cáp hoặc một jumper chập, hoặc nút EN đang nảy. Motor trên VM chưa phải nguyên nhân bạn được phép kết luận, vì VM chưa nối.
-5. Đặt monitor 115200 cho khớp `Serial.begin`. LED chứng minh sketch đang chạy. Rác ở sai baud không phải chip hỏng.
+1. Trong 4 giây có $$4 / 0{,}5 = 8$$ chu kỳ nháy trọn vẹn và $$4 / 0{,}5 = 8$$ dòng nhịp tim. Dòng đầu tiên có thể trễ nhẹ do thời gian khởi tạo `setup` hoặc REPL, nhưng khoảng cách giữa các dòng liên tiếp phải xấp xỉ 500 ms.
+2. Vì chu kỳ in (500 ms) là bội số nguyên của chu kỳ đảo đèn (250 ms), thời điểm lấy mẫu luôn rơi vào cùng một pha nên trạng thái in ra bị lặp lại. Để xác nhận đạt, hãy nhìn trực tiếp đèn LED xem có nháy 2 Hz không và kiểm tra cột mili giây có tăng đều khoảng 500 ms hay không.
+3. Trong lúc thực thi `delay(1000)`, phép kiểm tra không chạy nên thời điểm đưa duty về 0 có thể bị trễ tối đa tới 1000 ms sau khi điều kiện timeout đã đúng. Ngược lại, vòng lặp không chặn sẽ xử lý ngay ở lượt lặp đầu tiên sau mốc 300 ms.
+4. Chip đang bị reset. Khi không có tải động cơ, hai nguyên nhân hợp lý là cáp USB kém/chập chờn, dây nối ngoài gây chạm chập nguồn (hoặc nút EN bị chạm/nhiễu). Không thể kết luận lỗi do động cơ kéo sụt chân VM vì hiện tại chưa nối dây VM hay động cơ.
+5. Chỉnh tốc độ Serial Monitor lên 115200 baud cho khớp với `Serial.begin(115200)`. Đèn LED nháy đều chứng tỏ chương trình đã nạp và đang chạy bình thường; ký tự rác chỉ do lệch tốc độ baud, không phải lỗi hỏng chip hay hỏng core.
 
 </details>
 
 ## Mua ở Việt Nam
 
-Lab này không mua gì nếu board và một cáp dữ liệu đã chạy. Nếu nhịp tim bị reset và sợi cáp chưa từng copy file, thay bằng [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Nếu vẫn thiếu board: [NodeMCU-32S giá 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker) hoặc [Vietduino ESP32 giá 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32), không phải [ESP32-S3-WROOM-1 trần giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif). Đường Pico: trang tìm [raspberry pi pico](https://hshop.vn/search?q=raspberry+pi+pico) hiện Pico 2 giá 195 000 ₫ và Pico 2 W giá 275 000 ₫ ngày 23 tháng 9 năm 2026 ([Pico 2](https://hshop.vn/mach-raspberry-pi-pico-2-rp2350), [Pico 2 W](https://hshop.vn/mach-raspberry-pi-pico-2-w-rp2350)). Shopee: [ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340), [Pico 2](https://shopee.vn/search?keyword=raspberry%20pi%20pico%202). Giỏ đầy đủ là [chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
+Bạn không cần mua thêm linh kiện nếu bo mạch và cáp dữ liệu đã hoạt động ổn định. Nếu mạch liên tục reset do dùng cáp chưa rõ nguồn gốc, hãy thay bằng cáp dữ liệu [Ugreen Micro-USB 1 m, 54 000 ₫](https://hshop.vn/cap-micro-usb-to-usb-2-0-dai-1m-cao-cap-60136-chinh-hang-ugreen). Nếu vẫn chưa có bo mạch: [NodeMCU-32S giá 190 000 ₫](https://hshop.vn/kit-rf-thu-phat-wifi-ble-esp32-nodemcu-32s-ch340-ai-thinker) hoặc [Vietduino ESP32 giá 265 000 ₫](https://hshop.vn/mach-phat-trien-vietduino-esp32), tránh chọn module trần [ESP32-S3-WROOM-1 giá 135 000 ₫](https://hshop.vn/mach-thu-phat-wifi-ble-soc-esp32-s3-esp32-s3-wroom-1-chinh-hang-espressif). Với hướng Pico, kết quả tìm kiếm [raspberry pi pico](https://hshop.vn/search?q=raspberry+pi+pico) ngày 23 tháng 9 năm 2026 hiển thị Pico 2 giá 195 000 ₫ và Pico 2 W giá 275 000 ₫ ([Pico 2](https://hshop.vn/mach-raspberry-pi-pico-2-rp2350), [Pico 2 W](https://hshop.vn/mach-raspberry-pi-pico-2-w-rp2350)). Tham khảo thêm trên Shopee: [ESP32 DevKit CH340](https://shopee.vn/search?keyword=esp32%20devkit%20ch340), [Pico 2](https://shopee.vn/search?keyword=raspberry%20pi%20pico%202). Danh sách linh kiện đầy đủ nằm ở [chương 00]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
 ## Đọc thêm
 
-- [PlatformIO `esp32dev`](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — id board đứng sau listing Arduino, nếu bạn đi đường đó.
-- [Cài arduino-esp32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — core cung cấp `millis` và `Serial`.
-- [MicroPython trên Pico](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html) — `machine.Pin` và `time.ticks_ms`.
-- [Datasheet Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf) — xác nhận GPIO 25 trước khi tin nhánh dự phòng trên board không W.
+- [PlatformIO `esp32dev`](https://docs.platformio.org/en/latest/boards/espressif32/esp32dev.html) — cấu hình bo mạch dùng cho đoạn mã C++ trong bài.
+- [Cài arduino-esp32](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) — gói thư viện lõi cung cấp hàm `millis()` và `Serial`.
+- [MicroPython trên Pico](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html) — tài liệu về `machine.Pin` và `time.ticks_ms()`.
+- [Datasheet Pico](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf) — đối chiếu thông tin GPIO 25 trước khi sử dụng nhánh dự phòng trên các bản không có W.

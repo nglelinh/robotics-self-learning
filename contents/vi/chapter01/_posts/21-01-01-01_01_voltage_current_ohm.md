@@ -13,172 +13,172 @@ draft: false
 
 ## Mục tiêu
 
-Học xong, bạn gọi đúng điện áp, dòng điện, điện trở, công suất và đơn vị của từng cái. Bạn dùng $V = IR$ để tìm số còn thiếu trong một vòng, rồi tính nhiệt trên điện trở bằng $P = VI = I^2 R = V^2/R$. Bạn chọn điện trở nối tiếp cho LED đỏ trên 3,3 V và thấy thân 1/4 W là thừa sức. Bạn cũng nói được vì sao mô-tơ TT không phải điện trở để mắc thẳng vào GPIO của ESP32 hay Pico.
+Sau bài học này, bạn sẽ nêu đúng định nghĩa và đơn vị của điện áp, dòng điện, điện trở và công suất. Bạn sẽ vận dụng $V = IR$ để tính đại lượng còn thiếu trong một mạch vòng, đồng thời tính công suất tỏa nhiệt trên điện trở bằng $P = VI = I^2 R = V^2/R$. Bạn sẽ chọn được điện trở hạn dòng nối tiếp cho LED đỏ trên nguồn 3,3 V, kiểm chứng mức công suất 1/4 W là hoàn toàn dư dả, và giải thích được vì sao không thể xem động cơ TT như một điện trở để đấu thẳng vào chân GPIO của ESP32 hay Raspberry Pi Pico.
 
 ## Cần có gì trước
 
-Chỉ cần cộng trừ nhân chia, mỗi con số đi kèm đơn vị. Viết trần 0,008 thì lúc là 8 mA, lúc là dấu phẩy bị trượt. Chưa cần breadboard; ví dụ làm trên giấy. Có đồng hồ và LED đỏ thì phần thực hành dùng luôn.
+Bạn chỉ cần nắm vững bốn phép tính số học cơ bản và giữ thói quen luôn ghi kèm đơn vị sau mỗi con số (viết mỗi `0,008` rất dễ gây nhầm giữa 8 mA và lỗi lệch dấu phẩy). Bài này có thể làm các ví dụ tính toán trên giấy mà chưa cần breadboard; nếu đã có sẵn đồng hồ vạn năng và LED đỏ, bạn có thể làm luôn phần thực hành.
 
-## Việc này nằm ở đâu trên xe hai bánh
+## Bài học này nằm ở đâu trên xe hai bánh
 
-Đồ án là xe vi sai hai bánh. ESP32 hoặc Pico nói logic 3,3 V. TB6612FNG lái hai mô-tơ TT từ nguồn riêng, HC-SR04 đo khoảng cách sau. Đèn "chương trình còn sống" là LED đỏ cộng một điện trở trên rail 3,3 V. Trở quá lớn thì đèn tối như firmware chết. Quên trở thì LED hoặc GPIO chết thật.
+Đồ án Capstone là một xe dẫn động vi sai hai bánh sử dụng ESP32 hoặc Pico ở mức logic 3,3 V, mạch lái TB6612FNG điều khiển hai động cơ TT từ nguồn pin riêng, và cảm biến HC-SR04 đo khoảng cách ở giai đoạn sau. Đèn báo trạng thái chương trình chỉ gồm một LED đỏ mắc nối tiếp điện trở trên đường nguồn 3,3 V: chọn điện trở quá lớn sẽ làm đèn tối đến mức tưởng nhầm firmware bị treo, còn bỏ quên điện trở sẽ làm hỏng LED hoặc chân GPIO.
 
-Mô-tơ TT kẹt kéo cỡ ampe. GPIO thoải mái quanh 12 mA và nguy hiểm khoảng 40 mA. Dòng mô-tơ đi nhờ USB đang nuôi chip thì rail 5 V sụt, ổn áp không giữ nổi 3,3 V, mạch reset đúng lúc bánh được lệnh chạy. Định luật Ohm tách hai lỗi đó trước khi đổ cho phần mềm.
+Trong khi đó, một động cơ TT khi kẹt trục có thể rút dòng cỡ ampe, còn chân GPIO chỉ nên cấp dòng an toàn quanh 12 mA và có ngưỡng nguy hiểm khoảng 40 mA. Nếu dòng động cơ lấy chung từ cổng USB đang nuôi vi điều khiển, đường nguồn 5 V sẽ sụt áp khiến mạch ổn áp không giữ nổi mức 3,3 V và chip bị reset đúng lúc bánh xe nhận lệnh chạy. Định luật Ohm giúp bạn tách bạch lỗi nguồn điện với lỗi phần mềm ngay từ bước tính toán.
 
-## Điện áp, dòng điện, điện trở
+## Điện áp, dòng điện và điện trở
 
-Điện áp là năng lượng trên mỗi đơn vị điện tích, luôn là hiệu giữa hai điểm. Một vôn là một joule trên một coulomb. Chân 3,3 V nói rằng điện tích rơi từ chân ấy xuống mass nhả 3,3 J mỗi coulomb. Que chỉ chạm một điểm thì chưa đo được điện áp.
+**Điện áp** là năng lượng trên mỗi đơn vị điện tích, luôn được định nghĩa là hiệu điện thế giữa hai điểm. Một vôn tương ứng với một joule trên một coulomb. Nói một chân có điện áp 3,3 V nghĩa là điện tích di chuyển từ chân đó về mass giải phóng 3,3 J cho mỗi coulomb. Vì là hiệu giữa hai điểm nên chạm một que đo đơn lẻ không thể đo được điện áp.
 
-Dòng điện là điện tích đi qua một điểm mỗi giây. Một ampe là một coulomb mỗi giây, ký hiệu $I$. Trên GPIO và LED người ta nói bằng miliampe:
+**Dòng điện** là lượng điện tích đi qua một điểm trong mỗi giây, ký hiệu là $I$ với đơn vị ampe (1 A bằng 1 coulomb/giây). Ở quy mô chân GPIO và LED, đơn vị thường dùng là miliampe:
 
 $$
 1\ \mathrm{mA} = 0.001\ \mathrm{A}
 $$
 
-nên 8 mA là $0{,}008\ \mathrm{A}$. Mô-tơ TT ở một thang khác: vài trăm miliampe khi đang lăn, và một cú kéo cỡ ampe khi rô-to bị khóa. Sơ đồ trong khóa này vẽ dòng quy ước, từ dương về âm.
+Do đó 8 mA tương đương $0{,}008\ \mathrm{A}$. Động cơ TT hoạt động ở thang dòng lớn hơn nhiều: vài trăm miliampe khi chạy tự do và lên tới cỡ ampe khi kẹt trục. Toàn bộ sơ đồ trong khóa học tuân theo quy ước chiều dòng điện đi từ cực dương sang cực âm.
 
-Điện trở $R$, đơn vị ôm ($\Omega$), cho biết linh kiện cản dòng mạnh đến mức nào. Cùng một điện áp, điện trở càng lớn thì dòng càng nhỏ. Dây jumper chỉ một phần của ôm. Điện trở 180 Ω là chỗ thắt có chủ đích. Công tắc hở là điện trở lớn đến mức dòng coi như bằng không.
+**Điện trở** $R$, đơn vị ôm ($\Omega$), đặc trưng cho mức độ cản trở dòng điện của linh kiện. Ở cùng một điện áp, điện trở càng lớn thì dòng điện càng nhỏ. Một sợi dây jumper chỉ có điện trở vài phần mười ôm, điện trở 180 Ω là mức cản dòng được tính toán có chủ đích, còn một công tắc đang hở có điện trở rất lớn khiến dòng điện coi như bằng 0.
 
-Với điện trở ở nhiệt độ ổn định, ba đại lượng buộc vào nhau bởi định luật Ohm:
+Với linh kiện thuần trở ở nhiệt độ ổn định, ba đại lượng liên hệ với nhau qua **định luật Ohm**:
 
 $$
 V = IR
 $$
 
-tức là $I = V/R$ và $R = V/I$. Định luật này mô tả linh kiện thuần trở. Điện trở thì đủ đúng cho mọi phép tính trong chương. LED thì không. Nó hầu như không dẫn cho đến khi điện áp trên nó đạt mức sụt thuận, rồi dòng tăng rất dốc. Vì vậy LED luôn đi cùng một điện trở, chứ không bị đối xử như một điện trở.
+Từ đây ta suy ra $I = V/R$ và $R = V/I$. Lưu ý rằng định luật Ohm áp dụng chính xác cho điện trở, nhưng không mô tả tuyến tính cho LED. Đèn LED gần như không dẫn điện cho đến khi điện áp đặt lên nó đạt mức điện áp thuận $V_f$, sau đó dòng tăng rất dốc. Vì lý do này, LED luôn phải mắc kèm điện trở hạn dòng chứ không thể xem là một điện trở thông thường.
 
 ![Tam giác định luật Ohm: che đại lượng cần tìm]({{ site.imgurl }}/generated/ohms_law_triangle.png)
 
-Tam giác chỉ là mẹo nhớ cho $V = IR$. Che chữ nào thì tính chữ đó. Che $V$ thì nhân $I$ với $R$. Che $I$ thì chia $V$ cho $R$. Công suất không nằm trên tam giác này.
+Tam giác trên là mẹo ghi nhớ nhanh cho $V = IR$: che đại lượng cần tìm để thấy phép tính tương ứng (che $V$ được $I \times R$, che $I$ được $V / R$). Lưu ý rằng công suất không nằm trong tam giác này.
 
-## Công suất, và vòng LED nối tiếp
+## Công suất và mạch LED nối tiếp
 
-Công suất là năng lượng mỗi giây, đơn vị oát. Với linh kiện hai chân, đó là tích của điện áp trên chính linh kiện ấy và dòng đi qua nó:
+**Công suất** là năng lượng tiêu thụ hoặc tỏa ra trong mỗi giây, đơn vị oát (W). Với linh kiện hai chân, công suất bằng tích điện áp rơi trên chính linh kiện đó và dòng điện chạy qua nó:
 
 $$
 P = VI
 $$
 
-Trên điện trở, thế Ohm vào. Nếu $I = V/R$ thì
+Đối với điện trở, thay $I = V/R$ vào công thức trên ta được:
 
 $$
 P = \frac{V^2}{R}
 $$
 
-Nếu $V = IR$ thì
+Và nếu thay $V = IR$ ta được:
 
 $$
 P = I^2 R
 $$
 
-Ba cách cho cùng một số trên điện trở. Trên LED, điện áp nằm gần sụt thuận còn điện trở mới đặt dòng, nên LED dùng $P = V_f I$ và điện trở nối tiếp dùng $I^2 R$. Trong $V^2/R$, chữ $V$ là điện áp trên điện trở, không phải cả nguồn.
+Cả ba biểu thức đều cho cùng một giá trị công suất trên điện trở. Tuy nhiên với LED, điện áp trên LED giữ gần mức $V_f$ còn dòng điện do điện trở hạn chế, nên ta tính công suất LED bằng $P = V_f I$ và công suất điện trở bằng $I^2 R$. Khi dùng $V^2/R$ cho điện trở, cần nhớ $V$ là điện áp rơi riêng trên điện trở chứ không phải điện áp toàn nguồn.
 
-Thân 1/4 W chịu 0,25 W nếu có không khí. Điện trở LED ở đây chỉ vài chục milioát. Điện trở nhỏ bị bắt dẫn cỡ ampe sẽ nâu vỏ, và $I^2 R$ nói trước.
+Điện trở thân 1/4 W chịu được công suất tối đa 0,25 W trong điều kiện thoáng khí. Điện trở dùng cho đèn LED chỉ tỏa vài chục milioát nên rất mát; ngược lại, ép một điện trở nhỏ gánh dòng cỡ ampe sẽ làm cháy xém vỏ, và công thức $I^2 R$ cho phép bạn dự đoán trước điều này.
 
-Trong một vòng nối tiếp, dòng giống nhau mọi chỗ và các điện áp cộng lại bằng nguồn:
+Trong mạch nối tiếp, dòng điện tại mọi điểm đều bằng nhau và tổng các điện áp rơi bằng điện áp nguồn:
 
 $$
 V_\mathrm{s} = V_R + V_f
 $$
 
-nên $V_R = V_\mathrm{s} - V_f$ và $I = V_R / R$. Mắc song song thì mỗi nhánh thấy cùng điện áp, còn dòng thì cộng. Hai mô-tơ trên một driver là trường hợp thứ hai. Pin chịu tổng dòng. Dây USB của vi điều khiển không phải là pin đó.
+Suy ra $V_R = V_\mathrm{s} - V_f$ và $I = V_R / R$. Ngược lại, trong mạch song song, các nhánh chịu cùng điện áp còn tổng dòng điện bằng tổng dòng qua từng nhánh — đây chính là trường hợp hai động cơ đấu trên cùng một nguồn pin. Nguồn pin phải gánh tổng dòng của cả hai động cơ, và cổng USB của vi điều khiển không được thiết kế cho vai trò đó.
 
-## Ví dụ tính: đèn báo 3,3 V
+## Ví dụ tính toán: đèn báo trên đường 3,3 V
 
-Nguồn 3,3 V, LED đỏ với $V_f \approx 2{,}0\ \mathrm{V}$, dòng mục tiêu 8 mA để trong phòng vẫn thấy rõ mà không hành hạ chân cắm.
+Giả sử ta dùng nguồn 3,3 V để thắp một LED đỏ có điện áp thuận $V_f \approx 2{,}0\ \mathrm{V}$, với dòng mục tiêu 8 mA để đủ sáng trong phòng mà vẫn an toàn cho chân mạch. Trị số điện trở lý thuyết là:
 
 $$
 R = \frac{V_\mathrm{s} - V_f}{I} = \frac{3.3 - 2.0}{0.008} = \frac{1.3}{0.008} = 162.5\ \Omega
 $$
 
-Chọn giá trị thông dụng kế trên, 180 Ω, để dòng thực nằm dưới mục tiêu:
+Chọn trị số tiêu chuẩn gần nhất lớn hơn là 180 Ω để dòng thực tế không vượt mức mục tiêu:
 
 $$
 I = \frac{3.3 - 2.0}{180} = \frac{1.3}{180} \approx 7.2\ \mathrm{mA}
 $$
 
-Kiểm tra nhiệt bằng dòng mục tiêu và con trở bạn sẽ cắm thật. Cách này hơi bi quan, đúng cái cần trước khi tin mức công suất:
+Để kiểm tra độ an toàn nhiệt một cách thận trọng, ta tính thử với dòng mục tiêu 8 mA và điện trở 180 Ω:
 
 $$
-P = I^2 R = (0.008)^2 \times 180 = 0.0115\ \mathrm{W} \approx 0.011\ \mathrm{W}
+P = I^2 R = (0.008)^2 \times 180 = 0.0115\ \mathrm{W} \approx 0.012\ \mathrm{W}
 $$
 
-Mức 1/4 W là 0,25 W, nên điện trở chỉ chạy khoảng 4% định mức. Lấy đúng 7,2 mA mà 180 Ω tạo ra thì nhiệt còn thấp hơn, khoảng 0,009 W. Cùng con số ấy nếu dùng 1,3 V mà điện trở thực sự gánh: $P = VI \approx 0{,}0072 \times 1{,}3 \approx 0{,}009\ \mathrm{W}$ và $P = V^2/R = 1{,}69/180 \approx 0{,}009\ \mathrm{W}$. Bản thân LED tản $P_\mathrm{LED} \approx 2{,}0 \times 0{,}0072 \approx 0{,}014\ \mathrm{W}$.
+So với định mức 1/4 W (0,25 W), điện trở chỉ hoạt động ở mức dưới 5% công suất cho phép. Nếu tính theo dòng thực tế 7,2 mA, công suất tỏa nhiệt trên điện trở còn nhỏ hơn nữa, khoảng 0,009 W — khớp với cả hai công thức còn lại khi dùng điện áp 1,3 V rơi riêng trên điện trở: $P = VI \approx 0{,}0072 \times 1{,}3 \approx 0{,}009\ \mathrm{W}$ và $P = V^2/R = 1{,}69/180 \approx 0{,}009\ \mathrm{W}$. Bản thân đèn LED tiêu thụ $P_\mathrm{LED} \approx 2{,}0 \times 0{,}0072 \approx 0{,}014\ \mathrm{W}$.
 
 ![Một vòng: nguồn, điện trở nối tiếp, LED, mass]({{ site.imgurl }}/generated/led_series_resistor.png)
 
-Dòng ra khỏi cực dương, qua điện trở, vào LED ở anot, ra ở catot, về mass. Dòng trong điện trở chính là dòng trong LED. LED cắm ngược thì vòng tối. Đó không phải lý do để bỏ điện trở khi bạn lật lại. Không có điện trở thì không còn gì đặt dòng. LED bị ép ngồi gần 3,3 V trong khi sụt thuận chỉ khoảng 2 V, dòng thành cái mà chân cắm và đường đặc tuyến dốc của LED cho phép, thường gấp nhiều lần 20 mA.
+Dòng điện đi từ cực dương, qua điện trở, vào chân anot của LED, ra chân catot rồi về mass. Vì mắc nối tiếp nên dòng qua điện trở bằng đúng dòng qua LED. Nếu cắm ngược cực LED thì đèn không sáng, nhưng tuyệt đối không được bỏ điện trở khi xoay lại chiều. Không có điện trở hạn dòng, LED sẽ bị ép gần mức 3,3 V trong khi điện áp thuận chỉ khoảng 2 V, khiến dòng tăng vọt gấp nhiều lần ngưỡng 20 mA và nhanh chóng làm hỏng linh kiện.
 
-## Ví dụ tính: mô-tơ không phải điện trở của GPIO
+## Ví dụ tính toán: vì sao không đấu trực tiếp động cơ vào GPIO
 
-Giả sử mô-tơ TT kẹt kéo khoảng 0,8 A ở 6 V. Định luật Ohm bị dùng sai sẽ "ra một điện trở":
+Giả sử một động cơ TT khi kẹt trục kéo dòng khoảng 0,8 A ở điện áp 6 V. Nếu tạm tính điện trở tương đương của cuộn dây khi kẹt theo định luật Ohm:
 
 $$
 R_\mathrm{stall} \approx \frac{6}{0.8} = 7.5\ \Omega
 $$
 
-Treo cái đó lên GPIO 3,3 V thì cùng công thức đoán
+Nếu nối trực tiếp tải này vào chân GPIO 3,3 V, dòng điện ước tính sẽ là:
 
 $$
 I \approx \frac{3.3}{7.5} \approx 0.44\ \mathrm{A} = 440\ \mathrm{mA}
 $$
 
-Ngân sách GPIO cẩn thận khoảng 12 mA. Trần thường được nhắc khoảng 40 mA. Bốn trăm miliampe vượt cả hai khoảng một bậc. Chân hỏng, hoặc ổn áp sụt và chip reset. Phép tính còn nhẹ tay: mô-tơ kẹt là cuộn dây cộng hộp số bị khóa, không phải điện trở màng 7,5 Ω. Khi rô-to quay, sức điện động ngược làm dòng nhỏ hơn lúc kẹt, nên thử không tải nói dối về dòng lúc xe dúi vào tường.
+Trong khi đó, mức dòng khuyến nghị cho một chân GPIO chỉ khoảng 12 mA và ngưỡng tối đa thường nêu khoảng 40 mA. Dòng 440 mA vượt ngưỡng an toàn tới hàng chục lần, đủ làm cháy chân GPIO hoặc gây sụt áp ổn áp khiến vi điều khiển tự khởi động lại. Hơn nữa, động cơ là tải cảm kèm hộp số chứ không phải điện trở thuần 7,5 Ω: khi rô-to quay tự do, sức điện động ngược làm giảm dòng tiêu thụ, nên kết quả thử không tải không phản ánh đúng dòng đỉnh khi bánh xe bị kẹt vào vật cản.
 
-Dòng mô-tơ vào chân VM của TB6612, từ nguồn trong dải module, khoảng 4,5 V đến 10 V. GPIO chỉ mang chiều quay và PWM vào logic 2,7 V đến 5,5 V, nên 3,3 V là mức cao hợp lệ. Hai mô-tơ kẹt, mỗi cái gần 0,8 A, đòi khoảng 1,6 A. USB máy tính thường gần 0,5 A, nên bánh không lấy dòng từ USB hay từ chân 3,3 V.
+Vì vậy, dòng cấp cho động cơ phải đi qua chân VM của TB6612FNG từ nguồn pin riêng (dải 4,5 V đến 10 V). Chân GPIO chỉ truyền tín hiệu chiều quay và PWM vào ngõ logic (dải 2,7 V đến 5,5 V, tương thích mức cao 3,3 V). Khi cả hai động cơ TT cùng kẹt, tổng dòng yêu cầu lên tới khoảng 1,6 A, vượt xa mức ~0,5 A của cổng USB máy tính — do đó động cơ tuyệt đối không được lấy nguồn từ USB hay chân 3,3 V.
 
 ## Thực hành
 
-Có linh kiện thì lắp đèn sau phép tính.
+Nếu đã có sẵn linh kiện, hãy lắp mạch đèn báo theo đúng các bước sau:
 
-1. Viết $R = (3{,}3 - 2{,}0) / 0{,}008 = 162{,}5\ \Omega$, và bên cạnh là con 180 Ω sẽ cắm, trước khi bất kỳ chân nào vào lỗ.
-2. Mắc điện trở và LED đỏ nối tiếp giữa rail 3,3 V và GND. Trên board, rail đó là chân ghi 3V3, không phải GPIO và không phải chân 5V. Chân LED dài hơn, tức anot, hướng về phía dương. Vạt phẳng trên vành hướng về GND.
-3. Chỉ cấp nguồn sau khi điện trở đã nằm trong vòng. Nhìn LED từ bên cạnh, đừng nhìn thẳng vào thấu kính.
-4. Đồng hồ để thang DC vôn, que đỏ ở ổ điện áp, đo trên chính điện trở. Chia điện áp đó cho 180 Ω. Bạn đang suy ra dòng, chưa được ngắt mạch để đo ampe. Việc đó để bài sau.
+1. Ghi sẵn phép tính $R = (3{,}3 - 2{,}0) / 0{,}008 = 162{,}5\ \Omega$ và chọn điện trở 180 Ω ra giấy trước khi cắm bất kỳ linh kiện nào lên breadboard.
+2. Mắc nối tiếp điện trở 180 Ω và LED đỏ giữa chân 3V3 và GND (lưu ý lấy từ chân nguồn 3V3 trên board, không lấy từ chân GPIO hay chân 5V). Chân dài của LED (anot) hướng về phía dương; cạnh vát phẳng trên vành nhựa (catot) hướng về phía GND.
+3. Kiểm tra chắc chắn điện trở đã nằm đúng trong vòng nối tiếp rồi mới cấp nguồn. Quan sát ánh sáng LED từ góc nghiêng thay vì nhìn thẳng vào thấu kính.
+4. Chuyển đồng hồ vạn năng sang thang đo điện áp một chiều (DC V), kiểm tra que đỏ đang ở lỗ đo áp, rồi đo trực tiếp hai đầu điện trở. Lấy điện áp đo được chia cho 180 Ω để tính dòng thực tế mà không cần ngắt mạch đo ampe (phép đo dòng sẽ học ở bài sau).
 
-Bạn sẽ thấy ánh đỏ rõ, không chói gắt. Điện áp trên điện trở 180 Ω nên nằm gần 1,1 V đến 1,5 V, tức dòng gần 6 mA đến 8 mA. Vỏ điện trở không nóng. Thay bằng 220 Ω thì $I = 1{,}3 / 220 \approx 5{,}9\ \mathrm{mA}$, tối hơn một chút và vẫn đạt.
+**Kết quả kỳ vọng:** LED phát sáng đỏ rõ, không chói gắt; điện áp rơi trên điện trở 180 Ω nằm trong khoảng 1,1 V đến 1,5 V (tương ứng dòng khoảng 6 mA đến 8 mA) và thân điện trở không nóng. Nếu thay bằng điện trở 220 Ω, dòng còn $I = 1{,}3 / 220 \approx 5{,}9\ \mathrm{mA}$, đèn hơi dịu hơn nhưng vẫn đạt yêu cầu.
 
-| Bạn thấy | Nguyên nhân hay gặp | Cách xử lý |
+| Hiện tượng quan sát | Nguyên nhân thường gặp | Cách khắc phục |
 | --- | --- | --- |
-| LED tối, điện trở mát | LED ngược | Đổi chiều LED. Giữ điện trở trong mạch. |
-| Loé một cái rồi tối | Thiếu điện trở nối tiếp, hoặc điện trở bị lỗ breadboard nối tắt | Bỏ LED đó. Lắp lại với 180 Ω trước khi tin chân GPIO. |
-| Board reset, hoặc GPIO không còn đảo được | 5 V rơi vào chân ESP32 hoặc Pico, hoặc LED lấy 5 V rồi trả về qua GPIO | Dừng. Đèn chỉ lấy từ 3V3 xuống GND. Thử lại chân bằng LED tốt và 180 Ω. |
-| Sáng đến mức mất hút trong phòng | Con trở thực ra hàng chục kilôom | Đo lại. $I = 1{,}3 / 10000 = 0{,}13\ \mathrm{mA}$ trông như tắt. |
+| LED không sáng, điện trở nguội | Cắm ngược cực LED | Đảo chiều hai chân LED, vẫn giữ nguyên điện trở trong mạch |
+| LED lóe sáng rồi tắt hẳn | Thiếu điện trở nối tiếp, hoặc cắm hai chân điện trở vào cùng hàng lỗ breadboard làm nối tắt | Thay LED mới, lắp lại đúng với điện trở 180 Ω trước khi kiểm tra chân mạch |
+| Board bị reset hoặc chân GPIO ngừng hoạt động | Đưa nguồn 5 V vào chân 3,3 V hoặc đấu LED giữa 5 V và chân GPIO | Ngắt nguồn ngay; chỉ đấu đèn giữa chân 3V3 và GND; kiểm tra lại chân bằng LED tốt kèm trở 180 Ω |
+| LED tối mờ gần như không thấy | Cắm nhầm điện trở trị số hàng chục kilôôm | Đo lại trị số điện trở; với 10 kΩ, $I = 1{,}3 / 10000 = 0{,}13\ \mathrm{mA}$ nên gần như tắt |
 
-An toàn: bánh xe nếu đã gắn thì phải nhấc khỏi mặt bàn, chưa nối nguồn mô-tơ, và không đưa VM hay 5 V của USB vào GPIO. Cả thí nghiệm chỉ là một LED vài miliampe.
+**Lưu ý an toàn:** Nếu đã lắp bánh xe, luôn nhấc bánh khỏi mặt bàn; không nối nguồn động cơ trong bài này và tuyệt đối không đưa nguồn VM hay nguồn USB 5 V vào chân GPIO.
 
 ## Video tham khảo
 
-- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. V, I, R và công suất trên một mạch đơn. Đây là hình của định luật Ôm trong bài.
-- [video tập giảng: Định luật Ôm đối với toàn mạch- Trần Thị Hồng Nhung](https://www.youtube.com/watch?v=Pd7jlqP4CRw) — Trường Đại học Giáo dục - ĐHQGHN, tiếng Việt. Bài giảng tiếng Việt về định luật Ôm cho toàn mạch, có sức điện động và điện trở trong.
+- **Xem trước:** [Ohms Law Explained - The basics circuit theory](https://www.youtube.com/watch?v=HsLLq6Rm5tU) — The Engineering Mindset, tiếng Anh. Minh họa trực quan mối liên hệ giữa điện áp, dòng điện, điện trở và công suất trên một mạch đơn giản.
+- [video tập giảng: Định luật Ôm đối với toàn mạch- Trần Thị Hồng Nhung](https://www.youtube.com/watch?v=Pd7jlqP4CRw) — Trường Đại học Giáo dục - ĐHQGHN, tiếng Việt. Bài giảng tiếng Việt về định luật Ohm cho toàn mạch, có đề cập sức điện động và điện trở trong.
 
 ## Bài tập
 
-1. LED xanh, $V_f = 2{,}2\ \mathrm{V}$, thắp từ 5 V ở 10 mA, mắc giữa 5 V và GND, không vào GPIO. Tính $R$, chọn giá trị kế trên trong bộ 220 Ω, 270 Ω, 330 Ω, rồi tính $P$ trên điện trở đó.
-2. Hộp không có 180 Ω, bạn dùng 220 Ω cho đèn đỏ 3,3 V với $V_f = 2{,}0\ \mathrm{V}$. Tính dòng. Trong phòng còn dùng làm đèn báo được không?
-3. Một mô-tơ TT lấy 0,15 A khi lăn và 0,8 A khi kẹt. Hai cái chạy cùng lúc. Tổng nào, nếu có, vừa cổng USB giới hạn 0,5 A?
-4. Một người đo được 3,3 V trên LED đang tối và không có điện trở nối tiếp, rồi nói điện áp đúng nên LED còn tốt. Với $V_\mathrm{s} = V_R + V_f$, lập luận đó thiếu gì?
-5. Với điện trở 180 Ω chịu 1,3 V, chứng minh $P = VI$, $P = I^2 R$ và $P = V^2/R$ ra cùng một kết quả. Vì sao không được thế $V = 3{,}3\ \mathrm{V}$ vào $V^2/R$ cho chính điện trở đó?
+1. Cần thắp sáng một LED xanh lá có $V_f = 2{,}2\ \mathrm{V}$ từ nguồn 5 V với dòng mục tiêu 10 mA (mắc giữa nguồn 5 V và GND, không dùng GPIO). Tính giá trị $R$, chọn trị số kế trên trong tập {220 Ω, 270 Ω, 330 Ω} và tính công suất tỏa nhiệt $P$ trên điện trở đã chọn.
+2. Nếu không có sẵn điện trở 180 Ω, bạn thay bằng điện trở 220 Ω cho LED đỏ ($V_f = 2{,}0\ \mathrm{V}$) trên nguồn 3,3 V. Hãy tính dòng điện qua mạch và nhận xét độ sáng trong phòng.
+3. Một động cơ TT tiêu thụ 0,15 A khi chạy không tải và 0,8 A khi kẹt trục. Khi hai động cơ chạy cùng lúc, trường hợp nào (nếu có) nằm trong giới hạn 0,5 A của cổng USB?
+4. Một người đo được 3,3 V trên một đèn LED đang tối (mắc không có điện trở nối tiếp) và kết luận rằng vì có đủ điện áp nên LED còn tốt. Dựa vào $V_\mathrm{s} = V_R + V_f$, lập luận này sai ở điểm nào?
+5. Với điện trở 180 Ω chịu điện áp rơi 1,3 V, hãy chứng minh ba công thức $P = VI$, $P = I^2 R$ và $P = V^2/R$ đều cho cùng một kết quả. Vì sao không được thay $V = 3{,}3\ \mathrm{V}$ vào công thức $V^2/R$ cho điện trở này?
 
 <details>
 <summary>Gợi ý đáp án</summary>
 
-1. $R = (5 - 2{,}2) / 0{,}010 = 280\ \Omega$. Giá trị kế trên là 330 Ω. Khi đó $I = 2{,}8 / 330 \approx 8{,}5\ \mathrm{mA}$ và $P \approx 0{,}024\ \mathrm{W}$, thấp hơn nhiều so với 0,25 W. Đèn này không nằm trên GPIO.
-2. $I = 1{,}3 / 220 \approx 5{,}9\ \mathrm{mA}$. Được. Tối hơn 8 mA nhưng trong phòng vẫn thấy. Đừng tháo điện trở để "chữa" độ tối.
-3. Lúc lăn: $0{,}30\ \mathrm{A}$, dưới 0,5 A. Lúc kẹt: $1{,}6\ \mathrm{A}$, không vừa. Thử lăn có thể trông an toàn rồi vẫn reset khi một bánh bị chặn. Dòng mô-tơ không lấy từ USB.
-4. Không có điện trở thì $V_R = 0$, cả 3,3 V bị ép lên LED. LED đỏ còn tốt chỉ ngồi gần 2 V khi có điện trở đặt dòng vừa phải. Thấy cả điện áp nguồn trên một LED tối nghĩa là hở, ngược, hoặc đã hỏng.
-5. $I = 1{,}3 / 180 \approx 7{,}2\ \mathrm{mA}$, cả ba công thức cho khoảng 0,0094 W. Thế 3,3 V là giả vờ điện trở gánh cả nguồn và bỏ quên 2 V của LED.
+1. $R = (5 - 2{,}2) / 0{,}010 = 280\ \Omega$. Chọn trị số kế trên là 330 Ω. Khi đó $I = 2{,}8 / 330 \approx 8{,}5\ \mathrm{mA}$ và $P \approx 0{,}024\ \mathrm{W}$, rất nhỏ so với định mức 0,25 W. Lưu ý mạch đèn này lấy nguồn 5 V độc lập, không mắc vào chân GPIO.
+2. $I = 1{,}3 / 220 \approx 5{,}9\ \mathrm{mA}$. Hoàn toàn dùng làm đèn báo trong phòng được (chỉ dịu hơn mức 8 mA một chút). Không tháo bỏ điện trở để làm đèn sáng hơn.
+3. Khi chạy không tải: tổng dòng $0{,}30\ \mathrm{A} < 0{,}5\ \mathrm{A}$. Khi kẹt trục: tổng dòng $1{,}6\ \mathrm{A} > 0{,}5\ \mathrm{A}$, vượt xa giới hạn cổng USB. Do đó, chạy thử không tải có thể tưởng là ổn nhưng mạch sẽ reset ngay khi bánh xe gặp vật cản.
+4. Khi không có điện trở, $V_R = 0$ nên toàn bộ 3,3 V đặt trực tiếp lên LED. Một LED đỏ còn tốt đang dẫn điện chỉ giữ điện áp quanh 2 V khi có điện trở hạn dòng; việc đo thấy trọn 3,3 V trên một LED tối chứng tỏ LED đang bị cắm ngược, hở mạch hoặc đã cháy đứt.
+5. Với $I = 1{,}3 / 180 \approx 7{,}2\ \mathrm{mA}$, cả ba công thức đều cho kết quả xấp xỉ 0,0094 W. Không được thay 3,3 V vì điện trở chỉ gánh 1,3 V; phần 2,0 V còn lại rơi trên LED.
 
 </details>
 
 ## Đọc thêm
 
-All About Circuits trình bày định nghĩa và điều kiện của định luật trong chương một chiều: [Voltage, current, resistance, and Ohm's law](https://www.allaboutcircuits.com/textbook/direct-current/chpt-2/voltage-current-resistance-ohms-law/). Bài LED của SparkFun là phần đi cùng khi điện trở đã vào vòng: [Light-emitting diodes](https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds).
+Tài liệu trực tuyến của All About Circuits trình bày chi tiết định nghĩa và phạm vi áp dụng của định luật Ohm trong mạch một chiều: [Voltage, current, resistance, and Ohm's law](https://www.allaboutcircuits.com/textbook/direct-current/chpt-2/voltage-current-resistance-ohms-law/). Bài hướng dẫn về LED của SparkFun bổ sung cách chọn điện trở hạn dòng thực tế: [Light-emitting diodes](https://learn.sparkfun.com/tutorials/light-emitting-diodes-leds).
 
 ## Mua ở Việt Nam
 
-Khung xe, driver, vi điều khiển, cảm biến siêu âm và phần còn lại của giỏ hàng nằm ở [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Bài này chỉ thêm đồ cho đèn, và chỉ khi giỏ đó chưa có.
+Toàn bộ danh sách khung xe, mạch lái, vi điều khiển và cảm biến nằm ở bài [BOM và cách mua bộ kit robot ở Việt Nam]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}). Bài này chỉ bổ sung linh kiện cho mạch đèn báo nếu bạn chưa mua sẵn.
 
-Bộ LED 3 mm trên Hshop giá 20 000 ₫ ngày 23 tháng 9 năm 2026: [bộ 5 loại LED 3 mm](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led). Lấy LED đỏ cho phép tính ở trên. Xem lại giá trước khi chuyển khoản.
+Bộ LED 3 mm trên Hshop có giá tham khảo 20.000 ₫ (ghi nhận ngày 23 tháng 9 năm 2026): [bộ 5 loại LED 3 mm](https://hshop.vn/bo-5-loai-led-sieu-sang-3mm-thong-dung-5-kind-3mm-transparent-color-led). Bạn dùng LED đỏ cho bài thực hành và nhớ kiểm tra lại giá trước khi đặt hàng.
 
-Bộ điện trở xuyên lỗ 1/4 W có 180 Ω hoặc 220 Ω là món cần mua. Lúc viết bài, tìm "điện trở" trên Hshop không ra bộ 1/4 W, nên dùng trang tìm kiếm và đọc shop: [Shopee, tìm bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W). Đó là trang tìm kiếm, không phải một sản phẩm. Chọn 1/4 W, sai số 5% hoặc 1%. Đừng tin một con "180 Ω" không nhãn nếu chưa đo.
+Với bộ điện trở xuyên lỗ 1/4 W (cần có trị số 180 Ω hoặc 220 Ω), do thời điểm khảo sát Hshop không hiển thị bộ 1/4 W thông dụng, bạn có thể tìm qua trang tìm kiếm: [Shopee, tìm bộ điện trở 1/4W](https://shopee.vn/search?keyword=b%E1%BB%99%20%C4%91i%E1%BB%87n%20tr%E1%BB%9F%201%2F4W). Hãy chọn loại công suất 1/4 W, sai số 5% hoặc 1%, và luôn đo kiểm tra bằng đồng hồ trước khi cắm mạch thay vì chỉ tin vào nhãn túi.

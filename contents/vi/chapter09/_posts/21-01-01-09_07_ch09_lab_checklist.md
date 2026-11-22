@@ -11,37 +11,37 @@ lesson_type: required
 draft: false
 ---
 
-Thời lượng: **~70 phút**. Cửa này hỏi bằng chứng rằng Jazzy sống trên Ubuntu 24.04, graph có topic, và cây TF có một cạnh tĩnh bạn giải thích được.
+Thời lượng: **~70 phút**. Mục kiểm tra cuối chương này yêu cầu bằng chứng thực tế rằng ROS 2 Jazzy đang chạy ổn định trên Ubuntu 24.04, đồ thị ROS có topic hoạt động và cây TF có ít nhất một cạnh tĩnh mà bạn giải thích được.
 
 ## Mục tiêu
 
-Bạn ký sáu cửa: Ubuntu đúng bản, workspace đã source, một topic echo được, một service hoặc action đã gọi, `ROS_DOMAIN_ID` nếu có SBC, và `tf2_echo` của cạnh `base_link` tới frame cảm biến. Thiếu log là trượt.
+Bạn cần hoàn thành và xác nhận đủ sáu tiêu chí: đúng phiên bản Ubuntu, workspace đã nạp đúng thứ tự, đọc được dữ liệu từ một topic, gọi được một service hoặc action, đồng bộ `ROS_DOMAIN_ID` (nếu dùng SBC) và kiểm chứng cạnh `base_link` tới frame cảm biến bằng `tf2_echo`. Bất kỳ mục nào thiếu log minh chứng đều chưa đạt.
 
 ## Kiến thức cần trước
 
-Bài 09-00 đến 09-06. Laptop hoặc SBC đã có `printenv ROS_DISTRO`. Sổ chương 08 đã ký, hoặc bạn ghi rõ chương 08 còn cửa nào trượt. TF không sửa khẩu độ sai.
+Hoàn thành các bài từ 09-00 đến 09-06; máy tính (laptop hoặc SBC) đã kiểm tra được `printenv ROS_DISTRO`. Sổ thực hành chương 08 cần đã hoàn tất, hoặc ghi rõ những hạng mục còn tồn đọng của chương 08 vì cây TF không thể bù đắp cho thông số chiều rộng trục bánh bị đo sai.
 
 ## Vì sao bài này nằm trên lộ trình
 
-Gazebo Harmonic ở chương 10 spawn vào một graph đã có. `use_sim_time` dán lên một cài hỏng chỉ nhân đôi số topic lạ. Ký graph khi world còn trống.
+Gazebo Harmonic ở chương 10 sẽ khởi chạy trực tiếp trên đồ thị ROS hiện tại. Nếu thêm `use_sim_time` lên một môi trường ROS vốn đã lỗi, số lượng topic bất thường sẽ tăng lên và rất khó gỡ. Do đó, cần xác nhận đồ thị ROS vận hành chuẩn xác ngay từ khi chưa có mô phỏng.
 
-## Đạt và trượt
+## Tiêu chí đạt và không đạt
 
-**Bản cài.** `printenv ROS_DISTRO` là `jazzy` và `lsb_release -sc` là `noble` trên máy sẽ chạy apt. Jetson còn `jammy` thì cửa này trượt cho đến khi bạn không còn cài Jazzy trên đó. Ảnh chụp terminal là bằng chứng.
+**Phiên bản cài đặt.** Trên máy cài gói qua `apt`, `printenv ROS_DISTRO` phải trả về `jazzy` và `lsb_release -sc` phải là `noble`. Nếu mạch Jetson vẫn đang ở `jammy`, tiêu chí này chưa đạt cho đến khi bạn không cố cài Jazzy lên đó nữa. Lưu ảnh chụp màn hình terminal làm minh chứng.
 
-**Workspace.** Một gói trong `~/ros2_ws` build bằng `colcon`, terminal mới source underlay rồi overlay. `ros2 pkg list` không thấy gói của bạn sau khi mở terminal mới là trượt, trừ khi `.bashrc` đã source và bạn dán dòng đó.
+**Workspace.** Biên dịch thành công ít nhất một gói trong `~/ros2_ws` bằng `colcon`, và khi mở terminal mới hệ thống phải tự động nạp underlay trước rồi đến overlay. Nếu `ros2 pkg list` không hiển thị gói của bạn ở terminal mới thì tiêu chí này chưa đạt (trừ khi bạn đã cấu hình đúng trong `.bashrc` và dán dòng cấu hình đó vào sổ).
 
-**Topic.** Talker hoặc node của bạn, `ros2 topic echo` một lần, có kiểu message. Danh sách rỗng cộng một talker bạn chưa chạy là chưa làm, không phải "DDS hỏng".
+**Topic.** Chạy `talker` hoặc node tự viết, dùng `ros2 topic echo` lấy ít nhất một bản ghi kèm tên kiểu message. Danh sách trống khi bạn chưa chạy bất kỳ publisher nào là chưa thực hiện, không phải "lỗi DDS".
 
-**Service hoặc action.** Một lời gọi thành công, hoặc một lỗi bạn đọc được và sửa. Không có lệnh trong sổ là trượt.
+**Service hoặc action.** Thực hiện thành công một lệnh gọi service/action, hoặc ghi lại rõ một lỗi đã gặp kèm cách khắc phục. Không có câu lệnh và log lưu trong sổ là chưa đạt.
 
-**SBC.** Nếu bạn có Pi hoặc Jetson: `/dev/esp32` hoặc câu hoãn có ngày, unit systemd đã `status`, hai máy cùng domain. Không có SBC: câu "chỉ laptop" là đạt cửa này.
+**Máy tính nhúng (SBC).** Nếu có Raspberry Pi hoặc Jetson: cần có liên kết `/dev/esp32` (hoặc ghi chú kế hoạch hoãn có ngày cụ thể), kết quả `systemctl status` của unit `systemd` và xác nhận hai máy dùng chung `ROS_DOMAIN_ID`. Nếu chưa dùng SBC, ghi rõ "chỉ dùng laptop" là đủ để đạt tiêu chí này.
 
-**TF.** `ros2 run tf2_ros tf2_echo base_link <frame>` in một tịnh tiến theo mét. Hai publisher trên cùng cạnh là trượt. Quaternion yaw $90^\circ$ phải gần $(0,\ 0,\ 0{,}707,\ 0{,}707)$ nếu bạn cố ý quay $90^\circ$.
+**Cây tọa độ TF.** Lệnh `ros2 run tf2_ros tf2_echo base_link <frame>` phải in ra phép tịnh tiến theo đơn vị mét. Nếu xuất hiện hai publisher trên cùng một cạnh thì chưa đạt. Nếu bạn chủ động xoay góc yaw $90^\circ$, giá trị quaternion in ra phải xấp xỉ $(0,\ 0,\ 0{,}707,\ 0{,}707)$.
 
 ## Lab
 
-Dán vào sổ khối sau, điền hoặc xóa dòng không có bằng chứng.
+Sao chép mẫu sau vào sổ thực hành, điền đầy đủ kết quả thực tế (xóa các dòng không có minh chứng):
 
 ```text
 ## Ky duyet chuong 09
@@ -57,26 +57,28 @@ tf2_echo base_link -> :
 
 ### Lỗi thường gặp
 
-| Bạn thấy | Cần kiểm |
+| Hiện tượng | Hướng kiểm tra |
 | --- | --- |
-| `humble` và `jazzy` cùng shell | Xóa một `source` trong `.bashrc` |
-| Echo không có data | Publisher chưa chạy, khác domain, hoặc QoS không khớp |
-| `tf2_echo` chờ mãi | Sai tên frame. `ros2 run tf2_tools view_frames` |
-| Pi chạy Ubuntu 26.04 | Ngoài apt Jazzy. Ghi lại 24.04 hoặc dừng cửa bản cài |
+| Cả `humble` và `jazzy` xuất hiện trong cùng shell | Xóa bớt một dòng `source` trong `~/.bashrc` |
+| `echo` không có dữ liệu | Publisher chưa chạy, khác `ROS_DOMAIN_ID`, hoặc không tương thích QoS |
+| `tf2_echo` chờ mãi không in | Nhập sai tên frame; kiểm tra lại bằng `ros2 run tf2_tools view_frames` |
+| Raspberry Pi chạy Ubuntu 26.04 | Không khớp kho gói `apt` của Jazzy; nạp lại Ubuntu 24.04 hoặc dừng ở tiêu chí bản cài |
 
 ## Video tham khảo
 
-- **Xem trước:** [The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6](https://www.youtube.com/watch?v=QyvHhY4Y_Y8) — Articulated Robotics, tiếng Anh. Checklist chương hỏi một cây frame nhìn được. Video TF là hình cần có trước khi tick.
+- **Xem trước:** [The ROS Transform System (TF) | Getting Ready to Build Robots with ROS #6](https://www.youtube.com/watch?v=QyvHhY4Y_Y8) — Articulated Robotics (tiếng Anh). Danh sách kiểm tra của chương yêu cầu một cây tọa độ hiển thị rõ ràng; video này giúp hình dung trực quan trước khi hoàn thành bước xác nhận.
 
 ## Bài tập
 
-1. Cửa nào trượt khi topic thấy nhau nhưng `lsb_release` là `jammy`?
-2. `tf2_echo` ra $x = 10$. Đơn vị nào đang sai nếu lidar chỉ cách tâm 10 cm?
-3. Vì sao "chỉ laptop" vẫn đạt cửa SBC?
+1. Tiêu chí nào không đạt nếu các topic vẫn giao tiếp được với nhau nhưng `lsb_release` trả về `jammy`?
+2. Lệnh `tf2_echo` báo $x = 10$ trong khi cảm biến lidar chỉ cách tâm xe 10 cm. Bạn đang nhập sai đơn vị nào?
+3. Vì sao ghi nhận "chỉ dùng laptop" vẫn được tính là đạt tiêu chí SBC?
 
 ### Gợi ý đáp án
 
-1. Cửa bản cài. Topic không chứng minh distro. 2. Mét. $10$ m là khai $10$ thay vì $0{,}10$. 3. SBC là máy trên xe, không phải điều kiện để học graph. Câu hoãn thành thật được ký. Im lặng thì không.
+1. Tiêu chí phiên bản cài đặt không đạt, vì các topic hoạt động không chứng minh bạn đang dùng đúng bản Ubuntu 24.04 cho Jazzy.
+2. Sai đơn vị mét: hệ thống hiểu $10$ là 10 m thay vì $0{,}10$ m.
+3. SBC chỉ cần khi đưa hệ thống lên xe thật, không phải điều kiện bắt buộc để học đồ thị ROS; việc ghi nhận minh bạch phạm vi thực hành được chấp nhận, còn bỏ trống không báo cáo thì không.
 
 ## Đọc thêm
 
