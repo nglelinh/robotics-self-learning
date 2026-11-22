@@ -128,7 +128,9 @@ pip index versions lerobot
 
 Bài này không mua gì. Cánh tay hạng SO-100 là kit nhập: khung in, servo, tay leader, camera. Cộng bộ servo và tiền ship, hạng kit đó ở Việt Nam thường nằm ở mức nhiều triệu đồng. Hãy đối lại listing thật vào tuần bạn định mua. Bài giảng không gắn link shop cho cánh tay, vì link cũ còn hại hơn không có link. Khóa học không bắt mua. Camera tùy chọn ở chương 11 là cảm biến thêm duy nhất bạn có thể đã có, và card không cần ảnh sống. Robot mà card mô tả là Capstone bạn đã dựng.
 
+## Khái niệm
 
+[LeRobot](https://huggingface.co/docs/lerobot/index) là thư viện Python, một định dạng dataset, và một bộ cấu hình phần cứng gắn với Hugging Face. Trang index mô tả vòng lặp bốn động từ: teleoperate, record, train, deploy. Teleoperate là người lái. Record là mỗi demonstration thành video camera đồng bộ với action người đã gửi. Train là một policy, tức một mạng, bắt chước các action đó. Deploy là policy ghi action trở lại robot. Khóa học này dừng trước train. Bốn động từ là cách bạn đọc tài liệu, không phải script bài tập.
 ## Video tham khảo
 
 - **Xem trước:** [Core Concepts: Imitation Learning](https://www.youtube.com/watch?v=GDmhrAHxgQE) — Sanjiban Choudhury, tiếng Anh. Học bắt chước: ghi hành động của người, rồi policy làm lại. Khác với reinforcement learning ở các reel Chinbi.
@@ -136,10 +138,100 @@ Bài này không mua gì. Cánh tay hạng SO-100 là kit nhập: khung in, serv
 
 Reel Chinbi là Facebook Reel ngắn của Hoàng Quân (Cơ điện tử ICTU, [chinbi.com](https://chinbi.com)). Câu sau link chỉ nhắc caption.
 
-- [Đi bộ khi có tải, reinforcement learning](https://www.facebook.com/reel/4089347134533915). Chú thích: training robot bốn chân đi khi mang tải, ghi rõ reinforcement learning. Tải đổi động lực. Policy của một thân không tải không tự thành policy của thân có tải.
-- [Học đứng bằng hai chân](https://www.facebook.com/reel/1624642749368249). Chú thích: Chinbi đang học đứng bằng hai chân. Đó là một dáng, không phải `Twist` của xe vi sai.
-- [Học đi bằng hai chân trước, handstand](https://www.facebook.com/reel/2292393271597807). Chú thích song ngữ: học đi bằng hai chân trước, và learning to do a handstand. Cùng một clip, hai cách gọi dáng. Giữ đúng chữ chú thích, đừng đặt tên khớp hộ.
-- [Học trèo bậc, nhảy lên cầu thang](https://www.facebook.com/reel/2191042771623926). Chú thích song ngữ: học trèo lên bậc, và learning to jump up stairs. Bậc thang là địa hình trong chú thích, chưa phải bản đồ Nav2 của chương 11.
+**Robot** ở đây là một thân cộng config: động cơ, camera, và khóa chúng điền. Trên docs, SO-101 là cánh tay giá thấp chủ lực, SO-100 là đời trước cùng họ. Koch v1.1 là cánh tay cộng đồng họ vẫn ghi tài liệu. LeKiwi là đế di động có cánh tay. Đó là embodiment của dự án. Capstone là hai bánh chủ động, không kẹp, action $$(v,\omega)$$, và timeout của bạn. Đích khớp SO-101 không xuất bản `cmd_vel`. Action của LeKiwi có cả cánh tay, nên chữ "mobile" không gộp khóa.
+
+Lúc ghi là người lái, logger viết. Lúc phát là policy viết, firmware áp lệnh. Cùng tên, cùng đơn vị, cả hai lúc. Camera thấp hơn 15 cm, hoặc dấu yaw bị đảo, cột vẫn tên `w` mà chuyển động đổi. `fps: 10` nghĩa là các action cách 0,1 s. Camera 30 Hz đổ vào mà không căn giờ sẽ ghép ảnh với nhầm lệnh. Timeout 300 ms ở lại khi bạn ghi. Comment nó ra là log một robot bạn không được phép chạy. Link trễ làm log đầy $$(0, 0)$$ là lỗi kia: đánh dấu frame, đừng xóa watchdog.
+
+## Hình
+
+![Dataset, policy và robot dùng chung khóa]({{ site.imgurl }}/generated/ch12_lerobot.png)
+
+Ba hộp, hai mũi tên. Hộp dataset giữ observation và action. Mũi tên xuyên qua policy là lúc phát: một dòng đi vào, một action đi ra, robot thực hiện. Mũi tên xanh ghi record chạy ngược: người lái robot, logger lưu cùng các khóa. Dòng đỏ dưới hộp là luật mà tấm card phải khóa lại. Dòng xám bảo đọc card trước một lần train. Tối nay lần train không bắt đầu. Tấm card thì có.
+
+## Ví dụ đọc có số
+
+Tấm card này mô tả một episode Capstone giả. Không phải file trên Hub, cũng không phải exporter bạn phải cài. Hai giây, mười khung mỗi giây, hai mươi dòng. Card nằm đầu thư mục để script sau không được đoán.
+
+```text
+robot_name: capstone_diff
+embodiment: two-wheel diff-drive, no arm
+fps: 10
+episode_length_s: 2.0
+features:
+  observation.images.cam:
+    dtype: video
+    shape: [480, 640, 3]
+    names: [height, width, channel]
+    info: RGB, forward camera, 10 Hz, same clock as action
+  observation.state:
+    dtype: float32
+    shape: [2]
+    names: [v_meas_m_s, w_meas_rad_s]
+  action:
+    dtype: float32
+    shape: [2]
+    names: [v_cmd_m_s, w_cmd_rad_s]
+```
+
+Dòng 0, hành lang trống: state đo $$(0.00, 0.00)$$, action $$(0.20, 0.00)$$. Đó là 0,20 m/s tiến, không quay. Trong một chu kỳ 0,1 s, đế trườn khoảng 2 cm nếu bánh chạm đất. Dòng 8, ghế xuất hiện bên trái ảnh: action $$(0.10, -0.40)$$, chậm hơn, yaw $$-0.40$$ rad/s. Trục $$z$$ hướng lên, quy tắc bàn tay phải, yaw âm là rẽ phải. Dòng 19 là $$(0.00, 0.00)$$, người lái chủ đích dừng, không phải timeout.
+
+Cùng hai mươi dòng trở thành robot khác nếu đơn vị trôi. Script teleop vẫn viết lệnh kiểu PWM chương 07 trong $$[-100, 100]$$, còn tờ bạn đưa cho policy bảo vector là m/s và rad/s. Loader sau tin tờ giấy. Nó đọc 70 trong log và hiểu là 70 m/s. Không tầng nào trong mạng kiểm điều đó. Card chỉ xong khi mâu thuẫn này không còn chỗ đứng: một dòng `names`, một đơn vị, logger và cầu phát lại cùng nhập dòng đó.
+
+Số dòng là phép kiểm, không phải khẩu hiệu:
+
+$$
+N = \text{fps} \times T = 10 \times 2.0 = 20
+$$
+
+Hai mươi ảnh mà card ghi `fps: 30` không còn là episode 2,0 s. Ai đó sẽ kéo giãn cú quay. Hãy ghi con số bạn kiểm được bằng cách liệt kê thư mục.
+
+## Lab
+
+Chỉ phần mềm. Đế có thể nằm trên kệ. `lab-notes.md` nhận hai thứ: một câu trích có ngày, và một dataset card.
+
+**Sơ đồ docs.** Mở [trang index LeRobot](https://huggingface.co/docs/lerobot/index). Đọc mục "How it works" và chép bốn động từ đúng thứ tự: teleoperate, record, train, deploy. Bên dưới, viết câu bạn sẽ giữ: khóa học này dừng trước train. Rồi tìm, theo đúng heading đang có trên trang, một mục cài đặt, một mục về dataset, một mục imitation learning, và một mục robots. Docs đổi chỗ. Ghi ngày của ảnh chụp. Một ghi chú dùng được trông như sau, heading là heading bạn thấy:
+
+```text
+date: 2026-09-23
+docs: https://huggingface.co/docs/lerobot/index
+verbs: Teleoperate, Record, Train, Deploy
+pages I opened:
+  - Installation (có lệnh; tôi không cần chạy)
+  - (heading dataset tôi thực sự thấy)
+  - (heading imitation tôi thực sự thấy)
+  - Robots: trang index có tên SO-101, LeKiwi, Koch v1.1
+stopped before: any train command
+```
+
+Heading bị đổi tên thì ghi tên mới. Đừng bịa heading cho khớp bài giảng.
+
+**Một câu từ repository.** Mở [huggingface/lerobot](https://github.com/huggingface/lerobot). Ngay dưới tên repository có một dòng mô tả. Chép nguyên câu đó vào `lab-notes.md`, để trong dấu ngoặc kép, kèm ngày. Đừng diễn giải. Nếu dòng đã đổi từ khi bài giảng được viết, dòng hôm nay mới là câu trích đúng.
+
+**Dataset card.** Viết lại ví dụ ở trên cho ra của bạn. Đổi một con số và giữ phép tính khớp. Một sửa hợp lý là `fps: 5` và `episode_length_s: 3.0`, tức 15 dòng. Giữ khóa `observation.images.cam`, $$v$$ theo m/s, và $$\omega$$ theo rad/s. Thêm một dòng số và một câu nói rằng cặp số đó chính là `linear.x` và `angular.z` trên cầu Capstone.
+
+Cài thư viện là việc tùy chọn. Lệnh terminal duy nhất bài này chấp nhận, nếu bạn muốn một dòng trong nhật ký, là liệt kê phiên bản:
+
+```bash
+pip index versions lerobot
+```
+
+**Kỳ vọng của lệnh.** Một danh sách ngắn mở đầu bằng tên gói, hoặc một lỗi mạng, quyền, hay `pip` cũ. Cả hai đều được. Danh sách phiên bản không phải policy đã luyện. Lệnh chạy được thì dừng. Đừng đi tiếp vào entrypoint train chỉ vì cài đặt tình cờ xong.
+
+**Kỳ vọng của phần viết.** Mọi chỗ nói về `action` trên card đều là m/s và rad/s, kể cả dòng bạn bịa. Câu README nằm trong ngoặc kép. Ảnh chụp docs có ngày. Nhật ký không có đường loss, không có đường checkpoint.
+
+**Các kiểu hỏng**
+
+| Bạn tạo ra | Nó có nghĩa là |
+| --- | --- |
+| Comment logger nói PWM, ghi chú policy nói radian | Lúc phát, policy bị áp lên robot khác với lúc ghi |
+| `fps` nhân số giây không bằng số ảnh | Cú quay bị kéo giãn. Né nhẹ thành giật, hoặc ngược lại |
+| Ghi teleop khi timeout 300 ms đã bị gỡ | Log là của một đế giữ lệnh cuối khi link chết. Firmware thật không làm vậy, và bạn đã lái khi thiếu tính chất an toàn |
+| Timeout vẫn còn, link đứng, log đầy số 0 đột ngột | Policy sẽ chép các lần dừng. Sửa link hoặc đánh dấu frame |
+| Một lệnh train, vì docs liệt kê train là bước ba | Tắt nó. Bài nộp là card và câu trích |
+
+## Phần cứng tùy chọn, không phải tuần này
+
+Bài này không mua gì. Cánh tay hạng SO-100 là kit nhập: khung in, servo, tay leader, camera. Cộng bộ servo và tiền ship, hạng kit đó ở Việt Nam thường nằm ở mức nhiều triệu đồng. Hãy đối lại listing thật vào tuần bạn định mua. Bài giảng không gắn link shop cho cánh tay, vì link cũ còn hại hơn không có link. Khóa học không bắt mua. Camera tùy chọn ở chương 11 là cảm biến thêm duy nhất bạn có thể đã có, và card không cần ảnh sống. Robot mà card mô tả là Capstone bạn đã dựng.
 
 ## Bài tập
 
