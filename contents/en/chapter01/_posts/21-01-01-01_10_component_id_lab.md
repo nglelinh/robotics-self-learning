@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Open any unlabeled parts bin and you will meet identical-looking black 3-pin `TO-92` packages that could be an NPN transistor (`2N2222`), a PNP transistor (`2N3906`), a 3.3 V regulator, or a Hall-effect sensor — and identical glass diodes that could be fast signal diodes (`1N4148`) or Zener voltage references. Guessing wastes boards; a 30-second multimeter test identifies them with certainty.
+
+This hands-on lab turns component identification into a fast, repeatable measurement protocol.r
+
+---
+
 This hour is a bench session. The earlier lessons handed you a color code, a diode band, and an electrolytic stripe one part at a time. Today those parts share one unpowered breadboard, and the grade is a table of numbers you measured. A photograph of a parts pile is not a measurement. A color code you did not check with the meter is a guess you will later solder into the cart.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will map which breadboard rows beep and which gap stays open, and you will p
 ## Prerequisites
 
 Lessons 02 through 05 are the background: breadboard rows, the meter, resistor codes, capacitors, diodes, and LEDs. You need continuity, ohms, and diode mode. You do not need the iron, and you do not need the TB6612 powered. If a part is missing, write the step and mark the row dry-run. Do not borrow a classmate's numbers.
+
+## Background Knowledge Map: Diode-Test Mode, Continuity Thresholds, and Lookalike Disambiguation
+
+Three measurement principles let you identify unknown parts without guessing:
+
+- **Diode-Test Mode Physics:** Unlike ohmmeter mode, diode mode forces a constant ~1 mA test current and displays the actual forward voltage drop $$V_f$$ directly in volts: $$\approx 0.6\text{–}0.7\text{ V}$$ for silicon PN junctions, $$\approx 0.2\text{–}0.35\text{ V}$$ for Schottky diodes, $$1.8\text{–}3.0\text{ V}$$ for LEDs, and `OL` (open loop) in reverse bias.
+- **BJT Dual-Diode Model:** An NPN transistor behaves in diode mode like two diodes sharing a common anode at the Base (`B→E` and `B→C` both read $$\approx 0.65\text{ V}$$, while `E↔C` reads `OL`). A PNP transistor has a common cathode at the Base (`E→B` and `C→B` read $$\approx 0.65\text{ V}$$).
+- **Tolerance & Verification Against Printed Markings:** Measuring passive components before soldering catches mislabeled bags and builds intuition for how real parts sit inside their $$\pm 1\%$$ or $$\pm 5\%$$ bands.r
+
+---
 
 ## Why it matters
 
@@ -107,6 +123,36 @@ The meter shows 1027 Ω. The row passes. A second part, coded 220 Ω, is still s
 A third part has five bands and was first written down as if it had four, producing 1000 Ω on paper and about 100 Ω on the meter. Recounting as three digits plus a multiplier removes the decade error. The part was never bad.
 
 On the diode, the banded end is the cathode, so the anode is the other lead. Red probe on the anode, black on the band, the display shows 0.62 V. Probes swapped, the display shows OL. On the red LED, red on the long lead shows 1.85 V and a faint glow, so that long lead is the anode today. Those two voltages in one table are how you prove the parts were not swapped: about 0.6 V is the diode, about 1.8 V is the red LED.
+
+## Deep-Dive Explanation (Read Slowly): Identifying an Unknown 3-Pin Transistor in 6 Probe Touches
+
+Suppose you pick up an unmarked `TO-92` transistor with pins labeled `1`, `2`, `3` from left to right. Walk through this systematic 4-step diode-mode test:
+
+1. **Find the Base pin:** Place the red probe on pin 1 and touch black to pins 2 and 3; repeat with red on pin 2, then red on pin 3. If one red-probe position produces $$\approx 0.65\text{ V}$$ to *both* other pins, that pin is the **Base** of an **NPN** transistor! (If no red position works, repeat holding the *black* probe fixed to find a **PNP** Base.)
+2. **Distinguish Emitter from Collector:** Between `B→E` and `B→C`, the emitter junction is more heavily doped, so $$V_{\text{BE}}$$ is consistently **5–15 mV higher** than $$V_{\text{BC}}$$.
+3. **Confirm no Collector–Emitter short:** Both `C→E` and `E→C` must read `OL` (if either reads `0.00 V`, the transistor is shorted and dead).
+4. **Verify continuity vs. low resistance:** Remember that a continuity beeper sounds for *anything* below $$\approx 30\text{–}50\,\Omega$$ — including a healthy $$10\,\Omega$$ motor winding! Always read the numeric ohm value.
+
+### Concrete Worked Example: Interpreting a Real Bench Diode-Mode Table
+
+You probe an unknown `TO-92` part and record the following 6 readings in diode mode:
+
+| Red Probe (+) | Black Probe (–) | Meter Reading | Interpretation |
+| --- | --- | --- | --- |
+| Pin 2 | Pin 1 | `0.688 V` | Forward PN junction (higher $$V_f \implies$$ Emitter) |
+| Pin 2 | Pin 3 | `0.679 V` | Forward PN junction (lower $$V_f \implies$$ Collector) |
+| Pin 1 | Pin 2 | `OL` | Reverse-biased junction |
+| Pin 3 | Pin 2 | `OL` | Reverse-biased junction |
+| Pin 1 | Pin 3 | `OL` | Open C–E channel (healthy) |
+| Pin 3 | Pin 1 | `OL` | Open E–C channel (healthy) |
+
+Conclusion: Pin 2 is **Base**, the transistor is **NPN**, Pin 1 is **Emitter** ($$0.688\text{ V} > 0.679\text{ V}$$), and Pin 3 is **Collector** — matching the standard `E-B-C` pinout of a `2N2222A`!
+
+**Common Pitfall:** Testing a MOSFET in diode mode after accidentally touching the gate pin with your fingers — static charge on the gate can latch the MOSFET ON so Drain-to-Source looks shorted (`0.00 V`). Short Gate to Source momentarily before retesting!
+
+**Quick Check:** A healthy silicon diode reads `0.62 V` one way and `OL` the other; a shorted diode reads `0.00 V` both ways; an open (blown) diode reads `OL` both ways.
+
+---
 
 ## Exercises
 

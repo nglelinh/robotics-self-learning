@@ -13,6 +13,31 @@ draft: false
 
 Thời lượng ước tính: **80–110 phút**. Đây là bài thực hành trực tiếp trên cơ khí; nguồn điện phải tắt hoàn toàn trong mọi bước kiểm tra.
 
+Thông số in trên nhãn hộp số giá rẻ mua online không phải lúc nào cũng khớp 100% với thực tế: một động cơ quảng cáo "hộp số 30:1" đôi khi thực chất là 29,86:1 hoặc 34:1, và độ rơ thực tế sau khi lắp lên khung có thể lớn gấp đôi thông số lý thuyết. **Bài lab đo tỉ số truyền và kiểm tra lắp ráp** rèn cho bạn thói quen quý giá của kỹ sư thực nghiệm: *đừng tin mù quáng vào nhãn bán hàng — hãy tự đo trực tiếp bằng thước, đánh dấu phấn và đồng hồ, rồi đưa con số đo thật vào cấu hình phần mềm!*
+
+## Bản đồ kiến thức nền: Phương pháp đo thực nghiệm cơ cấu truyền động
+
+### 1. Đo tỉ số truyền thực nghiệm (Phương pháp đếm nhiều vòng)
+Nếu chỉ quay trục vào 1 vòng để ước lượng góc trục ra bằng mắt, sai số đọc góc lên tới vài phần trăm. Kỹ thuật chuẩn là **đánh dấu vạch tham chiếu trên cả hai trục**, quay trục đầu vào đúng $$N_{\text{in}}$$ vòng lớn (ví dụ 10–20 vòng) cho đến khi trục ra quay đủ 1 hoặc nhiều vòng chẵn, từ đó tính $$G = N_{\text{in}} / N_{\text{out}}$$ với sai số nhỏ hơn $$0{,}5\%$$.
+
+### 2. Đo độ rơ góc (Backlash) bằng phương pháp tay đòn khuếch đại
+Đo trực tiếp góc rơ $$1^\circ$$ trên trục tròn đường kính $$6\text{ mm}$$ bằng mắt thường là bất khả thi. Thay vào đó, kẹp một thanh thước mảnh dài $$L = 100\text{ mm}$$ vào trục đầu ra, giữ cứng trục vào rồi lắc nhẹ đầu thanh thước qua lại đo khoảng dịch chuyển tuyến tính $$\Delta x$$ bằng thước cặp, sau đó đổi sang độ: $$\Delta\theta = \frac{\Delta x}{L} \cdot \frac{180^\circ}{\pi}$$.
+
+### 3. Kiểm tra kẹt cơ khí (Binding) theo chu kỳ quay $$360^\circ$$
+Quay tay trục bánh xe trọn một vòng $$360^\circ$$ (khi đã ngắt động cơ): nếu thấy nhẹ ở nửa vòng này nhưng đột nhiên nặng khựng ở nửa vòng kia, chắc chắn trục đang bị **lệch tâm (eccentricity)** hoặc bánh răng bị đảo — bắt buộc căn chỉnh lại trước khi cấp điện!
+
+### Khung giải thích: Cầm tay xử lý số liệu đo tỉ số truyền và góc rơ Backlash trong phòng lab (nên đọc chậm)
+
+**Phần A — Xác định tỉ số truyền thực của một hộp số không rõ nhãn:**
+Bạn đánh dấu vạch sơn trắng lên trục động cơ và trục bánh xe. Quay trục động cơ đúng **$$15$$ vòng trọn vẹn**, thấy vạch trên bánh xe quay đúng **$$1$$ vòng** trở về vị trí cũ:
+$$G_{\text{đo}} = \frac{N_{\text{in}}}{N_{\text{out}}} = \frac{15}{1} = 15{:}1.$$
+*(Nếu quay $$30$$ vòng trục vào mà trục ra quay được $$1$$ vòng + $$18^\circ = 1{,}05$$ vòng, thì $$G_{\text{đo}} = 30 / 1{,}05 \approx 28{,}57{:}1$$ — sai khác tới 5% so với con số "30:1" in trên nhãn!)*
+
+**Phần B — Đo độ rơ góc Backlash bằng thanh thước dài $$L = 100\text{ mm}$$:**
+Giữ chặt trục đầu vào, lắc nhẹ đầu thanh thước dài $$100\text{ mm}$$ gắn trên trục ra và đo được tổng biên độ lắc tự do **$$\Delta x = 2{,}0\text{ mm}$$**:
+$$\Delta\theta_{\text{rad}} = \frac{\Delta x}{L} = \frac{2{,}0}{100} = 0{,}020\text{ rad} \implies \Delta\theta_{\text{độ}} = 0{,}020 \times \frac{180^\circ}{\pi} \approx 1{,}15^\circ.$$
+Ghi ngay con số $$G = 15{:}1$$ và backlash $$1{,}15^\circ$$ vào sổ lab: đó là cơ sở định lượng để bạn biết odometry có thể lệch tối đa bao nhiêu mỗi lần xe đảo chiều!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn có một giá trị tỉ số truyền đã được dự đoán và đo kiểm thực tế, một ước lượng độ rơ (backlash) tại bánh xe theo độ, và một danh sách kiểm tra lắp ráp (checklist) hoàn chỉnh để thực hiện trước khi cấp điện ở Chương 07. Các bạn phân biệt rõ tác dụng của bánh trung gian đơn với tầng đổi tỉ số, đồng thời biết nhân tỉ số hộp giảm tốc với tỉ số bộ truyền đai ngoài (nếu có).

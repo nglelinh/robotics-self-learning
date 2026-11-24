@@ -13,6 +13,8 @@ draft: false
 
 This is the first powered spin: wheels in the air, one motor at a time, until positive PWM rolls both tires toward the nose.
 
+Never test a motor driver for the first time with the robot sitting on the floor—that is how prototypes leap off desks. Bringing up one channel at a time with wheels elevated, a low PWM duty cycle, and a multimeter in series turns driver commissioning into a calm, repeatable procedure that reveals deadband, spin direction, and stall limits safely.
+
 ## Learning objectives
 
 1. Bring the robot up on a box so both tires are clear of the table, and spin one motor at a time with PWM held to 60–80 counts out of 255.
@@ -24,6 +26,14 @@ This is the first powered spin: wheels in the air, one motor at a time, until po
 
 Lesson 07-01 left you a common ground, a fuse in the battery positive lead, and a buck at 5.0 V measured before the ESP32 was attached. Chapter 05 is the truth table: an H-bridge has a forward pair and a reverse pair, and both switches in one leg are a short. You can identify a TB6612 (STBY, PWMA, PWMB, AIN, BIN) or an L298N (ENA, ENB, INx, heatsink, 5 V jumper). Chapter 06 gave you $$b$$ and $$r$$, and it defined forward as the nose direction. A positive yaw in that chapter is the right wheel faster than the left, so the sign you discover today is the sign Chapter 08's PID and Chapter 09's topics will inherit. No ROS node is part of this lab.
 
+
+## Background Knowledge Map: PWM Average Voltage, Deadband Friction, and H-Bridge Control Logic
+
+Driver bring-up translates digital GPIO pins into controlled mechanical motion through three core concepts:
+
+- **PWM Duty Cycle & Effective Armature Voltage:** Switching a supply voltage $$V_{\text{bat}}$$ at frequency $$f_{\text{PWM}}$$ (typically 10–25 kHz, above human hearing) with duty ratio $$D \in [0,1]$$ delivers an average voltage $$V_{\text{eff}} = D \cdot V_{\text{bat}}$$. Because the motor winding has inductance $$L_a$$, current smooths out smoothly when $$f_{\text{PWM}} \gg R_a / (2\pi L_a)$$.
+- **Static Friction Deadband:** Below a minimum duty cycle $$D_{\text{min}}$$ (often 15%–30% on small gearmotors), motor torque $$\tau = K_t I$$ cannot overcome static gear and brush friction. Knowing $$D_{\text{min}}$$ prevents firmware from commanding unusable trickle PWM.
+- **H-Bridge Truth Table & Standby Enable:** An H-bridge uses two direction pins (`AIN1`, `AIN2`), a `PWMA` pin, and a global `STBY` (standby) pin. Setting `AIN1=1, AIN2=0` drives forward; `0, 1` drives reverse; `1, 1` engages active short-brake; `0, 0` coasts; and `STBY=0` puts all outputs into high-impedance safe shutoff.
 ## Why this matters for Capstone A and the ROS path
 
 A later `geometry_msgs/Twist` carries `linear.x` forward and `angular.z` as yaw. Those become a left command and a right command. If the right tire's positive is physically backward, every positive `linear.x` is a spin, and Chapter 08's PID will try to cancel a wiring error. Find the sign here, wheels in the air. Lesson 03 only names the two numbers. They are not meters per second.
@@ -55,6 +65,19 @@ With one tire in the air at PWM 70, a yellow TT motor often draws on the order o
 ![No-load current is the low end of the curve; stall is the high end]({{ site.imgurl }}/generated/stall_current.png)
 
 If you need a stall point, pinch the tire for one second, read the meter, and release. A seller stall of $$1.2~\mathrm{A}$$ at $$6~\mathrm{V}$$ is the order of magnitude, not a value to hold. At PWM 70 the stall current is lower than the full-voltage stall, and it still heats the winding and the tab. If the package smells, or you cannot touch the L298N tab or the TB6612, open the switch. The sentence for the next lesson: with your IN map, positive PWM rolls both tires forward, negative reverses them, and PWM 0 stops. That is the sign map.
+
+### Deep-Dive Explanation (Read Slowly): Predicting Motor Speed vs. PWM Duty and Deadband Voltage
+
+Suppose your 2S battery measures $$V_{\text{bat}} = 7.6\ \text{V}$$, your motor has armature resistance $$R_a = 4.5\ \Omega$$, torque/back-EMF constant $$K_e = K_t = 0.008\ \text{V}\cdot\text{s/rad}$$, and gearbox static friction torque reflected to the motor shaft is $$\tau_f = 0.0024\ \text{N}\cdot\text{m}$$.
+
+1. **Find the breakaway current and deadband duty cycle:** To just overcome static friction, the motor needs:
+   $$I_{\text{break}} = \frac{\tau_f}{K_t} = \frac{0.0024}{0.008} = 0.30\ \text{A}.$$
+   At zero speed (zero back-EMF), the required effective voltage is $$V_{\text{min}} = I_{\text{break}} R_a = 0.30 \times 4.5 = 1.35\ \text{V}$$, which corresponds to a minimum PWM duty cycle of:
+   $$D_{\text{min}} = \frac{1.35}{7.6} = 17.8\% \quad (\text{8-bit PWM} \approx 45 / 255).$$
+   Any command below 18% duty simply warms the motor winding without turning the wheel!
+2. **Predict no-load speed at 50% duty ($$V_{\text{eff}} = 3.80\ \text{V}$$):** Subtracting the resistive drop of no-load running current (say $$I_0 = 0.15\ \text{A}$$, drop $$0.675\ \text{V}$$), back-EMF is $$E_b = 3.80 - 0.675 = 3.125\ \text{V}$$, so motor shaft speed is:
+   $$\omega_m = \frac{E_b}{K_e} = \frac{3.125}{0.008} = 390.6\ \text{rad/s} \approx 3730\ \text{RPM}.$$
+   Comparing your bench tachometer or wheel-turn count against this simple model immediately flags binding gears or a half-dead driver channel.
 
 ## Lab
 

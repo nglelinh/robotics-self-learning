@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng ước tính: **~75 phút** khi camera USB nhận diện tại `/dev/video0`, hoặc khoảng 45 phút nếu máy chưa có camera và bạn hoàn thành phần thiết kế pipeline trên giấy.
 
+LiDAR 2D đo khoảng cách tường cực chuẩn nhưng lại hoàn toàn "mù màu" và "mù ngữ nghĩa": nó không phân biệt được đâu là một chiếc hộp các-tông cần nhặt, đâu là biển báo dừng, hay đâu là đôi chân của một người đang bước tới. Đưa **Camera (RGB / RGB-D)** vào đường ống ROS 2 bổ sung đôi mắt ngữ nghĩa cho robot — nhưng cũng đòi hỏi hiểu rõ hình học phép chiếu camera và ngân sách xử lý thời gian thực trên SBC.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Đường ống Thị giác Robot (ROS 2 Vision)
+
+1. **Mô hình Camera Lỗ kim (Pinhole Camera) & Hiệu chuẩn Nội tại (Intrinsic Matrix $$K$$)**:
+   Biến đổi điểm 3D $$(X, Y, Z)$$ trong hệ camera thành tọa độ pixel $$(u, v)$$ qua tiêu cự $$(f_x, f_y)$$, tâm ảnh $$(c_x, c_y)$$ và hệ số méo ống kính (distortion) — phát kèm trên topic `/camera/camera_info`.
+2. **Định vị Marker Tin cậy (AprilTag / ArUco) & Cầu nối `cv_bridge`**:
+   `cv_bridge` chuyển ảnh ROS 2 sang mảng NumPy/OpenCV; thuật toán AprilTag dùng kích thước vật lý đã biết của thẻ vuông để giải bài toán PnP (Perspective-n-Point), trả về trực tiếp tư thế 6-DoF $$(x, y, z, \text{roll}, \text{pitch}, \text{yaw})$$ gắn lên cây TF2!
+3. **Quản lý Băng thông & Tách tải Suy luận**:
+   Luôn nén ảnh khi truyền qua mạng (`image_transport`), giảm độ phân giải phù hợp bài toán (`640×480` hoặc `320×240`) và tách node chạy mô hình phát hiện vật thể (YOLO/ONNX) để không làm nghẽn vòng điều khiển động cơ.
+
 ## Mục tiêu học
 
 Sau bài học này, bạn sẽ xây dựng quy trình xử lý thị giác theo đúng thứ tự **ánh sáng → camera → thuật toán** (tránh chỉnh ngưỡng màu khi ánh sáng môi trường làm cháy sáng thẻ màu). Bạn nắm được kiểu dữ liệu `usb_cam` xuất bản, tính được tọa độ trọng tâm (centroid), giới hạn tần số ra quyết định ở mức 5–10 Hz thay vì gửi lệnh theo từng khung hình, phân biệt rõ hệ tọa độ quang học với `camera_link` theo chuẩn REP-103, và biết cách ghi nhận tình huống thiếu `/dev/video0` một cách trung thực.
@@ -110,6 +121,17 @@ centroid u=312 v=248 area=1840
 Giá trị cụ thể sẽ khác tùy vị trí: `u` tăng khi thẻ dịch sang phải, `area` tăng khi thẻ tiến lại gần. Nếu kết quả là `centroid none area=0`, hãy kiểm tra lại ánh sáng rồi mới chỉnh ngưỡng HSV. Nếu máy không có camera, dòng `error: cannot open /dev/video0` là kết quả ghi nhận hợp lệ — tuyệt đối không bịa số liệu trọng tâm.
 
 Khi chuyển thành node ROS về sau, timer sẽ quyết định ở tần số 5–10 Hz: nếu `area < 500` thì phát `Twist` bằng 0; nếu `u` nằm bên trái tâm thì đặt `angular.z` khoảng `0.3`; nếu nằm bên phải thì khoảng `-0.3`, rồi giữ nguyên lệnh tới chu kỳ kế tiếp.
+
+### Khung giải thích (nên đọc chậm): Tính tay khoảng cách tới một thẻ AprilTag bằng mô hình Camera Lỗ kim
+
+Giả sử bạn đã hiệu chuẩn camera và thu được tiêu cự ngang $$f_x = 600\text{ pixel}$$, tâm ảnh $$c_x = 320\text{ pixel}$$. Bạn đặt một thẻ **AprilTag cạnh vuông thực tế $$W = 0{,}10\text{ m}$$** (10 cm) đối diện thẳng góc với camera, và đo được trên ảnh thẻ chiếm bề rộng $$w_{\text{px}} = 75\text{ pixel}$$, tâm thẻ nằm ở cột pixel $$u = 380$$:
+
+1. **Tính độ sâu $$Z$$ (khoảng cách từ camera tới thẻ):**
+   $$Z = \frac{f_x \cdot W}{w_{\text{px}}} = \frac{600 \times 0{,}10}{75} = \mathbf{0{,}80\text{ m}}.$$
+2. **Tính độ lệch ngang $$X$$ của tâm thẻ so với trục quang camera:**
+   $$X = \frac{(u - c_x) \cdot Z}{f_x} = \frac{(380 - 320) \times 0{,}80}{600} = \frac{48}{600} = \mathbf{+0{,}08\text{ m}}$$ (lệch sang phải 8 cm!).
+
+Chỉ bằng hai phép chia hình học đồng dạng cực gọn của mô hình lỗ kim, một camera RGB bình thường (không cần cảm biến độ sâu đắt tiền) đã đo được chính xác tọa độ 3D của mục tiêu để dẫn robot tự động tiến vào trạm sạc!
 
 ## Lab
 

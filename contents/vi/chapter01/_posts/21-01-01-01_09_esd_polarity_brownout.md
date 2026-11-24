@@ -21,6 +21,39 @@ Sau bài học này, bạn sẽ hình thành thói quen chống tĩnh điện đ
 
 Bạn đã nắm rõ cách xác định cực tính tụ hóa (bài 04), tách biệt chân VM và VCC (bài 07) và tính toán cơ bản theo định luật Ohm. Hôm nay bạn chỉ đo đường nguồn USB — không quay bánh xe và chưa nối pin động cơ.
 
+---
+
+Ba "sát thủ thầm lặng" thường xuyên đánh gục các dự án robot sinh viên nhất không hề xuất hiện trong thông báo lỗi trình biên dịch: **phóng tĩnh điện (ESD)** đánh thủng cổng MOSFET mà không để lại vết cháy nào, **cắm ngược cực nguồn** phá hủy IC ổn áp trong tích tắc, và **sụt áp (brownout)** khiến ESP32 liên tục tự khởi động lại đúng khoảnh khắc hai bánh xe vừa quay! Bài này trang bị cho bạn bộ giáp điện tử để chặn đứng cả ba sát thủ ấy.
+
+## Bản đồ kiến thức nền: Bảo vệ Mạch Điện tử khỏi ESD, Ngược cực và Sụt áp
+
+1. **Phóng tĩnh điện (ESD — Electrostatic Discharge):** Khi bạn đi trên sàn nhựa hay kéo áo khoác len, cơ thể tích điện tới $$3.000\text{–}10.000\text{ V}$$! Tuy dòng ngắn nhưng điện trường cực lớn đủ đánh thủng lớp oxit cổng dày vài nanomet của chip CMOS — giải pháp đơn giản là luôn chạm tay vào khung kim loại tiếp đất trước khi cầm bo mạch và cầm vào mép PCB.
+2. **Bảo vệ Ngược cực (Reverse Polarity Protection):** Một diode Schottky nối tiếp (mất $$0.3\text{ V}$$), cầu chì + diode song song, hoặc mạch P-MOSFET chống ngược cực sẽ cứu toàn bộ bo mạch khi bạn vô tình đấu nhầm dây đỏ–đen.
+3. **Sụt áp (Brownout) & Tách đường Nguồn:** Khi động cơ DC khởi động, dòng tăng vọt gấp $$3\text{–}5\times$$ dòng chạy đều; theo định luật Ohm $$\Delta V = I \cdot R_{\text{dây+pin}}$$, điện áp đường nguồn lập tức sụt sâu. Nếu vi điều khiển dùng chung đường nguồn yếu đó và sụt xuống dưới ngưỡng **Brownout Detector** (~$$2.43\text{ V}$$ trên ESP32), chip sẽ tự reset lặp đi lặp lại (*boot loop*)!
+
+### Ví dụ cầm tay chỉ việc: Tính sụt áp gây Brownout Reset khi động cơ khởi động
+
+Giả sử xe dùng nguồn 5 V (hoặc pin 2S yếu) đi qua một sợi dây jumper mảnh dài + tiếp điểm breadboard có tổng điện trở $$R_{\text{đường}} = 0.5\ \Omega$$. Khi 2 động cơ cùng khởi động đột ngột, dòng đỉnh đạt $$I_{\text{đỉnh}} = 2.5\text{ A}$$:
+
+$$
+\Delta V_{\text{sụt}} = I_{\text{đỉnh}} \cdot R_{\text{đường}} = 2.5\text{ A} \times 0.5\ \Omega = \mathbf{1.25\text{ V}}!
+$$
+
+- Trên đường nguồn $$5.0\text{ V}$$ chung: điện áp tại chân `5V` của ESP32 tụt ngay xuống $$5.0 - 1.25 = \mathbf{3.75\text{ V}}$$.
+- Qua bộ ổn áp LDO AMS1117 (cần điện áp rơi tối thiểu $$V_{\text{dropout}} \approx 1.1\text{ V}$$): điện áp đầu ra đường 3,3 V tụt xuống chỉ còn $$3.75 - 1.1 = \mathbf{2.65\text{ V}}$$ (và chỉ cần thêm một gai nhiễu nhỏ $$0.25\text{ V}$$ là chạm ngưỡng brownout $$2.43\text{ V}$$ → **ESP32 lập tức reset!**).
+- **Cách khắc phục bằng con số:** thay dây động cơ bằng dây 20 AWG hàn chắc ($$R_{\text{đường}} \approx 0.05\ \Omega$$) và đi nhánh sao (*star topology*) tách riêng đường pin cấp cho động cơ khỏi nhánh Buck cấp cho ESP32 → độ sụt giảm **10 lần** xuống chỉ còn $$0.125\text{ V}$$!
+
+### Khung giải thích: 4 tuyến phòng thủ chống hỏng mạch trên xe robot (nên đọc chậm)
+
+1. **Bước 1 — Phòng ESD bằng thói quen cầm mép bo:** Luôn chạm tay vào vật kim loại lớn trước khi chạm vào ESP32/IMU; cất bo mạch trong túi chống tĩnh điện khi không dùng.
+2. **Bước 2 — Chống ngược cực bằng cơ khí trước, điện tử sau:** Dùng giắc có ngàm định hướng (JST/XT30) kết hợp màu dây chuẩn Đỏ/Đen để không thể cắm ngược ngay từ thao tác tay.
+3. **Bước 3 — Luôn đi nguồn hình sao (Star Power Distribution):** Tách hai nhánh dây riêng từ cực pin (sau công tắc & cầu chì): Nhánh 1 chạy thẳng tới Driver động cơ; Nhánh 2 chạy qua mạch Buck 5 V + tụ lọc tới ESP32.
+4. **Bước 4 — Đọc thông báo `Brownout detector was triggered` trên Serial Monitor:** Khi thấy dòng chữ này trên ESP32, **đừng** tắt bộ phát hiện brownout bằng phần mềm — hãy sửa ngay đường nguồn và dây dẫn!
+
+**Kiểm tra nhanh.** Nếu bạn thấy ESP32 chạy code nhấp LED bình thường khi cắm USB, nhưng cứ gửi lệnh cho động cơ quay ở tốc độ 100% là Serial Monitor in lại dòng khởi động `rst:0x1 (POWERON_RESET)` hoặc `Brownout detector was triggered`, lỗi nằm ở code hay ở phần cứng nguồn? **100% ở phần cứng nguồn** — dòng khởi động động cơ đang kéo tụt đường nguồn nuôi ESP32!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Xe Capstone gồm vi điều khiển 3,3 V (ESP32 hoặc Pico), một mạch lái TB6612, hai động cơ TT và một cảm biến HC-SR04. Khi vận hành thực tế, hiện tượng kẹt bánh (va chạm vướng vật cản hoặc bị giữ bánh) chắc chắn sẽ xảy ra. Nếu chân VM đang nối chung vào đường 5 V nuôi vi điều khiển, dòng kẹt sẽ kéo tụt đường 5 V, làm nguồn 3,3 V sụp theo và khiến chip tự reset giữa chừng — biểu hiện bên ngoài rất giống lỗi phần mềm. Một dạng lỗi âm thầm khác là đưa thẳng chân echo 5 V của HC-SR04 vào chân GPIO (đã cấm ở bài 07). Cả hai đều là lỗi phần cứng mà việc sửa mã nguồn không thể khắc phục; tách riêng nguồn động cơ và chỉ nối chung một điểm mass là nền tảng để hệ thống hoạt động ổn định và dễ chẩn đoán.

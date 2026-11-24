@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Whenever a machine needs open-loop precision down to hundredths of a millimeter — 3D printers, CNC routers, laser cutters, and lab pipetting arms — you will almost always find **stepper motors**. Instead of spinning freely when voltage is applied, a stepper rotates in discrete magnetic detents (typically 200 full steps per revolution, or $$1.8^\circ$$ per step), allowing a microcontroller to command exact position simply by counting `STEP` pulses.
+
+This lesson explains bipolar stepper physics, **microstepping** (sinusoidal current shaping), and why steppers trade low-speed precision for lower efficiency and missed-step risk compared to closed-loop DC encoder motors.r
+
+---
+
 A stepper motor moves in counted angles. You tell it how many steps to take, and you trust that it took them. This lesson covers the 1.8 degree hybrid motor, what microstepping actually smooths, how to set the coil current on an A4988-style board without guessing at the potentiometer, and why Capstone A's wheels stay with DC motors and encoders.
 
 ## Learning objectives
@@ -23,6 +29,16 @@ A stepper motor moves in counted angles. You tell it how many steps to take, and
 ## Prerequisites
 
 You can measure a small DC voltage, down near half a volt, with the meter black lead on ground. Ohm's law and the stall-current idea from the DC motor lesson transfer directly to "current in a coil." You do not need a stepper on the desk. A photo of an A4988 or DRV8825, plus the calculation, completes the lab. If you do have a bare NEMA17, you can count one revolution.
+
+## Background Knowledge Map: Electromagnetic Detents, Sinusoidal Microstepping, and Pull-Out Torque Curves
+
+Three physical ideas explain both the magic and the limits of stepper motors:
+
+- **Full Steps & Microstepping Geometry:** A standard NEMA-17 motor has 50 rotor teeth and 2 stator phases (A and B), giving $$200\text{ full steps/rev}$$ ($$1.8^\circ/\text{step}$$). A current-controlled driver (`A4988`, `TMC2209`) energizes phases sinusoidally — $$I_A = I_{\max}\cos\phi$$, $$I_B = I_{\max}\sin\phi$$ — subdividing each full step into $$M = 8, 16, \text{ or } 32$$ **microsteps** for silky-quiet motion.
+- **Holding Torque vs. Incremental Microstep Torque:** Microstepping smooths vibration dramatically, yet incremental torque per microstep shrinks approximately as $$\sin(\pi / (2M))$$ — meaning 1/16 microstepping delivers smooth motion but cannot overcome heavy static friction with a single microstep.
+- **Open-Loop Slip & High-Speed Torque Roll-Off:** Because coil inductance $$L$$ opposes rapid current reversals at high step rates, stepper torque drops steeply with RPM. If load torque exceeds pull-out torque, the rotor silently **misses steps** with no encoder to warn the firmware.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -119,6 +135,36 @@ A written $$V_{ref}$$ target for 1.0 A with the resistor value you assumed, and 
 | Motion is smoother than full step but weak under a finger | Microstepping is on. Torque was not multiplied. |
 | Position drifts only when loaded | Missed steps. Lower the speed, raise current only up to the motor rating, or add an encoder. |
 | Meter shows VM on the pot | The red probe is on the wrong contact. Move to the wiper and measure to GND. |
+
+## Deep-Dive Explanation (Read Slowly): Computing Step Rate, Linear Resolution, and Microstepping Phase Currents
+
+Let's calculate the exact step frequency and phase currents for a 1/16 microstepping NEMA-17 actuator in four steps:
+
+1. **Compute effective microsteps per revolution:** $$N_{\mu} = N_{\text{full}} \times M$$.
+2. **Convert target RPM to `STEP` pulse frequency:**
+   $$f_{\text{step}} = \frac{\text{RPM}}{60} \times N_{\mu}.$$
+3. **Compute linear resolution** (for a lead screw of pitch $$P$$ or pulley of diameter $$D$$):
+   $$\Delta x = \frac{\text{travel/rev}}{N_{\mu}}.$$
+4. **Verify sinusoidal coil currents at microstep $$k$$:** $$I_A = I_{\max}\cos\!\left(\frac{k\pi}{2M}\right)$$, $$I_B = I_{\max}\sin\!\left(\frac{k\pi}{2M}\right)$$, keeping total power $$I_A^2 + I_B^2 = I_{\max}^2$$ constant!
+
+### Concrete Worked Example: NEMA-17 with 1/16 Microstepping Driving a 60 mm Wheel at 120 RPM
+
+Parameters: $$N_{\text{full}} = 200$$ steps/rev, microstepping $$M = 16$$, phase peak current $$I_{\max} = 1.00\text{ A}$$, wheel diameter $$D = 60\text{ mm}$$ (circumference $$\pi \times 60 = 188.5\text{ mm}$$):
+
+- **Step 1 — Microsteps per revolution and linear step size:**
+  $$N_{\mu} = 200 \times 16 = 3\,200\text{ microsteps/rev}.$$
+  $$\Delta x = \frac{188.5\text{ mm}}{3\,200} \approx 0.0589\text{ mm/microstep}.$$
+- **Step 2 — Required `STEP` pulse rate for 120 RPM (2 rev/s):**
+  $$f_{\text{step}} = 2\text{ rev/s} \times 3\,200 = 6\,400\text{ Hz}\;\; (\text{one pulse every } 156.25\,\mu\text{s}).$$
+- **Step 3 — Coil currents at microstep $$k = 4$$ (one quarter of a full step, $$\phi = 4\pi/32 = 22.5^\circ$$):**
+  $$I_A = 1.00 \cos(22.5^\circ) \approx 0.924\text{ A}, \qquad I_B = 1.00 \sin(22.5^\circ) \approx 0.383\text{ A}.$$
+  Check constant-power identity: $$0.924^2 + 0.383^2 = 0.854 + 0.147 \approx 1.00 = I_{\max}^2$$!
+
+**Common Pitfall:** Unplugging a stepper motor's 4-pin cable *while the driver is powered ON* — breaking an energized inductive coil generates an instant high-voltage flyback spike that destroys `A4988`/`TMC2209` output MOSFETs. Always power off before touching stepper cables!
+
+**Quick Check:** Why do mobile battery robots usually prefer DC gearmotors with encoders over NEMA-17 steppers? Because steppers draw near-full holding current *even while standing completely still*, draining a 2S battery 3×–5× faster than a DC motor idling at 0 A!
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

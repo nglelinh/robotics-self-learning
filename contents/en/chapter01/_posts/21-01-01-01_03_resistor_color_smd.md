@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In 1920s radio factories, tiny cylindrical resistors had no room for printed text, so engineers invented a color-coded language that could be read from any angle even after a part was soldered onto a chassis. Nearly a century later, through-hole color bands and microscopic 3-digit SMD markings still sit on every robot PCB and pull-up network — and misreading a single multiplier band (picking $$100\text{ k}\Omega$$ instead of $$10\text{ k}\Omega$$, or $$10\,\Omega$$ instead of $$1\text{ k}\Omega$$) can silently break an I2C bus or burn out an LED.
+
+This lesson makes resistor decoding second nature and connects tolerance bands to real circuit margins.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you will be able to read a four-band resistor as digit, digit, multiplier, and tolerance, and compute the window the tolerance allows. You will decode brown-black-red-gold as 1 kΩ ±5% and brown-blue-orange-gold as 16 kΩ ±5% without looking up the arithmetic a second time. You will recognize a five-band part as three digits plus a multiplier, read a three-digit SMD code such as 103 or 472, and treat an R in a code such as R22 as a decimal point. You will confirm a decoded value with an unpowered meter and know when probe resistance, not the part, is what you are seeing.
@@ -18,6 +24,16 @@ By the end of this lesson you will be able to read a four-band resistor as digit
 ## Prerequisites
 
 You need Ohm's law from the first lesson, especially $I = V/R$ and the reason a status LED uses about 180 Ω rather than whatever cylinder was nearest the iron. You need the meter's ohms habit from the previous lesson: unpowered part, red lead in the voltage/ohms jack, not the current jack. No SMD soldering is required. If your kit is all through-hole, the SMD section is still worth reading, because the same codes are printed on the small parts already soldered to an ESP32 board and a TB6612 module.
+
+## Background Knowledge Map: Scientific Notation Encoding, E-Series Values, and Tolerance Propagation
+
+Behind resistor markings lies an elegant engineering numbering system:
+
+- **Positional Scientific Notation:** Both 4-band/5-band color codes and 3-digit/4-digit SMD codes encode $$R = (\text{mantissa}) \times 10^{\text{exponent}}$$. The final digit or band is always the power of 10 (number of trailing zeros), while `R` in SMD codes (`4R7`, `0R1`) acts as the decimal point.
+- **Logarithmic E-Series (E12, E24, E96):** Rather than manufacturing every integer ohm, industry spaces standard values geometrically (approximately $$10^{k/12}$$ for E12: `10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82`) so adjacent values overlap their tolerance windows with minimal inventory.
+- **Tolerance & Worst-Case Circuit Analysis:** A $$\pm 5\%$$ (gold) or $$\pm 1\%$$ (brown) tolerance means a nominal $$10\text{ k}\Omega$$ part can legally sit anywhere in $$[9.5\text{ k}\Omega, 10.5\text{ k}\Omega]$$ or $$[9.9\text{ k}\Omega, 10.1\text{ k}\Omega]$$. In precision battery voltage dividers for ADC sensing, 1% resistors keep state-of-charge errors small.r
+
+---
 
 ## Why this matters on the diff-drive robot
 
@@ -108,6 +124,38 @@ You should see meter readings inside the tolerance window for intact, correctly 
 | Continuity is silent on a 220 Ω part | Continuity is not the ohms range | Switch to Ω. Silence here is expected. |
 
 Safety: never measure ohms on a powered rail, a battery, or the VM pin of a motor driver. A 2S pack is not a resistor. Keep the red lead out of the current jack so a later voltage check on the 3.3 V pin is not a short.
+
+## Deep-Dive Explanation (Read Slowly): Decoding Both Color Bands and SMD Codes — Plus Worst-Case Divider Drift
+
+Follow this 4-step decoding habit (and always confirm with your multimeter when bands look ambiguous):
+
+1. **Locate the tolerance band first:** Usually gold ($$\pm 5\%$$) or brown ($$\pm 1\%$$) slightly separated on the right end.
+2. **Read significant digits left-to-right:** 2 digits for 4-band, 3 digits for 5-band.
+3. **Apply the multiplier $$10^m$$:** Black=0, Brown=1, Red=2, Orange=3, Yellow=4, Green=5, Blue=6.
+4. **Compute worst-case bounds:** Multiply by $$(1 \pm \text{tol})$$ to verify your circuit still meets voltage or current limits at the extremes.
+
+### Concrete Worked Example: Decoding Three Parts and Computing Worst-Case ADC Voltage Error
+
+- **Part 1 (4-band: Brown–Black–Red–Gold):**
+  Digits `1`, `0`; multiplier $$10^2$$; tolerance $$\pm 5\%$$:
+  $$R = 10 \times 10^2 = 1\,000\,\Omega = 1\text{ k}\Omega \;\; (\text{range: } 950\,\Omega \text{ to } 1\,050\,\Omega).$$
+- **Part 2 (5-band: Yellow–Violet–Black–Brown–Brown):**
+  Digits `4`, `7`, `0`; multiplier $$10^1$$; tolerance $$\pm 1\%$$:
+  $$R = 470 \times 10^1 = 4\,700\,\Omega = 4.7\text{ k}\Omega \;\; (\text{range: } 4\,653\,\Omega \text{ to } 4\,747\,\Omega).$$
+- **Part 3 (SMD codes `103`, `472`, `4R7`):**
+  - `103` $$= 10 \times 10^3 = 10\text{ k}\Omega$$.
+  - `472` $$= 47 \times 10^2 = 4.7\text{ k}\Omega$$.
+  - `4R7` $$= 4.7\,\Omega$$.
+- **Worst-case check on a 2:1 battery divider ($$R_1 = R_2 = 10\text{ k}\Omega \pm 5\%$$, $$V_{\text{bat}} = 8.00\text{ V}$$):**
+  Nominal $$V_{\text{adc}} = 4.00\text{ V}$$. Worst-case high occurs when $$R_1$$ is $$-5\%$$ ($$9.5\text{ k}\Omega$$) and $$R_2$$ is $$+5\%$$ ($$10.5\text{ k}\Omega$$):
+  $$V_{\text{adc,max}} = 8.00 \times \frac{10.5}{9.5 + 10.5} = 8.00 \times 0.525 = 4.20\text{ V} \quad (+5\% \text{ error!}).$$
+  Switching to $$\pm 1\%$$ resistors narrows that worst-case error to $$\pm 1\%$$ ($$4.04\text{ V}$$).
+
+**Common Pitfall:** Reading a 5-band resistor backward (e.g., mistaking Brown–Black–Black–Red–Brown `10 kΩ 1%` for Brown–Red–Black–Black–Brown `120 Ω 1%`). When in doubt, spend 3 seconds measuring it with an ohmmeter.
+
+**Quick Check:** What does SMD code `000` or `0` mean? It is a **0 Ω jumper resistor** used as a bridge or configuration link on PCBs.
+
+---
 
 ## Exercises
 

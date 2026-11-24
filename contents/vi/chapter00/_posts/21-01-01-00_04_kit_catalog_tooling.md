@@ -21,6 +21,41 @@ Sau bài học này, bạn sẽ **nêu** được công dụng của từng dụ
 
 Bạn đã hoàn thiện thẻ quy trình cấp nguồn từ bài 00-03 (ít nhất trên giấy), nắm rõ nguồn động cơ VM tách biệt với chân 3,3 V và mỏ hàn luôn đi kèm giá đỡ cùng kính bảo hộ. Chương 01 sẽ bắt đầu các bài đo thực tế bằng que đo; hôm nay bạn cần biết dụng cụ nào giải quyết câu hỏi nào để tránh gián đoạn giữa chừng.
 
+---
+
+Lập trình trên màn hình máy tính cho phép bạn đặt điểm dừng (breakpoint) để nhìn thấy mọi biến số. Nhưng khi mạch robot trên bàn không chạy, dòng điện vô hình và điện áp không hề phát sáng — **dụng cụ bàn lab** chính là "đôi mắt và đôi tay" giúp bạn nhìn thấy thế giới vật lý! Hiểu đúng chức năng và giới hạn đo của đồng hồ vạn năng, mỏ hàn, kìm tuốt dây và thước kẹp giúp bạn bắt bệnh phần cứng trong 2 phút thay vì đoán mò suốt buổi tối.
+
+## Bản đồ kiến thức nền: Bốn nhóm dụng cụ cốt lõi trên bàn lab Robotics
+
+1. **Nhóm Đo lường (Đồng hồ vạn năng, Thước kẹp):** Biến các đại lượng ẩn (điện áp, thông mạch, điện trở, dòng điện, kích thước cơ khí) thành con số định lượng có sai số xác định.
+2. **Nhóm Lắp ráp Điện (Breadboard, Mỏ hàn nhiệt độ ổn định, Dây jumper):** Tạo kết nối điện chắc chắn với điện trở tiếp xúc thấp — tách bạch giai đoạn thử nghiệm nhanh (breadboard) với giai đoạn chịu rung động trên xe chạy thật (hàn/cosse).
+3. **Nhóm Gia công Cơ khí & An toàn (Kìm cắt, Kìm tuốt dây, Kính bảo hộ, Đế gá PCB):** Giữ linh kiện cố định, cắt chân dây không bắn vào mắt và đảm bảo khoảng hở lắp đặt chính xác cho trục bánh xe và cảm biến.
+
+### Ví dụ cầm tay chỉ việc: Kiểm định sai số linh kiện bằng đồng hồ vạn năng
+
+Trước khi tin vào dụng cụ hay linh kiện mới mua, hãy kiểm tra dung sai bằng phép tính cụ thể:
+- **Kiểm tra điện trở $$1\text{ k}\Omega$$ dung sai $$\pm 5\%$$ (vạch vàng kim):**
+  $$
+  R_{\min} = 1{,}000 \times (1 - 0.05) = \mathbf{950\ \Omega}, \qquad R_{\max} = 1{,}000 \times (1 + 0.05) = \mathbf{1{,}050\ \Omega}.
+  $$
+  Nếu đồng hồ đọc $$982\ \Omega$$ → linh kiện đạt chuẩn! Nếu đồng hồ đọc $$10.2\text{ k}\Omega$$ → bạn đã lấy nhầm sang điện trở $$10\text{ k}\Omega$$!
+- **Kiểm tra đường nguồn $$5.0\text{ V}$$ cấp cho cảm biến (dung sai cho phép $$\pm 5\%$$):**
+  $$
+  V_{\min} = 5.0 \times 0.95 = \mathbf{4.75\text{ V}}, \qquad V_{\max} = 5.0 \times 1.05 = \mathbf{5.25\text{ V}}.
+  $$
+  Nếu đo lúc không tải được $$5.02\text{ V}$$ nhưng vừa chạy động cơ tụt xuống $$4.40\text{ V}$$ → nguồn bị sụt áp, cần kiểm tra pin hoặc mạch hạ áp!
+
+### Khung giải thích: Quy tắc 4 bước quản lý dụng cụ giúp giảm 80% lỗi vặt (nên đọc chậm)
+
+1. **Bước 1 — Luôn kiểm tra que đo đồng hồ trước khi đo:** Chập hai đầu que đo ở thang Ohm; nếu hiển thị $$0.2\text{–}0.5\ \Omega$$ là dây tốt, nếu nhảy số loạn xạ thì chính dây đo đã đứt ngầm.
+2. **Bước 2 — Để đồng hồ ở thang DC V (20 V) sau khi dùng xong:** Không bao giờ bỏ quên que đỏ ở lỗ đo dòng 10 A — lần sau đo điện áp pin sẽ gây ngắn mạch tức thì!
+3. **Bước 3 — Dùng đúng tiết diện dây cho đúng dòng:** Dây jumper mảnh (26–28 AWG) chỉ dùng cho tín hiệu logic (vài mA); dây cấp nguồn động cơ (1–3 A) phải dùng dây 20–22 AWG để tránh sụt áp và nóng chảy vỏ.
+4. **Bước 4 — Đầu tư trước cho dụng cụ đo và hàn cơ bản:** Một chiếc đồng hồ vạn năng chính xác và mỏ hàn chỉnh nhiệt tốt phục vụ bạn suốt nhiều năm, đáng giá hơn nhiều so với việc mua sớm cảm biến đắt tiền.
+
+**Kiểm tra nhanh.** Một bộ mạch hạ áp buck được chỉnh về $$5.00\text{ V}$$ bằng tua-vít, đồng hồ vạn năng có độ chính xác $$\pm 1\%$$ đọc ra $$5.03\text{ V}$$. Điện áp thật nằm trong khoảng nào? Sai số đo là $$\pm 0.05\text{ V}$$, nên điện áp thật nằm trong $$[4.98\text{ V},\ 5.08\text{ V}]$$ — hoàn toàn an toàn cho mọi cảm biến 5 V!
+
+---
+
 ## Vì sao bài này gắn liền với Capstone
 
 Bài nghiệm thu Chương 07 thường gặp những lỗi phần cứng rất cơ bản: một sợi dây cắm trông có vẻ chắc chắn nhưng bị đứt lõi bên trong đầu bấm, một phép đo mass thực hiện nhầm ở thang ohm trên mạch đang cấp điện, hay dây động cơ cắm trực tiếp vào lò xo của breadboard. Những sự cố này dễ bị nhầm thành lỗi firmware và kéo bạn đi tìm lỗi ở tầng phần mềm hay ROS 2, trong khi công cụ gỡ lỗi thực sự chỉ là một tiếng bíp thông mạch. Danh mục dụng cụ trong bài giúp bạn tách bạch "lỗi timeout PWM" với "lỗi dây dẫn" trước khi hệ thống trở nên phức tạp hơn.

@@ -11,6 +11,10 @@ lesson_type: required
 draft: false
 ---
 
+Sensors are only trustworthy after they have been **calibrated, sign-checked, and logged**. In Chapter 04 you wired buses, encoders, an IMU, and range sensors. This sign-off checklist validates every sensor stream quantitatively — ensuring right-handed coordinate frames, accurate scale factors, and healthy sample rates before Chapter 05 closes the feedback loop onto motors.r
+
+---
+
 Estimated time: **50–70 minutes**. This is a sign-off, not a new sensor. You pass when `lab-notes.md` holds the evidence below. A memory of having “basically done the lab” does not open Chapter 05.
 
 ## Learning objectives
@@ -20,6 +24,16 @@ You will judge your own Chapter 04 notes against pass/fail measurements: an I2C 
 ## Prerequisites
 
 Lessons 04-01 through 04-06 are the work being signed. You need your `lab-notes.md`, the ID sheet from Lesson 04-02, and the numbers those lessons already computed: $$N$$ and $$r = 0.0325~\mathrm{m}$$ if you used the teaching wheel, the complementary step that lands on 9.889 degrees, the echo of 5.8 ms that is 99.5 cm, the divider at 3.33 V, and the 147 Mbit/s camera budget. Chapter 05 starts motors and H-bridges. It assumes this page is already honest, because a 5 V echo on a GPIO will still be a 5 V echo after a motor driver is wired beside it.
+
+## Background Knowledge Map: Right-Handed Coordinate Frames (REP-103), Calibration, and Multi-Sensor Synchronization
+
+Three robotics standards make Chapter 04 sensor data seamlessly compatible with both Capstone A and ROS 2:
+
+- **ROS REP-103 Right-Handed Frame Convention:** `+X` forward, `+Y` left, `+Z` up; positive yaw `ω_z` rotates **counter-clockwise** (left turn). Checking sign conventions now prevents inverted steering bugs in Chapter 05 and SLAM.
+- **Scale & Bias Calibration:** Rolling the robot straight along a 1.00 m tape measure calibrates effective wheel circumference `m_per_count`; rotating 360° in place calibrates effective track width `L_eff` (accounting for tire scrub!); holding still calibrates IMU gyro bias.
+- **Health & Rate Verification:** Confirming actual achieved publish/log rates (e.g., encoders at 100 Hz, IMU at 100 Hz, ToF at 20–30 Hz) with zero `NaN` or stuck readings completes sensor readiness.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -129,6 +143,31 @@ A classmate finds an address, an $$N$$, a g-vector or a waiver, a range table or
 | Waiver with no 9.889 and no 30 deg | The IMU row is empty |
 | Dry-run with no 3.33 V | The divider was skipped on paper too |
 | Camera sentence with no bit rate | The row fails |
+
+## Deep-Dive Explanation (Read Slowly): Calibrating Wheel Radius and Track Width with a 1-Meter Tape Measure
+
+Even caliper-measured wheel diameters differ slightly from effective rolling diameters under chassis weight and tire compression. Calibrate your robot's true kinematic constants in four exact steps:
+
+1. **Linear calibration (1.000 m straight push):** Push the robot straight along a ruler for exact distance $$D_{\text{true}} = 1.000\text{ m}$$ and record average encoder counts $$\bar{c} = (c_L + c_R)/2$$.
+2. **Compute calibrated meters-per-count:** $$m_{\text{cal}} = D_{\text{true}} / \bar{c}$$.
+3. **Angular calibration (exact $$360^\circ = 2\pi\text{ rad}$$ spin):** Rotate the robot in place one full turn ($$2\pi$$ rad) and record $$\Delta s_R - \Delta s_L = (c_R - c_L)\,m_{\text{cal}}$$.
+4. **Compute effective track width:** $$L_{\text{eff}} = \frac{\Delta s_R - \Delta s_L}{2\pi}$$.
+
+### Concrete Worked Example: Empirical Odometry Calibration on a Desk Robot
+
+- **Step 1 — Straight 1.000 m roll:** Encoders record $$c_L = 4\,910$$ and $$c_R = 4\,890$$ counts ($$\bar{c} = 4\,900$$):
+  $$m_{\text{cal}} = \frac{1.000\text{ m}}{4\,900\text{ counts}} = 0.00020408\text{ m/count}.$$
+  (If caliper prediction had been $$0.0002000\text{ m/count}$$, this single 10-second calibration eliminates a **2.0%** distance error!)
+- **Step 2 — Exact $$360^\circ$$ counter-clockwise spin in place:** Encoders record $$c_R = +2\,540$$ and $$c_L = -2\,520$$:
+  $$\Delta s_R - \Delta s_L = (2540 - (-2520)) \times 0.00020408 = 5\,060 \times 0.00020408 = 1.0326\text{ m}.$$
+  $$L_{\text{eff}} = \frac{1.0326}{2\pi} = \frac{1.0326}{6.2832} \approx 0.1643\text{ m} \;\; (164.3\text{ mm}).$$
+  Notice $$L_{\text{eff}} = 164.3\text{ mm}$$ is slightly wider than the caliper-measured `160 mm` because wide rubber tires scrub during pivots — using $$L_{\text{eff}}$$ makes turning accuracy dramatically sharper!
+
+**Common Pitfall:** Calibrating only one wheel and assuming left and right motors/tires are identical — a 1% tire-diameter mismatch causes a robot driving "straight" to drift into a slow curve unless you compare `c_L` vs. `c_R` separately.
+
+**Quick Check:** Turn the robot $$90^\circ$$ left (counter-clockwise) by hand: right encoder should increase (`+`), left encoder should decrease (`-`), and IMU `gyro_z` should spike **positive** (`+`). If `gyro_z` goes negative, negate it in software so all sensors share one right-handed frame!
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

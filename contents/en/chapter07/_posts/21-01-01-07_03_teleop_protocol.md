@@ -13,6 +13,8 @@ draft: false
 
 Lesson 02 defined what a positive number does to each tire. This lesson names the bytes. The firmware loop is lesson 04.
 
+Imagine driving a robot across a room over USB serial when a loose cable drops half a line of text—turning `V 20 20` into `V 200` and sending the chassis straight into a wall. A teleoperation protocol is not just a print format; it is a **safety contract** that defines framing, bounds, sign conventions, and what the robot must do the instant the operator goes silent.
+
 ## Learning objectives
 
 1. Specify a UTF-8, newline-terminated text protocol at 115200 8N1: `V <left> <right>` with integer wheel commands, and `S` as an emergency stop.
@@ -30,6 +32,14 @@ $$
 
 with $$b$$ the track you measured (example $$b = 0.15~\mathrm{m}$$, $$r = 31.2~\mathrm{mm}$$). You can open a serial monitor. Lesson 04 writes the parser. You are not publishing ROS topics.
 
+
+## Background Knowledge Map: Serial Framing, Deterministic Parsing, and Fail-Safe Watchdogs
+
+Designing a clean host-to-MCU command protocol draws on three pillars of embedded communications:
+
+- **Packet Framing & Delimiters:** UART delivers an unstructured byte stream, not discrete messages. Adding a clear frame boundary (newline-terminated ASCII lines like `L,R\n` or binary start-byte + length + checksum) lets the parser resynchronize cleanly after a corrupted or truncated packet.
+- **Range Clamping & Sign Conventions:** Never trust incoming bytes blindly. Clamping every parsed command to a known safe envelope (e.g., $$[-100, +100]$$) and locking a single sign convention (positive = forward on *both* wheels, matching REP-103) prevents runaway PWM and inverted turns.
+- **Command Deadlines (Watchdog Timeout):** In real-time control, silence is a fault, not "keep doing the last thing." Every valid packet resets a timestamp `last_cmd_ms`; if $$t_{\text{now}} - t_{\text{last}} > T_{\text{timeout}}$$ (typically 250–500 ms), firmware forces both motors to zero.
 ## Why this matters for Capstone A and the ROS path
 
 Teleop is the first closed conversation with the two motors. Text is the conversation you can read in a serial monitor; binary can wait until the line is boring and correct. Later the same idea is a `geometry_msgs/Twist`: `linear.x` is forward speed, `angular.z` is yaw rate, and a driver splits them with the equations above. In this chapter the integers are PWM counts, not m/s. Chapter 08 calibrates. Writing "`V 80 80` means $$0.2~\mathrm{m/s}$$" is a false calibration.
@@ -89,6 +99,19 @@ v = \frac{0.20+0.20}{2} = 0.20~\mathrm{m/s}, \qquad \omega = 0,
 $$
 
 the arithmetic is tidy and the physics is invented. Chapter 08 may time a measured meter and only then claim a speed. Until then, `V 80 80` means forward on the sign map, at 80 counts.
+
+### Deep-Dive Explanation (Read Slowly): Serial Bandwidth, Frame Time, and Watchdog Margin Budget
+
+Can a 115,200 baud UART comfortably carry a 50 Hz teleop loop with telemetry replies? Let us calculate the exact timing budget by hand:
+
+1. **Byte transmission time at 115,200 baud (8N1 = 10 bits/byte):**
+   $$t_{\text{byte}} = \frac{10\ \text{bits}}{115\,200\ \text{bits/s}} = 86.8\ \mu\text{s/byte}.$$
+2. **Command frame airtime:** A compact ASCII command like `V,+045,-030\n` is 12 bytes long, taking:
+   $$t_{\text{frame}} = 12 \times 86.8\ \mu\text{s} = 1.04\ \text{ms}.$$
+   At 50 Hz (one frame every $$20\ \text{ms}$$), commands consume only $$1.04 / 20 = 5.2\%$$ of the serial link bandwidth—leaving plenty of headroom for status telemetry.
+3. **Choosing the watchdog timeout:** If the host sends at $$20\ \text{ms}$$ intervals and USB-serial buffering can introduce up to $$40\ \text{ms}$$ of jitter, a timeout of $$T_{\text{timeout}} = 300\ \text{ms}$$ tolerates 14 dropped frames before tripping, yet stops a $$0.30\ \text{m/s}$$ robot within:
+   $$d_{\text{stop}} = v \cdot T_{\text{timeout}} = 0.30 \times 0.30 = 0.09\ \text{m} = 9\ \text{cm}$$
+   if the host crashes or the cable is pulled.
 
 ## Lab
 

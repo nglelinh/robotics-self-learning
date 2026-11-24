@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **80–100 minutes**, including a cardboard four-bar or a tooth count on a GT2 pulley if you have one.
 
+Wheels are not the only way robots move parts through space. Open a 3D printer, a robotic gripper, or a walking mechanism and you will immediately meet four-bar linkages, synchronous timing belts, rack-and-pinion rails, and cam followers—each turning a rotary motor into a precisely shaped path without heavy, expensive gearboxes.
+
 ## Learning objectives
 
 By the end of this lesson you can test a four-bar against Grashof’s condition and recognize a crank-rocker, compute a toothed-belt ratio from pulley teeth, and turn a pinion pitch diameter into rack travel per revolution. You can describe a cam rise and a dwell, and you can write down the extra encoder-to-wheel ratio a belt would insert before ROS ever sees the joint.
@@ -21,6 +23,14 @@ By the end of this lesson you can test a four-bar against Grashof’s condition 
 
 You can form a gear ratio $$i = N_{\text{out}}/N_{\text{in}}$$ (Lesson 03) and you know track width $$b$$ from Lesson 01. Cardboard, four brads, and a ruler are enough hardware. A GT2 pulley is optional.
 
+
+## Background Knowledge Map: Planar Mechanisms, Mobility Analysis, and Synchronous Transmission
+
+Designing non-wheel mechanisms rests on three foundational pillars of kinematics of machinery:
+
+- **Planar Mobility (Grübler–Kutzbach Criterion):** A planar linkage with $$N$$ links (including the fixed ground frame), $$J_1$$ one-DOF joints (revolute pins or prismatic sliders), and $$J_2$$ two-DOF joints (cams/gears) has mobility $$M = 3(N-1) - 2J_1 - J_2$$. A standard four-bar linkage ($$N=4, J_1=4, J_2=0$$) has $$M = 3(3) - 8 = 1$$: a single motor uniquely determines the entire mechanism's pose.
+- **Grashof's Law for Four-Bar Linkages:** Ordering the four link lengths from shortest $$s$$ to longest $$l$$ with intermediates $$p, q$$, at least one link can make a full $$360^\circ$$ rotation if and only if $$s + l \le p + q$$. Violating this turns a crank-rocker into a double-rocker that jams if driven by a continuous-rotation motor.
+- **Synchronous Belts & Rack-and-Pinion Geometry:** Toothed timing belts (e.g., GT2 with pitch $$p = 2\ \text{mm}$$) eliminate slip by meshing pulley teeth with belt teeth, yielding exact linear travel $$\Delta x = N_{\text{teeth}} \cdot p$$ per revolution—the exact same kinematic relation as a rack-and-pinion.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A’s drive is two geared wheels, not a linkage. The mechanisms in this lesson still decide whether you understand the joints you will describe later. In ROS a joint is a name, a type, and a pair of limits. A four-bar that can only rock must be given those limits or the controller will command a pose the cardboard already proved impossible. A GT2 belt between a motor and a wheel multiplies the gearbox ratio from Lesson 03. Forget the belt and the same tick count means the wrong wheel angle, so odometry scale drifts exactly as it did when $$i$$ was inverted. Cams show up in limit hardware and in some grippers. You do not need a cam to finish Capstone A. You do need the habit of writing every ratio between encoder and floor.
@@ -80,6 +90,19 @@ $$
 Half a turn is about 18.8 mm. If your drawing’s pinion is the outside diameter and the pitch diameter is smaller, the travel shrinks with it. Use the pitch diameter, and say which diameter you measured.
 
 Belt, for the notes: a 20-tooth motor pulley and a 60-tooth wheel pulley give $$i = 3$$, same structure as the 12-into-36 gear pair. Three motor turns, one wheel turn, plus the gearbox that sits in front of the motor pulley.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Checking Grashof's Condition and GT2 Belt Resolution
+
+Before cutting brackets or ordering pulleys, verify both mechanism feasibility and linear resolution with five lines of arithmetic:
+
+1. **Test a four-bar gripper linkage with Grashof's law:** Suppose ground $$L_1 = 60\ \text{mm}$$, input crank $$L_2 = 20\ \text{mm}$$, coupler $$L_3 = 55\ \text{mm}$$, and output rocker $$L_4 = 45\ \text{mm}$$.
+   - Shortest $$s = 20$$, longest $$l = 60$$, remaining $$p = 45,\ q = 55$$.
+   - Compare sums: $$s + l = 20 + 60 = 80 \le p + q = 45 + 55 = 100$$.
+   - Because $$s + l < p + q$$ and the shortest link is the input crank, it is a valid **crank-rocker**: the motor can spin continuously $$360^\circ$$ without ever locking up.
+2. **Compute GT2 timing-belt linear travel and stepper resolution:** Suppose a 20-tooth GT2 pulley (pitch $$p = 2\ \text{mm}$$) is mounted on a 200-step/rev motor running at $$16\times$$ microstepping ($$3200\ \text{microsteps/rev}$$):
+   - Linear travel per full revolution: $$\Delta x_{\text{rev}} = 20 \times 2\ \text{mm} = 40\ \text{mm/rev}$$.
+   - Theoretical step resolution: $$\delta x = \frac{40\ \text{mm}}{3200} = 0.0125\ \text{mm/microstep}$$ ($$12.5\ \mu\text{m}$$).
+   - If the motor delivers $$\tau = 0.40\ \text{N}\cdot\text{m}$$ on pitch radius $$r_p = \frac{40}{2\pi} \approx 6.37\ \text{mm}$$, peak belt tension force is $$F = \tau / r_p = 0.40 / 0.00637 \approx 62.8\ \text{N}$$.
 
 ## Lab: cardboard, or a pulley, or a sketch
 

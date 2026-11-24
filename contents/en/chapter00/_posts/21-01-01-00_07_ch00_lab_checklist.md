@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Before launching a rocket or rolling a mobile robot onto the floor, engineers run a **readiness review**: a concrete, pass/fail verification that tools, power, safety gear, and workspace files exist and work as specified. Skipping readiness checks is how a five-minute missing driver turns into a three-hour troubleshooting spiral in Chapter 01.
+
+This capstone checklist for Chapter 00 turns abstract preparation into measurable bench acceptance criteria.r
+
+---
+
 This is the exit gate for Chapter 00. Plan 60–90 minutes, mostly checking evidence from lessons 00-01 through 00-06. A tick without a file, a photo, or a pasted line does not count. Chapter 01 will ask you to measure real parts. Do not start it on a vibe.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will **audit** the bench with a written procedure, one item at a time. You w
 ## Prerequisites
 
 You need the journal, the track sentence, the power-up card, the Wave 1 inventory photo, and whatever `bom.csv` lesson 00-05 asked you to build. If one of those was skipped, the audit records the skip. You do not need a moving robot, ROS 2, or a soldered joint. You do need to be willing to leave a box unticked.
+
+## Background Knowledge Map: Verification, Validation, and Acceptance Testing in Robotics
+
+Even at the bench-setup stage, you are practicing the same systems-engineering habits used in aerospace and industrial robotics:
+
+- **Verification ("Did we build it right?"):** Objective, quantitative checks — does the multimeter measure a known AA cell within $$\pm 0.05\text{ V}$$? Does the USB cable carry data (not charge-only)? Does the toolchain compile a minimal binary without errors?
+- **Validation ("Will it support the mission?"):** Confirming that your BOM parts, battery capacity, and workspace layout match the requirements of Capstone A (closed-loop differential-drive MCU robot) and the later ROS 2 track.
+- **Baseline Logging:** Recording initial measurements (battery resting voltage, wheel diameter, track width) in a versioned bench log creates a ground-truth reference whenever behavior drifts weeks later.r
+
+---
 
 ## Why it matters
 
@@ -78,6 +94,32 @@ My's exit note, written after she actually looked, reads as follows. `bom.csv` s
 She ticks the written plan, not a proved cable, and leaves `cable unproven` visible. Gaps: a stand (40000 ₫ on the 23 Sep 2026 snapshot) and jumpers. The missing chassis is Wave 2 and does not block Chapter 01. The missing stand blocks soldering, so a hot iron stays off the desk. Metering and identification may start.
 
 A second student, Khoa, has a beep, a card, and a track sentence, and also a photograph of a TP4056 wired across two cells because "the connector fit." His charger line is `open`, and the photo is evidence of a fault, not of readiness. He disconnects the module, writes that each cell will be charged alone to 4.2 V or not at all, and only then may he reconsider the tick. His `bom.csv` has no sum. He goes back to lesson 00-05 before he calls the gate passed. A messaging stack on Ubuntu would not have caught either miss.
+
+## Deep-Dive Explanation (Read Slowly): Quantifying Battery State-of-Charge & Bench Readiness
+
+How do you verify a fresh 2S Li-ion pack is healthy before it ever powers your electronics? Walk through these four checks:
+
+1. **Measure open-circuit voltage (OCV) of the full pack and each cell:** A healthy Li-ion cell sits between $$3.0\text{ V}$$ (empty cutoff) and $$4.2\text{ V}$$ (full charge), with storage voltage near $$3.7\text{–}3.85\text{ V}$$.
+2. **Check cell balance $$\Delta V = \lvert V_1 - V_2 \rvert$$:** If two series cells differ by more than $$0.10\text{ V}$$, one cell will over-discharge while the pack total still looks acceptable.
+3. **Verify polarity before mating connectors:** Red probe on `V+`, black on `GND` must read **positive** (`+7.4 V`, never `-7.4 V`).
+4. **Estimate remaining energy conservatively:** Never extrapolate linearly below $$3.3\text{ V/cell}$$ because Li-ion discharge curves drop sharply near the knee.
+
+### Concrete Worked Example: Checking a 2S 18650 Pack at Bench Bring-Up
+
+Suppose your multimeter measures total pack voltage $$V_{\text{pack}} = 7.62\text{ V}$$, cell 1 $$V_1 = 3.82\text{ V}$$, and cell 2 $$V_2 = 3.80\text{ V}$$.
+
+- **Step 1 — Series sum consistency check:**
+  $$V_1 + V_2 = 3.82 + 3.80 = 7.62\text{ V} = V_{\text{pack}}$$ (confirms clean contact and no hidden series drop).
+- **Step 2 — Cell imbalance check:**
+  $$\Delta V = \lvert 3.82 - 3.80 \rvert = 0.02\text{ V} \le 0.05\text{ V}$$ (well-balanced!).
+- **Step 3 — Linearized state-of-charge estimate (3.2 V empty to 4.2 V full):**
+  $$\text{SoC} \approx \frac{3.81 - 3.20}{4.20 - 3.20} = \frac{0.61}{1.00} = 61\%$$ — right in the ideal storage band for first bench tests.
+
+**Common Pitfall:** Assuming a pack reading `7.0 V` is safe when cell 1 is `4.0 V` and cell 2 is `3.0 V` — always check individual cell voltages if your pack has a balance tap.
+
+**Quick Check:** If a 2S pack drops to $$6.4\text{ V}$$ ($$3.2\text{ V/cell}$$) under load, stop the lab immediately and recharge; discharging below $$2.5\text{–}3.0\text{ V/cell}$$ permanently damages lithium-ion chemistry.
+
+---
 
 ## Exercises
 

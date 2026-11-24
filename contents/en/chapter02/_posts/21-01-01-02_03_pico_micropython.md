@@ -10,6 +10,12 @@ lesson_type: required
 draft: false
 ---
 
+If C++ on an ESP32 is a finely tuned race car, **MicroPython on a Raspberry Pi Pico (RP2040)** is an interactive robotics laboratory where you can type `motor.duty_u16(32768)` into a live REPL prompt and watch a wheel spin half a second later — zero compile-flash cycle required. For rapid sensor probing, I2C bus discovery, and verifying motor polarity on a brand-new chassis, that interactive feedback loop is unbeatable.
+
+This lesson introduces the RP2040 architecture and MicroPython runtime — along with the exact performance boundaries where interpreted Python shines and where C++ or PIO state machines take over.r
+
+---
+
 ## Objectives
 
 You will put a Pico or Pico 2 into BOOTSEL mode so a drive named `RPI-RP2` appears, and you will copy the MicroPython UF2 that matches that chip. You will point Thonny, or `mpremote`, at the board and get a REPL that answers `1 + 1`. You will blink the onboard LED at 2 Hz and print a counter, using `Pin("LED")` on a Pico W or Pico 2 W and GPIO 25 on an original Pico. You will refuse an RP2040 UF2 on a Pico 2. You will keep every GPIO at 3.3 V and leave motors unwired.
@@ -17,6 +23,16 @@ You will put a Pico or Pico 2 into BOOTSEL mode so a drive named `RPI-RP2` appea
 ## Prerequisites
 
 You either chose a Pico-family board in the landscape lesson or you are learning the other bench’s toolchain once. You can copy a file onto a USB drive. You do not need PlatformIO for this page; that file belongs to the ESP32 track. A data-capable micro-USB cable is part of the setup. The shopping list for the whole robot is still Chapter 00 ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
+
+## Background Knowledge Map: Interpreted Bytecode, Garbage Collection Jitter, and RP2040 Hardware
+
+Three systems concepts clarify how MicroPython runs on a bare-metal microcontroller:
+
+- **Bytecode VM & Interactive REPL:** MicroPython compiles `.py` scripts on-chip into compact bytecode executed by a small virtual machine in Flash/RAM. The serial REPL lets you inspect registers, scan I2C addresses, and test equations interactively.
+- **Garbage Collection (GC) & Timing Jitter:** Unlike C++ static allocation, creating temporary lists, floats, or formatted strings in Python allocates heap objects. Periodically, the garbage collector pauses execution for $$1\text{–}5\text{ ms}$$ to reclaim memory — harmless at 20 Hz, noticeable in a 500 Hz control loop unless you pre-allocate buffers or call `gc.collect()` deterministically.
+- **RP2040 Programmable I/O (PIO):** Unique to the Pico, 8 tiny deterministic state machines run independently of the ARM Cortex-M0+ cores at full 125 MHz clock speed — capable of decoding quadrature encoders or driving WS2812 LEDs with zero Python jitter.r
+
+---
 
 ## Why it matters for Capstone A
 
@@ -108,6 +124,34 @@ A pass is a REPL that is the Pico, not the laptop, and a 2 Hz blink you watched.
 Faults. BOOTSEL was released before the plug went in, so no drive appears and the board jumps straight to whatever was already installed. The cable is charge-only, so neither the drive nor a serial port appears. The UF2 family is wrong: an RP2040 image on a Pico 2, or a W image on a non-W board. Thonny is still on local Python, so `machine` does not exist.
 
 Safety: 3.3 V only on every GP pin. Do not connect a battery, a motor, or a 5 V sensor in this lab. `3V3` is an output. `VSYS` is not a place for a 2S pack.
+
+## Deep-Dive Explanation (Read Slowly): Mapping 16-Bit Pico PWM Duty Cycles and Bounding Loop Jitter
+
+On Raspberry Pi Pico MicroPython, PWM duty cycle uses an unsigned 16-bit integer `duty_u16` spanning $$0$$ to $$65\,535$$ ($$2^{16} - 1$$). Let's trace both the PWM scaling math and the timing budget of a MicroPython control loop:
+
+1. **Convert normalized command $$u \in [0, 1]$$ to `duty_u16`:**
+   $$\text{duty\_u16} = \operatorname{round}(u \times 65\,535).$$
+2. **Compute effective average motor voltage:** With supply $$V_{\text{sup}}$$ and driver drop $$V_{\text{drop}}$$, $$V_{\text{eff}} = u \cdot (V_{\text{sup}} - V_{\text{drop}})$$.
+3. **Budget loop execution + GC pause:** For a loop period $$T_s = 1/f_s$$, total worst-case iteration time $$t_{\text{code}} + t_{\text{GC}}$$ must remain strictly below $$T_s$$.
+4. **Minimize heap churn:** Pre-allocate `bytearray` objects outside the `while True:` loop so GC triggers rarely and finishes quickly.
+
+### Concrete Worked Example: 16-Bit PWM Scaling & 50 Hz Control Loop Timing on Pico
+
+Suppose your Pico drives a TB6612FNG powered by $$V_{\text{sup}} = 7.4\text{ V}$$ ($$V_{\text{drop}} = 0.4\text{ V}$$) and you want an effective motor voltage of $$V_{\text{eff}} = 4.2\text{ V}$$ inside a $$50\text{ Hz}$$ ($$T_s = 20\text{ ms}$$) MicroPython loop:
+
+- **Step 1 — Required duty cycle $$u$$ and `duty_u16`:**
+  $$u = \frac{V_{\text{eff}}}{V_{\text{sup}} - V_{\text{drop}}} = \frac{4.2}{7.4 - 0.4} = \frac{4.2}{7.0} = 0.60 \quad (60\%).$$
+  $$\text{duty\_u16} = \operatorname{round}(0.60 \times 65\,535) = 39\,321.$$
+- **Step 2 — Timing margin check at 50 Hz ($$T_s = 20.0\text{ ms}$$):**
+  Suppose reading encoders + IMU over I2C takes $$1.8\text{ ms}$$, PID math takes $$0.4\text{ ms}$$, and an occasional GC sweep takes $$2.5\text{ ms}$$.
+  - Worst-case execution time: $$1.8 + 0.4 + 2.5 = 4.7\text{ ms} \ll 20.0\text{ ms}$$ (76.5% idle slack — super stable!).
+  - Now check what happens if you try to push the same Python loop to $$500\text{ Hz}$$ ($$T_s = 2.0\text{ ms}$$): a single $$2.5\text{ ms}$$ GC pause exceeds the entire period, causing missed ticks!
+
+**Common Pitfall:** Naming your script `main.py` with an infinite `while True:` loop that prints continuously without a small startup delay — locking you out of the REPL until you send `Ctrl+C` or flash a nuke UF2 image. Always add a 1–2 second grace delay or physical run-enable switch at startup.
+
+**Quick Check:** On RP2040, `ADC.read_u16()` returns `0` to `65535` (scaling the native 12-bit ADC left-aligned to 16 bits), so a reading of `32768` corresponds to $$3.3 \times (32768 / 65535) \approx 1.65\text{ V}$$.
+
+---
 
 ## Exercises
 

@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Bats navigate pitch-black caves using 40 kHz acoustic chirps; autonomous cars map highways using nanosecond laser pulses. Your desk robot gets to compare both physical worlds side by side: an **HC-SR04 ultrasonic module** measuring sound travel time in microseconds, and a **VL53L0X Time-of-Flight (ToF)** sensor timing infrared photons at the speed of light.
+
+This lab teaches the physics, temperature dependence, and failure modes of active ranging sensors — plus how a simple 3-sample median filter eliminates phantom obstacle spikes.r
+
+---
+
 Estimated time: **80–100 minutes**. This is the ranging lab: a meterstick, a cardboard target, and a table of errors. Wheels stay off the bench.
 
 ## Learning objectives
@@ -20,6 +26,17 @@ You will compute distance from an echo pulse width with $$d = vt/2$$ at $$343~\m
 ## Prerequisites
 
 Lesson 04-02 identified the two cans and the tiny black window, including the voltage and the bus. Lesson 04-01 is the I2C scan you will need if a VL53L0X is on the bench. Chapter 03 can time a pulse or at least print a number from a library you have read. Chapter 01 is the multimeter on the echo pin. You do not need the motor chapter, and you should not be holding a wheel.
+
+## Background Knowledge Map: Wave Propagation Physics, Acoustic vs. Optical Constraints, and Robust Filtering
+
+Three physical principles separate reliable range sensing from jittery obstacle avoidance:
+
+- **Round-Trip Time-of-Flight Equation:** Whether using sound ($$c_{\text{sound}} \approx 343\text{ m/s}$$ at $$20^\circ\text{C}$$) or light ($$c_{\text{light}} \approx 3.0 \times 10^8\text{ m/s}$$), the pulse travels to the target and back, so distance is always **half** the total path:
+  $$d = \frac{c \cdot t_{\text{echo}}}{2}.$$
+- **Temperature & Surface Dependence:** Sound speed shifts with air temperature ($$c(T) \approx 331.3 + 0.606\,T\;[^{\circ}\text{C}]$$), and sound bounces away from smooth walls angled $$> 15^\circ\text{–}20^\circ$$. Infrared ToF ignores air temperature and handles angled matte walls well, but loses range on black light-absorbing fabric or bright outdoor sunlight.
+- **Non-Linear Spike Filtering (Median vs. Mean):** Range sensors suffer occasional multi-path outliers (e.g., `40, 41, 320, 40 cm`). A **3- or 5-sample median filter** rejects single-sample outliers completely without smearing real wall edges, unlike a moving average.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -119,6 +136,31 @@ On flat cardboard, a healthy HC-SR04 is often within a few centimeters at 40 cm 
 | Cloth reads nothing or doubles | Absorption, or a weak multipath |
 | Two VL53 boards, one address | Both still at `0x29`; use XSHUT |
 | Always 0 indoors, open space | Timeout, not a crash. Do not drive on that 0 |
+
+## Deep-Dive Explanation (Read Slowly): Computing Ultrasonic Pulse Timing, Timeout Caps, and Median Filtering
+
+Why does `pulseIn(ECHO, HIGH)` without a timeout freeze your robot's entire control loop when facing an open room? Trace the exact 4-step timing calculation:
+
+1. **Convert target distance $$d$$ to echo pulse duration:** At $$T = 30^\circ\text{C}$$ (typical Vietnam lab!), $$c = 331.3 + 0.606(30) = 349.5\text{ m/s}$$, so:
+   $$t_{\text{echo}} = \frac{2d}{c}.$$
+2. **Compute the blocking penalty of a missing timeout:** Arduino's default `pulseIn` timeout is **1,000,000 µs (1.0 full second!)** — if no echo returns, your 100 Hz control loop freezes for 100 consecutive ticks!
+3. **Cap timeout to your robot's maximum useful range (e.g., 2.0 m):** $$t_{\text{timeout}} = \frac{2 \times 2.0}{343} \approx 11\,660\,\mu\text{s} \approx 12\text{ ms}$$ (and trigger ultrasonic at 15–20 Hz asynchronously via interrupts, never blocking the 100 Hz PID loop!).
+4. **Apply a 3-point median filter** before feeding distance into your FSM obstacle guard.
+
+### Concrete Worked Example: Temperature Effect at 30 °C & Median vs. Mean Outlier Rejection
+
+- **Part A — Ultrasonic echo pulse of $$t_{\text{echo}} = 2\,915\,\mu\text{s}$$:**
+  - Using standard $$20^\circ\text{C}$$ speed ($$343\text{ m/s}$$): $$d = \frac{343 \times 0.002915}{2} = 0.4999\text{ m} = 50.0\text{ cm}$$.
+  - At a warm $$30^\circ\text{C}$$ room ($$349.5\text{ m/s}$$): $$d = \frac{349.5 \times 0.002915}{2} = 0.5094\text{ m} = 50.9\text{ cm}$$ (nearly 1 cm systematic shift — 1.9%!).
+- **Part B — Comparing Mean vs. Median on a 5-sample ToF burst `[38, 39, 250, 39, 40] cm`:**
+  - **Mean:** $$(38 + 39 + 250 + 39 + 40)/5 = 406 / 5 = 81.2\text{ cm}$$ — completely fools an obstacle detector set at `50 cm`!
+  - **Median (sorted `[38, 39, 39, 40, 250]`):** middle element $$= 39.0\text{ cm}$$ — 100% immune to the `250 cm` glitch!
+
+**Common Pitfall:** Wiring the HC-SR04's 5 V `ECHO` pin directly into a 3.3 V ESP32 or Pico GPIO without a `1 kΩ / 1.8 kΩ` voltage divider — risking permanent pin damage.
+
+**Quick Check:** How long does light take to travel to a wall `1.5 m` away and back (`3.0 m` round-trip) inside a VL53L0X? $$t = 3.0 / (3.0 \times 10^8) = 10\text{ nanoseconds}$$ — resolved by on-chip SPAD photon-timing electronics!
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

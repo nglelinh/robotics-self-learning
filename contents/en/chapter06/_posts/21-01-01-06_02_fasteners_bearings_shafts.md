@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **70–90 minutes**, including sorting a small screw kit and photographing a nyloc next to a plain nut.
 
+More robot demos have been ruined by a single loosened M3 set screw than by faulty control theory. A motor can deliver flawless torque and your PID loop can run at 500 Hz, yet if a hub slips half a millimeter on a D-shaft or a bearing binds axially against a bracket, the encoder sees motion that the tire never transmits to the floor.
+
 ## Learning objectives
 
 By the end of this lesson you can separate M2, M3, and M4 screws by measuring the thread diameter, choose a nyloc nut where a plain nut would walk off under vibration, and seat a set screw on the flat of a D-shaft. You can decide when a 608 ball bearing belongs on a printed idler and when the sleeve bearing already inside a TT gearbox should stay there, and you can match a coupler to the shaft diameters you actually bought.
@@ -21,6 +23,14 @@ By the end of this lesson you can separate M2, M3, and M4 screws by measuring th
 
 You can use a caliper or, failing that, a known nut as a gauge (Chapter 01 measuring habits). You know the chassis from Lesson 01 has wheels on motor shafts, and that those shafts will be asked to report honest rotation to an encoder later.
 
+
+## Background Knowledge Map: Machine Elements, Preload Mechanics, and Shaft Power Transmission
+
+Mechanical joints are the physical boundary conditions of every robotics equation:
+
+- **Threaded Fasteners & Clamping Preload:** A screw works like a stiff spring. Tightening it stretches the shank slightly to create clamping force $$F_p$$, which generates friction between mating plates so shear loads are carried by friction rather than bending the screw threads. Vibration relaxes preload unless countered by nylon-insert locknuts or threadlocker.
+- **Bearings & Friction Regimes:** Plain bushings rely on sliding contact (higher friction, wear under radial load), whereas rolling-element ball bearings replace sliding with rolling contact, cutting friction by an order of magnitude and keeping shafts concentric so gear teeth maintain proper center distance.
+- **Shafts, Keys, and Couplings:** Transmitting torque $$\tau$$ from a motor shaft to a hub requires a positive mechanical lock (a D-flat, keyway, or clamping collar) plus a coupling that accommodates tiny angular or parallel misalignments without overloading the motor's internal bearings.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A’s odometry believes the wheel angle and the motor angle are the same angle, scaled by the gear ratio you will write down in Lesson 03. A set screw that misses the flat lets the wheel click while the encoder keeps a perfect count of the motor. The ROS pose then walks across the map while the robot hesitates on the tile. Fasteners are the reason that lie starts or never starts. A nyloc that stays put, a coupler that matches  the shaft, and a bearing that fits the job are the mechanical half of a trustworthy `odom` topic.
@@ -54,6 +64,18 @@ s = 2\pi r = 2\pi \times 31.2 \approx 196\ \text{mm}
 $$
 
 that the robot never traveled. One missed flat, one phantom 20 cm, every time the torque reverses and the hub clicks.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Checking Set-Screw Torque Transmission on a D-Shaft
+
+Why does seating a set screw squarely onto the D-flat matter so much more than tightening it onto a round shaft? Let us compare the two mechanics quantitatively.
+
+1. **Torque transmitted by friction alone (round shaft):** Suppose a small gearmotor produces stall torque $$\tau = 0.40\ \text{N}\cdot\text{m}$$ on a shaft of radius $$r_s = 3\ \text{mm} = 0.003\ \text{m}$$. The tangential force at the shaft surface is:
+   $$F_t = \frac{\tau}{r_s} = \frac{0.40}{0.003} = 133.3\ \text{N}.$$
+   With steel-on-steel friction $$\mu \approx 0.15$$, holding $$133.3\ \text{N}$$ purely by friction requires a normal clamping force of:
+   $$F_N = \frac{F_t}{\mu} = \frac{133.3}{0.15} = 889\ \text{N}$$
+   — far more than a tiny M3 set screw in an aluminum hub can sustain without stripping its threads!
+2. **Positive engagement on a D-flat:** When the set screw lands squarely on the machined flat (say offset $$d = 2.5\ \text{mm}$$ from the shaft center), the flat physically blocks rotation by normal bearing stress rather than relying solely on friction. Even if the screw loosens slightly, the hub cannot spin freely until the screw backs completely out past the flat depth.
+3. **Practical engineering takeaway:** Always align the set screw perpendicular to the D-flat, add a drop of removable blue threadlocker, and never expect a friction-only collar to survive repeated motor reversals.
 
 ## Lab: sort the screws and find the flat
 

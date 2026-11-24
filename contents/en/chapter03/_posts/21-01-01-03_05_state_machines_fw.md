@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Ask a student to add "stop if an obstacle is closer than 20 cm, back up for 0.5 s, turn 45°, resume, and halt immediately if the battery drops below 6.4 V" to a tangle of nested `if / else` flags, and watch the bugs multiply overnight: the robot backs up *while* trying to turn, or ignores the low-battery fault during the backup `delay()`. A **Finite State Machine (FSM)** collapses that combinatorial mess into a handful of explicit states and crystal-clear transition rules.
+
+From Mars rovers to surgical manipulators, FSMs are the backbone of safe, auditable robot behavior.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you can implement three firmware states, IDLE, TELEOP, and FAULT, so that a command, a 300 ms silence, and a button each do one defined thing. In IDLE and in FAULT both PWM channels are commanded to 0. You will write the machine as an `enum` and a `switch` in C++, and as an `if`/`elif` chain or a dictionary of functions in MicroPython, using the non-blocking clock from Lesson 1 rather than a sleep that stands in for a state. You will also reject the pattern where a blink flag and a motor flag can be true at the same time.
@@ -18,6 +24,16 @@ By the end of this lesson you can implement three firmware states, IDLE, TELEOP,
 ## Prerequisites
 
 You can measure command age with `millis()` or `time.ticks_diff()`, which is the skill Lesson 1 put in place of the blocking heartbeat in the [Chapter 02 blink and serial lab]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}). You can print a button edge, and you can write a duty with `ledcWrite` or `duty_u16` without believing that `analogWrite` is always 0–255 on an ESP32. The LED from the GPIO lab will stand in for "motors enabled." The TB6612 is still not wired. The timeout math you are encoding is the same 300 ms rule whose 200 ms sleep failure you already calculated.
+
+## Background Knowledge Map: Formal Automata, Guard Conditions, and Fail-Safe Transitions
+
+Three software-architecture ideas make FSMs indispensable in robotics firmware:
+
+- **States, Events, and Guards:** An FSM is a tuple $$(S, s_0, \Sigma, \delta)$$ where the robot occupies **exactly one state** $$s \in S$$ at any moment (e.g., `IDLE`, `DRIVE`, `AVOID_BACKUP`, `AVOID_TURN`, `FAULT`). Transitions occur only when an event or guard condition (e.g., `dist_cm < 20`, `elapsed_ms >= 500`, `v_bat < 6.4`) evaluates true.
+- **Entry / Do / Exit Actions:** Separating one-time *entry actions* (e.g., recording `state_enter_ms = now`, resetting PID integrators) from continuous *do actions* (updating PWM) guarantees clean handoffs with zero lingering state.
+- **Global Safety Transitions (Highest Priority):** Checking safety guards (`E_STOP`, `LOW_BATT`, `CMD_TIMEOUT`) *before* the `switch (state)` block ensures that every state immediately yields to `FAULT` with motors commanded to zero.r
+
+---
 
 ## Why it matters
 
@@ -197,6 +213,35 @@ No motor, no VM, no battery. The LED is "motors enabled." The serial monitor is 
 5. In your notes, sketch the three bubbles and the silence arrow, and write the sentence "PWM is zero in FAULT." The checklist asks for both.
 
 If the LED turns on the moment the sketch boots, `apply` is not gated on TELEOP, or `setup` wrote a duty and the loop never rewrote it. That bug is the subject of the chapter checklist.
+
+## Deep-Dive Explanation (Read Slowly): Designing a 5-State Diff-Drive FSM and Tracing Every Transition
+
+Instead of juggling 4 boolean flags ($$2^4 = 16$$ combinations, most of them illegal!), trace how a clean 5-state FSM handles obstacle avoidance and safety:
+
+1. **List mutually exclusive states:** `IDLE`, `DRIVE`, `BACKUP`, `TURN`, `FAULT`.
+2. **Assign a strict priority order to transitions:** Safety faults (`v_bat < 6.4 V` or `bumper_stuck`) override everything; obstacle guards fire only in `DRIVE`; timer guards govern `BACKUP` and `TURN`.
+3. **Define exact actuator outputs per state:** Every state explicitly sets `(v_cmd, omega_cmd)` so motors can *never* inherit a stale speed from a previous state.
+4. **Trace a timeline with concrete numbers** to prove no deadlock or rapid oscillation (chattering) can occur.
+
+### Concrete Worked Example: Hand-Tracing a 4-Second Obstacle + Low-Battery Scenario
+
+Parameters: `BACKUP` duration $$= 500\text{ ms}$$ at $$(-0.15\text{ m/s}, 0)$$; `TURN` duration $$= 600\text{ ms}$$ at $$(0, +1.5\text{ rad/s})$$; obstacle trigger $$d < 20\text{ cm}$$; low-battery cutoff $$V_{\text{bat}} < 6.40\text{ V}$$.
+
+| Time `t_ms` | Sensor Inputs | Active State | Transition / Action | Command `(v, ω)` |
+| --- | --- | --- | --- | --- |
+| `0` | `start_btn=1`, `d=80 cm`, `V=7.2 V` | `IDLE → DRIVE` | Entry: reset PID | `(0.25, 0.0)` |
+| `1200` | `d=18 cm`, `V=7.1 V` | `DRIVE → BACKUP` | Guard `d < 20`: set `t_enter=1200` | `(-0.15, 0.0)` |
+| `1700` | `d=26 cm`, `V=7.1 V` | `BACKUP → TURN` | Guard `1700 - 1200 >= 500`: `t_enter=1700` | `(0.0, +1.5)` |
+| `2300` | `d=95 cm`, `V=7.0 V` | `TURN → DRIVE` | Guard `2300 - 1700 >= 600` (turned $$0.9\text{ rad} \approx 52^\circ$$) | `(0.25, 0.0)` |
+| `3500` | `d=90 cm`, `V=6.35 V` | `DRIVE → FAULT` | Global safety guard `V < 6.40` | `(0.0, 0.0)` |
+
+Notice how at `t = 2300 ms`, the robot has backed up $$0.15 \times 0.5 = 7.5\text{ cm}$$ and rotated $$1.5 \times 0.6 = 0.90\text{ rad}$$ ($$51.6^\circ$$) — cleanly, deterministically, and without a single `delay()`!
+
+**Common Pitfall:** Transitioning from `AVOID` back to `DRIVE` using the exact same threshold (`d < 20 cm` to enter, `d >= 20 cm` to exit) — sensor noise around 20 cm causes violent chattering between states. Always add **hysteresis** (enter at `d < 20 cm`, exit only when `d > 28 cm`).
+
+**Quick Check:** Why must `FAULT` require an explicit manual reset (button press or power cycle) rather than auto-recovering the instant `V_bat` rebounds above `6.40 V`? Because once motors stop, battery voltage immediately bounces back up by `0.3–0.5 V` — auto-recovery would cause an endless start-stop stutter loop!
+
+---
 
 ## Exercises
 

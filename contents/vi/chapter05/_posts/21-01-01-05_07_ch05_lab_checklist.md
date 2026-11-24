@@ -13,6 +13,33 @@ draft: false
 
 Bài này là mốc kiểm tra hoàn thành Chương 05 trước khi chuyển sang phần cơ khí ở Chương 06 và tích hợp hai kênh PWM có dấu, pin cùng cầu chì ở Chương 07. Bạn vượt qua chương này khi điền đầy đủ bảng kiểm chứng bên dưới bằng số liệu và ảnh thực tế của chính mình: tên chip cầu H, bảng chân lý, nguồn động cơ tách khỏi USB, ghi chú dòng không tải/stall, phép tính xung servo (ngay cả khi không có servo), kiểm thử dừng bang-bang, ảnh đấu dây và hai lỗi đã gặp hoặc chủ động diễn tập.
 
+Trong phòng lab robotics, khoảnh khắc căng thẳng nhất luôn là lúc cấp nguồn lần đầu cho tầng cơ cấu chấp hành: chỉ một sợi dây nguồn cắm ngược cực hay một mức PWM khởi động sai cũng đủ làm robot phóng thẳng khỏi mặt bàn hoặc bốc khói mạch driver. Checklist Chương 05 đóng vai trò là quy trình **nghiệm thu tầng truyền động** bài bản — từ kiểm tra ngân sách dòng đỉnh, đo vùng chết ma sát tĩnh (deadband), cho đến bài test "kê bánh trên không" (wheels-off-ground) trước khi đặt robot xuống sàn.
+
+## Bản đồ kiến thức nền: Nghiệm thu hệ thống truyền động an toàn
+
+### 1. Ngân sách dòng đỉnh (Peak Current Budget) và tách nhánh nguồn
+Động cơ và servo tiêu thụ dòng xung lớn hơn nhiều so với dòng trung bình khi khởi động hoặc đổi chiều đột ngột. Tính tổng dòng đỉnh của toàn hệ thống (động cơ + servo + vi điều khiển + cảm biến) và cộng thêm biên an toàn $$30\%$$ là bước bắt buộc để chọn đúng pin, cầu chì và mạch hạ áp (buck converter).
+
+### 2. Vùng chết PWM (PWM Deadband) do ma sát tĩnh (Stiction)
+Động cơ DC kèm hộp số không bao giờ quay ngay ở mức PWM 1% hay 5%: lực ma sát tĩnh trong bánh răng giữ trục đứng im cho tới khi PWM vượt qua một ngưỡng (thường 12%–20%). Nếu không đo và bù vùng chết này trong firmware, bộ điều khiển vòng kín sẽ bị "khựng" mỗi khi robot chạy chậm hoặc đảo chiều.
+
+### 3. Quy trình kê bánh (Wheels-Off-Ground) và kiểm tra chiều quay chuẩn
+Luôn kê gầm robot lên khối gỗ hoặc hộp giấy sao cho bánh quay tự do trên không khi chạy thử code lần đầu. Xác nhận: lệnh tiến làm *cả hai bánh* quay về phía trước và encoder *cả hai bên* cùng tăng giá trị dương!
+
+### Khung giải thích: Cầm tay lập ngân sách dòng đỉnh và bù vùng chết PWM cho xe lab 2 bánh (nên đọc chậm)
+
+**Phần A — Cộng ngân sách dòng đỉnh của robot trước khi chọn nguồn:**
+- 2 động cơ DC truyền động (dòng tải nặng mỗi bên $$1{,}2\text{ A}$$): $$2 \times 1{,}2 = 2{,}4\text{ A}$$.
+- 1 servo gật gù camera (dòng đỉnh lúc khởi động): $$0{,}8\text{ A}$$.
+- Vi điều khiển ESP32 + IMU + cảm biến siêu âm: $$0{,}4\text{ A}$$.
+- **Tổng dòng đỉnh tức thời:** $$I_{\text{đỉnh}} = 2{,}4 + 0{,}8 + 0{,}4 = 3{,}6\text{ A}$$.
+- Cộng biên an toàn $$30\%$$: $$3{,}6 \times 1{,}3 = 4{,}68\text{ A} \implies$$ cần pin và cầu chì tối thiểu **$$5\text{ A}$$** (không bao giờ dùng cổng USB laptop $$0{,}5\text{ A}$$ để thử tải động cơ!).
+
+**Phần B — Bù vùng chết PWM 8-bit (`0..255`):**
+Khi tăng dần PWM từ `0` lên trên bàn test, bạn thấy bánh xe chỉ bắt đầu lăn ở mức `PWM_min = 35` (tức $$35 / 255 \approx 13{,}7\%$$). Để lệnh tốc độ chuẩn hóa $$u \in (0, 1]$$ điều khiển mượt từ sát 0:
+$$\mathrm{PWM}_{\text{out}} = 35 + \operatorname{round}\!\big(u \times (255 - 35)\big) = 35 + \operatorname{round}(220\,u).$$
+Kiểm tra nhanh: khi bộ điều khiển ra lệnh nhẹ $$u = 0{,}10$$, thay vì xuất `26` (bánh đứng im!), mạch xuất $$35 + 22 = 57$$ giúp bánh lăn êm ngay lập tức!
+
 ## Mục tiêu học
 
 Sau bài này, bạn hoàn thiện bảng ký duyệt Chương 05 bằng các bằng chứng đo đạc và tính toán cụ thể thay vì đánh dấu chung chung. Bạn nộp được ảnh chụp đấu dây chứng minh nguồn động cơ tách biệt khỏi USB nhưng nối chung mass, trình bày rõ ràng tiêu chí hoàn thành trước khi bước vào Chương 06, và lập danh sách mua bổ sung ngắn gọn chỉ gồm những linh kiện thực sự còn thiếu (mạch cầu H, động cơ TT, cầu chì).

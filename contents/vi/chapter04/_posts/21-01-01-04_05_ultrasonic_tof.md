@@ -13,6 +13,37 @@ draft: false
 
 Thời lượng: **80–100 phút**. Đây là bài thực hành đo khoảng cách với thước mét, tấm bìa phẳng và bảng đánh giá sai số; không gắn bánh xe trong bài này.
 
+Dơi bay trong hang tối bằng sóng siêu âm, còn những chiếc robot tự hành hiện đại lại chiếu những xung tia hồng ngoại siêu ngắn rồi bấm đồng hồ đo thời gian ánh sáng dội ngược về — đó là hai gương mặt kinh điển của nguyên lý **Time-of-Flight (ToF)**: đo khoảng cách bằng cách đo *thời gian bay đi và về* của một làn sóng. Dù cùng dùng đúng một công thức $$d = \frac{v \cdot t}{2}$$, sự chênh lệch gần một triệu lần giữa tốc độ âm thanh ($$343\text{ m/s}$$) và tốc độ ánh sáng ($$3 \times 10^8\text{ m/s}$$) tạo ra hai thế giới cảm biến hoàn toàn khác nhau về độ rộng chùm tia, tần số lấy mẫu và dạng lỗi vật lý.
+
+## Bản đồ kiến thức nền: Vật lý truyền sóng trong đo khoảng cách robot
+
+### 1. Siêu âm (HC-SR04) — nón sóng rộng, phản xạ gương và ảnh hưởng nhiệt độ
+Cảm biến siêu âm phát chùm sóng $$40\text{ kHz}$$ mở rộng theo hình nón góc khoảng $$15^\circ\text{–}30^\circ$$. Ưu điểm là rẻ và phát hiện tốt cả kính trong suốt; nhưng nhược điểm chí mạng là **phản xạ gương (specular reflection)**: nếu sóng đập xiên góc vào tường phẳng nhẵn, sóng nảy đi nơi khác không quay về đầu thu, khiến robot tưởng phía trước trống không! Ngoài ra, tốc độ âm thanh phụ thuộc nhiệt độ không khí theo $$v(T) \approx 331{,}3 + 0{,}606\,T\;(^\circ\text{C})$$.
+
+### 2. Quang học ToF (VL53L0X / VL53L1X) — tia laser hẹp và bộ đếm nano-giây
+Cảm biến ToF hồng ngoại dùng diode phát VCSEL (940 nm) chiếu một chùm sáng hẹp kết hợp mảng diode đơn photon (SPAD) đo thời gian bay ở mức **pico-giây đến nano-giây**. Nhờ tia hẹp, nó đo cực sắc nét qua khe cửa hẹp và không bị nhiễu chéo (crosstalk) giữa các cảm biến cạnh nhau như siêu âm, nhưng lại bị suy yếu dưới ánh nắng mặt trời gắt hoặc bề mặt đen hấp thụ hồng ngoại.
+
+### 3. Chu kỳ đo tối đa và lọc nhiễu ngoại lai (Median Filter)
+Với siêu âm, phải chờ tiếng vang dội xong (thường tối thiểu $$30\text{–}60\text{ ms}$$ mỗi lần bắn) để tránh thu nhầm tiếng vang của xung trước đó (*ghost echo*). Trong cả hai loại cảm biến, một **bộ lọc trung vị (median filter)** 3–5 mẫu luôn đánh bại trung bình cộng vì nó vứt sạch các cú đo lỗi đột ngột về `0` hoặc `max_range`.
+
+### Khung giải thích: Cầm tay tính khoảng cách Siêu âm vs. Quang học ToF và sai số nhiệt độ (nên đọc chậm)
+
+Xét một vật cản đặt cách robot đúng **$$d = 20{,}0\text{ cm} = 0{,}200\text{ m}$$**:
+
+1. **Cảm biến siêu âm HC-SR04 ở nhiệt độ phòng $$20^\circ\text{C}$$ ($$v = 343\text{ m/s}$$):**
+   Thời gian xung `ECHO` đo được (đi và về tổng $$0{,}400\text{ m}$$):
+   $$t_{\text{echo}} = \frac{2d}{v} = \frac{0{,}400}{343} \approx 1{,}166 \times 10^{-3}\text{ s} = 1\,166\,\mu\text{s}.$$
+   Kiểm tra ngược: $$d = \frac{343 \times 1\,166 \times 10^{-6}}{2} \approx 0{,}200\text{ m}$$.
+
+2. **Điều gì xảy ra nếu robot chạy ngoài sân nắng nóng $$40^\circ\text{C}$$ nhưng code vẫn gán cứng $$v = 343\text{ m/s}$$?**
+   Ở $$40^\circ\text{C}$$, tốc độ âm thanh thực là $$v(40) \approx 331{,}3 + 0{,}606 \times 40 = 355{,}5\text{ m/s}$$. Sóng bay nhanh hơn nên xung về sớm hơn:
+   $$t_{\text{thực}} = \frac{0{,}400}{355{,}5} \approx 1\,125\,\mu\text{s}.$$
+   Code gán cứng $$343\text{ m/s}$$ sẽ tính nhầm khoảng cách thành $$\frac{343 \times 1\,125 \times 10^{-6}}{2} \approx 19{,}3\text{ cm}$$ (lệch $$-3{,}5\%$$!).
+
+3. **So sánh với cảm biến laser ToF (VL53L0X) ở cùng khoảng cách $$20{,}0\text{ cm}$$ ($$c = 3 \times 10^8\text{ m/s}$$):**
+   $$t_{\text{ánh sáng}} = \frac{0{,}400}{3 \times 10^8} \approx 1{,}33 \times 10^{-9}\text{ s} = 1{,}33\text{ nano-giây!}$$
+   Con số $$1{,}33\text{ ns}$$ giải thích vì sao bạn không bao giờ đo ToF quang học bằng hàm `pulseIn()` trên vi điều khiển mà phải dùng chip chuyên dụng có bộ đếm thời gian lượng tử bên trong!
+
 ## Mục tiêu học
 
 Sau bài này, bạn tính được khoảng cách từ độ rộng xung Echo theo công thức $$d = vt/2$$ với vận tốc âm $$343~\mathrm{m/s}$$, cũng như công thức rút gọn theo micro giây $$d_{\mathrm{cm}} \approx t_{\mu\mathrm{s}} \times 0{,}01715$$. Bạn biết hạ mức Echo 5 V của HC-SR04 xuống khoảng 3,33 V trước khi đưa vào ESP32 và hiểu rõ việc mất tín hiệu Echo (timeout) nghĩa là không xác định được khoảng cách chứ không phải 0 cm. Bạn giải thích được vì sao hai module VL53L0X mặc định (cùng địa chỉ `0x29`) không thể hoạt động song song nếu chưa đổi địa chỉ, đồng thời hoàn thành bảng sai số tại ba mốc 20 / 40 / 80 cm so với thước đo (hoặc bản chuẩn bị dry-run kèm phép tính 5,8 ms và cầu chia áp).

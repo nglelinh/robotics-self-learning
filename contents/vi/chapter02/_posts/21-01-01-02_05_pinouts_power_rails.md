@@ -18,6 +18,36 @@ Sau bài này, bạn xác định được đúng vị trí chân nguồn USB 5 
 
 Bạn cần đã hoàn thành bài nhịp tim để xác nhận bo mạch kết nối tốt với máy tính và biết rõ chân LED của mình. Bạn cần biết đặt đồng hồ vạn năng ở thang đo điện áp một chiều và đặt que đen lên chân mass (GND) xác định. Kiến thức về mạch chia áp ở chương 01 là phần tính toán duy nhất cần dùng. Nguồn động cơ chưa được đấu nối; danh sách đầy đủ gồm driver và pin nằm ở bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
+---
+
+Nhìn vào hai hàng chân kim loại chạy dọc bo mạch ESP32 hay Raspberry Pi Pico, người mới thường thấy tất cả các chân đều giống hệt nhau — nhưng chỉ một sợi dây cắm lệch từ `5V` sang `3V3` hoặc cấp tín hiệu 5 V vào chân GPIO là đủ khiến con chip im lặng vĩnh viễn! Hiểu rõ **kiến trúc các đường nguồn (power rails)** và **phân loại chân GPIO** là bước chuyển từ "cắm theo hình vẽ" sang tự thiết kế sơ đồ đấu dây chính xác.
+
+## Bản đồ kiến thức nền: Đường nguồn (Power Rails) và Phân loại Chân Vi điều khiển
+
+1. **Ba Đường Nguồn Độc lập trên Robot:** Đường **Pin động lực** (7,4–8,4 V cấp thẳng cho Driver động cơ), đường **5 V Buck** (cấp vào `VIN`/`VBUS`/`VSYS` và cảm biến 5 V), và đường **3,3 V Logic** (do LDO trên bo MCU tạo ra, giới hạn dòng thường ~$$300\text{–}500\text{ mA}$$, *chỉ* nuôi chip và cảm biến nhỏ!).
+2. **Phân nhóm Chân GPIO trên ESP32 & Pico:** Không phải chân nào cũng đa năng — cần tách riêng nhóm chân *an toàn đa dụng*, nhóm *chỉ đọc vào* (GPIO 34–39 trên ESP32 không có điện trở kéo lên nội bộ!), nhóm *khởi động (Strapping pins)* và nhóm *bus chuyên dụng* (I2C/SPI/UART).
+3. **Nối Chung Mass (`GND`) nhưng Tách Dòng Lớn:** Mọi đường nguồn khác mức áp đều bắt buộc nối chung một điểm `GND` để đồng nhất mốc 0 V cho tín hiệu logic, nhưng dây mass động cơ phải chạy thẳng về cực âm pin để dòng nhiễu không chạy xuyên qua bo MCU.
+
+### Ví dụ cầm tay chỉ việc: Tính tổng dòng trên đường `3V3` của bo ESP32 (giới hạn LDO 500 mA)
+
+Giả sử bạn dùng chân `3V3` xuất ra từ bo ESP32 để cấp nguồn cho các module nhỏ trên xe:
+- Bản thân chip ESP32 (Wi-Fi bật nhẹ): **$$160\text{ mA}$$**.
+- Cảm biến IMU (MPU6050 / ICM-20948): **$$5\text{ mA}$$**.
+- Màn hình OLED 0,96" + 2 encoder quang: $$25 + 20 = \mathbf{45\text{ mA}}$$.
+- **Tổng dòng đường `3V3`:** $$160 + 5 + 45 = \mathbf{210\text{ mA}} \ll 500\text{ mA}$$ → **an toàn, LDO mát!**
+- Nhưng nếu bạn cắm thêm **1 động cơ servo SG90** (dòng đỉnh **$$600\text{ mA}$$**) vào đường `3V3` hoặc `5V` từ USB: tổng dòng vọt lên **$$810\text{ mA}$$** → vượt trần LDO/USB, gây sụt áp tức thì và reset ESP32! Servo *bắt buộc* phải ăn nguồn từ nhánh Buck 5 V riêng!
+
+### Khung giải thích: 4 nguyên tắc khóa bản đồ chân (Pinmap) trước khi cắm dây (nên đọc chậm)
+
+1. **Bước 1 — Lập bảng Pinmap ra giấy/file `pinmap.md` trước khi viết code:** Ghi rõ số chân, chức năng, mức điện áp (3,3 V hay 5 V) và màu dây cho từng kết nối.
+2. **Bước 2 — Tránh xa các chân Strapping khi còn chân rảnh:** Trên ESP32, kéo nhầm `GPIO 12` lên `HIGH` lúc bật nguồn làm sai điện áp Flash khiến bo không khởi động được!
+3. **Bước 3 — Luôn hạ áp mọi tín hiệu 5 V (như chân Echo của HC-SR04) trước khi đưa vào GPIO 3,3 V:** Dùng cặp điện trở $$1\text{ k}\Omega / 2\text{ k}\Omega$$ như đã tính ở Chương 01.
+4. **Bước 4 — Kiểm tra sơ đồ chân theo đúng phiên bản bo thực tế trên tay:** Bo ESP32 30 chân và 38 chân có thứ tự chân khác nhau ở hai đầu mép!
+
+**Kiểm tra nhanh.** Trên ESP32, vì sao khi mắc một nút nhấn vào `GPIO 34` với `pinMode(34, INPUT_PULLUP)` thì nút nhấn lại bị nhiễu loạn xạ? Vì các chân `GPIO 34–39` là chân *input-only* và **không có điện trở pull-up/pull-down nội bộ** trong silicon — muốn dùng phải gắn điện trở kéo lên $$10\text{ k}\Omega$$ bên ngoài!
+
+---
+
 ## Vì sao bài này gắn với Capstone A
 
 Nhiều lỗi nghiêm trọng khi chạy firmware teleop ở chương 07 không xuất phát từ lỗi lập trình mà từ lỗi đấu nối phần cứng: đưa thẳng xung Echo 5 V vào GPIO 3,3 V; quên nối chung mass giữa mạch động cơ và vi điều khiển khiến tín hiệu PWM bị trôi mức tham chiếu và TB6612 không đọc được; hoặc cấp nhầm pin 7,4 V vào chân 5V hay 3V3 trên bo mạch. Hậu quả là chip bị reset liên tục hoặc hỏng chân ngay lần cấp điện đầu tiên. Cơ chế tự ngắt 300 ms và quy tắc nhấc bánh không thể bảo vệ được một chân GPIO đã bị quá áp. Thẻ sơ đồ chân bạn lập trong bài này sẽ là tài liệu đối chiếu trực tiếp khi bắt đầu lắp driver ở chương 05 và xuất PWM ở chương 07.

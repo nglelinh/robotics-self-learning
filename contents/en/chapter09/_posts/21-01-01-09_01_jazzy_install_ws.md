@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~90 minutes**, longer if Ubuntu itself is new.
 
+Up to Chapter 08, your entire robot lived inside one microcontroller sketch and one Python script. The moment you add a LiDAR, a camera, SLAM, and a path planner, a single monolithic program collapses under its own weight. ROS 2 Jazzy solves this by turning a robot into a **composable operating system of independent processes**—and your first `colcon` workspace is the foundation where every future package lives.
+
 ## Learning objectives
 
 You will install ROS 2 Jazzy Jalisco on Ubuntu 24.04 from the official deb packages, create an overlay workspace with `colcon`, and show that `ros2 topic list` works in a fresh terminal only after you source the underlay and the overlay in the right order. You will recognise a mixed Humble/Jazzy environment from the error text, and you will write a one-line note about where this laptop sits relative to the Capstone MCU.
@@ -21,6 +23,14 @@ You will install ROS 2 Jazzy Jalisco on Ubuntu 24.04 from the official deb packa
 
 You can use a terminal: `cd`, `sudo apt`, and a text editor. Ubuntu 24.04 (Noble) is the Tier-1 platform for Jazzy. A virtual machine or a second-hand mini PC is enough. The ESP32 from Chapters 02–08 stays on the robot; it does not run `colcon`. Chapter 08’s serial frame is the thing this computer will speak later. You do not need a lidar or a Pi for this lesson.
 
+
+## Background Knowledge Map: Modular Robotics Middleware, Overlay Workspaces, and Build Systems
+
+Setting up ROS 2 cleanly relies on three software-engineering concepts that prevent 90% of beginner environment issues:
+
+- **Underlay vs. Overlay Workspaces:** `/opt/ros/jazzy` is the immutable system *underlay* containing standard packages. Your `~/ros2_ws` is an *overlay* layered on top via `source install/setup.bash`: packages in your overlay shadow identically named packages in the underlay without ever modifying system files.
+- **Build & Dependency Graph (`colcon` + `ament`):** `colcon` inspects every package's `package.xml`, topologically sorts dependencies, and builds C++ (`ament_cmake`) and Python (`ament_python`) packages into isolated `build/`, `install/`, and `log/` trees.
+- **DDS Domain Isolation (`ROS_DOMAIN_ID`):** ROS 2 uses Data Distribution Service (DDS) multicast discovery so nodes find each other automatically on a local network. Setting a unique `ROS_DOMAIN_ID` (0–101) prevents your laptop from accidentally commanding a classmate's robot across the room.
 ## Why this sits on the path
 
 Capstone A proved the base moves under firmware. Jazzy is the messaging and tooling layer you will put beside that firmware, not a replacement for the motor watchdog. Every later command in Chapters 09–12 assumes one sourced distro. A workspace that sometimes sees Humble messages and sometimes Jazzy messages wastes a weekend that should have gone to TF and the bridge. Simulation in Chapter 10 uses the same install plus `ros-jazzy-ros-gz`. Nav2 and LeRobot do not get a turn until `ros2 topic list` is boring.
@@ -38,6 +48,20 @@ Locale must be UTF-8 before you add the apt source. The official install fails e
 ![Underlay then overlay]({{ site.imgurl }}/generated/ch09_workspace.png)
 
 Windows and macOS are not the path this course debugs. If your only machine is Windows, install Ubuntu 24.04 in a virtual machine with at least 4 GB of RAM and 30 GB of disk, or use a spare PC. WSL2 can work and also fails in ways this lesson will not chase (GUI, USB serial, Gazebo). A native Ubuntu install is the lab that matches the docs.
+
+### Deep-Dive Explanation (Read Slowly): Tracing Environment Resolution and DDS Port Mapping by Hand
+
+Understanding how ROS 2 resolves packages and network ports turns mysterious "package not found" or "nodes can't see each other" bugs into two-second checks:
+
+1. **Overlay path precedence (`AMENT_PREFIX_PATH`):** When you run:
+   - First: `source /opt/ros/jazzy/setup.bash` $$\rightarrow$$ `AMENT_PREFIX_PATH=/opt/ros/jazzy`
+   - Second: `source ~/ros2_ws/install/setup.bash` $$\rightarrow$$ `AMENT_PREFIX_PATH=~/ros2_ws/install:/opt/ros/jazzy`
+   ROS 2 searches left-to-right. If you source them in the *reverse* order, `/opt/ros/jazzy` shadows your own edits!
+2. **How `ROS_DOMAIN_ID` maps to UDP multicast discovery port:** Per the RTPS/DDS standard, the discovery port for domain $$D$$ is:
+   $$\text{Port}(D) = 7400 + 250 \times D.$$
+   - Default domain $$D = 0$$: UDP port $$7400$$.
+   - Your lab bench $$D = 12$$: UDP port $$7400 + 250(12) = 10\,400$$.
+   Two machines on the same Wi-Fi with different `ROS_DOMAIN_ID` values literally listen on different UDP ports, giving clean multi-robot isolation with zero extra firewall rules.
 
 ## Lab
 

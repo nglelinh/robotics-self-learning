@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~150 phút** cho phần mô phỏng, cộng thêm một buổi nếu đã có sẵn lidar và xe trên sàn (trong lần kiểm tra `/scan` đầu tiên trên xe thật, có thể nhấc bánh xe khỏi sàn).
 
+Mọi mảnh ghép từ Chương 08 đến Bài 11-01 hội tụ tại đây: lần đầu tiên chiếc xe Capstone của bạn tự chạy quanh một không gian chưa biết (trong Gazebo hoặc phòng lab thật), quét LiDAR liên tục và **tự dựng nên tấm bản đồ 2D hoàn chỉnh** bằng `slam_toolbox`. Đây là bài kiểm chứng khắt khe nhất cho chất lượng odometry, cây TF2 và cách lái thu thập dữ liệu của bạn.
+
+## Bản đồ kiến thức nền: Ba trụ cột Thực chiến Dựng bản đồ SLAM (Capstone B)
+
+1. **Chuỗi Dữ liệu Đầu vào Sạch (`/scan` + `/odom` + `/tf`)**:
+   `slam_toolbox` yêu cầu tia `/scan` gắn đúng khung `laser_frame` đã nối vào `base_link`, odometry không bị ngược dấu $$\omega$$ và đồng bộ thời gian chuẩn (`use_sim_time`).
+2. **Chiến lược Lái tạo Đóng vòng lặp (Loop-Closure Driving Pattern)**:
+   Lái chậm và đều ($$v \le 0{,}25\text{ m/s}$$, $$\omega \le 0{,}5\text{ rad/s}$$), tránh xoay giật cục tại chỗ, và luôn chủ động lái quay lại ít nhất một đoạn hành lang cũ để kích hoạt tối ưu hóa đồ thị tư thế.
+3. **Lưu trữ & Kiểm định Bản đồ (`map_saver_cli`)**:
+   Xuất cặp tệp `map.pgm` (ảnh xám lưới chiếm dụng) + `map.yaml` (độ phân giải `resolution`, gốc tọa độ `origin` và ngưỡng chiếm dụng) và đối chiếu kích thước phòng đo trên bản đồ với thước dây thực tế.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ chạy thành công SLAM Toolbox trong mô phỏng TurtleBot3 theo đúng hướng dẫn Nav2 cho Jazzy, rồi áp dụng quy trình tương tự lên xe thật dùng cảm biến LD06 hoặc RPLIDAR A1. Bạn sẽ xác minh `/scan` có kiểu `sensor_msgs/msg/LaserScan`, cây TF đầy đủ cạnh tới frame laser và cạnh `map → odom` do SLAM xuất bản. Nếu chưa có lidar thật, bạn vẫn bắt buộc hoàn thành phần mô phỏng và ghi chú kế hoạch hoãn có ngày cụ thể cho phần cứng.
@@ -79,6 +90,13 @@ ros2 launch rplidar_ros view_rplidar_a1_launch.py
 Kiểm tra ảnh hướng trục quét (`rplidar-frame.png`) trong kho mã nguồn và đảm bảo frame laser được phát lên TF. Lưu ý README có lỗi chính tả `rpldiar_ros` ở đường dẫn script `udev`, nên hãy mở trực tiếp thư mục `scripts/` trong bản bạn vừa clone để chạy đúng tệp.
 
 Kiểm tra dữ liệu quét bằng `ros2 topic echo /scan --once`: message hợp lệ phải có `angle_min`, `angle_increment` và mảng `ranges`. Việc xuất hiện một số giá trị `inf` là bình thường (tia vượt quá tầm đo tối đa); ngược lại, nếu toàn bộ mảng là `inf` hoặc toàn `0` thì cần kiểm tra lại cáp, tốc độ baud hoặc xem cửa sổ quét có bị che chắn không.
+
+### Khung giải thích (nên đọc chậm): Đọc nhanh tệp `map.yaml` và kiểm tra sai số tỉ lệ bản đồ bằng tay
+
+Sau khi lưu bản đồ bằng `map_saver_cli`, bạn nhận được `lab_map.pgm` (kích thước `400 × 300 pixel`) và `lab_map.yaml` với `resolution: 0.05` (mỗi pixel = `5 cm`):
+- Chiều rộng vật lý của vùng bản đồ: $$400 \times 0{,}05 = \mathbf{20{,}0\text{ m}}$$.
+- Nếu bạn đo hành lang phòng lab ngoài đời rộng **3,00 m**, thì khoảng cách giữa hai vạch tường đen trên ảnh `.pgm` phải là $$\frac{3{,}00}{0{,}05} = \mathbf{60\text{ pixel}}$$.
+- **Chẩn đoán lỗi tức thì:** Nếu hai bức tường song song bị vẽ *chập thành hai đường chéo lệch nhau* (double walls), nguyên nhân thường là: (1) ngược dấu $$\omega$$ trong odometry, (2) sai góc lắp `laser_frame` trong URDF, hoặc (3) lái xoay quá nhanh vượt tần số quét LiDAR!
 
 ## Lab
 

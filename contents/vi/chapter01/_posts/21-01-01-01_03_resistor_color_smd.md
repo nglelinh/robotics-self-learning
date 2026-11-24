@@ -19,6 +19,38 @@ Sau bài học này, bạn sẽ đọc thành thạo điện trở 4 vạch theo
 
 Bạn cần nắm định luật Ohm từ bài 01 (đặc biệt là $I = V/R$ và lý do đèn báo dùng điện trở quanh 180 Ω) cùng quy tắc đo điện trở của bài 02 (linh kiện không cấp nguồn, que đỏ cắm ở lỗ V/Ω). Bài này chưa yêu cầu hàn linh kiện dán (SMD), nhưng kiến thức đọc mã SMD vẫn rất hữu ích vì các linh kiện nhỏ hàn sẵn trên board ESP32 và module TB6612 đều dùng quy chuẩn này.
 
+---
+
+Lấy nhầm một chiếc điện trở $$220\ \Omega$$ thay vì $$22\text{ k}\Omega$$ nhìn bằng mắt thường chỉ khác nhau đúng **một vạch màu** (Đỏ vs. Cam) — nhưng dòng điện qua mạch lại chênh nhau tới **100 lần**, đủ biến một mạch phân áp êm ái thành một mạch làm cháy chân cảm biến! Thành thạo cách đọc **vạch màu 4/5 vạch** và **mã số điện trở dán SMD** (như `103`, `472`, `4R7`) giúp bạn đọc bo mạch thật nhanh như đọc chữ in.
+
+## Bản đồ kiến thức nền: Quy chuẩn Mã hóa Điện trở (IEC 60062)
+
+1. **Điện trở Cắm lỗ (4 vạch & 5 vạch màu):** Mã hóa trị số theo ký hiệu khoa học $$(\text{chữ số có nghĩa}) \times 10^{\text{hệ số nhân}} \pm \text{dung sai}$$. Loại 4 vạch (thường sai số $$\pm 5\%$$, vạch cuối vàng kim) có 2 chữ số có nghĩa; loại 5 vạch (thường $$\pm 1\%$$, vạch cuối nâu) có 3 chữ số có nghĩa.
+2. **Điện trở Dán (SMD — mã 3 số, 4 số và ký hiệu `R`):** Trên bo mạch ESP32 hay module cảm biến nhỏ xíu không thể vẽ vạch màu, nhà sản xuất in mã số: 2 (hoặc 3) chữ số đầu là giá trị, chữ số cuối là số chữ số `0` thêm vào; chữ `R` đóng vai trò dấu phẩy thập phân (ví dụ `4R7` = $$4.7\ \Omega$$).
+3. **Dãy Giá trị Chuẩn (E12 / E24):** Bạn sẽ không bao giờ mua được điện trở $$213\ \Omega$$; linh kiện sản xuất theo các bội số chuẩn (như `10, 12, 15, 18, 22, 27, 33, 47, 68`) để phủ kín mọi khoảng dung sai mà không cần tồn kho vô hạn trị số.
+
+### Ví dụ cầm tay chỉ việc: Giải mã 4 điện trở phổ biến nhất trên xe robot
+
+Hãy tự tính tay 4 mã gặp hằng ngày rồi kiểm tra lại bằng công thức:
+
+| Loại & Mã đọc được | Công thức giải mã | Trị số & Khoảng dung sai | Ứng dụng quen thuộc |
+|---|---|---|---|
+| **4 vạch:** Vàng – Tím – Đỏ – Vàng kim | $$47 \times 10^2\ \Omega \pm 5\%$$ | **$$4.7\text{ k}\Omega$$** ($$4.465\text{–}4.935\text{ k}\Omega$$) | Điện trở kéo lên (pull-up) bus I2C |
+| **5 vạch:** Nâu – Đen – Đen – Đỏ – Nâu | $$100 \times 10^2\ \Omega \pm 1\%$$ | **$$10\text{ k}\Omega$$** ($$9.9\text{–}10.1\text{ k}\Omega$$) | Điện trở kéo xuống (pull-down) nút nhấn |
+| **SMD 3 số:** `221` | $$22 \times 10^1\ \Omega$$ | **$$220\ \Omega$$** | Điện trở hạn dòng LED trên bo mạch |
+| **SMD chữ R:** `0R1` / `4R7` | $$0.1\ \Omega$$ / $$4.7\ \Omega$$ | **$$0.1\ \Omega$$** / **$$4.7\ \Omega$$** | Điện trở shunt đo dòng động cơ |
+
+### Khung giải thích: 4 mẹo tránh đọc ngược và nhầm màu điện trở (nên đọc chậm)
+
+1. **Bước 1 — Tìm vạch dung sai để đặt đúng chiều đọc:** Vạch vàng kim ($$\pm 5\%$$) hoặc bạc ($$\pm 10\%$$) luôn nằm ở **bên phải** và thường có khoảng cách rộng hơn một chút so với nhóm vạch trị số.
+2. **Bước 2 — Cảnh giác với điện trở thân xanh 5 vạch (Nâu vs. Đỏ):** Dưới đèn bàn ánh sáng vàng, màu Nâu (`1`), Đỏ (`2`) và Cam (`3`) trên nền thân xanh rất dễ lẫn — nguyên tắc vàng: **nghi ngờ là đo lại bằng đồng hồ vạn năng!**
+3. **Bước 3 — Phân biệt mã SMD `100` ($$10\ \Omega$$) với `101` ($$100\ \Omega$$):** Chữ số cuối `0` nghĩa là nhân $$10^0 = 1$$ (không thêm số 0 nào!), nên `100` là $$10\ \Omega$$ chứ không phải $$100\ \Omega$$!
+4. **Bước 4 — Sắp xếp khay linh kiện theo bội số 10:** Gom riêng hàng trăm ohm ($$220, 330\ \Omega$$), hàng kilo-ohm ($$1, 4.7, 10\text{ k}\Omega$$) và ghi nhãn trị số rõ trên từng ngăn hộp.
+
+**Kiểm tra nhanh.** Một điện trở dán trên module động cơ in mã **`103`**, còn một điện trở khác in **`4701`**. Trị số của chúng lần lượt là bao nhiêu? `103` = $$10 \times 10^3 = \mathbf{10\text{ k}\Omega}$$; `4701` (mã 4 số) = $$470 \times 10^1 = \mathbf{4.7\text{ k}\Omega}$$!
+
+---
+
 ## Vì sao xe hai bánh cần đọc chính xác mã điện trở
 
 Đèn báo 3,3 V trên ESP32 hay Pico chỉ sáng đúng thiết kế nếu điện trở bạn cắm thực sự gần mức 180 Ω. Nếu nhầm sang nâu-đen-cam (10 kΩ thay vì 1 kΩ), dòng qua LED chỉ còn:

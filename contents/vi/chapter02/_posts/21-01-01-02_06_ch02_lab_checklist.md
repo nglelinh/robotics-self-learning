@@ -18,6 +18,38 @@ Bài kiểm tra này dùng để chốt lại toàn bộ chương 02 dựa trên
 
 Bài này tổng hợp kết quả từ bài 1 đến bài 5: câu quyết định chọn vi điều khiển (ESP32 hoặc đúng phiên bản Pico), bộ công cụ tương ứng, log nhịp tim (hoặc ghi rõ đang chờ nếu chưa có mạch) và thẻ sơ đồ chân. Bạn cần có đồng hồ vạn năng cho mục đo nguồn. Danh sách linh kiện đầy đủ nằm ở chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Cần đọc lại quy tắc nhấc bánh khỏi bàn từ bài nhịp tim để bảo đảm không đánh dấu đạt khi robot đang có nguy cơ tự lăn.
 
+---
+
+Trước khi viết các thuật toán điều khiển phức tạp như PWM động cơ, ngắt encoder hay máy trạng thái ở Chương 03, bạn cần chắc chắn 100% rằng nền móng vi điều khiển ở Chương 02 đã vững như bàn thạch: nạp code ổn định, không rớt cổng Serial, nhịp tim không chặn chạy đều tăm tắp và đường nguồn không bao giờ sụt áp. **Checklist Chương 02** là bài kiểm tra nghiệm thu nhanh giúp bạn bước sang Chương 03 không mang theo bất kỳ "quả bom nổ chậm" nào.
+
+## Bản đồ kiến thức nền: Nghiệm thu Tầng Vi điều khiển (MCU Bring-Up Verification)
+
+1. **Tính ổn định Nạp & Giao tiếp:** Cắm rút USB 3 lần liên tiếp đều nhận đúng cổng, nạp firmware thành công ở lần đầu và log Serial hiển thị rõ ràng không rác ký tự.
+2. **Định thời Chính xác & Không chặn:** Bộ đếm thời gian (`millis()` / `ticks_ms()`) giữ chu kỳ nhịp tim ổn định, không dùng `delay()` chặn CPU.
+3. **An toàn Đường nguồn & Mức logic:** Có bảng Pinmap rõ ràng, tách biệt nguồn động lực với nguồn logic 3,3 V và xác minh không xảy ra `Brownout Reset`.
+
+### Ví dụ cầm tay chỉ việc: Bốn con số nghiệm thu đầu ra Chương 02
+
+Hãy đối chiếu 4 chỉ số thực đo từ bo mạch của bạn với ngưỡng chuẩn sau:
+
+| Hạng mục kiểm tra | Cách đo / Bằng chứng | Ngưỡng đạt chuẩn | Ví dụ thực đo ĐẠT |
+|---|---|---|---|
+| **1. Chu kỳ log nhịp tim (500 ms)** | Hiệu 2 dòng `t_ms` liên tiếp trên Serial | $$[495\text{ ms},\ 505\text{ ms}]$$ | `t_ms = 1000, 1500, 2001` ($$\Delta = 500\text{–}501\text{ ms}$$) |
+| **2. Tỉ lệ lỗi khung Serial** | Quan sát 60 dòng log ở `115200 bps` | **0%** ký tự rác | 60/60 dòng sạch CSV |
+| **3. Điện áp đường `3V3` chạy tải logic** | Đo DC V tại chân `3V3–GND` | $$[3.20\text{ V},\ 3.40\text{ V}]$$ | $$3.31\text{ V}$$ |
+| **4. Số lần tự reset trong 5 phút** | Theo dõi dòng `BOOT` trên Serial | **0 lần** | 0 lần reset bất thường |
+
+### Khung giải thích: 4 bước xử lý khi một mục trong Checklist Chương 02 chưa đạt (nên đọc chậm)
+
+1. **Bước 1 — Cô lập phần cứng về cấu hình tối thiểu:** Tháo toàn bộ cảm biến/dây nối ngoài, chỉ giữ lại bo MCU trần cắm USB để xác định lỗi thuộc về bo mạch hay thuộc về ngoại vi.
+2. **Bước 2 — Kiểm tra lại tốc độ baud và cáp USB:** 70% lỗi Serial rác hoặc không nạp được đến từ lệch baud rate hoặc cáp USB kém tiếp xúc.
+3. **Bước 3 — Dùng đồng hồ đo lại nguồn trước khi nghi chip hỏng:** Vi điều khiển hiếm khi tự chết nếu chưa bị quá áp; thường do nguồn tụt áp hoặc chân `EN` bị chạm lỏng.
+4. **Bước 4 — Lưu bản chụp log Serial và ảnh Pinmap vào sổ lab:** Đây là mốc tham chiếu cực quý giá nếu sau này lắp thêm động cơ mà bo đột ngột mất ổn định.
+
+**Kiểm tra nhanh.** Nếu nhật ký Serial in `t_ms` nhảy từ `5000` thẳng về `120` giữa chừng mà bạn không hề bấm nút Reset, hiện tượng gì vừa xảy ra? Bo mạch vừa bị **tự khởi động lại (Watchdog reset hoặc Brownout reset)** — cần kiểm tra lại nguồn cấp hoặc vòng lặp bị treo!
+
+---
+
 ## Vì sao bài này gắn với Capstone A
 
 Chương 07 sử dụng vi điều khiển này để chạy chương trình điều khiển từ xa (teleop) cho xe vi sai với hai kênh PWM nối tới TB6612, nguồn pin cấp vào VM, cơ chế tự ngắt sau khoảng 300 ms mất lệnh và quy tắc nhấc bánh khi thử nghiệm. Chương 07 giả định mọi mục trong danh sách kiểm tra này đã hoàn tất. Nếu bước sang chương sau mà vẫn chưa xác định chắc chắn chân mass hay độ ổn định nguồn, bạn sẽ mất thời gian sửa mã nguồn timeout trong khi lỗi thật sự là chip đang bị reset. Đến chương 08, kết nối Wi-Fi trên ESP32 càng dễ lộ lỗi nếu nguồn sụt áp (brownout), biểu hiện như tín hiệu mạng chập chờn. Danh sách kiểm tra này giúp loại bỏ các lỗi phần cứng cơ bản trước khi đi sâu vào phần mềm.

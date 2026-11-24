@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~70 minutes**. Most of that is a slow read of one abstract and a numerical note about 0.2 s of open-loop motion. None of it is a training run.
 
+If you train a simple neural network to copy human robot demonstrations one frame at a time (Behavioral Cloning), a subtle disaster occurs: tiny 1-millimeter errors compound at every tick until the arm drifts into a state the human never demonstrated—and freezes or flails. **Action Chunking with Transformers (ACT)** tames this compounding error by predicting an entire short *chunk* of future actions at once and blending overlapping chunks smoothly.
+
 ## Learning objectives
 
 You will define behavior cloning as a map from observation to action, fitted on demonstrations rather than on a reward. You will state what ACT (Zhao et al., RSS 2023) actually outputs: a chunk of $$k$$ future actions from a transformer, trained as a conditional variational autoencoder so more than one style of demonstration can exist. You will compute the open-loop window for $$k = 10$$ at 50 Hz, connect that window to the Chapter 08 watchdog, and explain temporal ensemble as an average of overlapping chunks without re-deriving the paper.
@@ -21,6 +23,14 @@ You will define behavior cloning as a map from observation to action, fitted on 
 
 Lesson 12-01's dataset card is in your notes: camera, $$v$$ in m/s, $$\omega$$ in rad/s, one fps. You know the firmware zeros the motors 300 ms after the last good frame. You can read an abstract. You do not need a GPU, the ALOHA hardware, or a working install of the policy. If a classmate's machine reports that it ran out of memory, that classmate started the wrong assignment.
 
+
+## Background Knowledge Map: Covariate Shift in Behavioral Cloning, Action Chunking, and CVAE Transformers
+
+ACT solves three classical failure modes of imitation learning:
+
+- **Compounding Error (Covariate Shift):** Under single-step behavioral cloning with per-step error probability $$\epsilon$$ over horizon $$H$$, expected cumulative error grows quadratically as $$O(\epsilon H^2)$$ because each mistake pushes the robot further off the expert's state distribution.
+- **Action Chunking (Effective Horizon Reduction):** Predicting a sequence of $$k$$ future actions $$a_{t:t+k-1}$$ in one forward pass shrinks the effective decision horizon from $$H$$ to $$H/k$$, slashing compounding error and eliminating the "pausing/jittering" caused by noisy human demonstrations.
+- **Conditional VAE + Temporal Ensembling:** Humans solve the same task in multiple valid ways (multimodality). ACT uses a Conditional Variational Autoencoder (CVAE) latent variable $$z$$ during training to separate distinct styles, and **temporal ensembling** at test time to exponentially average overlapping action chunks for silky-smooth motion.
 ## Why this sits on the path
 
 Up through Nav2's tour, the command on `cmd_vel` was one `Twist` per tick, produced by a controller you could name. A learned policy changes the shape of that command. ACT does not emit "the next 20 ms." It emits a short list of future actions and then lets the robot execute them while the network is not being asked again. That list is a burst of open-loop motion. The Capstone bridge can forward the burst. It cannot make the burst safe. The 300 ms timeout still matters, and it is not enough on its own: a timeout fires when frames stop arriving, and a live policy keeps frames arriving for the rest of a bad chunk. This lesson is how you read that burst before anyone suggests you train it.
@@ -70,6 +80,22 @@ $$
 of open loop if you do not replan early. Two seconds of committed forward motion does not belong on the Capstone in a hallway. Knowing the paper uses chunking is not the same as accepting the paper's chunk length on your base.
 
 Temporal ensemble on one overlapping instant: an older chunk still says $$v = 0.25$$ at $$t = 0.20$$, and a newer chunk, queried after the person appeared, says $$v = 0.00$$. A plain average is $$0.125$$ m/s. That is not a stop. Even a weighted average that leans toward the new chunk, say three quarters of the new value and one quarter of the old, is $$0.0625$$ m/s, still forward. Ensemble reduces the command. It does not replace the zero.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Computing ACT Temporal Ensembling Across Overlapping Chunks
+
+Suppose an ACT policy predicts chunks of length $$k = 3$$, and at time $$t = 2$$ three overlapping chunks have each proposed a target joint angle for the current step $$t = 2$$:
+- Chunk from $$t = 0$$ (oldest, index $$i = 0$$): predicted $$a^{(0)}_2 = 1.00\ \text{rad}$$.
+- Chunk from $$t = 1$$ (index $$i = 1$$): predicted $$a^{(1)}_2 = 1.10\ \text{rad}$$.
+- Chunk from $$t = 2$$ (newest, index $$i = 2$$): predicted $$a^{(2)}_2 = 1.16\ \text{rad}$$.
+
+ACT applies exponential decay weights $$w_i = \exp(-m \cdot i)$$ (with decay factor $$m = 0.5$$, weighting older predictions higher or vice versa depending on convention; using $$w_{\text{age}} = e^{-0.5 \cdot \text{age}}$$ to favor fresher observations):
+
+1. **Compute unnormalized weights by age (0 = newest, 2 = oldest):**
+   $$w_0 = e^{0} = 1.000, \qquad w_1 = e^{-0.5} = 0.607, \qquad w_2 = e^{-1.0} = 0.368.$$
+   Sum of weights: $$W = 1.000 + 0.607 + 0.368 = 1.975$$.
+2. **Compute the blended executed command:**
+   $$a_2^{\text{exec}} = \frac{1.000(1.16) + 0.607(1.10) + 0.368(1.00)}{1.975} = \frac{1.160 + 0.668 + 0.368}{1.975} = \frac{2.196}{1.975} = 1.112\ \text{rad}.$$
+3. **Why this works:** Instead of snapping abruptly from $$1.00$$ to $$1.16$$ between chunks, temporal ensembling acts as a learned low-pass filter that preserves responsiveness while suppressing jitter.
 
 ## Lab
 

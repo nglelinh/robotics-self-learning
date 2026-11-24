@@ -13,6 +13,19 @@ draft: false
 
 Thời lượng: **~75 phút**, dành để đọc kỹ hai hệ thống nhằm hoàn thành bảng đối chiếu và nhận diện ba tên tuổi còn lại (không tải hay nạp checkpoint).
 
+ACT và Diffusion Policy rất giỏi thực hiện **một kỹ năng chuyên biệt** mà chúng được dạy (ví dụ "gắp khối đỏ bỏ vào cốc"), nhưng nếu bạn đổi câu lệnh thành *"hãy đặt quả táo lên chiếc đĩa màu xanh gần nhất"*, bạn phải thu dữ liệu và huấn luyện lại từ đầu. **VLA (Vision–Language–Action)** — như RT-2, OpenVLA, $$\pi_0$$ hay SmolVLA — hợp nhất tri thức ngữ nghĩa khổng lồ của mô hình ngôn ngữ–thị giác (VLM) với đầu ra hành động liên tục của robot để hướng tới chính sách đa nhiệm hiểu ngôn ngữ tự nhiên.
+
+## Bản đồ kiến thức nền: Bốn trụ cột của Mô hình Thị giác–Ngôn ngữ–Hành động (VLA)
+
+1. **Nền tảng VLM Tiền huấn luyện (Pretrained Vision–Language Backbone)**:
+   Thừa hưởng khả năng nhận diện vật thể, màu sắc, quan hệ không gian ("bên trái", "phía sau") từ hàng tỷ cặp ảnh–văn bản trên Internet.
+2. **Đầu ra Hành động (Discrete Action Token vs. Flow Matching / Diffusion Head)**:
+   VLA đời đầu (như OpenVLA) lượng tử hóa mỗi chiều hành động thành 256 token rời rạc để sinh giống chữ; thế hệ mới hơn ($$\pi_0$$, SmolVLA) gắn thêm **action expert dùng Flow Matching / Diffusion** để sinh hành động liên tục mượt mà ở tần số cao.
+3. **Khoảng cách Hiện thân (Embodiment Gap) & Fine-tuning**:
+   Mỗi robot có số khớp, góc gắn camera và hệ tọa độ khác nhau. Do đó một mô hình VLA gốc hiếm khi chạy tốt ngay lập tức (zero-shot) trên cánh tay SO-101 của bạn mà thường cần **fine-tune (LoRA)** trên vài chục đến vài trăm tập dữ liệu đặc thù của đúng cánh tay đó.
+4. **Đánh đổi Tốc độ – Kích thước (7B Parameters vs. Edge Deployment)**:
+   Chạy mô hình 7 tỷ tham số ở 5–10 Hz đòi hỏi GPU mạnh (hoặc suy luận qua mạng LAN), mở ra hướng nén mô hình nhỏ gọn (SmolVLA) và suy luận bất đồng bộ.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ định nghĩa được mô hình **Vision-Language-Action (VLA)** là ánh xạ từ hình ảnh kết hợp câu lệnh ngôn ngữ sang hành động của một robot cụ thể. Bạn đặt được năm hệ thống tiêu biểu — **RT-1**, **RT-2**, **Open X-Embodiment**, **OpenVLA** và **pi0** — lên cùng một khung so sánh (đầu vào, không gian hành động và mức độ tương thích với `Twist` hoặc góc khớp của Capstone/SO-101). Bạn cũng sẽ diễn giải rõ khoảng cách hình thái phần cứng (*embodiment gap*) qua ví dụ cụ thể, nắm vững nguyên tắc ưu tiên watchdog phần cứng cao hơn mọi câu lệnh ngôn ngữ và đánh giá trung thực khả năng huấn luyện tại nhà trên laptop.
@@ -68,6 +81,16 @@ Phần thực hành tay máy nằm ở [bài lab tay SO-101]({% multilang_post_u
 | Hệ thống | Đầu vào | Không gian hành động | Có phải 6 khớp SO-101? | Chạy trên laptop tối nay? |
 | --- | --- | --- | --- | --- |
 | SO-101 của bạn | Ảnh camera (nếu gắn) kèm trạng thái khớp | 6 giá trị theo đúng đơn vị trong tệp dataset | Có, vì đây là phần cứng bạn trực tiếp thu dữ liệu | Đọc tài liệu và hiệu chỉnh (khi có tay trên bàn): có. Huấn luyện không có GPU: không |
+
+### Khung giải thích (nên đọc chậm): Tính tay sai số lượng tử hóa khi mã hóa hành động thành 256 bin rời rạc
+
+Giả sử một mô hình VLA rời rạc hóa góc khớp vai $$q_1 \in [-90^\circ, +90^\circ]$$ (dải rộng $$180^\circ$$) thành đúng **256 token hành động** (tương ứng 255 khoảng chia đều):
+- Độ phân giải góc mỗi bước token:
+  $$\Delta q = \frac{180^\circ}{255} \approx \mathbf{0{,}706^\circ}.$$
+- Nếu cánh tay dài $$L = 0{,}40\text{ m}$$, sai số vị trí đầu kẹp chỉ riêng do làm tròn góc 1 khớp đã là:
+  $$\Delta s = L \cdot \Delta q_{\text{rad}} = 0{,}40 \times \left(0{,}706 \times \frac{\pi}{180}\right) \approx \mathbf{4{,}9\text{ mm}}!$$
+
+Sai số 5 mm này không vấn đề gì khi nhặt một quả cam, nhưng sẽ làm **kẹt cứng** khi cắm một đầu dây USB đòi hỏi dung sai dưới 1 mm! Đó chính là lý do các VLA mới như $$\pi_0$$ chuyển từ token rời rạc sang đầu ra liên tục (Flow Matching / Diffusion)!
 
 ## Lab
 

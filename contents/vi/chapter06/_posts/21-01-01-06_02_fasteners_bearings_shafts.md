@@ -13,6 +13,32 @@ draft: false
 
 Thời lượng ước tính: **70–90 phút**, bao gồm thời gian phân loại một bộ ốc nhỏ và chụp ảnh so sánh đai ốc nyloc với đai ốc thường.
 
+Phần mềm điều khiển của bạn có thể tinh vi đến đâu đi nữa, nhưng nếu một con vít chí (set screw) trên khớp nối bánh xe bị tuôn ren sau 10 phút rung lắc, cả con robot lập tức đứng im bất lực. Những chi tiết cơ khí tưởng như "lặt vặt" nhất — **ốc vít hệ mét, vòng bi (bạc đạn), trục D-shaft và khớp nối mềm** — lại chính là nguyên nhân số một gây hỏng vặt trên các dự án robot sinh viên. Nắm vững ngôn ngữ tiêu chuẩn của chúng giúp bạn lắp ráp chắc chắn, đồng tâm và dễ bảo trì.
+
+## Bản đồ kiến thức nền: Tiêu chuẩn ren hệ mét, Ổ lăn và Khớp nối trục
+
+### 1. Quy ước ốc vít hệ mét (M3, M4) và chống tự tháo do rung
+Ký hiệu `M3 × 12` nghĩa là đường kính danh nghĩa **$$3\text{ mm}$$**, chiều dài thân ren **$$12\text{ mm}$$**, bước ren thô tiêu chuẩn **$$0{,}5\text{ mm/vòng}$$**. Trên robot có động cơ rung liên tục, đai ốc thường sẽ tự xoay lỏng rất nhanh — giải pháp chuẩn là dùng **đai ốc chống trượt có vòng nylon (nyloc)**, long-đen vênh, hoặc keo khóa ren tháo được (Loctite xanh 243; *tránh dùng keo đỏ trên ốc nhỏ M3*).
+
+### 2. Bạc đạn (Vòng bi) — đỡ tải hướng kính và giảm mô-men uốn lên trục động cơ
+Trục hộp số động cơ nhỏ không được thiết kế để gánh tải trọng nặng treo lơ lửng quá xa vỏ hộp số. **Vòng bi cầu rãnh sâu** (như 608ZZ, 688ZZ) thay ma sát trượt bằng ma sát lăn cực nhỏ, đỡ tải hướng kính (radial load) và giữ trục đồng tâm, bảo vệ bánh răng bên trong động cơ khỏi bị mòn lệch.
+
+### 3. Trục vát cạnh (D-Shaft) và Khớp nối mềm (Flexible Coupling)
+Bắt vít chí lên trục tròn trơn rất dễ trượt xoay khi gặp mô-men lớn; trục **D-shaft** (vát một mặt phẳng) khóa chặt mô-men xoay cơ học. Khi nối hai trục độc lập (ví dụ trục động cơ nối trục vitme), luôn dùng **khớp nối mềm** (khớp nối lò xo nhôm hoặc khớp nối cao su jaw coupling) để hấp thụ độ lệch tâm nhỏ $$0{,}1\text{–}0{,}3\text{ mm}$$ thay vì ép cứng làm kẹt và nóng động cơ.
+
+### Khung giải thích: Cầm tay kiểm tra chiều dài ăn ren M3 và mô-men uốn trên trục bánh xe (nên đọc chậm)
+
+**Phần A — Chọn đúng chiều dài ốc `M3` (bước ren $$p = 0{,}5\text{ mm/vòng}$$):**
+- Quy tắc bền cơ khí: chiều dài ăn ren tối thiểu trong nhôm/nhựa cứng nên đạt **$$1{,}5\text{–}2{,}0 \times d$$**, tức với ốc M3 cần tối thiểu $$4{,}5\text{–}6{,}0\text{ mm}$$ (tương đương $$6{,}0 / 0{,}5 = 12$$ vòng ren ăn khớp!).
+- Nếu bạn bắt một tấm khung dày $$4\text{ mm}$$ kèm long-đen $$0{,}5\text{ mm}$$ vào trụ đồng có lỗ ren sâu $$6\text{ mm}$$, chiều dài ốc lý tưởng là $$4 + 0{,}5 + 5{,}5 = 10\text{ mm}$$ (`M3 × 10`). Dùng ốc `M3 × 6` chỉ ăn được $$1{,}5\text{ mm}$$ (3 vòng ren) sẽ tuôn ren ngay khi siết!
+
+**Phần B — Tại sao phải lắp bánh xe sát vào bạc đạn/vỏ động cơ nhất có thể?**
+Giả sử mỗi bánh xe gánh tải trọng đứng $$F = 15\text{ N}$$:
+- Nếu tâm bánh xe cách ổ đỡ/vỏ động cơ **$$d_1 = 1{,}0\text{ cm} = 0{,}01\text{ m}$$**:
+  Mô-men uốn lên trục: $$M_1 = F \cdot d_1 = 15 \times 0{,}01 = 0{,}15\text{ N}\cdot\text{m}$$.
+- Nếu bạn dùng trục nối dài đẩy tâm bánh ra cách **$$d_2 = 3{,}0\text{ cm} = 0{,}03\text{ m}$$** mà không thêm bạc đạn đỡ ngoài:
+  Mô-men uốn tăng vọt gấp **3 lần**: $$M_2 = 15 \times 0{,}03 = 0{,}45\text{ N}\cdot\text{m}$$ — dễ làm cong trục hoặc phá bạc đồng bên trong hộp số chỉ sau vài buổi chạy!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn phân biệt được ốc M2, M3 và M4 thông qua việc đo đường kính ren, biết chọn đai ốc nyloc cho các mối ghép dễ tự tháo khi rung, và siết vít cố định trục (set screw) đúng vào mặt vát của trục chữ D. Các bạn cũng xác định được khi nào nên dùng bạc đạn bi 608 (cho con lăn in 3D), khi nào nên giữ nguyên bạc lót sẵn có trong hộp giảm tốc TT, và biết chọn khớp nối theo đúng đường kính trục đo thực tế thay vì dựa vào trí nhớ.

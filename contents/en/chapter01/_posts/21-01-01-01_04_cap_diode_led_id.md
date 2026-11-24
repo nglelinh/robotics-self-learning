@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Why does an ESP32 sometimes reboot spontaneously the exact millisecond a DC motor stops spinning, even when the battery is fully charged? Two humble two-terminal parts — **capacitors** and **diodes** — are the silent bodyguards that stop that crash. A capacitor acts like a local water tank that supplies microsecond current spikes right beside an IC's power pins, while a flyback diode acts like a one-way pressure-relief valve that safely redirects the inductive voltage kick from a collapsing motor magnetic field.
+
+This lesson pairs physical component identification with the differential equations that make capacitors, diodes, and LEDs indispensable on every robot board.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you will be able to point at the stripe on an aluminum electrolytic and say that it marks the negative lead, and you will treat a ceramic disc or chip capacitor as non-polar unless the body says otherwise. You will read a ceramic code such as 104 as 100 nF. You will name the cathode of a diode by its band, and you will check an LED with the meter's diode mode instead of trusting the long lead alone. You will also explain why a 100 µF capacitor across a motor driver's VM pin softens short spikes and still does not replace a separate motor supply for two TT motors.
@@ -18,6 +24,16 @@ By the end of this lesson you will be able to point at the stripe on an aluminum
 ## Prerequisites
 
 You can use $V = IR$ and you can size the series resistor for a red LED on 3.3 V. You know that diode mode belongs on an unpowered part, with the red lead out of the current jack. If the kit has not arrived, the photographs still carry the polarity rules. The lab is a diode test, not a powered experiment.
+
+## Background Knowledge Map: Energy Storage in Electric Fields, Semiconductor Junctions, and Inductive Flyback
+
+Three physical mechanisms unite capacitors, diodes, and LEDs in robotics:
+
+- **Capacitor Dynamics ($$i = C\frac{dv}{dt}$$):** Capacitors oppose abrupt changes in *voltage*. Placing a $$0.1\,\mu\text{F}$$ ceramic decoupling capacitor beside an IC filters high-frequency switching noise, while a $$100\text{–}470\,\mu\text{F}$$ electrolytic bulk capacitor absorbs millisecond motor startup dips.
+- **PN-Junction Rectification & Forward Drop ($$V_f$$):** Diodes conduct easily in one direction once forward voltage exceeds $$V_f$$ ($$\approx 0.7\text{ V}$$ for silicon `1N4007`, $$\approx 0.3\text{ V}$$ for Schottky `1N5819`, and $$1.8\text{–}3.2\text{ V}$$ for LEDs) and block reverse current up to their reverse breakdown rating.
+- **Inductive Flyback Protection ($$v = L\frac{di}{dt}$$):** A spinning motor coil stores magnetic energy. Switching off its current abruptly makes $$di/dt$$ huge and negative, generating a high-voltage spike that destroys MOSFETs unless a **flyback (freewheeling) diode** gives the inductive current a safe recirculating loop.r
+
+---
 
 ## Why this matters on the diff-drive robot
 
@@ -101,6 +117,31 @@ You should see one direction of each diode conduct and the other block. The LED 
 A reversed aluminum electrolytic on a live rail does not sit there politely. The oxide film breaks down, leakage current heats the electrolyte, pressure rises, and the scored vent on the can opens or the can ruptures. The failed part often becomes a short. On a motor pack that short can dump the cells. We describe it so you can recognize a vented can. We do not build it.
 
 Safety: diode mode only, parts out of circuit, USB unplugged, no VM connected. Do not discharge a large capacitor by shorting it with your fingers or with a probe tip you are holding. The 100 µF parts in this kit are small; the habit still matters when a later board is not.
+
+## Deep-Dive Explanation (Read Slowly): RC Time Constants and Sizing a Bulk Decoupling Capacitor by Hand
+
+How large does a bulk capacitor need to be to keep a 5 V logic rail from dipping during a brief motor surge? Walk through the exact 4-step physics calculation:
+
+1. **Use the capacitor charge equation:** $$\Delta V = \frac{I_{\text{pulse}} \cdot \Delta t}{C}$$.
+2. **Solve for minimum capacitance $$C$$:** Given a transient current deficit $$I_{\text{pulse}}$$ lasting $$\Delta t$$ and maximum tolerable voltage droop $$\Delta V_{\max}$$, we need $$C \ge \frac{I_{\text{pulse}} \Delta t}{\Delta V_{\max}}$$.
+3. **Check the RC time constant $$\tau = RC$$:** For a simple RC debounce or low-pass filter, the voltage reaches $$63.2\%$$ of its final value after $$1\tau$$ and $$99.3\%$$ after $$5\tau$$, with cutoff frequency $$f_c = \frac{1}{2\pi R C}$$.
+4. **Verify voltage rating and polarity:** Electrolytic capacitors must have a voltage rating at least $$1.5\times\text{–}2\times$$ the rail voltage (e.g., 16 V cap on a 7.4 V rail) and strictly match `+/-` polarity.
+
+### Concrete Worked Example: Bulk Capacitor Droop & RC Low-Pass Filter Calculation
+
+- **Part A — Hold-up capacitance during a 2 ms, 0.5 A current transient:**
+  Suppose your 5 V logic rail can tolerate at most $$\Delta V_{\max} = 0.25\text{ V}$$ droop while the buck converter responds over $$\Delta t = 2\text{ ms} = 0.002\text{ s}$$ to a $$I_{\text{pulse}} = 0.5\text{ A}$$ spike:
+  $$C \ge \frac{0.5\text{ A} \times 0.002\text{ s}}{0.25\text{ V}} = \frac{0.001}{0.25} = 0.004\text{ F} = 4000\,\mu\text{F}$$
+  (or for a shorter $$200\,\mu\text{s}$$ switching transient, $$C \ge 400\,\mu\text{F}$$ — which is why a $$470\,\mu\text{F}$$ bulk electrolytic cap sits on motor driver boards!).
+- **Part B — RC button-debounce filter with $$R = 10\text{ k}\Omega$$ and $$C = 1\,\mu\text{F}$$:**
+  - Time constant: $$\tau = R C = 10^4\,\Omega \times 10^{-6}\text{ F} = 0.01\text{ s} = 10\text{ ms}$$.
+  - Cutoff frequency: $$f_c = \frac{1}{2\pi (0.01)} \approx 15.9\text{ Hz}$$ — cleanly smooths out 1–5 ms mechanical switch bounce while responding crisply to human button presses.
+
+**Common Pitfall:** Wiring a flyback diode *forward-biased* across a motor supply (creating a dead short) or wiring an electrolytic capacitor backward (heating and venting electrolyte). Remember: the stripe on a diode marks the **cathode** (`K`), which goes toward `V+` for a flyback diode.
+
+**Quick Check:** Decode ceramic capacitor code `104`: $$10 \times 10^4\text{ pF} = 100\,000\text{ pF} = 100\text{ nF} = 0.1\,\mu\text{F}$$ — the universal decoupling capacitor on almost every digital IC.
+
+---
 
 ## Exercises
 

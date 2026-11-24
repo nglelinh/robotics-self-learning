@@ -13,6 +13,38 @@ draft: false
 
 Thời lượng: **50–70 phút**. Đây là mốc kiểm tra hoàn thành chương, không bổ sung cảm biến mới. Bạn vượt qua chương 04 khi `lab-notes.md` chứa đầy đủ các bằng chứng đo kiểm bên dưới trước khi chuyển sang Chương 05.
 
+Trước khi để robot tự chạy vòng kín trong phòng lab, một kỹ sư robotics kỳ cựu không bao giờ vội viết thuật toán điều hướng ngay — họ dành 15 phút để **kiểm định từng cảm biến lúc đứng yên và lúc chuyển động chậm**. Bởi nếu một dây encoder lỏng làm mất xung, một trục IMU bị đảo dấu, hay một cảm biến siêu âm nhiễu quá mức, thì bộ điều khiển thông minh nhất thế giới cũng sẽ lái robot đâm thẳng vào tường. Checklist Chương 04 đóng vai trò như "bảng kiểm trước giờ bay" giúp bạn tách biệt lỗi phần cứng/cảm biến khỏi lỗi thuật toán.
+
+## Bản đồ kiến thức nền: Kiểm định cảm biến theo quy chuẩn đo lường
+
+### 1. Độ chính xác (Accuracy) vs. Độ chụm (Precision / Noise Floor)
+- **Độ chính xác (Accuracy):** trung bình các phép đo có nằm sát giá trị thực tế hay bị lệch hằng số (**bias**)? Bias sửa được bằng **hiệu chuẩn (calibration)**.
+- **Độ chụm (Precision):** khi robot đứng yên tuyệt đối, các mẫu đo dao động quanh trung bình với độ lệch chuẩn $$\sigma$$ lớn cỡ nào? Độ phân tán $$\sigma$$ phản ánh **sàn nhiễu (noise floor)** của cảm biến.
+
+### 2. Quy ước dấu và hệ tọa độ đồng nhất (REP-103)
+Trong robotics (đặc biệt khi tiến lên ROS 2 ở các chương sau), quy ước chuẩn là hệ tọa độ tay phải: trục **X hướng về phía trước**, **Y sang trái**, **Z hướng lên trên**; quay ngược chiều kim đồng hồ nhìn từ trên xuống là **yaw dương (+)**. Kiểm tra dấu encoder và gyro ngay từ lab Chương 04 giúp bạn tránh hàng giờ gỡ lỗi ngược hướng về sau.
+
+### 3. Đánh đổi giữa lọc nhiễu (Averaging) và độ trễ pha
+Lấy trung bình trượt $$N$$ mẫu độc lập giúp giảm độ lệch chuẩn nhiễu đi $$\sqrt{N}$$ lần, nhưng đồng thời cộng thêm độ trễ trung bình $$\frac{N-1}{2}\Delta t$$. Trong vòng điều khiển nhanh, lọc quá tay sẽ làm robot phản ứng chậm và lắc qua lại.
+
+### Khung giải thích: Cầm tay tính trung bình, độ lệch chuẩn sàn nhiễu và hiệu quả lọc trung bình 4 mẫu (nên đọc chậm)
+
+Khi robot đứng yên cách tường phẳng đúng **$$20{,}0\text{ cm}$$**, bạn ghi lại 5 mẫu liên tiếp từ cảm biến khoảng cách (đơn vị cm):
+$$[20{,}0,\quad 20{,}4,\quad 19{,}6,\quad 20{,}2,\quad 19{,}8].$$
+
+1. **Tính giá trị trung bình mẫu ($$\bar{x}$$):**
+   $$\bar{x} = \frac{20{,}0 + 20{,}4 + 19{,}6 + 20{,}2 + 19{,}8}{5} = \frac{100{,}0}{5} = 20{,}0\text{ cm}$$
+   *(Bias $$\approx 0$$ — cảm biến đã được hiệu chuẩn tốt!)*
+
+2. **Tính phương sai mẫu ($$s^2$$) và độ lệch chuẩn sàn nhiễu ($$s$$):**
+   Các độ lệch $$(x_i - \bar{x})$$: $$[0,\; +0{,}4,\; -0{,}4,\; +0{,}2,\; -0{,}2]$$.
+   $$s^2 = \frac{0^2 + 0{,}4^2 + (-0{,}4)^2 + 0{,}2^2 + (-0{,}2)^2}{5 - 1} = \frac{0 + 0{,}16 + 0{,}16 + 0{,}04 + 0{,}04}{4} = \frac{0{,}40}{4} = 0{,}10\text{ cm}^2.$$
+   $$s = \sqrt{0{,}10} \approx 0{,}316\text{ cm}.$$
+
+3. **Nếu gom trung bình $$N = 4$$ mẫu ở tần số đo $$20\text{ Hz}$$ ($$\Delta t = 50\text{ ms}$$):**
+   - Sàn nhiễu giảm xuống còn: $$s_{\text{mới}} = \frac{0{,}316}{\sqrt{4}} = 0{,}158\text{ cm}$$ (mịn gấp đôi!).
+   - Cái giá phải trả: độ trễ trung bình tăng thêm $$\frac{4-1}{2} \times 50\text{ ms} = 75\text{ ms}$$ — hoàn toàn chấp nhận được cho robot chạy chậm $$0{,}2\text{ m/s}$$ (chỉ đi thêm $$1{,}5\text{ cm}$$), nhưng sẽ quá chậm cho drone bay nhanh!
+
 ## Mục tiêu học
 
 Bạn tự đánh giá sổ thực hành Chương 04 theo tiêu chí đạt/trượt rõ ràng: có địa chỉ I2C kèm ảnh đấu dây, có giá trị $$N$$ đo bằng tay cho encoder cùng mét trên mỗi xung, có số đo IMU lúc nằm yên (hoặc ghi chú hoãn có ngày kèm tính tay), có bảng sai số đo khoảng cách (hoặc bản dry-run 5,8 ms và 3,33 V), và có câu quyết định hoãn camera chứa con số 147 Mbit/s. Bạn trình bày gọn gàng trong một khối mẫu để người khác dễ kiểm tra, ghi nhận hai lỗi thực tế đã gặp (hoặc chủ động tái hiện để kiểm chứng) và phân biệt được một bản ghi chép kín chữ nhưng vẫn không đạt yêu cầu.

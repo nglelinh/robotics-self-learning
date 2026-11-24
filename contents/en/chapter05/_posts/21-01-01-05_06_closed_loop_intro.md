@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In 1788, James Watt bolted two spinning brass balls onto a steam engine — the centrifugal flyball governor. When the engine sped up, the balls swung outward and pinched the steam valve shut; when it slowed down under load, they dropped and opened the valve wider. Without a single line of code, Watt had harnessed the most powerful idea in all of engineering: **negative feedback**. On your robot, open-loop PWM ("set duty = 50%") fails the instant the battery drains or the floor shifts from tile to carpet; **closed-loop control** (*sense → compute → act*) measures actual speed every 10 milliseconds and automatically compensates.
+
+This culminating lab of Chapter 05 brings every chapter together — electronics, MCU timers, encoders, H-bridges, and feedback control — into one living closed-loop wheel controller.r
+
+---
+
 Every later controller on this robot is the same three boxes: sense, compute, act. This lab closes them with the rudest computer that still counts: if the range is inside 20 cm, the wheel PWM is zero; otherwise a modest forward PWM is allowed. That law is bang-bang. PID arrives in Chapter 08. What you practice now is the safety shape those later laws must keep: a failed sensor means stop.
 
 ## Learning objectives
@@ -23,6 +29,17 @@ Every later controller on this robot is the same three boxes: sense, compute, ac
 ## Prerequisites
 
 You need a range reading from the ultrasonic or time-of-flight lesson in Chapter 04, in millimetres or in centimetres you can convert. You need one motor channel whose forward truth table you wrote in lesson 05-01, on a driver you can name from lesson 05-02. Wheels come off the ground before they touch the floor. A cardboard target and a power switch you can hit with your hand are part of the apparatus.
+
+## Background Knowledge Map: Open-Loop vs. Closed-Loop Control, Proportional–Integral Action, and Anti-Windup
+
+Four control-theory pillars turn a spinning motor into a precision velocity actuator:
+
+- **Error-Driven Feedback ($$e_k = r_k - y_k$$):** At each discrete tick $$k$$ (period $$\Delta t$$), the controller compares desired wheel velocity $$r_k$$ against encoder-measured velocity $$y_k$$ and computes command $$u_k$$.
+- **Proportional (P) vs. Integral (I) Action:** Pure proportional control $$u_k = K_p e_k$$ responds instantly to error, yet **always leaves steady-state error** against constant friction or gravity (if $$e = 0$$, $$u = 0$$, so the wheel stops!). Adding an integral term $$I_k = I_{k-1} + K_i e_k \Delta t$$ accumulates persistent error until steady-state error reaches **exact zero**.
+- **Feedforward + Feedback:** Combining a rough open-loop model $$u_{\text{ff}} = k_v r_k$$ with PI feedback lets the feedback loop handle only *disturbances* (battery droop, carpet friction), cutting rise time in half.
+- **Actuator Saturation & Integrator Anti-Windup:** PWM is bounded to $$[-u_{\max}, +u_{\max}]$$. If a wheel jams while the integrator keeps summing error blindly, the integral term grows enormous (*windup*) and causes violent overshoot once released. Clamping the integrator whenever output saturates eliminates windup cleanly.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -136,6 +153,34 @@ A note with three cases (far → forward, near → stop, timeout or 0 → stop) 
 | Wheel runs backward | IN1 and IN2 do not match the forward row of your truth table. |
 | Robot never starts | Every read is inside the stop band, the target is too close, or STBY / enable is low. |
 | Floor run does not stop | Wrong units (cm compared with 200), or the sensor is aimed over the cardboard. Cut power. |
+
+## Deep-Dive Explanation (Read Slowly): Hand-Stepping 3 Ticks of a Discrete PI Wheel Velocity Controller
+
+Before tuning gains on your robot, trace three consecutive 100 Hz control ticks ($$\Delta t = 0.01\text{ s}$$) of a discrete **PI velocity controller** by hand:
+
+1. **Write the discrete PI update equations:**
+   $$e_k = r_k - y_k, \qquad I_k = \operatorname{clamp}\bigl(I_{k-1} + K_i e_k \Delta t,\; -u_{\max}, +u_{\max}\bigr), \qquad u_k = \operatorname{clamp}\bigl(K_p e_k + I_k,\; -u_{\max}, +u_{\max}\bigr).$$
+2. **Initialize state cleanly:** $$I_0 = 0$$, command range $$u \in [-1.0, +1.0]$$ (normalized PWM duty).
+3. **Update error, integral, and PWM at each tick** using actual encoder feedback $$y_k$$.
+4. **Watch the integral term carry the friction load** as error shrinks toward zero!
+
+### Concrete Worked Example: 3 Control Ticks with $$K_p = 1.2\text{ s/m}$$, $$K_i = 8.0\text{ m}^{-1}$$, Target $$r = 0.40\text{ m/s}$$
+
+Suppose the robot commands $$r = 0.40\text{ m/s}$$ from rest ($$\Delta t = 0.01\text{ s}$$, so $$K_i \Delta t = 0.08$$, $$I_0 = 0$$), and the encoder measures $$y_1 = 0.00$$, $$y_2 = 0.15$$, $$y_3 = 0.30\text{ m/s}$$:
+
+| Tick $$k$$ | Meas $$y_k$$ (m/s) | Error $$e_k = 0.40 - y_k$$ | P-term $$1.2 e_k$$ | Integrator $$I_k = I_{k-1} + 0.08 e_k$$ | Output $$u_k = P + I_k$$ (PWM %) |
+| --- | --- | --- | --- | --- | --- |
+| $$1$$ | $$0.00$$ | $$+0.40$$ | $$+0.480$$ | $$0 + 0.032 = 0.032$$ | $$0.512$$ (51.2%) |
+| $$2$$ | $$0.15$$ | $$+0.25$$ | $$+0.300$$ | $$0.032 + 0.020 = 0.052$$ | $$0.352$$ (35.2%) |
+| $$3$$ | $$0.30$$ | $$+0.10$$ | $$+0.120$$ | $$0.052 + 0.008 = 0.060$$ | $$0.180$$ (18.0%) |
+
+Look at what happens as $$y_k \to 0.40\text{ m/s}$$: the proportional term smoothly tapers to `0`, while the integral term $$I_k$$ climbs and settles at the exact steady-state PWM needed to overcome motor friction and battery level — locking the wheel onto $$0.40\text{ m/s}$$ automatically!
+
+**Common Pitfall:** Using **positive feedback** by accident (wiring the encoder backward or writing `e = y - r` instead of `e = r - y`) — instead of braking when too fast, the controller slams PWM to `100%` and runs away uncontrollably! Always test with wheels lifted off the desk first.
+
+**Quick Check:** If steady-state cruise at $$0.40\text{ m/s}$$ requires $$u = 0.36$$ PWM and you run *pure P-control* ($$K_i = 0, K_p = 1.2$$), the wheel can never reach $$0.40\text{ m/s}$$ — it stalls at $$e_{\text{ss}} = 0.36 / 1.2 = 0.30\text{ m/s}$$ error (only $$y = 0.10\text{ m/s}$$!). That single division proves why integral action or feedforward is essential.
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

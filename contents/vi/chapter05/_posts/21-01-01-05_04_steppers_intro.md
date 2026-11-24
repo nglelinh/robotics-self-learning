@@ -13,6 +13,34 @@ draft: false
 
 Động cơ bước (stepper) di chuyển theo từng nấc góc rời rạc theo số xung bạn cấp. Bài này trình bày về động cơ bước hybrid $1{,}8^\circ$, tác dụng thực sự của chế độ vi bước (microstep), cách tính và chỉnh điện áp tham chiếu giới hạn dòng trên mạch lái kiểu A4988 mà không vặn biến trở theo cảm tính, cũng như lý do hệ dẫn động của Capstone A vẫn dùng động cơ DC kết hợp encoder.
 
+Nếu bạn từng đứng ngắm một chiếc máy in 3D vẽ từng đường nhựa mảnh như sợi tóc lặp đi lặp lại chính xác đến phần trăm milimet mà *không hề có một cái encoder nào trên trục động cơ*, bạn đã chứng kiến sức mạnh của **động cơ bước (stepper motor)**. Thay vì quay liên tục như động cơ DC, động cơ bước chia một vòng quay thành hàng trăm nấc từ trường rời rạc; mỗi khi bộ điều khiển gửi một xung `STEP`, roto nhảy chính xác thêm đúng một bước góc — biến chuyển động cơ khí thành một bài toán đếm xung số hóa thuần túy!
+
+## Bản đồ kiến thức nền: Từ trường bước rời rạc, Vi bước (Microstepping) và Đường cong mô-men
+
+### 1. Cấu trúc cực từ và bước góc cơ bản (Full-Step)
+Động cơ bước lưỡng cực phổ biến nhất (NEMA 17) có góc bước cơ bản **$$1{,}8^\circ$$**, tương đương **$$360^\circ / 1{,}8^\circ = 200\text{ bước/vòng}$$**. Nhờ điều khiển hở vòng (open-loop) theo xung `STEP` và chân hướng `DIR`, ta biết chính xác vị trí góc mà không cần cảm biến phản hồi — với điều kiện tuyệt đối là tải không bao giờ vượt quá mô-men giữ làm **trượt bước (missed steps)**.
+
+### 2. Vi bước (Microstepping) — mượt hơn nhờ điều chế dòng hình sin–cos
+Chạy bước đủ (full-step) gây rung và cộng hưởng cơ khí mạnh. Driver hiện đại (A4988, DRV8825, TMC2209) điều khiển dòng điện qua hai cuộn dây A và B theo hàm $$\cos\theta$$ và $$\sin\theta$$ để chia mỗi bước đủ thành $$4, 8, 16$$ hoặc $$256$$ **vi bước (microsteps)**. Chuyển động trở nên êm ru, nhưng hãy nhớ một sự thật vật lý quan trọng: vi bước giúp **tăng độ mượt**, chứ *không* tăng độ chính xác tuyệt đối tương xứng vì mô-men gia tăng giữa hai vi bước kề nhau rất nhỏ!
+
+### 3. Giới hạn tần số xung và sụt giảm mô-men ở tốc độ cao
+Khi động cơ bước quay nhanh, sức phản điện động và độ tự cảm cuộn dây $$L$$ cản trở dòng điện tăng kịp trong thời gian một bước quá ngắn, khiến mô-men giảm mạnh ở RPM cao. Đó là lý do mọi máy CNC/máy in 3D đều cần **hồ sơ tăng tốc hình thang hoặc đường cong chữ S (acceleration ramp)** thay vì nhảy vọt ngay từ 0 lên tốc độ tối đa.
+
+### Khung giải thích: Cầm tay tính tần số xung vi bước 1/16 và độ sụt mô-men gia tăng (nên đọc chậm)
+
+Xét động cơ NEMA 17 chuẩn (**$$1{,}8^\circ/\text{bước}$$**, tức **200 bước/vòng**) chạy ở chế độ vi bước **1/16** với mục tiêu quay đều ở tốc độ **$$120\text{ RPM}$$**:
+
+1. **Độ phân giải góc và tổng số vi bước mỗi vòng:**
+   $$N_{\text{micro}} = 200 \times 16 = 3\,200\text{ vi bước/vòng}, \qquad \Delta\theta = \frac{1{,}8^\circ}{16} = 0{,}1125^\circ/\text{vi bước}.$$
+2. **Tần số xung `STEP` vi điều khiển phải phát:**
+   Tốc độ $$120\text{ RPM} = \frac{120}{60} = 2\text{ vòng/giây}$$.
+   $$f_{\text{step}} = 2\text{ vòng/s} \times 3\,200\text{ vi bước/vòng} = 6\,400\text{ Hz} \implies T_{\text{step}} = \frac{1}{6\,400} = 156{,}25\,\mu\text{s}.$$
+   Nếu vi điều khiển bận in `Serial.println()` chậm mất $$1\text{ ms}$$, động cơ sẽ lập tức khựng và trượt bước!
+3. **Kiểm chứng độ sụt mô-men gia tăng (Incremental Torque) ở vi bước 1/16:**
+   Mô-men kéo roto nhảy đúng 1 vi bước tỉ lệ với $$\sin\!\left(\frac{90^\circ}{M}\right)$$ (với $$M = 16$$ là hệ số vi bước):
+   $$\frac{\tau_{\text{inc}}}{\tau_{\text{hold}}} = \sin\!\left(\frac{90^\circ}{16}\right) = \sin(5{,}625^\circ) \approx 0{,}098 = 9{,}8\%!$$
+   Nghĩa là mỗi vi bước 1/16 chỉ tạo được chưa đầy **10%** mô-men giữ toàn phần — nếu ma sát trục lớn hơn $$9{,}8\%$$ mô-men giữ, roto sẽ đứng im vài vi bước rồi mới nhảy cục bộ!
+
 ## Mục tiêu học
 
 Sau bài này, bạn quy đổi được góc bước đầy $1{,}8^\circ$ thành 200 bước mỗi vòng và tính được số bước trên trục ra sau hộp giảm tốc. Bạn hiểu vi bước (1/2, 1/4, 1/16) giúp chuyển động mượt hơn nhưng không làm tăng mô-men giữ của động cơ. Bạn tính được điện áp tham chiếu $$V_{ref}$$ cho mạch A4988 khi điện trở cảm biến dòng là $$0.068~\Omega$$ và biết điều chỉnh công thức khi bo mạch clone dùng $$0.1~\Omega$$. Bạn cũng nhận diện được kiểu lỗi đặc trưng của điều khiển vòng hở: mất bước dưới tải xảy ra âm thầm mà không báo lỗi.

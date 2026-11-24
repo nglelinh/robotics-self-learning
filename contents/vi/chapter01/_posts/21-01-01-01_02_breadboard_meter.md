@@ -19,6 +19,40 @@ Sau bài học này, bạn sẽ nhận diện chính xác cấu trúc dải năm
 
 Bạn đã nắm được khái niệm vôn, ampe và lý do đèn LED báo trạng thái phải có điện trở nối tiếp. Bài này không lặp lại định luật Ohm mà tập trung vào kỹ năng thao tác trên bàn lab: hiểu rõ sơ đồ nối lỗ của breadboard và chọn đúng thang đo trên đồng hồ để không vô tình gây ngắn mạch. Bạn chỉ cần một đồng hồ vạn năng số và một breadboard không hàn.
 
+---
+
+Hàng trăm sinh viên điện tử đã từng dành trọn một buổi chiều kiểm tra lại từng dòng code chỉ vì một lỗi cực kỳ ngớ ngẩn trên **breadboard**: đường thanh nguồn dài bên mép breadboard bị ngắt đôi ở chính giữa (chỗ vạch đỏ/xanh bị đứt quãng) mà mắt thường không để ý! Biết cách hình dung mạng lưới lá đồng ẩn dưới lớp nhựa breadboard và sử dụng **đồng hồ vạn năng** đúng thang đo là kỹ năng cứu bạn khỏi 90% nỗi đau gỡ lỗi phần cứng.
+
+## Bản đồ kiến thức nền: Kết nối Breadboard và Nguyên lý Đồng hồ Vạn năng
+
+1. **Bản đồ Lá đồng Ẩn của Breadboard:** Mỗi hàng 5 lỗ ở khu vực giữa nối thông ngang với nhau (bị tách đôi bởi rãnh giữa dành cho IC); hai dải nguồn dọc hai bên nối thông theo chiều dọc (nhưng nhiều breadboard cỡ lớn tách làm hai nửa trên–dưới!).
+2. **Đo Song song (Vôn kế — Trở kháng cực lớn) vs. Đo Nối tiếp (Ampe kế — Trở kháng cực nhỏ):** Vôn kế có nội trở ~$$10\text{ M}\Omega$$ nên kẹp *song song* vào mạch mà không làm nhiễu dòng; ngược lại Ampe kế có điện trở shunt chỉ ~$$0.1\ \Omega$$ nên **bắt buộc phải cắt mạch mắc nối tiếp**!
+3. **Đo Thông mạch & Điện trở (Chỉ đo khi TẮT nguồn):** Thang thông mạch phát ra một dòng thử cực nhỏ từ pin bên trong đồng hồ để kiểm tra xem hai điểm có thông nhau không; đo khi mạch đang có điện sẽ cho kết quả sai hoặc hỏng đồng hồ.
+
+### Ví dụ cầm tay chỉ việc: Vì sao đo nhầm thang Ampe song song nguồn lại làm nổ cầu chì đồng hồ?
+
+Giả sử bạn có một mạch đơn giản gồm nguồn **$$V = 5.0\text{ V}$$** nối với điện trở tải **$$R_{\text{tải}} = 500\ \Omega$$**:
+- **Đo dòng ĐÚNG (cắt dây, mắc Ampe kế nối tiếp tải, nội trở shunt $$R_s = 0.1\ \Omega$$):**
+  $$
+  I_{\text{đúng}} = \frac{5.0}{500 + 0.1} \approx \mathbf{10.0\text{ mA}} \quad (\text{an toàn tuyệt đối!}).
+  $$
+- **Đo dòng SAI (để que ở lỗ Ampe rồi chạm song song trực tiếp hai cực nguồn 5 V):** dòng điện đi tắt hoàn toàn qua điện trở shunt $$0.1\ \Omega$$:
+  $$
+  I_{\text{sai}} = \frac{5.0\text{ V}}{0.1\ \Omega} = \mathbf{50\text{ A}}!
+  $$
+  Dòng vọt lên **50 A** làm **đứt ngay cầu chì bảo vệ 10 A** (hoặc cháy mạch nếu đo trên cổng mA 200 mA)!
+
+### Khung giải thích: 4 bước kiểm tra mạch breadboard bằng đồng hồ vạn năng (nên đọc chậm)
+
+1. **Bước 1 — Nối cầu thanh nguồn nếu breadboard bị tách giữa:** Dùng hai sợi dây ngắn nối liền nửa trên và nửa dưới của thanh `+` và `-`, rồi kiểm tra bằng thang thông mạch.
+2. **Bước 2 — Đo thông mạch `VCC–GND` khi chưa cấp điện:** Đảm bảo không có chân linh kiện nào chạm chéo làm ngắn mạch.
+3. **Bước 3 — Cấp nguồn và đo điện áp tại *chân linh kiện* (không chỉ tại đầu nguồn):** Đặt que đen cố định vào một điểm `GND` chung, chấm que đỏ lần lượt tới chân `VCC` của từng IC để phát hiện dây cắm lỏng.
+4. **Bước 4 — Chỉ chuyển sang thang Ampe khi thực sự cần đo dòng:** Và ngay sau khi đọc xong, rút que đỏ trả về lỗ `VΩmA` lập tức!
+
+**Kiểm tra nhanh.** Bạn dùng đồng hồ thang DC V đo trực tiếp tại cực pin được $$5.00\text{ V}$$, nhưng đo tại chân `VCC` của cảm biến cắm cuối thanh nguồn breadboard lại chỉ được $$0.00\text{ V}$$. Nguyên nhân khả dĩ nhất là gì? Thanh nguồn breadboard bị ngắt đôi ở giữa (hoặc sợi dây jumper nối thanh nguồn bị đứt lõi bên trong)!
+
+---
+
 ## Vì sao xe hai bánh hay gặp lỗi ở bước này
 
 Trên xe đồ án, mạch ESP32 hoặc Pico, mạch lái TB6612 và hệ thống dây tín hiệu gặp nhau trên breadboard hoặc đầu cắm Dupont theo đúng quy tắc hình học: năm lỗ trong cùng một cột là một nút chung, còn rãnh giữa là rào cách điện. Một thanh nguồn bị ngắt ở giữa, một đầu dây cắm trượt khỏi kẹp lò xo, hay que đo đỏ còn quên ở lỗ đo dòng đều tạo ra triệu chứng giống như mạch bị chết trong khi chip thậm chí chưa được cấp điện.

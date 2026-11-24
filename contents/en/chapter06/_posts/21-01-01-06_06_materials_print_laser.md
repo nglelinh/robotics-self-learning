@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **70–90 minutes**. You can finish the lab from a photo of a broken printed part. Owning a printer is optional.
 
+Two brackets with identical CAD geometry can behave completely differently once bolted to a robot: one survives a 1-meter drop onto concrete while the other snaps cleanly in half at the first motor jolt. The secret is not magic plastic—it is **anisotropy** in 3D-printed layers versus **brittle fracture** in laser-cut acrylic plates.
+
 ## Learning objectives
 
 By the end of this lesson you can choose a bought acrylic 2WD plate for Capstone A and reserve 3D printing for brackets, sensor mounts, and a battery strap. You can predict how a 0.1–0.2 mm laser kerf changes a drawn hole, name the temperature at which PLA goes soft in a closed car, and orient a motor mount so bolt tension does not peel the printed layers apart.
@@ -21,6 +23,14 @@ By the end of this lesson you can choose a bought acrylic 2WD plate for Capstone
 
 You know the chassis geometry from Lesson 01 and the M3 fastener habit from Lesson 02. You do not need a CAD license. A pencil sketch with a thickness labeled in millimeters is enough.
 
+
+## Background Knowledge Map: Mechanics of Materials, Print Anisotropy, and Bending Stiffness
+
+Choosing chassis materials draws on three core principles from solid mechanics and digital fabrication:
+
+- **Beam Bending Stiffness ($$E I$$):** Under a load $$F$$, a cantilevered plate or bracket of length $$L$$, width $$w$$, and thickness $$t$$ deflects by $$\delta = \frac{F L^3}{3 E I}$$, where $$I = \frac{w t^3}{12}$$ is the second moment of area. Because stiffness scales with the **cube of thickness** ($$t^3$$), doubling plate thickness cuts deflection by a factor of **8**—far more effective than switching plastics.
+- **FDM Print Anisotropy:** Fused-deposition 3D prints (PLA, PETG) are strong *along* the extruded filament lines ($$X\text{–}Y$$ plane) but often 30%–50% weaker *across* layer boundaries ($$Z$$ axis). Orienting a motor bracket so bending tension pulls across layers invites delamination at the first bump.
+- **Ductile vs. Brittle Failure & Stress Concentrations:** Cast acrylic is stiff and laser-cuts cleanly, yet it is brittle: sharp internal $$90^\circ$$ corners concentrate stress and launch cracks. Adding small corner fillets ($$R \ge 2\ \text{mm}$$) and using PETG/aluminum at high-impact mounts prevents sudden shatter.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A has to roll this month. A printed copy of an entire chassis spends the week on a machine you may not have, and a PLA plate left in a parked car can warp before the URDF is finished. Buy the acrylic 2WD frame. Print the pieces the kit does not include: a bracket that aims an ultrasonic sensor, a strap that stops the battery from sliding (Lesson 07), a small cover over a solder joint. ROS never sees the polymer name. It sees wheel positions. A cracked motor mount changes those positions and the $$b$$ you measured becomes a lie. Material choice is how $$b$$ stays the number in `diff_drive_controller`.
@@ -60,6 +70,18 @@ d_{\text{cut}} \approx 2.8 + 0.15 = 2.95\ \text{mm},
 $$
 
 and the screw either will not start or will wedge. That wedge is the crack. On the printed battery strap, PLA at 58 °C in a closed cabin is at the softening range. PETG is the material you name for that strap if the robot ever waits in a car. The plate itself stays the acrylic kit.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Comparing Plate Stiffness and Print-Layer Stress
+
+Let us calculate two numbers that every robot builder should know before sending a file to a laser cutter or 3D printer:
+
+1. **The $$t^3$$ rule for chassis deflection:** Compare a $$3\ \text{mm}$$ acrylic deck against a $$5\ \text{mm}$$ acrylic deck of the same width $$w = 100\ \text{mm}$$, supporting a $$5\ \text{N}$$ battery overhang at $$L = 80\ \text{mm}$$ (Young's modulus $$E \approx 3.0\ \text{GPa} = 3000\ \text{N/mm}^2$$):
+   - For $$t = 3\ \text{mm}$$: $$I_3 = \frac{100 \times 3^3}{12} = 225\ \text{mm}^4 \implies \delta_3 = \frac{5 \times 80^3}{3 \times 3000 \times 225} = 1.26\ \text{mm}$$.
+   - For $$t = 5\ \text{mm}$$: $$I_5 = \frac{100 \times 5^3}{12} = 1041.7\ \text{mm}^4 \implies \delta_5 = \frac{5 \times 80^3}{3 \times 3000 \times 1041.7} = 0.27\ \text{mm}$$.
+   Adding just $$2\ \text{mm}$$ of thickness reduces flex by a factor of $$(5/3)^3 = 4.63\times$$!
+2. **Bending stress vs. layer-bond strength in a 3D-printed motor L-bracket:** A $$4\ \text{mm}$$-thick, $$20\ \text{mm}$$-wide printed bracket holding a motor torque of $$0.50\ \text{N}\cdot\text{m}$$ ($$500\ \text{N}\cdot\text{mm}$$) experiences peak bending stress:
+   $$\sigma_{\max} = \frac{6 M}{w t^2} = \frac{6 \times 500}{20 \times 4^2} = 9.38\ \text{MPa}.$$
+   If printed flat so tensile stress runs *along* filaments (strength $$\approx 45\ \text{MPa}$$), safety factor is $$4.8$$. If printed upright so bending pulls *across* Z-layers (inter-layer strength $$\approx 15\ \text{MPa}$$ with a notch factor of 2), safety factor drops below $$1.0$$ and the bracket snaps along a layer line.
 
 ## Lab: read a broken layer, sketch the orientation
 

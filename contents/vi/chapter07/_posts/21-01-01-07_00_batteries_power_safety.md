@@ -13,6 +13,40 @@ draft: false
 
 Thời lượng ước tính: **~100 phút**. Trong bài này, bánh xe chưa được phép quay. Bạn sẽ xác định rõ loại hóa học pin, chọn dòng cầu chì phù hợp và chốt sơ đồ dây nguồn trước khi chuyển sang bài lắp khung.
 
+Nếu vi điều khiển là bộ não và động cơ là cơ bắp, thì **khối pin LiPo / Li-Ion** chính là trái tim bơm năng lượng cho toàn bộ robot — đồng thời cũng là thành phần nguy hiểm nhất trong phòng lab nếu bị đối xử bất cẩn. Một viên pin LiPo 3S cỡ bằng nắm tay có thể xả tức thời hàng chục ampe, đủ làm nóng đỏ sợi dây đồng và bùng cháy trong vài giây nếu bị chập mạch hoặc xả quá sâu. Nắm vững hóa học pin, thông số `S`, `mAh`, `C-rating`, cầu chì và mạch hạ áp là điều kiện tiên quyết *trước khi* bạn chạm tay vào việc lắp Capstone.
+
+## Bản đồ kiến thức nền: Hóa học pin Lithium, Ngưỡng điện áp an toàn và Kiến trúc phân phối nguồn
+
+### 1. Giải mã thông số `3S 2200mAh 20C`
+- **`3S` (3 Series):** 3 cell pin Lithium mắc nối tiếp. Mỗi cell có điện áp đầy **$$4{,}2\text{ V}$$**, danh định **$$3{,}7\text{ V}$$**, mức cảnh báo hạ cánh/dừng an toàn **$$3{,}5\text{ V}$$**, và ngưỡng phá hủy hóa học tuyệt đối **$$3{,}0\text{ V}$$**.
+- **`2200 mAh` ($$2{,}2\text{ Ah}$$):** dung lượng điện tích. Trong thực tế, chỉ nên dùng tối đa **80%** dung lượng để giữ tuổi thọ pin (không bao giờ xả cạn 100%).
+- **`20C` (C-rating):** tốc độ xả liên tục tối đa an toàn tính bằng bội số của dung lượng ($$I_{\max} = C \times \text{Ah}$$).
+
+### 2. Kiến trúc nguồn chuẩn cho robot: Cầu chì → Công tắc → Phân nhánh
+Đường dây từ cực dương pin đi ra phải tuân theo đúng thứ tự: **Giắc chống cắm ngược (XT60) → Cầu chì bảo vệ quá dòng → Công tắc tổng (E-Stop)** → chia làm 2 nhánh song song: (a) nhánh công suất trực tiếp cho driver động cơ, và (b) nhánh qua mạch hạ áp **Buck converter (5 V / 3,3 V)** sạch sẽ cho vi điều khiển và cảm biến, với **dây mass (GND) nối chung hình sao**.
+
+### 3. Quy tắc an toàn phòng lab bắt buộc với pin Lithium
+Luôn sạc bằng bộ sạc cân bằng (balance charger) đúng chế độ LiPo, lưu trữ pin ở điện áp bảo quản **$$3{,}8\text{ V/cell}$$** trong túi chống cháy nếu không dùng quá vài ngày, và **ngưng sử dụng ngay lập tức** nếu thấy vỏ pin phồng rộp hoặc có mùi ngọt hắc của dung môi điện phân.
+
+### Khung giải thích: Cầm tay tính điện áp ngưỡng, dòng xả cực đại và thời gian chạy thực tế của pin LiPo 3S (nên đọc chậm)
+
+Xét viên pin LiPo **3S – 2200 mAh – 20C** cấp nguồn cho robot Capstone tiêu thụ dòng trung bình **$$I_{\text{tb}} = 2{,}75\text{ A}$$**:
+
+1. **Ba mốc điện áp sống còn của cả khối 3S:**
+   - Sạc đầy 100%: $$3 \times 4{,}2 = 12{,}6\text{ V}$$.
+   - Điện áp danh định: $$3 \times 3{,}7 = 11{,}1\text{ V}$$.
+   - Ngưỡng dừng chạy để sạc ($$3{,}5\text{ V/cell}$$): $$3 \times 3{,}5 = 10{,}5\text{ V}$$ *(tuyệt đối không xả dưới $$9{,}0\text{ V}$$!)*.
+
+2. **Dòng xả liên tục cực đại an toàn:**
+   $$I_{\max} = 20\text{C} \times 2{,}2\text{ Ah} = 44{,}0\text{ A}$$
+   *(Cực kỳ mạnh — đó là lý do nếu chập hai dây pin không có cầu chì, dây 18 AWG sẽ bốc cháy lập tức trước khi pin kịp hết điện!)*
+
+3. **Thời gian chạy thực tế theo quy tắc giữ lại 20% dung lượng an toàn:**
+   - Dung lượng khả dụng (80%): $$Q_{\text{dùng}} = 0{,}80 \times 2{,}2\text{ Ah} = 1{,}76\text{ Ah}$$.
+   - Thời gian hoạt động liên tục:
+     $$t = \frac{Q_{\text{dùng}}}{I_{\text{tb}}} = \frac{1{,}76\text{ Ah}}{2{,}75\text{ A}} = 0{,}64\text{ giờ} \approx 38{,}4\text{ phút}.$$
+   - Năng lượng dự trữ danh định của viên pin: $$E = 11{,}1\text{ V} \times 2{,}2\text{ Ah} = 24{,}42\text{ Wh}$$.
+
 ## Mục tiêu
 
 Sau bài này, bạn phân biệt được pin Li-ion 18650, LiPo dạng túi (pouch) và LiFePO4 dựa trên điện áp danh định và điện áp sạc đầy, từ đó không sử dụng nhầm bộ sạc khác hóa học. Bạn biết cách tính dòng xả liên tục theo hệ số C trên nhãn nhưng không dùng con số này để thay thế cho dòng đo thực tế khi chọn cầu chì. Bạn bố trí đúng vị trí cầu chì trên nhánh cực dương, chỉnh mạch hạ áp (buck) về 5,0 V trước khi kết nối ESP32, và vẽ hoàn chỉnh cây nguồn gồm: pin, công tắc, cầu chì, nhánh VM, mạch buck và điểm mass chung.

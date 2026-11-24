@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **70–90 minutes**, including a ruler measurement on a real 2WD chassis or on a careful scale drawing if the kit has not arrived.
 
+Every autonomous mobile robot—from a $30 classroom rover to an Amazon warehouse tug—begins with the same deceptively simple geometry: two powered wheels sharing an axle and a third passive contact holding the frame level. Yet a two-millimeter mistake with a ruler on day one will haunt your SLAM map months later, bending straight hallways into gentle arcs even when your software has zero bugs.
+
 ## Learning objectives
 
 By the end of this lesson you can point to the two lengths a differential-drive robot actually uses: track width $$b$$, taken between the tire contact centers, and rolling radius $$r$$, taken from a one-revolution roll test. You can turn a pair of wheel speeds into body speed and yaw rate, place the battery so the caster stays on the floor, and write $$b$$ and $$r$$ in millimeters so Chapter 07 assembly and the later ROS `diff_drive_controller` inherit the same geometry.
@@ -21,6 +23,14 @@ By the end of this lesson you can point to the two lengths a differential-drive 
 
 You can read a millimeter ruler. You know a DC gearmotor turns a wheel (Chapter 05) and that encoder ticks will later stand in for wheel rotation (Chapter 04). You do not need ROS installed, and you do not need the chassis on the bench if you can draw it to scale.
 
+
+## Background Knowledge Map: Planar Rigid-Body Kinematics, Static Stability, and Geometric Calibration
+
+Understanding differential-drive anatomy connects three classical engineering pillars directly to modern robotics software:
+
+- **Planar Rigid-Body Kinematics ($$SE(2)$$):** A mobile base on a flat floor has three pose coordinates $$(x, y, \theta)$$, yet only two wheel inputs $$(\omega_L, \omega_R)$$. Because rubber tires resist sideways sliding, the chassis obeys a *nonholonomic constraint* ($$\dot{y}_{\text{body}} = 0$$), mapping wheel velocities linearly to body speed $$v$$ and yaw rate $$\omega$$ via track width $$b$$ and rolling radius $$r$$.
+- **Static Stability & Support Polygon:** A chassis remains upright without tipping if and only if the vertical projection of its center of mass (CoM) falls strictly inside the convex hull of its ground contact points (the support triangle formed by the two drive patches and the caster). Placing the battery low and near the axle maximizes tipping margin during hard braking.
+- **Kinematic Parameter Identification:** Odometry integrates wheel encoder ticks over thousands of revolutions. Systematic errors in $$b$$ scale angular error proportionally, while errors in $$r$$ scale distance error proportionally—making loaded roll tests the foundation of accurate odometry and URDF modeling.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A is this chassis: two driven wheels on one axis, plus a caster or a skid that holds the third corner down. Chapter 08 expands the kinematics. The controller you meet on the ROS path, `diff_drive_controller`, converts `cmd_vel` into two wheel commands and converts encoder ticks back into odometry using the same $$b$$ and $$r$$ you measure here. The URDF in Chapter 09–10 places the wheel links with those lengths. A wrong $$b$$ shows up as a circle when you command a straight line, because the controller spends the whole motion “correcting” a turn that the geometry invented. Measure once, write the millimeters in `lab-notes.md`, and refuse to round them into “about 15 cm” later.
@@ -66,6 +76,19 @@ In one second the midpoint of the axle travels 25 cm along the heading and the h
 ![Body speed and yaw rate drawn from the two wheel velocities]({{ site.imgurl }}/generated/diff_drive_kinematics.png)
 
 The first figure is the ruler picture: $$b$$ from tread center to tread center, $$r$$ from the compressed tire. The second figure is the velocity picture behind the two equations. Equal forward arrows give $$\omega = 0$$. Unequal arrows yaw the robot about a point that still lies on the axle line. Chapter 08 names that point and the turning radius. Today you only need $$b$$, $$r$$, $$v$$, and $$\omega$$ written down.
+
+### Deep-Dive Explanation (Read Slowly): Propagating a 5% Track-Width Error into a Full-Turn Drift
+
+Why does measuring across the motor cans instead of the tire contact centers ruin a straight-line or square-path test? Let us compute the exact angular error by hand.
+
+1. **Matrix form of differential-drive kinematics:** Writing the forward map from wheel angular rates $$(\dot\phi_R, \dot\phi_L)$$ to body twist $$(v, \omega)$$ gives:
+   $$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} r/2 & r/2 \\ r/b & -r/b \end{bmatrix} \begin{bmatrix} \dot\phi_R \\ \dot\phi_L \end{bmatrix}.$$
+2. **True vs. assumed geometry:** Suppose the true contact-patch track width is $$b_{\text{true}} = 0.150\ \text{m}$$ and $$r = 0.0312\ \text{m}$$, but you mistakenly enter $$b_{\text{model}} = 0.165\ \text{m}$$ (+10% error) into the controller.
+3. **Command a $$90^\circ$$ ($$\pi/2\ \text{rad}$$) in-place turn:** The controller sets $$v = 0$$ and chooses opposite wheel speeds so that $$\omega_{\text{model}} \cdot T = \pi/2$$, meaning the wheel differential satisfies:
+   $$(v_R - v_L) T = b_{\text{model}} \frac{\pi}{2} = 0.165 \times 1.5708 = 0.2592\ \text{m}.$$
+4. **Compute the actual physical rotation on the floor:** The real robot divides that same wheel difference by its *true* track width $$b_{\text{true}} = 0.150\ \text{m}$$:
+   $$\Delta\theta_{\text{real}} = \frac{0.2592}{0.150} = 1.728\ \text{rad} = 99.0^\circ.$$
+   A 10% ruler mistake causes the robot to overshoot every right-angle corner by $$9^\circ$$—after four corners of a square room, your heading is off by $$36^\circ$$!
 
 ## Lab: measure b and r
 

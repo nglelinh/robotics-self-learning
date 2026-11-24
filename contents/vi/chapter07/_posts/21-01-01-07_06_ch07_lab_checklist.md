@@ -13,6 +13,32 @@ draft: false
 
 Đây là biên bản nghiệm thu cho giai đoạn hoàn thiện khung robot vận hành đầu tiên. Bạn chỉ chuyển sang Chương 08 khi có đủ bằng chứng cho cả bốn nhóm tiêu chí, hoặc ghi rõ một lỗi cụ thể cần khắc phục trước khi tiếp tục.
 
+Capstone Chương 07 là cột mốc chuyển giao quan trọng nhất của nửa đầu khóa học: lần đầu tiên bạn sở hữu một con robot vật lý hoàn chỉnh có thể chạy ổn định, nhận lệnh có kiểm soát và tự dừng an toàn khi có sự cố — sẵn sàng để ở Chương 08–10 ta lắp thêm toán học TF2, điều khiển PID và hệ điều hành ROS 2 lên trên. Checklist Capstone giúp bạn nghiệm thu toàn diện cả 4 mặt: **an toàn điện, cơ khí, truyền thông teleop và hồ sơ log**.
+
+## Bản đồ kiến thức nền: Đánh giá độ tin cậy hệ thống tích hợp (System Integration)
+
+### 1. Thống kê độ tin cậy kênh truyền thông (Packet Delivery Ratio & Jitter)
+Trong hệ thống điều khiển không dây hoặc qua cáp USB gần động cơ DC, tỷ lệ mất gói trung bình (PDR) chưa kể hết câu chuyện — thứ gây kích hoạt Watchdog giả là **độ trễ biến thiên (jitter)** và số gói mất *liên tiếp* tối đa. Theo dõi cả PDR lẫn khoảng trống tối đa giữa hai gói (`max_gap_ms`) cho bức tranh sức khỏe kênh truyền đầy đủ.
+
+### 2. Kiểm tra ranh giới an toàn kép (Phần cứng + Phần mềm)
+Một robot Capstone đạt chuẩn luôn vượt qua đồng thời hai bài thử: (1) rút nguồn / gạt công tắc E-Stop vật lý ngắt toàn bộ động cơ ngay lập tức, và (2) đóng cửa sổ chương trình điều khiển trên máy tính thì Watchdog phần mềm tự phanh xe trong chưa đầy nửa giây.
+
+### 3. Tính tái lập (Reproducibility) và tài liệu bàn giao
+Một hệ thống chỉ thực sự "xong" khi người khác (hoặc chính bạn sau 1 tháng) đọc sơ đồ nối dây, bảng phân chân GPIO và tệp cấu hình là có thể bật lên chạy lại y hệt trong 5 phút.
+
+### Khung giải thích: Cầm tay kiểm tra chỉ số chất lượng kênh Teleop từ tệp log 10 giây (nên đọc chậm)
+
+Trong bài chạy nghiệm thu kéo dài **10 giây**, máy tính gửi lệnh ở tần số **20 Hz** (chu kỳ danh định $$50\text{ ms}$$, tổng cộng **200 gói** đã gửi). Firmware đặt ngưỡng Watchdog **$$T_{\text{wd}} = 300\text{ ms}$$** và ghi nhận từ tệp log:
+- Tổng số gói hợp lệ (đúng checksum) nhận được: **198 gói** (mất 2 gói riêng lẻ không liên tiếp).
+- Khoảng thời gian dài nhất đo được giữa hai gói hợp lệ liên tiếp: **`max_gap_ms = 104 ms`**.
+
+Đánh giá định lượng 2 tiêu chí nghiệm thu:
+1. **Tỷ lệ nhận gói thành công (Packet Delivery Ratio — PDR):**
+   $$\mathrm{PDR} = \frac{198}{200} = 99{,}0\% \ge 98\% \implies \textbf{ĐẠT}.$$
+2. **Biên an toàn chống kích hoạt Watchdog giả:**
+   $$\frac{T_{\text{wd}}}{\text{max\_gap\_ms}} = \frac{300\text{ ms}}{104\text{ ms}} \approx 2{,}88\times$$
+   *(Khoảng trống lớn nhất chỉ bằng $$35\%$$ ngưỡng Watchdog, chứng tỏ hệ thống còn dư biên chịu đựng gần 3 lần — vừa đủ nhạy để dừng an toàn khi đứt mạng thật, vừa không bị giật cục do kích hoạt nhầm!)*
+
 ## Mục tiêu học
 
 1. Đánh giá sổ tay `lab-notes.md` theo đủ bốn tiêu chí hoàn thành: điều khiển teleop bốn hướng, dừng an toàn khi máy chủ quá hạn, cố định pin an toàn không có đầu hàn lithium trần, và đầy đủ hồ sơ ghi chú (ảnh đi dây, giao thức, bảng dấu, điện áp).

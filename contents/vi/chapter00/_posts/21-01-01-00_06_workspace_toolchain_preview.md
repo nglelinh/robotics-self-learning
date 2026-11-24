@@ -21,6 +21,39 @@ Sau bài học này, bạn sẽ **khởi tạo** không gian làm việc gồm `
 
 Bạn chỉ cần biết tạo thư mục và cập nhật nội dung vào `notes/lab-notes.md`. Các bài từ 00-01 đến 00-04 đã chuẩn bị sẵn cấu trúc sổ lab, lộ trình, thẻ cấp nguồn và ảnh kiểm kê dụng cụ. Tệp `bom.csv` (hoặc ghi chú ngân sách có ngày) từ bài 00-05 nên đã hoàn thiện; nếu chưa xong, hãy ghi `thiếu bom.csv` vào nhật ký thay vì tự điền giá ước đoán. Hiện tại vẫn chưa cần kỹ năng hàn.
 
+---
+
+Trong tuần đầu làm dự án robot, bạn chỉ có một file `blink.ino` duy nhất nên lưu ở đâu cũng thấy gọn. Nhưng đến tuần thứ tám — khi đã có firmware đọc encoder, mã PID, file cấu hình chân, sơ đồ nối dây và nhật ký thử nghiệm — một thư mục lộn xộn kiểu `code_final_v3_fix2` sẽ khiến bạn nạp nhầm bản cũ làm xe chạy giật lùi mà không hiểu vì sao! Thiết lập **không gian làm việc (workspace) và chuỗi công cụ (toolchain)** bài bản ngay từ Chương 00 giúp mã nguồn của bạn tái lập được sau nhiều tháng.
+
+## Bản đồ kiến thức nền: Chuỗi công cụ (Toolchain) Biên dịch Nhúng hoạt động ra sao?
+
+1. **Biên dịch chéo (Cross-Compilation):** Máy tính của bạn dùng CPU x86_64/ARM64, còn robot dùng vi điều khiển kiến trúc Xtensa/RISC-V (ESP32) hoặc ARM Cortex-M0+ (RP2040). Toolchain (PlatformIO / `arm-none-eabi-gcc` / `xtensa-esp32-elf-gcc`) biên dịch mã C++ trên PC thành tệp nhị phân `.bin` chạy được trên chip nhỏ.
+2. **Giao tiếp Nạp & Gỡ lỗi (USB-to-UART & Bootloader):** Khi bấm `Upload`, PC kéo chân `BOOT`/`EN` đưa chip vào chế độ Bootloader, bơm từng gói nhị phân qua cổng nối tiếp UART ở tốc độ baud cao rồi khởi động lại MCU.
+3. **Quản lý Phiên bản & Cây thư mục Chuẩn hóa:** Tách bạch rõ `firmware/`, `docs/` (sơ đồ chân, sổ lab), `cad/` và `ros2_ws/` giúp bạn đối chiếu ngay mã nguồn nào đã tạo ra kết quả đo nào.
+
+### Ví dụ cầm tay chỉ việc: Tính thời gian nạp Firmware qua cổng USB-UART
+
+Giả sử dự án ESP32 của bạn biên dịch ra tệp nhị phân `firmware.bin` có dung lượng **$$650\text{ KB}$$** ($$650 \times 1{,}024 = 665{,}600\text{ byte}$$). Giao thức UART chuẩn `8N1` cần **10 bit** cho mỗi byte (1 bit start + 8 bit dữ liệu + 1 bit stop):
+- Nếu nạp ở tốc độ mặc định chậm **115.200 bps** ($$11{,}520\text{ byte/s}$$):
+  $$
+  t_{\text{nạp}} = \frac{665{,}600}{11{,}520} \approx \mathbf{57.8\text{ giây}} \quad (\text{rất lâu mỗi lần sửa 1 dòng code!}).
+  $$
+- Tăng `upload_speed = 460800` bps trong `platformio.ini` ($$46{,}080\text{ byte/s}$$):
+  $$
+  t_{\text{nạp}} = \frac{665{,}600}{46{,}080} \approx \mathbf{14.4\text{ giây}} \quad (\text{nhanh gấp }\mathbf{4\times}\text{!}).
+  $$
+
+### Khung giải thích: 4 bước dựng Workspace bền vững cho cả khóa học (nên đọc chậm)
+
+1. **Bước 1 — Dùng một thư mục gốc cố định không dấu, không khoảng trắng:** Ví dụ `robotics_lab/` thay vì `Đồ án Robot (mới)/` — nhiều công cụ CMake/PlatformIO và ROS 2 bị lỗi đường dẫn khi gặp khoảng trắng hoặc ký tự tiếng Việt có dấu.
+2. **Bước 2 — Khóa phiên bản thư viện trong `platformio.ini`:** Ghi rõ phiên bản thư viện cảm biến để 3 tháng sau mở lại dự án vẫn biên dịch ra đúng tệp nhị phân ban đầu.
+3. **Bước 3 — Tách nhánh ESP32 (PlatformIO) và Pico (MicroPython) rõ ràng:** Mỗi bo mạch có trình nạp và giao diện serial riêng; ghi chép đúng tên cổng (`COM3` / `/dev/ttyUSB0`) vào `README.md`.
+4. **Bước 4 — Giữ ROS 2 Jazzy & Gazebo ở chế độ "nhận diện trước":** Chương 00 chỉ cần biết vai trò của chúng trên bản đồ tổng thể; chưa cần cài đặt nặng máy ngay từ tuần đầu.
+
+**Kiểm tra nhanh.** Vì sao giao thức UART `8N1` cần **10 bit** đường truyền để gửi **8 bit** (1 byte) dữ liệu thực? Vì mỗi khung byte luôn kèm thêm 1 bit bắt đầu (`Start bit = 0`) và 1 bit kết thúc (`Stop bit = 1`) để bên nhận đồng bộ nhịp đồng hồ mà không cần dây xung nhịp riêng!
+
+---
+
 ## Vì sao bài này gắn liền với Capstone
 
 Cơ chế timeout 300 ms của Chương 07 nằm trong firmware mà bạn có thể biên dịch lại bất cứ lúc nào trên một mạch đã nhận đúng cổng serial. Các topic ROS 2 về sau chỉ là lớp truyền thông đặt lên trên nền tảng đó. Nếu thư mục `ros_ws/` trên laptop Windows chứa đầy các gói cài đặt dang dở, bạn sẽ mất thời gian sửa lỗi phần mềm trong khi chân PWM chưa từng được kiểm tra. Một thư mục `ros_ws/` trống kèm lý do rõ ràng luôn hữu ích hơn một hướng dẫn cài đặt bỏ dở. Gazebo Harmonic hoàn toàn có thể chờ đến khi robot thực tế đã có hành vi dừng tin cậy để mô phỏng.

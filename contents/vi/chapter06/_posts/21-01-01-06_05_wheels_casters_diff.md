@@ -13,6 +13,41 @@ draft: false
 
 Thời lượng ước tính: **70–90 phút**. Nếu robot đã lắp lăn được, khoảng 10 phút trong đó dùng để xoay thử bằng tay quanh trung điểm trục; nếu chưa, bạn dùng 10 phút đó để vẽ sơ đồ mũi tên vận tốc.
 
+Tại sao gần như mọi robot hút bụi trong nhà lẫn xe giao hàng trong nhà kho đều chọn cấu hình **vi sai hai bánh chủ động + một bánh đa hướng (caster)** thay vì hệ thống lái kiểu ô tô (Ackermann)? Bí mật nằm ở khả năng **quay tại chỗ với bán kính bằng 0**: chỉ cần cho bánh trái lùi và bánh phải tiến cùng tốc độ, robot xoay gọn ngay giữa hành lang hẹp mà không cần lùi chuồng. Và tuyệt vời hơn nữa, toàn bộ động học của hệ vi sai nằm gọn trong hai phương trình cộng–trừ đơn giản đến bất ngờ!
+
+## Bản đồ kiến thức nền: Động học vi sai, Tâm quay tức thời (ICC) và Bánh Caster
+
+### 1. Hai phương trình vàng của động học thuận vi sai (Forward Kinematics)
+Gọi $$L$$ là khoảng cách giữa tâm hai bánh chủ động (*track width*), $$v_L$$ và $$v_R$$ là vận tốc tiếp tuyến của bánh trái và bánh phải (tính từ $$v = r\omega$$). Khi không trượt ngang, vận tốc tịnh tiến $$v$$ và vận tốc góc $$\omega$$ của tâm robot là:
+$$v = \frac{v_R + v_L}{2}, \qquad \omega = \frac{v_R - v_L}{L}.$$
+Từ đây suy ngay ra **động học ngược (Inverse Kinematics)** để đổi lệnh ROS `cmd_vel` $$(v, \omega)$$ thành tốc độ hai bánh:
+$$v_R = v + \frac{\omega L}{2}, \qquad v_L = v - \frac{\omega L}{2}.$$
+
+### 2. Tâm quay tức thời (ICC — Instantaneous Center of Curvature)
+Mọi chuyển động của xe vi sai ở một thời điểm đều là một chuyển động tròn quanh điểm **ICC** nằm trên đường kéo dài của trục hai bánh, cách tâm robot một bán kính $$R = \frac{v}{\omega} = \frac{L}{2}\frac{v_R + v_L}{v_R - v_L}$$. Khi $$v_R = v_L$$, $$R \to \infty$$ (đi thẳng); khi $$v_R = -v_L$$, $$R = 0$$ (quay tại chỗ quanh tâm trục!).
+
+### 3. Cái bẫy của bánh đa hướng (Swivel Caster vs. Ball Caster)
+Bánh bi thép (*ball caster*) quay mọi hướng không bị giật nhưng hay kẹt tóc/bụi và ma sát cao trên thảm. Bánh xoay (*swivel caster*) lăn rất êm nhưng có khoảng lệch trục xoay (*caster offset*) — mỗi khi robot đột ngột đảo chiều từ tiến sang lùi, bánh xoay phải lật $$180^\circ$$, tạo ra một cú hích ngang làm lệch hướng khởi động!
+
+### Khung giải thích: Cầm tay giải cả Động học thuận và Động học ngược cho robot vi sai (nên đọc chậm)
+
+Xét robot vi sai có khoảng cách hai bánh **$$L = 0{,}20\text{ m}$$** (20 cm) và bán kính bánh **$$r = 0{,}035\text{ m}$$** (đường kính 7 cm):
+
+**Bài toán 1 — Động học thuận (từ encoder bánh xe suy ra chuyển động robot):**
+Encoder đo được bánh trái chạy $$v_L = 0{,}30\text{ m/s}$$, bánh phải chạy $$v_R = 0{,}50\text{ m/s}$$.
+1. Vận tốc tịnh tiến của tâm robot:
+   $$v = \frac{0{,}50 + 0{,}30}{2} = 0{,}40\text{ m/s}.$$
+2. Vận tốc góc quay (quy ước dương = rẽ trái / ngược chiều kim đồng hồ):
+   $$\omega = \frac{0{,}50 - 0{,}30}{0{,}20} = \frac{0{,}20}{0{,}20} = +1{,}00\text{ rad/s}\;(\approx 57{,}3^\circ/\text{s}).$$
+3. Bán kính quỹ đạo cung tròn quanh tâm ICC:
+   $$R = \frac{v}{\omega} = \frac{0{,}40}{1{,}00} = 0{,}40\text{ m}\;(40\text{ cm về phía bên trái robot}).$$
+
+**Bài toán 2 — Động học ngược (từ lệnh `cmd_vel` tìm tốc độ góc từng bánh):**
+Bộ điều hướng yêu cầu robot đi thẳng kết hợp rẽ phải: $$v = 0{,}50\text{ m/s},\; \omega = -2{,}0\text{ rad/s}$$.
+- $$v_R = 0{,}50 + \frac{(-2{,}0)(0{,}20)}{2} = 0{,}50 - 0{,}20 = 0{,}30\text{ m/s} \implies \omega_R = \frac{0{,}30}{0{,}035} \approx 8{,}57\text{ rad/s}.$$
+- $$v_L = 0{,}50 - \frac{(-2{,}0)(0{,}20)}{2} = 0{,}50 + 0{,}20 = 0{,}70\text{ m/s} \implies \omega_L = \frac{0{,}70}{0{,}035} = 20{,}0\text{ rad/s}.$$
+Kiểm tra trực giác: bánh trái quay nhanh hơn bánh phải nên robot rẽ sang phải — khớp tuyệt đối!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn vẽ được sơ đồ vectơ vận tốc hai bánh cho ba trạng thái: đi thẳng, quẹo nhẹ và xoay tại chỗ, đồng thời tính được vận tốc góc xoay tại chỗ $$\omega = 2 v_r / b$$. Các bạn giải thích được vai trò của khoảng đuôi (trail) trên bánh caster, lý do caster lắp ngược bị rung lắc và vì sao cơ cấu bốn bánh cố định tiêu tốn dòng điện gần mức dòng kẹt (Chương 05). Cuối cùng, các bạn xác định đúng trung điểm trục làm tâm quay và liên hệ trực tiếp `cmd_vel` (`linear.x` và `angular.z`) với hai động cơ.

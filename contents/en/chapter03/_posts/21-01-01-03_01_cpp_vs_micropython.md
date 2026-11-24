@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In real robotics teams, the "C++ vs. Python" debate is a false dichotomy — almost every serious robot uses **both**, just at different layers of the stack. C++ owns the inner millisecond-critical loops (encoder interrupts, PWM updates, PID control, safety watchdogs) where predictable execution time and zero garbage-collection pauses are sacred. Python owns the outer layers (offline calibration, step-response plotting, rapid prototyping, and high-level mission scripting) where human iteration speed dominates.
+
+This lesson gives you a quantitative criterion for choosing between C++ and MicroPython on your robot so you write the right code in the right language.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you can keep one heartbeat alive in both C++ and MicroPython without parking the CPU inside a long sleep, and you can point at the exact line that would make a 300 ms command timeout late. You will use `millis()` on the Arduino core and `time.ticks_ms()` together with `time.ticks_diff()` in MicroPython, which replaces the blocking `delay(500)` heartbeat from the [Chapter 02 blink and serial lesson]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}). You will compute how a 200 ms sleep hides a 300 ms silence limit on a differential-drive base, and you will decide, for a new sensor versus the driving robot, which language you want while the timeout is still present in either one.
@@ -18,6 +24,16 @@ By the end of this lesson you can keep one heartbeat alive in both C++ and Micro
 ## Prerequisites
 
 You already have a board that prints a climbing millisecond stamp and toggles an LED, from the Chapter 02 heartbeat. ESP32 students did that from PlatformIO; Pico students did it from the MicroPython REPL. You can change a pin number when the listing does not match the silk. You do not need PWM, interrupts, or a motor driver yet. What you are retiring is the habit at the bottom of that heartbeat: `delay(500)` or `time.sleep` for half a second was acceptable only while the sketch had nothing else to notice.
+
+## Background Knowledge Map: Compiled Native Code, Deterministic Latency, and Fixed-Point / Float Performance
+
+Three computer-systems principles explain the real-world gap between C++ and MicroPython on microcontrollers:
+
+- **Ahead-of-Time Compilation vs. Bytecode Interpretation:** C++ compiles directly to native CPU machine instructions with aggressive compiler optimizations (`-O2`), often running **20× to 100× faster** than interpreted MicroPython loops on arithmetic-heavy control code.
+- **Deterministic Worst-Case Execution Time (WCET):** Control theory assumes a constant sampling period $$\Delta t$$. C++ with static memory allocation has tightly bounded WCET (microseconds of jitter), whereas MicroPython's dynamic heap and garbage collector introduce occasional multi-millisecond spikes.
+- **Type Safety & Hardware Register Access:** C++ exposes `volatile`, fixed-width integers (`int32_t`, `uint16_t`), hardware timer registers, and FreeRTOS tasks directly — essential when synchronizing an Interrupt Service Routine (ISR) with a main control loop.r
+
+---
 
 ## Why it matters
 
@@ -125,6 +141,31 @@ Stay on the LED from Chapter 02. Do not add a motor, and do not wire a TB6612 in
 2. Add a pass counter that prints once per second using the same non-blocking test, then clears. Write the count in your notes. That number is this sketch's iteration rate, not a universal constant. A MicroPython loop that yields 1 ms will land near 1000, and that is the yield you asked for.
 3. Insert `delay(200)` or `time.sleep(0.2)` once per pass. Watch the LED and the counter. The cooperative rate collapses, and a 300 ms silence can only be noticed on the 200 ms grid from the worked example.
 4. Remove the 200 ms call before you leave the bench. The file you keep is the non-blocking heartbeat. In your notes, record language, pin, iterations per second, and the sentence "a 200 ms sleep stops the robot at 400 ms."
+
+## Deep-Dive Explanation (Read Slowly): Quantifying Phase Lag Caused by Execution Latency & Jitter
+
+Why do robotics engineers obsess over 2 ms vs. 0.05 ms of loop latency? Because in feedback control, **pure time delay $$T_d$$ adds phase lag** that erodes stability margin! Trace the exact 4-step calculation:
+
+1. **Relate time delay $$T_d$$ to phase lag at frequency $$f$$:**
+   $$\Delta \phi = -360^\circ \cdot f \cdot T_d.$$
+2. **Compute delay from sampling + computation:** A digital controller running at period $$T_s$$ with computation/GC delay $$T_c$$ introduces an effective delay $$T_d \approx \frac{T_s}{2} + T_c$$ (zero-order hold half-period plus compute lag).
+3. **Compare phase lag at the robot's control bandwidth $$f_c$$** (typically $$5\text{–}15\text{ Hz}$$ for a small wheeled robot, higher for balancing robots).
+4. **Apply the rule of thumb:** Keep loop-induced phase lag at crossover frequency below $$10^\circ\text{–}15^\circ$$ so your PID loop stays crisp and non-oscillatory.
+
+### Concrete Worked Example: Comparing Phase Lag of 100 Hz C++ vs. 25 Hz MicroPython at $$f_c = 10\text{ Hz}$$
+
+| Controller Setup | Period $$T_s$$ | Compute/GC $$T_c$$ | Effective Delay $$T_d = T_s/2 + T_c$$ | Phase Lag at $$f_c = 10\text{ Hz}$$ |
+| --- | --- | --- | --- | --- |
+| **C++ at 100 Hz** | $$10\text{ ms}$$ | $$0.1\text{ ms}$$ | $$5.1\text{ ms}$$ | $$-360^\circ(10)(0.0051) = -18.4^\circ$$ |
+| **MicroPython at 25 Hz (+3 ms GC)** | $$40\text{ ms}$$ | $$3.0\text{ ms}$$ | $$23.0\text{ ms}$$ | $$-360^\circ(10)(0.0230) = -82.8^\circ!$$ |
+
+At $$10\text{ Hz}$$ bandwidth, a 25 Hz MicroPython loop with a 3 ms GC pause eats **$$82.8^\circ$$ of phase margin** — instantly destabilizing a fast-reacting controller (like a self-balancing robot), whereas C++ at 100 Hz (or 200 Hz: only $$-9.4^\circ$$!) stays rock-solid.
+
+**Common Pitfall:** Writing everything in C++ too early when you just want to verify a brand-new I2C sensor's register map — prototyping sensor reads in 10 lines of MicroPython or Python takes 2 minutes, then porting the verified math to C++ takes 10 minutes.
+
+**Quick Check:** If your C++ loop runs at $$200\text{ Hz}$$ ($$T_s = 5\text{ ms}$$) with $$T_c = 0.1\text{ ms}$$, effective delay is $$2.6\text{ ms}$$ and phase lag at $$10\text{ Hz}$$ is only $$-9.36^\circ$$.
+
+---
 
 ## Exercises
 

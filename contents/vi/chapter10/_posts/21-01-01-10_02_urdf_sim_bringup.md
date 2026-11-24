@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~90 phút**.
 
+Có tệp URDF hiển thị đẹp trong RViz2 mới chỉ là một nửa chặng đường: nếu ném thẳng URDF đó vào Gazebo Harmonic, chiếc robot sẽ nằm im bất động như một bức tượng nhựa vì nó chưa có **plugin động cơ vi sai**, chưa có **plugin cảm biến LiDAR/IMU** và chưa được nối qua cầu `ros_gz_bridge`. Bài học này hướng dẫn cách thổi "sự sống vật lý" vào mô hình URDF để tạo nên gói `sim_bringup` hoàn chỉnh.
+
+## Bản đồ kiến thức nền: Ba trụ cột Đưa URDF vào Mô phỏng Gazebo
+
+1. **Thẻ mở rộng `<gazebo>` & Plugin hệ thống (`gz-sim-diff-drive-system`, `gz-sim-sensors-system`)**:
+   Gắn bộ truyền động vi sai nhận lệnh `/cmd_vel` tác động lực lên khớp bánh trái/phải và xuất `/odom` + `/tf`, đồng thời gắn cảm biến LiDAR 2D/camera có **nhiễu Gaussian thực tế** thay vì dữ liệu lý tưởng 100%.
+2. **Đơn giản hóa hình học `<collision>` & Tham số ma sát (`mu1`, `mu2`)**:
+   Dùng khối hộp/trụ đơn giản cho va chạm để giữ RTF cao; đặt ma sát cao cho 2 bánh chủ động và ma sát gần bằng 0 cho bánh đa hướng (caster wheel) để xe không bị kẹt khi xoay tại chỗ.
+3. **Một lệnh Bringup duy nhất (`sim.launch.py`)**:
+   Gom cả 4 thành phần — khởi động Gazebo, sinh robot (`create`), bật `robot_state_publisher` và chạy `ros_gz_bridge` (kèm YAML ánh xạ topic) — vào một launch file duy nhất với `use_sim_time=True`.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ đưa được mô hình `xacro` từ chương 09 vào một world Gazebo Harmonic đang chạy theo đúng trình tự: biên dịch `xacro` ra URDF, khởi chạy `robot_state_publisher`, mở `empty.sdf -r`, spawn mô hình bằng `ros_gz_sim create`, rồi bắc cầu `/clock` một chiều và `/cmd_vel` hai chiều. Bạn sẽ cấu hình tên khớp bánh xe, khoảng cách hai bánh (0,16 m) và bán kính bánh (0,033 m) trong plugin diff-drive khớp hoàn toàn với tệp `xacro`, sau đó gửi một lệnh `Twist` chậm để quan sát bánh xe lăn trực tiếp trong Gazebo. Đồng thời, bạn nắm được năm lỗi bring-up phổ biến (khiến RViz vẫn hiển thị bình thường nhưng robot trong mô phỏng đứng yên hoặc rơi xuyên sàn) và biết đồng bộ `use_sim_time` với `/clock` để timer và TF dùng chung một mốc thời gian.
@@ -159,6 +170,14 @@ ros2 topic pub --times 20 /cmd_vel geometry_msgs/msg/Twist \
 ```
 
 Hai mươi message chỉ đủ cho xe lăn một đoạn ngắn. Trong cửa sổ Gazebo, khung xe sẽ tiến dọc theo $$+x$$ với cả hai bánh quay cùng chiều, và khi publisher kết thúc, xe không còn nhận lực dẫn động nữa. Trường `linear.y` giữ bằng 0 vì xe vi sai không trượt ngang; với $$L/2 = 0.08$$, $$v = 0.2$$ và $$\omega = 0$$, vận tốc dài vành hai bánh đều bằng 0,2 m/s.
+
+### Khung giải thích (nên đọc chậm): Tính nhanh lực kéo tối đa và kiểm tra ma sát bánh caster
+
+Giả sử xe Capstone trong Gazebo nặng tổng cộng $$m = 2{,}0\text{ kg}$$ (trọng lực $$P = m g \approx 19{,}6\text{ N}$$), phân bố 70% tải lên 2 bánh chủ động ($$N_{\text{drive}} = 13{,}7\text{ N}$$) và 30% lên bánh đa hướng phía sau ($$N_{\text{caster}} = 5{,}9\text{ N}$$):
+- Nếu đặt hệ số ma sát bánh chủ động $$\mu_{\text{drive}} = 1{,}0$$ và bánh caster $$\mu_{\text{caster}} = 0{,}01$$:
+  - Lực bám tối đa của 2 bánh chủ động: $$F_{\text{bám}} = 1{,}0 \times 13{,}7 = \mathbf{13{,}7\text{ N}}$$.
+  - Lực cản ngang của bánh caster khi xoay: $$F_{\text{cản}} = 0{,}01 \times 5{,}9 = \mathbf{0{,}06\text{ N}}$$ (không đáng kể, xe xoay mượt!).
+- Ngược lại, nếu quên chỉnh để mặc định $$\mu_{\text{caster}} = 1{,}0$$, bánh caster (mô phỏng bằng hình cầu không xoay trục) sẽ tạo lực cản $$5{,}9\text{ N}$$ khiến xe **rung giật và quay lệch tâm** ngay cả trên mặt sàn phẳng!
 
 ## Lab
 

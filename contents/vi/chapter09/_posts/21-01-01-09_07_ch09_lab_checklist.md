@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~70 phút**. Mục kiểm tra cuối chương này yêu cầu bằng chứng thực tế rằng ROS 2 Jazzy đang chạy ổn định trên Ubuntu 24.04, đồ thị ROS có topic hoạt động và cây TF có ít nhất một cạnh tĩnh mà bạn giải thích được.
 
+Kết thúc Chương 09, bạn đã chuyển từ lập trình đơn lẻ trên MCU sang vận hành trọn vẹn một ngăn xếp phần mềm **ROS 2 Jazzy** trên Linux: có workspace sạch, có launch file tham số hóa, có cây hệ tọa độ TF2 và mô hình URDF hiển thị trực tiếp trên RViz2. Danh sách nghiệm thu này đảm bảo mọi mảnh ghép đã khớp nhau chặt chẽ trước khi bước sang mô phỏng Gazebo và cầu nối phần cứng ở Chương 10.
+
+## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Ngăn xếp ROS 2 (Chương 09)
+
+1. **Tính tự động & Tái lập bằng một lệnh Launch**:
+   Toàn bộ hệ thống (driver/mô phỏng, `robot_state_publisher`, RViz2) khởi chạy sạch sẽ từ một tệp launch duy nhất kèm cấu hình YAML.
+2. **Tính nhất quán của Đồ thị Node–Topic–TF2**:
+   Không có khung TF bị đứt gãy (`view_frames` tạo đúng một cây liên thông duy nhất), không có cảnh báo xung đột QoS và mọi tên topic tuân thủ quy ước chuẩn (`/cmd_vel`, `/odom`, `/tf`).
+3. **Tính hợp lệ của Mô hình URDF/Xacro**:
+   Kiểm tra qua `check_urdf`, bánh xe xoay đúng chiều khi đẩy `/joint_states` và mọi `<link>` đều có thông số quán tính hợp lý cho bước mô phỏng kế tiếp.
+
 ## Mục tiêu
 
 Bạn cần hoàn thành và xác nhận đủ sáu tiêu chí: đúng phiên bản Ubuntu, workspace đã nạp đúng thứ tự, đọc được dữ liệu từ một topic, gọi được một service hoặc action, đồng bộ `ROS_DOMAIN_ID` (nếu dùng SBC) và kiểm chứng cạnh `base_link` tới frame cảm biến bằng `tf2_echo`. Bất kỳ mục nào thiếu log minh chứng đều chưa đạt.
@@ -38,6 +49,17 @@ Gazebo Harmonic ở chương 10 sẽ khởi chạy trực tiếp trên đồ th�
 **Máy tính nhúng (SBC).** Nếu có Raspberry Pi hoặc Jetson: cần có liên kết `/dev/esp32` (hoặc ghi chú kế hoạch hoãn có ngày cụ thể), kết quả `systemctl status` của unit `systemd` và xác nhận hai máy dùng chung `ROS_DOMAIN_ID`. Nếu chưa dùng SBC, ghi rõ "chỉ dùng laptop" là đủ để đạt tiêu chí này.
 
 **Cây tọa độ TF.** Lệnh `ros2 run tf2_ros tf2_echo base_link <frame>` phải in ra phép tịnh tiến theo đơn vị mét. Nếu xuất hiện hai publisher trên cùng một cạnh thì chưa đạt. Nếu bạn chủ động xoay góc yaw $90^\circ$, giá trị quaternion in ra phải xấp xỉ $(0,\ 0,\ 0{,}707,\ 0{,}707)$.
+
+### Khung giải thích (nên đọc chậm): Bộ 4 lệnh kiểm tra nhanh "Sức khỏe ROS 2" trong 60 giây
+
+Trước khi ký duyệt Chương 09, chạy đúng 4 lệnh sau và đối chiếu kỳ vọng:
+
+| Lệnh kiểm tra | Kết quả đạt chuẩn | Dấu hiệu lỗi cần sửa ngay |
+| :--- | :--- | :--- |
+| `ros2 run tf2_tools view_frames` | 1 cây duy nhất `odom → base_link → ...` không đứt nhánh | Xuất hiện 2 cây rời nhau hoặc thời gian trễ TF âm |
+| `ros2 topic hz /odom` | Tần số ổn định (ví dụ `20–50 Hz`), độ lệch chuẩn nhỏ | `no new messages` hoặc rớt nhịp thất thường |
+| `ros2 topic info /scan --verbose` | QoS Publisher và Subscriber tương thích | `BEST_EFFORT` phát vào `RELIABLE` nhận |
+| `check_urdf <(xacro robot.urdf.xacro)` | Báo `Successfully Parsed XML` và đúng số lượng link/joint | Lỗi cú pháp XML hoặc thiếu thẻ `<inertial>` |
 
 ## Lab
 

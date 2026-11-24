@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+A seasoned roboticist can diagnose a stubborn motor driver in two minutes not because of superhuman intuition, but because they never guess what a multimeter can measure. Your workbench tools — multimeter, temperature-controlled soldering iron, wire strippers, and calipers — are the **sensory organs** of an engineer.
+
+This lesson explains what each bench tool actually measures, how measurement error propagates into your robot's math, and why investing in a few dependable instruments saves dozens of hours of phantom debugging.r
+
+---
+
 Plan about 90 minutes. If you already have a meter, prove it on a known short and put it away. If you do not, finish the Wave 1 inventory and photograph the gaps. Do not heat an iron in this lesson.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will **say** what each Wave 1 tool is for, and **state** the observation tha
 ## Prerequisites
 
 The power-up card from lesson 00-03 exists, at least on paper. You know motor VM is not the 3.3 V pin, and you know an iron needs a stand and eye protection before it needs a plug. Chapter 01 is where probing becomes a measured lab. Today you are learning which tool answers which question, so that lab is not a walk to the shop in the middle of an exercise.
+
+## Background Knowledge Map: Metrology, Measurement Loading, and Mechanical Precision
+
+Three foundational measurement concepts govern every tool on your bench:
+
+- **Accuracy, Precision, and Resolution:** A multimeter with 4000 counts on the 4 V range has resolution $$0.001\text{ V}$$, while its accuracy spec (say $$\pm(0.5\% + 2\text{ digits})$$) bounds systematic error. Knowing both prevents you from chasing 5 mV "drifts" that are merely meter tolerance.
+- **Instrument Loading Effect:** An ideal voltmeter has infinite input impedance (typically $$10\text{ M}\Omega$$ in digital multimeters) so it draws negligible current; an ideal ammeter has zero shunt resistance. Probing a high-impedance voltage divider with a low-impedance meter distorts the very voltage you are trying to read.
+- **Mechanical Metrology for Kinematics:** Your odometry equations depend directly on measured wheel radius $$R$$ and track width $$L$$. A 1 mm caliper error on a 65 mm wheel creates a systematic 1.5% distance drift on every single meter the robot drives.r
+
+---
 
 ## Why it matters
 
@@ -104,6 +120,34 @@ $$
 $$
 
 đồng. With the UT33D+ the empty-drawer total is 494000 ₫. Quân writes both figures, dated 23 Sep 2026, and does not order a scope.
+
+## Deep-Dive Explanation (Read Slowly): How a 1 mm Caliper Error Propagates into Odometry Drift
+
+Why do we bother owning vernier calipers instead of eyeballing a wheel with a plastic ruler? Let's trace the error propagation step by step:
+
+1. **Write the forward distance equation:** After $$N$$ full wheel revolutions, the firmware estimates distance traveled as $$\hat{s} = 2\pi \hat{R} N$$, whereas true distance is $$s = 2\pi R N$$.
+2. **Compute relative error:** $$\frac{\hat{s} - s}{s} = \frac{\hat{R} - R}{R} = \frac{\Delta D}{D}$$. Relative diameter error maps 1-to-1 into relative distance error.
+3. **Trace heading error during a turn:** For an in-place rotation $$\Delta\theta = \frac{s_R - s_L}{L}$$, an error $$\Delta L$$ in track width $$L$$ causes a proportional heading error $$\frac{\Delta\theta_{\text{err}}}{\Delta\theta} \approx -\frac{\Delta L}{L}$$.
+4. **Combine with electrical measurement error:** Knowing meter accuracy tells you whether a battery reading of 7.35 V is genuinely sagging or within spec.
+
+### Concrete Worked Example: Caliper Measurement Error & Multimeter Accuracy Spec
+
+- **Part A — Wheel diameter error over a 10 m hallway run:**
+  Suppose the true wheel diameter is $$D = 65.0\text{ mm}$$, but a rough ruler estimate records $$\hat{D} = 66.0\text{ mm}$$ ($$\Delta D = +1.0\text{ mm}$$).
+  - Relative error: $$\frac{1.0}{65.0} \approx +1.538\%$$.
+  - Over a $$10.00\text{ m}$$ run, your robot's odometry reports $$10.00 \times 1.01538 = 10.154\text{ m}$$ — an error of **15.4 cm** purely from a 1 mm ruler mistake!
+  - With digital calipers accurate to $$\pm 0.05\text{ mm}$$, that systematic error drops to $$1000\text{ cm} \times (0.05 / 65) \approx 0.77\text{ cm}$$ — a 20× improvement.
+- **Part B — Multimeter accuracy bound on a 3.300 V rail:**
+  Your DMM is set to the 4.000 V range (resolution $$0.001\text{ V}$$) with accuracy $$\pm(0.5\% + 2\text{ digits})$$ and displays `3.300 V`.
+  - Percentage term: $$0.005 \times 3.300 = 0.0165\text{ V}$$.
+  - Digit term: $$2 \times 0.001 = 0.002\text{ V}$$.
+  - Total uncertainty: $$\pm(0.0165 + 0.002) = \pm 0.0185\text{ V}$$, so the true voltage lies in $$[3.2815\text{ V},\, 3.3185\text{ V}]$$.
+
+**Common Pitfall:** Measuring current by placing the multimeter probes *in parallel* across a battery or power rail while the red lead is plugged into the `10A` jack — that creates a dead short through the meter's internal fuse.
+
+**Quick Check:** If your robot turns $$360^\circ$$ ($$2\pi\text{ rad}$$) and your estimated track width $$\hat{L} = 160\text{ mm}$$ is off by $$4\text{ mm}$$ ($$2.5\%$$), your estimated heading after one full spin will be off by $$0.025 \times 360^\circ = 9^\circ$$.
+
+---
 
 ## Exercises
 

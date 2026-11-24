@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In 1999, a seemingly minor unit mismatch destroyed the $125 million Mars Climate Orbiter; on a student workbench, a single reversed battery lead or dropped screwdriver across a Li-ion pack can vent a cell in under two seconds. Safety in a robotics lab is not bureaucracy — it is **quantitative hazard analysis** applied to stored electrical, thermal, and mechanical energy.
+
+This lesson builds a repeatable pre-power ritual grounded in physics: how much energy sits inside a lithium battery, how fast a short circuit heats a wire, and how mechanical pinch points behave when a firmware bug drives a motor at 100% duty cycle.r
+
+---
+
 Give this lesson 80 minutes. You can pass it with paper before any parcel arrives. If an iron or a lithium cell is already on the desk, the rules apply now.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will **name** the three hazards that actually show up on this bench: stored 
 ## Prerequisites
 
 Lessons 00-01 and 00-02: you can say the 300 ms stop, and the journal has a Track A or Track B sentence. You do not need parts. A GPIO pin is a logic pin, not a power supply, and a wheel on the table becomes a winch the moment PWM is not zero.
+
+## Background Knowledge Map: Electrical Energy Storage, Thermal Runaway, and Mechanical Kill-Switches
+
+Three physical principles explain why lab safety rules are non-negotiable:
+
+- **Internal Resistance & Short-Circuit Current:** A lithium-ion cell has very low internal resistance $$R_{\text{int}}$$ (typically $$30\text{–}80\text{ m}\Omega$$). When shorted, current spikes to $$I_{\text{sc}} = V / R_{\text{int}}$$, dumping tens or hundreds of watts directly into thin jumper wires and the cell's own chemistry.
+- **Joule Heating & Fuse Clearing:** Power dissipated in a conductor scales with the *square* of current: $$P = I^2 R$$. Doubling current quadruples heating rate. A properly sized inline fuse melts intentionally in milliseconds before wire insulation ignites.
+- **Fail-Safe Architecture (Hardware vs. Software E-Stop):** Software can hang in an infinite loop while PWM timers keep driving a motor. True safety requires a physical power cutoff (battery switch / pull-plug) and lifting drive wheels off the bench during every untested firmware flash.r
+
+---
 
 ## Why it matters
 
@@ -95,6 +111,34 @@ A classmate wants the wheels down "just to see the new sketch." PWM has not been
 The same afternoon an 18650 reads 2.1 V and someone offers a TP4056 "recovery." The cell is below a sane cutoff. The note says it will not be charged, pocketed, or clipped across the 2S holder. A healthy cell, if they have one, is charged alone to 4.2 V and only then placed in the holder.
 
 The echo wire in the same pile was about to land on an ESP32 GPIO. Absolute maximum on that pad is not 5 V, so the wire waits for a level shifter. Motor voltage is the same ban, only larger.
+
+## Deep-Dive Explanation (Read Slowly): Calculating Short-Circuit Power and Fuse Sizing by Hand
+
+Why can a harmless-looking 3.7 V lithium cell melt a jumper wire instantly? Trace the four-step calculation:
+
+1. **Model the battery as an ideal source $$V_{\text{oc}}$$ in series with $$R_{\text{int}}$$:** For a fresh 2S Li-ion pack, $$V_{\text{oc}} = 8.4\text{ V}$$ and total pack internal resistance $$R_{\text{int}} \approx 0.12\,\Omega$$.
+2. **Add the accidental short path resistance $$R_{\text{wire}}$$:** A 20 cm 26 AWG jumper wire has resistance $$R_{\text{wire}} \approx 0.03\,\Omega$$ (total loop $$R_{\text{total}} = 0.15\,\Omega$$).
+3. **Compute short-circuit current and power:** $$I_{\text{sc}} = V_{\text{oc}} / R_{\text{total}}$$, and power dumped into the thin wire is $$P_{\text{wire}} = I_{\text{sc}}^2 R_{\text{wire}}$$.
+4. **Size an inline fuse:** Pick a fuse rating just above peak normal stall current (e.g., 1.25×–1.5× peak load) so normal driving never blows it, while a dead short clears it rapidly.
+
+### Concrete Worked Example: Short-Circuiting a 2S Pack vs. Protecting It with a 5 A Fuse
+
+- **Step 1 — Unfused dead short across a 26 AWG jumper:**
+  $$I_{\text{sc}} = \frac{8.4\text{ V}}{0.12\,\Omega + 0.03\,\Omega} = \frac{8.4}{0.15} = 56\text{ A}.$$
+- **Step 2 — Power dissipated inside that tiny jumper wire:**
+  $$P_{\text{wire}} = I_{\text{sc}}^2 R_{\text{wire}} = 56^2 \times 0.03 = 3136 \times 0.03 = 94.1\text{ W}!$$
+  That is nearly the wattage of a hot soldering iron concentrated inside a strand of PVC-coated wire — melting insulation in under a second.
+- **Step 3 — Power dissipated inside the cells themselves:**
+  $$P_{\text{cells}} = 56^2 \times 0.12 = 376.3\text{ W},$$
+  rapidly pushing cell temperature toward thermal runaway.
+- **Step 4 — Sizing the inline fuse for our diff-drive robot:**
+  Suppose two motors stall at $$1.5\text{ A}$$ each ($$3.0\text{ A}$$ total) and logic draws $$0.5\text{ A}$$ (peak $$3.5\text{ A}$$). Choosing a **5 A blade or glass fuse** allows brief startup surges without nuisance tripping, yet at $$56\text{ A}$$ (over 11× rated current) it opens in milliseconds.
+
+**Common Pitfall:** Relying on a breadboard's thin spring clips to carry motor stall currents — breadboards are typically rated for $$\le 1\text{ A}$$ and will melt silently before a 5 A fuse ever blows.
+
+**Quick Check:** Before flipping the main switch on any new circuit, measure resistance between `V+` and `GND` with a multimeter (power OFF). A reading near $$0\,\Omega$$ catches a dead short *before* 56 A ever flows.
+
+---
 
 ## Exercises
 

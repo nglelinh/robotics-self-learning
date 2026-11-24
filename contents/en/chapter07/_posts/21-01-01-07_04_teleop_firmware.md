@@ -13,6 +13,8 @@ draft: false
 
 Lesson 03 specified the lines. This lesson is the ESP32 sketch that parses them, clamps them, slews them, and drops them to zero when the host goes quiet. ROS is still not in the loop. The wheels stay in the air.
 
+The leap from "blinking an LED with `delay()`" to real robotics firmware happens the day you write your first non-blocking control loop. If your MCU freezes inside `delay(500)` while a wheel is spinning toward a staircase, your safety timeout is blind for half a second. Real firmware runs on a steady heartbeat—reading serial bytes without blocking, clamping commands, ramping PWM smoothly, and enforcing the watchdog on every tick.
+
 ## Learning objectives
 
 1. Parse `V` and `S` with `sscanf`, clamp each target to $$\pm 180$$, and ignore a bad line.
@@ -24,6 +26,14 @@ Lesson 03 specified the lines. This lesson is the ESP32 sketch that parses them,
 
 You need lesson 07-01's power tree, lesson 07-02's sign map, and lesson 07-03's grammar: 115200 8N1, newline-terminated text, host refresh $$200~\mathrm{ms}$$, firmware deadline $$250~\mathrm{ms}$$, clamp $$-180..180$$. On a TB6612, STBY low keeps the outputs off, and PWM 0 with STBY high is a short brake, not a high-Z coast. Chapter 06's $$b$$ and $$r$$ stay in the notes; this sketch does not read them. Positive still means that tire toward the nose. Twist, with `linear.x` and `angular.z`, comes after Chapter 08 calibrates and Chapter 09 carries topics. No ROS workspace today.
 
+
+## Background Knowledge Map: Non-Blocking Event Loops, Slew-Rate Limiting, and Embedded Safety States
+
+Reliable teleop firmware combines three core concepts from real-time embedded systems:
+
+- **Non-Blocking Cooperative Scheduling:** Polling `millis()` / `micros()` instead of calling `delay()` allows the MCU to service serial RX, update PWM outputs, and check safety deadlines at a deterministic rate (e.g., 50 Hz = 20 ms period) with minimal jitter.
+- **Slew-Rate Limiting (Acceleration Ramping):** Jumping instantly from `-100%` to `+100%` PWM produces a current spike of nearly $$2 \times I_{\text{stall}}$$ (because back-EMF temporarily *adds* to battery voltage during plug-reversing!), stripping plastic gears and browning out the 5 V rail. Bounding $$\lvert u_k - u_{k-1} \rvert \le \Delta u_{\max}$$ per tick limits both current and jerk.
+- **Explicit Fault & Timeout State Machine:** Separating `IDLE/SAFE`, `ACTIVE`, and `TIMEOUT_STOP` states ensures that an expired watchdog cleanly zeroes hardware outputs and requires a fresh valid command to resume.
 ## Why this matters for Capstone A and the ROS path
 
 The bug that matters is a command that sticks: the host dies and the last LEDC duty keeps the robot rolling on battery power. The timeout belongs in firmware. A later Twist stream needs the same deadline. Chapter 09 replaces the parser, not the stop.
@@ -177,6 +187,23 @@ port.close()
 ```
 
 A second run writes `V 60 -60\n` for one second. Left forward and right back is a right yaw on the lesson 02 map. If the flags disagree, edit that channel's IN pins, not the screws, in this session.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Tracing a Slew-Rate Limiter Over 5 Loop Ticks
+
+Suppose your firmware runs at $$f_s = 50\ \text{Hz}$$ ($$\Delta t = 20\ \text{ms}$$) with command range $$[-100, +100]$$ and a maximum slew step of $$\Delta u_{\max} = 10$$ units per tick (reaching full speed from rest in $$10 \times 20\ \text{ms} = 200\ \text{ms}$$).
+
+Trace the actual PWM output $$u_k$$ when the operator suddenly commands a step from $$0$$ to $$+45$$ at $$k = 1$$, then drops the connection after $$k = 4$$:
+
+| Tick $$k$$ | Time (ms) | Target $$u_{\text{cmd}}$$ | Clamped step $$\operatorname{clip}(u_{\text{cmd}} - u_{k-1}, -10, +10)$$ | Applied $$u_k$$ |
+|---:|---:|---:|---:|---:|
+| 0 | 0 | 0 | 0 | **0** |
+| 1 | 20 | +45 | +10 | **10** |
+| 2 | 40 | +45 | +10 | **20** |
+| 3 | 60 | +45 | +10 | **30** |
+| 4 | 80 | +45 | +10 | **40** |
+| 5 | 100 | +45 | +5 | **45** |
+
+If the operator instead commands a hard reverse from $$+45$$ to $$-45$$, the slew limiter takes 9 ticks ($$180\ \text{ms}$$) to pass smoothly through $$0$$—preventing the plug-reversal current spike that would otherwise reset the ESP32.
 
 ## Lab
 

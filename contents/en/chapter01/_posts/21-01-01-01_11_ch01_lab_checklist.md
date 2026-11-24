@@ -11,6 +11,10 @@ lesson_type: required
 draft: false
 ---
 
+Chapter 01 has taken you from Ohm's law to soldering iron, from color bands to brownout protection. Before handing power and signals over to a microcontroller in Chapter 02, every professional hardware team runs an **electrical bring-up sign-off**: verifying rails, continuity, divider voltages, and harness integrity quantitatively so Chapter 02 starts on rock-solid foundations.r
+
+---
+
 Chapter 01 ends when seven pieces of evidence are in the notes, each one able to fail in a way you can point at. A tick beside "I understand pinouts" is not evidence. This lesson is the audit: what a real pass looks like, what a weak tick looks like, and the short path back when a row is thin. You may close the gates in any order. You may not replace a missing photo with a classmate's.
 
 ## Learning objectives
@@ -20,6 +24,16 @@ You will score seven gates against artifacts, not against a feeling of being don
 ## Prerequisites
 
 Lessons 07 through 10 produced the artifacts this page inspects, and lesson 01 produced the LED arithmetic. The shopping list, when a row is blocked by a missing object, is Chapter 00 lesson 05. You need your notes and your photos. You still do not need a moving robot. Wheels stay up. No motor is connected to celebrate a pass.
+
+## Background Knowledge Map: Hardware Bring-Up Sequencing and Fault-Tree Isolation
+
+A disciplined Chapter 01 sign-off rests on three hardware-engineering habits:
+
+- **Power-Off Before Power-On:** Never apply battery voltage to a freshly wired circuit until resistance between every power rail and `GND` confirms no dead short and polarity checks pass.
+- **Subsystem Isolation Testing:** Verify the battery pack, the 5 V buck converter, and the 3.3 V regulator *independently* (disconnected from the MCU and motor driver) before joining rails. If a buck trimmer was shipped set to 12 V, catching it unloaded saves every downstream chip.
+- **Quantitative Pass/Fail Thresholds:** Replace vague impressions ("looks fine") with numerical tolerances — e.g., `5.00 V ± 0.15 V`, harness drop `< 0.10 V`, and divider output strictly `< 3.30 V`.r
+
+---
 
 ## Why it matters
 
@@ -78,6 +92,33 @@ No wheel turns during the audit.
 A note says: "LED resistor done. Breadboard photo attached, no marks. Three resistors measured, two looked right. Polarity: stripe is negative I think. Driver is an H-bridge. Solder next week maybe. Brownout: don't stall the motors."
 
 Gate 1 fails, or is at best incomplete, because no arithmetic is on the page. "Done" is the weak tick. Gate 2 fails: an unmarked breadboard photo is not a rail map. Gate 3 fails: three measurements are not five, and "looked right" is not a decode plus a meter reading. Gate 4 fails: a guess about an electrolytic stripe is not a diode-mode anode call. Gate 5 fails: "H-bridge" is the forbidden label. Gate 6 is not yet a pass; "next week maybe" becomes a pass of the make-up rule only if a real date replaces "maybe." Gate 7 fails: there is no separate battery, no common ground, no capacitor, and no 300 ms cut. The note does not scrape a pass by being sincere. The next hour is gates 1, 3, and 4 at the bench, plus a rewritten paragraph for gate 7. Gates 2 and 5 need a pencil on a photo. Gate 6 needs a date.
+
+## Deep-Dive Explanation (Read Slowly): Executing a 4-Stage Power-Rail Bring-Up Check
+
+Follow this exact sequence before connecting any MCU board in Chapter 02:
+
+1. **Cold continuity & polarity check (Power OFF):** Measure `VBAT` to `GND` and `5V` to `GND` in resistance mode; verify `> 1 kΩ` (note: bulk capacitors briefly charge and climb upward — wait 2 seconds for the reading to stabilize).
+2. **Unloaded buck converter calibration (Power ON, MCU disconnected):** Power the buck from 2S battery and adjust the potentiometer until the output reads `5.00 V ± 0.05 V`.
+3. **Loaded rail regulation test:** Attach a known dummy load (e.g., a $$22\,\Omega$$, 2 W power resistor drawing $$5.0 / 22 \approx 0.227\text{ A}$$) and confirm the 5 V rail droops by `< 0.05 V`.
+4. **Signal-interface verification:** Test your 5 V → 3.3 V voltage divider under DC input to confirm `V_out ≤ 3.30 V` before attaching any sensor.
+
+### Concrete Worked Example: Computing Load Regulation Percentage on Your 5 V Buck
+
+Suppose your adjustable buck converter measures $$V_{\text{no-load}} = 5.04\text{ V}$$ unloaded and $$V_{\text{full-load}} = 4.98\text{ V}$$ when supplying $$I = 0.50\text{ A}$$ to your logic subsystem.
+
+- **Step 1 — Load regulation percentage:**
+  $$\text{Load Reg (\%)} = \frac{V_{\text{no-load}} - V_{\text{full-load}}}{V_{\text{full-load}}} \times 100\% = \frac{5.04 - 4.98}{4.98} \times 100\% \approx 1.20\%.$$
+  (Anything under $$2\text{–}3\%$$ is excellent for a robot logic rail.)
+- **Step 2 — Effective output impedance of the regulator + wiring:**
+  $$R_{\text{out}} = \frac{\Delta V}{\Delta I} = \frac{0.06\text{ V}}{0.50\text{ A}} = 0.12\,\Omega.$$
+- **Step 3 — Extrapolated voltage at $$1.0\text{ A}$$ peak:**
+  $$V(1.0\text{ A}) \approx 5.04 - 1.0 \times 0.12 = 4.92\text{ V}$$ — still comfortably inside the `4.75–5.25 V` USB/logic spec!
+
+**Common Pitfall:** Adjusting a cheap buck converter while the MCU is already wired to its output — a single slip of the screwdriver can spike the output to full battery voltage (8.4 V) and destroy the board instantly.
+
+**Quick Check:** If a `100 µF` capacitor is connected across `5V` and `GND`, your continuity beeper may chirp for 0.1 seconds and then go silent as the meter charges the capacitor — that brief chirp is normal, whereas a continuous beep indicates a real short.
+
+---
 
 ## Exercises
 

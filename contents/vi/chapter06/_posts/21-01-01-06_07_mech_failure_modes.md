@@ -13,6 +13,34 @@ draft: false
 
 Thời lượng ước tính: **60–80 phút**, bao gồm một lần kiểm tra lực kéo khi đã ngắt nguồn và thực hành làm điểm giảm lực kéo dây (strain relief) có chụp ảnh trước và sau.
 
+Trong các cuộc thi robotics sinh viên, tỷ lệ robot dừng cuộc chơi vì *lỗi thuật toán* thực ra thấp hơn nhiều so với tỷ lệ dừng vì *lỗi cơ – điện cơ bản*: một đầu dây nguồn bị đứt ngầm sát mối hàn sau 50 lần gập mở, một bánh xe tự văng ra vì thiếu keo khóa ren, hay một dây tín hiệu bị kéo căng làm tuột giắc cắm giữa chừng. Nhận diện sớm các **chế độ hỏng hóc cơ khí (failure modes)** và thiết kế **chống kéo dây (strain relief)** giúp robot của bạn sống sót qua hàng trăm giờ chạy thử thay vì hỏng đúng hôm chấm đồ án.
+
+## Bản đồ kiến thức nền: Mỏi kim loại, Sụt áp dây dẫn và Quản lý bó dây (Harnessing)
+
+### 1. Đứt ngầm do mỏi uốn (Fatigue Fracture) và Chống kéo dây (Strain Relief)
+Đồng mềm chịu kéo thẳng khá tốt, nhưng nếu bị uốn đi uốn lại ngay tại đúng ranh giới cứng của **mối hàn thiếc** hoặc đầu chân giắc cắm, dây sẽ đứt gãy do mỏi chỉ sau vài chục chu kỳ. **Strain relief** (dùng dây rút cố định bó dây vào khung *trước* khi đi vào bo mạch, dùng ống co nhiệt bọc chân mối hàn, và giữ bán kính uốn tối thiểu $$R_{\min} \approx 8\text{–}10 \times D_{\text{dây}}$$) chuyển lực giật cơ học vào khung xe thay vì vào mối hàn mỏng manh.
+
+### 2. Chống lỏng cơ khí và tập trung ứng suất tại góc nhọn
+Các vết nứt trên tấm mica hay chi tiết in 3D gần như luôn bắt đầu từ một **góc vuông $$90^\circ$$ sắc nhọn** nơi ứng suất tập trung gấp nhiều lần. Bo tròn góc trong (fillet bán kính $$2\text{–}3\text{ mm}$$) và không khoan lỗ ốc quá sát mép tấm (giữ khoảng cách mép $$\ge 1{,}5\times$$ đường kính lỗ) ngăn nứt vỡ hiệu quả.
+
+### 3. Chọn sai tiết diện dây (AWG) — nguyên nhân ngầm gây sụt áp và reset vi điều khiển
+Dây jumper breadboard (26–28 AWG) có điện trở rất lớn, chỉ chịu được vài trăm mA. Dùng dây jumper mảnh để cấp dòng $$3\text{ A}$$ cho động cơ không chỉ gây nóng chảy vỏ nhựa mà còn làm sụt áp mạnh trên đường dây khiến mạch điều khiển reset bất thường!
+
+### Khung giải thích: Cầm tay tính sụt áp dây nguồn 24 AWG vs. 18 AWG và bán kính uốn bó dây (nên đọc chậm)
+
+**Phần A — So sánh sụt áp trên dây nguồn tổng dài $$0{,}5\text{ m}$$ (tổng khứ hồi dây dương + dây mass $$L = 1{,}0\text{ m}$$) khi robot kéo dòng $$I = 3{,}0\text{ A}$$:**
+- **Dùng dây mảnh 24 AWG** (điện trở $$r \approx 0{,}084\,\Omega/\text{m}$$):
+  $$\Delta V_{24} = I \cdot R = 3{,}0 \times 0{,}084 = 0{,}252\text{ V}, \qquad P_{\text{nóng}} = I^2 R = 9 \times 0{,}084 \approx 0{,}76\text{ W}.$$
+  *(Nếu là dây jumper 28 AWG với $$r \approx 0{,}213\,\Omega/\text{m}$$, sụt áp vọt lên **$$0{,}64\text{ V}$$** và dây nóng **$$1{,}92\text{ W}$$**!)*
+- **Dùng dây nguồn chuẩn 18 AWG** (điện trở $$r \approx 0{,}021\,\Omega/\text{m}$$):
+  $$\Delta V_{18} = 3{,}0 \times 0{,}021 = 0{,}063\text{ V}, \qquad P_{\text{nóng}} = 9 \times 0{,}021 \approx 0{,}19\text{ W}$$
+  — giảm sụt áp và nhiệt tổn hao tới **4 lần**!
+
+**Phần B — Kiểm tra bán kính uốn an toàn cho bó dây động (trên khớp quay/nắp mở):**
+Với một bó dây bọc lưới đường kính ngoài $$D = 4\text{ mm}$$, bán kính uốn động tối thiểu theo quy tắc $$8\text{–}10\times D$$ là:
+$$R_{\min} = 8 \times 4\text{ mm} = 32\text{ mm}\;(\text{đến } 40\text{ mm}).$$
+Bẻ gập bó dây thành góc nhọn bán kính $$5\text{ mm}$$ sẽ làm gãy lõi đồng bên trong sau vài chục lần mở nắp bảo trì!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn nhận diện được bốn dạng hỏng cơ khí phổ biến: bánh xe trượt kêu tách trong khi encoder vẫn đếm xung, càng hoặc moay-ơ nhựa mòn răng, mối hàn đứt ngầm do khung rung uốn và bánh xe cọ khung gây mùi khét do động cơ quá tải. Các bạn biết lắp điểm giảm lực kéo dây (strain relief) kết hợp vòng dây dự phòng để bảo vệ mối hàn, đồng thời soạn hai mục kiểm tra bắt buộc trước khi chạy Capstone A.

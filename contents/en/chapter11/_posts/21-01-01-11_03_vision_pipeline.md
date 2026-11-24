@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: about 75 minutes when a USB camera enumerates as `/dev/video0`, and about 45 minutes when you document a missing device and still walk the pipeline on paper.
 
+A 2D LiDAR sees the world as a flat horizontal slice of distances—it cannot tell a red stop sign from a cardboard box, nor can it see a low doorstep beneath its scan plane. Adding a camera gives your robot rich semantic and geometric perception, turning a stream of RGB pixel arrays into 3D bearings, AprilTag poses, and target-tracking velocity commands.
+
 ## Learning objectives
 
 You can order the pipeline as light, then camera, then algorithm, and you will not retune thresholds while a window blows out the card. You can say what `usb_cam` publishes, compute a centroid, act once at 5 to 10 Hz instead of every frame, state how an optical frame differs from `camera_link` under REP-103, and record a missing `/dev/video0` as a result rather than a broken lab.
@@ -21,6 +23,14 @@ You can order the pipeline as light, then camera, then algorithm, and you will n
 
 You can run a short Python script and you know that an image is an array. You have met `geometry_msgs/msg/Twist` in the Nav2 tour, so you know a velocity command has a linear part and an angular part. You do not need a depth camera, and this lesson never asks for a RealSense.
 
+
+## Background Knowledge Map: Pinhole Camera Geometry, Lens Calibration, and Visual Servoing
+
+Robotic computer vision connects projective geometry to real-time control across three pillars:
+
+- **Pinhole Projection & Intrinsic Matrix $$K$$:** A 3D point $$P_c = (X, Y, Z)^\top$$ in the camera frame projects to pixel coordinates $$(u, v)$$ via $$s\,[u, v, 1]^\top = K P_c$$, where $$K = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}$$ encodes focal lengths (in pixels) and principal point $$(c_x, c_y)$$.
+- **Radial/Tangential Distortion & Calibration:** Wide-angle robot cameras bend straight edges into barrel curves. Calibrating with a checkerboard estimates $$K$$ and distortion coefficients $$(k_1, k_2, p_1, p_2)$$ so `image_proc` can undistort pixels before geometry estimation.
+- **Image-Based Visual Servoing (IBVS):** Even without full 3D depth, the horizontal pixel error $$e_u = c_x - u_{\text{target}}$$ maps directly to a proportional yaw rate $$\omega = K_p e_u$$—closing a clean perception-to-action feedback loop.
 ## Why this lesson sits on the path
 
 The path is the Capstone base, then ROS 2 Jazzy, then Gazebo, then autonomy. The base already bridges `cmd_vel` to PWM. Jazzy is how a camera would publish `sensor_msgs/msg/Image` beside the lidar topics. A colored card on the desk shows thresholding fail in real light faster than a simulated camera. The autonomous act here is modest: yaw toward the card, or stop. That is the same Twist Nav2 publishes. A loop at 30 Hz fights the bridge. A loop at 5 to 10 Hz can share the robot with a later navigator.
@@ -106,6 +116,17 @@ centroid u=312 v=248 area=1840
 Your integers will differ. `u` grows as the card moves right. `area` grows as it comes closer. `centroid none area=0` means the bounds miss this lamp: change the light, then the bounds. `error: cannot open /dev/video0` is a valid lab line. Record it. Do not invent a centroid.
 
 A later ROS node decides at 5 or 10 Hz. If `area` is below 500, publish a zero Twist. If `u` is left of center, publish `angular.z` near 0.3. If `u` is right of center, publish `angular.z` near -0.3. Hold that command until the next tick. Enough to twitch the bridge toward a card. Not a navigator.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Projecting a 3D Target to Pixels and Computing Yaw Command
+
+Suppose your calibrated 640×480 camera has intrinsics $$f_x = f_y = 600\ \text{px}$$ and principal point $$(c_x, c_y) = (320, 240)\ \text{px}$$. A fiducial target sits at $$P_c = (X, Y, Z) = (0.30,\ -0.15,\ 1.50)\ \text{m}$$ in the camera optical frame ($$+X$$ right, $$+Y$$ down, $$+Z$$ forward):
+
+1. **Project $$P_c$$ onto pixel coordinates $$(u, v)$$ using $$K$$:**
+   $$u = f_x \frac{X}{Z} + c_x = 600 \cdot \frac{0.30}{1.50} + 320 = 120 + 320 = 440\ \text{px},$$
+   $$v = f_y \frac{Y}{Z} + c_y = 600 \cdot \frac{-0.15}{1.50} + 240 = -60 + 240 = 180\ \text{px}.$$
+2. **Compute bearing angle and visual-servoing yaw command:** The target appears $$120\ \text{px}$$ to the *right* of image center, corresponding to horizontal bearing angle:
+   $$\theta_{\text{err}} = \arctan\!\left(\frac{u - c_x}{f_x}\right) = \arctan\!\left(\frac{120}{600}\right) = \arctan(0.20) = 0.197\ \text{rad} \approx 11.3^\circ.$$
+   Under REP-103 ($$+\omega$$ = turn left, $$-\omega$$ = turn right), a proportional visual-servoing gain $$K_p = 1.5\ \text{s}^{-1}$$ commands $$\omega = -1.5(0.197) = -0.296\ \text{rad/s}$$—turning right smoothly until $$u \to 320\ \text{px}$$.
 
 ## Lab
 

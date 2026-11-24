@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~75 minutes**.
 
+Traditional embedded robots need a custom serial protocol on the MCU plus a hand-written Python bridge node on the host PC to translate bytes into ROS 2 topics. **micro-ROS** collapses that boundary: by running a lightweight XRCE-DDS client right on your ESP32 or RP2040, the microcontroller itself becomes a first-class ROS 2 node publishing `/odom` and subscribing to `/cmd_vel`.
+
 ## Learning objectives
 
 You will describe XRCE-DDS as a client on the microcontroller plus an agent on the PC that is the actual DDS participant in the ROS 2 graph. You will predict, before you run anything, that `ros2 topic list` stays empty of MCU topics when the agent is down and still empty when the agent is up but no client has connected. You will start the Jazzy micro-ROS agent container for UDP and write the matching serial form with the device flags the agent README uses. You will state the course order out loud: the Python serial bridge in the next lesson comes first, and micro-ROS waits until that bridge’s units and the 300 ms watchdog already work. You will leave a written client topic plan that reuses `/cmd_vel`, telemetry out, and the same frame names as the simulator, even if you do not flash a board tonight.
@@ -21,6 +23,14 @@ You will describe XRCE-DDS as a client on the microcontroller plus an agent on t
 
 Lesson 09-02’s picture of nodes and topics, lesson 08-01’s framed serial command, and lesson 10-01’s Jazzy shell. Docker is required for the agent command in the lab. You do not need a working micro-ROS firmware image tonight, and you should not rebuild the Capstone teleop around micro-ROS before lesson 10-04 passes. An ESP32 DevKit is the board this lesson talks about. A Pico may sit in a drawer; it is not the supported path below.
 
+
+## Background Knowledge Map: XRCE-DDS Client–Agent Architecture, Static Memory, and Embedded Executors
+
+Running ROS 2 on a 320 KB RAM microcontroller relies on three architectural adaptations:
+
+- **XRCE-DDS (eXtremely Resource Constrained Environments):** Full DDS discovery and serialization are too heavy for an MCU. Instead, the MCU runs a tiny XRCE-DDS *client* over UART/Wi-Fi that talks to a host-side `micro-ros-agent`, which proxies topics into the standard ROS 2 DDS graph transparently.
+- **Static Memory Allocation (`rclc`):** Dynamic `malloc`/`free` inside real-time firmware fragments RAM and causes unpredictable crashes after hours of operation. `rclc` pre-allocates fixed message buffers, executor handles, and timer slots at boot.
+- **Deterministic Embedded Executor (`rclc_executor`):** A single-threaded executor polls subscriptions and periodic timers in a strict, bounded order—preserving real-time control timing while speaking native ROS 2 message types.
 ## Why this sits on the path
 
 The Capstone firmware already accepts `V,left,right` and already drops torque when those frames stop. ROS 2 does not speak that frame, and this ESP32 does not speak full DDS. Lesson 10-04’s `rclpy` node is the translator you run first: ordinary Python, the protocol you already debugged, and a killed process still covered by the firmware watchdog. micro-ROS comes later. The client lives on the MCU, the agent on the PC turns XRCE into DDS, and `/cmd_vel` can reach the firmware without the Python scale function in between. Nav2 and a later learned policy still publish Twist either way. They will not debug an agent that never saw a client.
@@ -97,6 +107,18 @@ ros2 topic list
 `/capstone_mcu` must not be on the list. Absence of the MCU node is the observation. A random demo publisher does not establish the Capstone contract. Skip it, or do not leave it as the robot’s interface.
 
 Stop the container with Ctrl-C so the next run does not find port 8888 already taken. When a real client connects later, the agent log gains a session and `ros2 node list` gains the node you named. Write that prediction in the notes tonight; the next hardware session checks it.
+
+### Deep-Dive Explanation (Read Slowly): Estimating RAM & UART Overhead of a micro-ROS Node
+
+Before choosing between micro-ROS and a thin custom serial bridge on an MCU with $$264\ \text{KB}$$ SRAM (such as RP2040) or $$320\ \text{KB}$$ usable DRAM (ESP32), check the exact resource footprint:
+
+1. **Static memory budget for a minimal 2-topic node (`/cmd_vel` sub + `/odom` pub):**
+   - `rclc` + Micro-XRCE-DDS client static buffers (MTU = 512 B, 4 history slots): $$\approx 32\text{–}48\ \text{KB}$$ RAM.
+   - `nav_msgs/msg/Odometry` struct (pose + twist + two $$6\times 6$$ `float64` covariance matrices = $$72 \times 8 = 576\ \text{bytes}$$ plus headers): $$\approx 0.72\ \text{KB}$$ per message.
+   - Total static footprint stays comfortably under $$64\ \text{KB}$$ (~20% of ESP32 DRAM).
+2. **Serial wire budget at 115,200 baud ($$11.52\ \text{kB/s}$$):**
+   - Publishing a full `Odometry` message ($$\approx 720\ \text{B}$$ with XRCE framing) at $$20\ \text{Hz}$$ demands $$720 \times 20 = 14.4\ \text{kB/s}$$ — **exceeding** 115,200 baud!
+   - Solution: bump UART to $$460\,800$$ or $$921\,600$$ baud ($$92.1\ \text{kB/s}$$), or publish compact wheel ticks (`Int32MultiArray`, ~40 B) at 50 Hz ($$2.0\ \text{kB/s}$$) and compute full `Odometry` on the host.
 
 ## Lab
 

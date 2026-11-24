@@ -13,6 +13,34 @@ draft: false
 
 Bài 03 đã chốt đặc tả khung lệnh. Bài này trình bày chương trình (sketch) cho ESP32 để đọc chuỗi lệnh, kẹp giá trị an toàn, tăng giảm PWM mượt theo bước (slew rate) và tự động đưa về 0 khi máy chủ ngừng gửi. Hệ thống vẫn chưa dùng ROS và hai bánh xe vẫn phải kê trên không.
 
+Viết phần mềm cho robot khác hoàn toàn với viết một ứng dụng web hay bài tập cấu trúc dữ liệu: trên vi điều khiển, **thời gian thực là luật thép**. Nếu bạn đặt một lệnh `delay(500)` trong hàm `loop()` để chờ chớp đèn LED, robot của bạn sẽ "điếc" hoàn toàn trong nửa giây — không đọc encoder, không nhận lệnh dừng khẩn cấp, và lao thẳng vào chân bàn! Bài học về **vòng lặp teleop firmware** giới thiệu kiến trúc chuẩn công nghiệp trên vi điều khiển (trước khi bước sang ROS): vòng lặp không chặn (**non-blocking loop**), máy trạng thái an toàn và cơ chế **chó canh cửa (watchdog timeout)** tự dừng xe khi mất kết nối.
+
+## Bản đồ kiến thức nền: Lập trình thời gian thực không chặn trên vi điều khiển
+
+### 1. Vòng lặp không chặn (Non-Blocking Scheduler với `millis()` / `micros()`)
+Thay vì gọi `delay()`, firmware chia công việc theo các chu kỳ cố định dựa trên đồng hồ phần cứng: đọc bộ đệm UART liên tục ở mỗi vòng lặp, chạy vòng điều khiển động cơ ở chu kỳ cứng $$50\text{–}100\text{ Hz}$$ (10–20 ms), và gửi bản tin telemetry ở $$10\text{–}20\text{ Hz}$$ (50–100 ms). Nhờ vậy, không tác vụ nào làm nghẽn phản xạ an toàn của robot.
+
+### 2. Cơ chế Watchdog Timeout (Dead-Man's Switch)
+Trong điều khiển từ xa (teleop), câu hỏi quan trọng nhất không phải là *"nhấn W xe có chạy không?"* mà là ***"nếu máy tính treo, Wi-Fi rớt hoặc cáp USB tuột giữa lúc xe đang lao đi, chuyện gì xảy ra?"***. Watchdog lưu mốc thời gian `last_cmd_ms` của gói lệnh hợp lệ gần nhất; hễ `now - last_cmd_ms > T_wd` (thường 200–500 ms), firmware lập tức chuyển sang trạng thái `SAFE_STOP` và đưa PWM cả hai bánh về 0!
+
+### 3. Giới hạn gia tốc (Slew-Rate Limiter) bảo vệ hộp số và nguồn pin
+Nhảy vọt lệnh từ tiến 100% sang lùi -100% trong 1 mili-giây sẽ tạo dòng xung ngược cực lớn làm reset nguồn và vỡ bánh răng nhựa. Một bộ giới hạn tốc độ thay đổi (*slew-rate limiter*) ép vận tốc tăng/giảm tối đa $$\Delta v_{\max} = a_{\max} \cdot \Delta t$$ mỗi chu kỳ, giúp xe đề-pa và phanh mượt mà.
+
+### Khung giải thích: Cầm tay tính quãng đường dừng khẩn cấp khi mất kết nối theo ngưỡng Watchdog (nên đọc chậm)
+
+Giả sử robot Capstone đang chạy thẳng với vận tốc **$$v = 0{,}80\text{ m/s}$$**, máy tính gửi lệnh teleop ở tần số $$20\text{ Hz}$$ (mỗi $$50\text{ ms}$$ một gói), và gia tốc phanh an toàn của xe là **$$a_{\text{phanh}} = 2{,}0\text{ m/s}^2$$**. Đột ngột đường truyền bị đứt hoàn toàn! Hãy so sánh quãng đường xe lao đi với hai cấu hình thời gian Watchdog:
+
+1. **Cấu hình an toàn ($$T_{\text{wd}} = 300\text{ ms} = 0{,}30\text{ s}$$, tương đương 6 gói mất liên tiếp):**
+   - Quãng đường trôi trong lúc chờ Watchdog kích hoạt:
+     $$d_{\text{chờ}} = v \cdot T_{\text{wd}} = 0{,}80 \times 0{,}30 = 0{,}24\text{ m}\;(24\text{ cm}).$$
+   - Quãng đường giảm tốc về 0 sau khi phanh kích hoạt:
+     $$d_{\text{phanh}} = \frac{v^2}{2 a_{\text{phanh}}} = \frac{0{,}80^2}{2 \times 2{,}0} = \frac{0{,}64}{4{,}0} = 0{,}16\text{ m}\;(16\text{ cm}).$$
+   - **Tổng quãng đường dừng:** $$d_{\text{tổng}} = 0{,}24 + 0{,}16 = 0{,}40\text{ m}\;(40\text{ cm})$$.
+
+2. **Cấu hình quá lỏng ($$T_{\text{wd}} = 2{,}0\text{ s}$$):**
+   - $$d_{\text{chờ}} = 0{,}80 \times 2{,}0 = 1{,}60\text{ m} \implies d_{\text{tổng}} = 1{,}60 + 0{,}16 = 1{,}76\text{ m}!$$
+   Chỉ một tham số cấu hình sai lệch đã biến cú dừng gọn trong 40 cm thành cú đâm tường ở cách đó gần 2 mét!
+
 ## Mục tiêu học
 
 1. Phân tích lệnh `V` và `S` bằng `sscanf`, kẹp từng giá trị mục tiêu vào khoảng $$\pm 180$$ và bỏ qua hoàn toàn các dòng sai cú pháp.

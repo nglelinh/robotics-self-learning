@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~60 minutes**. Ten minutes on the figure, twenty on picking a path, thirty on a one-month plan you can reread without buying anything tonight.
 
+Finishing a first robotics course is not the end of the road—it is the moment the map finally becomes legible. Every specialization you might pursue next—from embedded real-time firmware and nonlinear control to visual SLAM, legged locomotion, or robot foundation models—builds directly on the exact stack you have assembled from Chapter 01 to Chapter 12.
+
 ## Learning objectives
 
 You will choose one path for the next month, not three. Path A stays on the field base: Nav2, a lidar when you are ready, and linorobot2 as a reference diff-drive stack while your own bridge remains the motor path. Path B is an arm and a LeRobot dataset, only if you later decide to buy hardware. Path C is theory: Modern Robotics, which is free, and the MIT manipulation course. You will write a plan that names the Capstone you already have and one safety habit you will not drop. You will leave the reference list as a map, not as five papers to finish over a weekend.
@@ -21,6 +23,14 @@ You will choose one path for the next month, not three. Path A stays on the fiel
 
 Chapters 08 through 11 are behind you in the course sequence, even if some labs are still rough. You can say what the 300 ms timeout does, what `cmd_vel` carries, and why a policy from another gripper is not a controller for your wheels. You have the dataset-card habit from lesson 12-01. You do not need a new board, a new sensor, or a clean build of Nav2 to write the plan. The plan comes first so the shopping tab does not write it for you.
 
+
+## Background Knowledge Map: The Full Robotics Stack and Four Specialization Trajectories
+
+Seeing how every advanced subfield attaches to your existing Capstone foundation keeps your next learning steps focused:
+
+- **Controls & State Estimation Track:** Extends Chapter 08 PID and kinematics into state-space control (LQR, MPC), Extended/Unscented Kalman Filters (EKF/UKF), and factor-graph estimation (GTSAM)—ideal for drones, self-driving vehicles, and legged robots.
+- **Perception & Spatial AI Track:** Extends Chapter 11 LiDAR SLAM and pinhole vision into Visual-Inertial Odometry (VIO), 3D point-cloud registration, and neural scene representations (3D Gaussian Splatting / semantic mapping).
+- **Manipulation & Robot Learning Track:** Extends MoveIt 2 and Chapter 12 LeRobot/ACT/Diffusion Policy into whole-body motion planning, contact-rich force control, sim-to-real reinforcement learning (Isaac Lab / MuJoCo), and VLA fine-tuning.
 ## Why this sits on the path
 
 The course ran from a diff-drive you can hold to papers that publish actions for robots you do not have. The honest ending is one thread for a month. A weekend that opens RT-2, Diffusion Policy, a Nav2 tutorial, a gripper listing, and a Jetson listing finishes none of them. One path for a month beats five papers in a weekend. Timeouts, units, notes, and a power switch still apply on every path.
@@ -67,6 +77,22 @@ reference I will read and not flash over my firmware: https://github.com/linorob
 ```
 
 That plan names one path, the Capstone, and a 300 ms habit. linorobot2 is a reading reference, not a new motor driver. A small 360° lidar is about 1.5–3.5 million VND. A Pi 5, if the laptop is outgrown, starts near 2.4 million VND for a low-RAM board at [Hshop](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk). Recheck the variant. An arm is the expensive optional path and is not priced here. Lidar or Pi, not both on day one, and not beside an arm.
+
+### Deep-Dive Explanation (Read Slowly): Auditing Your Own Stack Readiness with a Concrete Bottleneck Check
+
+When choosing your next project, avoid picking blindly by hype; instead, run a quick quantitative bottleneck audit on your current robot stack:
+
+1. **List your four measured loop rates and bottlenecks:**
+   - Low-level MCU wheel PID: $$50\ \text{Hz}$$ (period $$20\ \text{ms}$$, jitter $$< 1\ \text{ms}$$).
+   - Wheel + IMU odometry (`/odom`): $$30\ \text{Hz}$$ (drift $$\approx 3\%$$ over 10 m).
+   - 2D LiDAR SLAM / Nav2 local planner: $$10\ \text{Hz}$$ (CPU load 45% on SBC).
+   - Vision / learned policy inference: $$5\ \text{Hz}$$ (latency $$180\ \text{ms}$$).
+2. **Match the next skill track to the actual limiting factor:**
+   - If your robot drifts $$> 5\%$$ before loop closure $$\rightarrow$$ study **EKF sensor fusion** (`robot_localization`) and revisit Chapter 06/08 calibration first.
+   - If navigation stalls in narrow corridors $$\rightarrow$$ dive into **Nav2 Smac/MPPI tuning** and Behavior Trees.
+   - If mobile navigation is rock-solid and you want dexterous object interaction $$\rightarrow$$ step into **MoveIt 2** or a **LeRobot/ACT** tabletop arm build.
+
+Measuring before specializing ensures every new mathematical tool solves a real problem on your bench.
 
 ## Lab
 

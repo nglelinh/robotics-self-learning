@@ -10,6 +10,12 @@ lesson_type: required
 draft: false
 ---
 
+On a microcontroller dev-board, two pins sitting 2.54 mm apart can have completely opposite destinies: one is a clean 3.3 V GPIO, the next is connected straight to the 5 V USB bus, and a third controls whether the chip boots from Flash or hangs silently. Mapping your board's **pinout and power-rail tree** on a single page before wiring is the cheapest insurance policy in robotics.
+
+This lesson turns raw pinout diagrams into an engineering pin-allocation sheet for Capstone A.r
+
+---
+
 ## Objectives
 
 You will name, on your own board, the USB 5 V pin and the regulated 3.3 V pin, and you will measure both with USB only. You will treat every ESP32 and Pico GPIO as a 3.3 V pin that 5 V can kill. You will place a 2S pack on the TB6612 VM pin in a drawing, and you will list the header pins that pack must never touch. You will level-shift an HC-SR04 echo on paper, with a common ground, before any sensor is wired. You will leave the battery disconnected for the whole lab.
@@ -17,6 +23,16 @@ You will name, on your own board, the USB 5 V pin and the regulated 3.3 V pin, a
 ## Prerequisites
 
 The heartbeat lab has already proved the board enumerates and that you know which LED pin you own. You can set a meter to DC volts and put the black lead on a ground you can name. Chapter 01’s resistor divider is the only circuit math required. No motor supply is connected. The full cart, including the driver and the pack, is the Chapter 00 shopping lesson ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). You are not buying the pack in order to finish this page.
+
+## Background Knowledge Map: Power-Rail Domains, Pin Multiplexing, and Current Sourcing Limits
+
+Three architectural facts govern safe MCU pin and power-rail design:
+
+- **Multiple Power Domains (`VBAT`, `5V/VIN`, `3V3`):** Never draw motor or servo current from an MCU board's onboard `3V3` pin (typically limited to $$\approx 300\text{–}500\text{ mA}$$ total, *including* the MCU itself). Route `VBAT` to the motor driver, `5V` buck to `VIN`/5 V sensors, and keep `3V3` strictly for low-current logic and I2C pull-ups.
+- **Pin Multiplexing & Strapping Constraints:** Modern MCUs map SPI, I2C, UART, ADC, and PWM onto shared GPIO pads. On ESP32, `ADC2` cannot be used while Wi-Fi is active (always put battery sensing on `ADC1`!), and strapping pins (`GPIO0`, `GPIO2`, `GPIO12`, `GPIO15`) must not be forced into invalid boot states by external hardware.
+- **Per-Pin vs. Package Current Limits:** Even if one GPIO can source 12–20 mA, the entire chip has a total I/O current ceiling (typically 100–200 mA). Always use transistors or driver ICs for anything heavier than an indicator LED.r
+
+---
 
 ## Why it matters for Capstone A
 
@@ -87,6 +103,37 @@ The figure is the order the card is enforcing. You are still on the USB step. Mo
 Faults. Black lead on the 5V pin and red lead on GND produces a negative number or a confusing zero; swap the leads and name GND again. Probing the metal can, or a capacitor, is not a rail measurement. A 0 V reading on 3V3 with a live USB port is a wrong pin, a missing ground, or a dead regulator. Stop. A classmate who powers a TT motor from the 5V pin will brown the board out the moment the motor stalls. That pin is USB 5 V.
 
 Safety: the pack stays in the bag. Do not series the meter in current mode across 5V and GND. That is a short through the meter.
+
+## Deep-Dive Explanation (Read Slowly): Auditing Your `3V3` Onboard Regulator Headroom by Hand
+
+Before hanging an IMU, an OLED screen, two encoders, and a ToF sensor off your dev-board's `3V3` pin, add up the current budget in four steps:
+
+1. **Find the onboard 3.3 V regulator limit $$I_{\text{reg,max}}$$:** Common ESP32 dev-boards use an `AMS1117-3.3` or `ME6211` rated around `500–800 mA` nominal (thermally safe continuous $$\approx 400\text{–}500\text{ mA}$$ from 5 V input).
+2. **Subtract MCU peak current:** ESP32 peaks around `240–300 mA` during Wi-Fi transmit bursts (or ~80 mA with Wi-Fi off); RP2040 peaks around `50–100 mA`.
+3. **Sum all external 3.3 V sensors:** Add datasheet maximums (not "typical sleep" currents!).
+4. **Check thermal margin:** Compute $$P_{\text{LDO}} = (5.0 - 3.3) \times I_{\text{total}}$$ and ensure $$P_{\text{LDO}} < 0.8\text{ W}$$.
+
+### Concrete Worked Example: Complete 3.3 V Rail Budget for an ESP32 Capstone A Robot
+
+| Load on `3V3` Rail | Typical Current | Peak Current |
+| --- | --- | --- |
+| ESP32 MCU (Wi-Fi active for telemetry) | $$120\text{ mA}$$ | $$260\text{ mA}$$ |
+| IMU (`MPU6050` / `BNO055`) | $$4\text{ mA}$$ | $$13\text{ mA}$$ |
+| VL53L0X ToF laser sensor | $$19\text{ mA}$$ | $$40\text{ mA}$$ |
+| 2× Magnetic Hall encoders (at 3.3 V) | $$10\text{ mA}$$ | $$16\text{ mA}$$ |
+| 0.96" I2C OLED display | $$15\text{ mA}$$ | $$25\text{ mA}$$ |
+| **Total `3V3` Rail Load** | **$$168\text{ mA}$$** | **$$354\text{ mA}$$** |
+
+- **Headroom check:** Peak $$354\text{ mA} < 500\text{ mA}$$ limit — **PASS** (146 mA safety margin).
+- **LDO thermal check (fed from 5.0 V buck):**
+  $$P_{\text{LDO,peak}} = (5.0 - 3.3) \times 0.354 = 1.7 \times 0.354 \approx 0.60\text{ W}$$ — stays cool and stable!
+- **What if someone added a 500 mA hobby servo onto `3V3`?** Peak jumps to $$854\text{ mA}$$ and instantly browns out the board. Servos always belong on a dedicated 5 V–6 V buck rail!
+
+**Common Pitfall:** Plugging USB into your laptop *while* simultaneously feeding 5 V into the dev-board's `5V` pin without verifying whether the board has a back-power protection diode — on some boards, that can back-feed power into your laptop's USB port.
+
+**Quick Check:** If you measure `3.28 V` on the `3V3` pin under load, the deviation from `3.30 V` is only $$-0.6\%$$ — well inside the $$\pm 3\%$$ tolerance of digital sensors.
+
+---
 
 ## Exercises
 

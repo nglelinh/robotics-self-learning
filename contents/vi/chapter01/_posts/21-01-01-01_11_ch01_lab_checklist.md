@@ -21,6 +21,40 @@ Sau bài học này, bạn sẽ tự đánh giá được đủ bảy cổng đ�
 
 Các hiện vật cần kiểm tra được tạo ra từ bài 01 (phép tính LED) và chuỗi bài 07 đến 10. Nếu còn thiếu dụng cụ, xem lại danh sách mua sắm ở Chương 00 bài 05. Bạn chỉ cần chuẩn bị sổ lab và các ảnh chụp của mình; vẫn chưa chạy xe, luôn giữ bánh nhấc khỏi bàn và chưa nối động cơ.
 
+---
+
+Kết thúc Chương 01 là một cột mốc quan trọng: bạn đã đi từ định luật Ohm trên giấy tới việc tự tay nhận diện linh kiện, đo kiểm an toàn bằng đồng hồ vạn năng, hàn dây chắc chắn và bảo vệ mạch khỏi ngược cực hay sụt áp. **Checklist Chương 01** đóng vai trò bộ lọc kỹ thuật giúp bạn chắc chắn tầng điện–nguồn đã "sạch bóng lỗi" trước khi cắm bo vi điều khiển ESP32 hoặc Pico vào ở Chương 02.
+
+## Bản đồ kiến thức nền: Bảy Cổng Kiểm soát Chất lượng Tầng Điện tử
+
+1. **Cổng Nguồn & Thông mạch:** Không có chạm chập `VCC–GND`, điện áp các đường nguồn (pin, 5 V Buck, 3,3 V) nằm đúng dung sai $$\pm 5\%$$ cả lúc không tải lẫn lúc đóng tải giả.
+2. **Cổng Linh kiện & Phân cực:** Đọc đúng điện trở (màu & SMD), xác định chính xác cực tính LED, diode và tụ hóa, kiểm chứng được mạch phân áp 5 V → 3,3 V bằng đồng hồ.
+3. **Cổng Cơ–Điện & An toàn:** Mối hàn bóng chắc, có ống co nhiệt chống chập, cầu chì gắn đúng cực dương pin và dây nguồn động cơ tách riêng khỏi nhánh logic.
+
+### Ví dụ cầm tay chỉ việc: Bảng nghiệm thu định lượng cho hệ nguồn trước khi cắm ESP32
+
+Thay vì đánh dấu tick cảm tính, hãy điền và kiểm chứng đúng 4 con số đo thật sau trên bàn lab của bạn:
+
+| Hạng mục nghiệm thu | Điều kiện đo | Ngưỡng đạt chuẩn | Ví dụ kết quả ĐẠT |
+|---|---|---|---|
+| **1. Thông mạch `5V–GND` (tắt nguồn)** | Thang Ohm / Thông mạch | Không kêu bíp, $$R > 1\text{ k}\Omega$$ | $$R = 14.2\text{ k}\Omega$$ |
+| **2. Đầu ra mạch Buck 5 V (không tải)** | Thang DC V (20 V) | $$[4.85\text{ V},\ 5.15\text{ V}]$$ | $$5.02\text{ V}$$ |
+| **3. Sụt áp Buck khi đóng tải $$500\text{ mA}$$** | Mắc tải giả $$10\ \Omega / 5\text{ W}$$ | $$\Delta V < 0.15\text{ V}$$ | $$4.96\text{ V}$$ ($$\Delta V = 0.06\text{ V}$$) |
+| **4. Mạch phân áp 5 V → 3,3 V** | Cấp 5,02 V vào đầu trên | $$[3.0\text{ V},\ 3.45\text{ V}]$$ | $$3.26\text{ V}$$ |
+
+Chỉ cần **một** trong 4 chỉ số trên trượt ngưỡng (ví dụ Buck ra $$6.8\text{ V}$$ do chưa vặn biến trở chỉnh áp!), bạn đã tự cứu sống bo ESP32 trị giá hàng trăm nghìn đồng trước khi cắm nó vào!
+
+### Khung giải thích: 4 bước vượt qua cổng kiểm tra Chương 01 trung thực (nên đọc chậm)
+
+1. **Bước 1 — Không bao giờ "tick hình thức":** Mọi hạng mục chưa có số đo ghi trong sổ lab đều coi là *chưa đạt*.
+2. **Bước 2 — Kiểm tra lặp lại sau khi rung lắc nhẹ cụm dây:** Cầm nhẹ cụm dây nguồn lắc qua lại trong khi đồng hồ vẫn kẹp đo điện áp — nếu số đo nhảy loạn xạ, mối hàn hoặc đầu nối đang lỏng.
+3. **Bước 3 — Chụp lại ảnh mặt trên và mặt dưới mạch vừa hàn:** Ảnh chụp sắc nét là bằng chứng tuyệt vời giúp bạn tự soi cầu thiếc (solder bridge) khi phóng to trên màn hình.
+4. **Bước 4 — Lưu sơ đồ phân bổ đường nguồn vào thư mục `docs/`:** Sang Chương 02, bạn sẽ nối thẳng bo vi điều khiển vào đúng các đầu chờ đã kiểm chứng này.
+
+**Kiểm tra nhanh.** Tại sao khi kiểm tra điện áp đầu ra của mạch Buck mới mua (loại có biến trở chỉnh áp như LM2596/MP1584), ta **bắt buộc** phải đo và vặn chỉnh về 5,0 V *trước* khi nối vào bo mạch robot? Vì nhiều mạch Buck xuất xưởng đang để mức áp mặc định gần bằng $$V_{\text{in}}$$ (7–8 V) — cắm thẳng vào sẽ đốt cháy ngay toàn bộ mạch 5 V và 3,3 V!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Xe Capstone là hệ dẫn động vi sai dùng ESP32 hoặc Pico 3,3 V, mạch lái TB6612 hoặc DRV8833, hai động cơ TT dùng pin riêng và cảm biến HC-SR04 có chân echo 5 V. Sang Chương 02 bạn sẽ bắt đầu lắp ráp và cấp điện cho các khối này. Nếu sơ đồ breadboard chỉ là ảnh board trống không đánh dấu, bạn dễ tốn cả buổi chiều gỡ lỗi đèn LED không sáng; nếu ảnh driver chỉ ghi "cầu H", rất dễ quên kéo chân `STBY` khiến bánh đứng yên; nếu chưa nắm vững đoạn phân tích sụt áp, hiện tượng mạch reset khi dùng chung nguồn USB sẽ bị nhầm thành lỗi chương trình. Buổi rà soát này giúp bạn phát hiện sớm mọi lỗ hổng ngay trên sổ ghi chép.

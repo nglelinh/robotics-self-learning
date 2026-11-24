@@ -13,6 +13,33 @@ draft: false
 
 Bài này chuyển tấm khung rời thành một khung robot hoàn chỉnh, nhưng bánh xe vẫn chưa được cấp PWM để quay. Bạn sẽ lắp động cơ, gắn bánh caster, cố định khối pin và đo kiểm toàn bộ cây nguồn trước khi nạp bất kỳ chương trình điều khiển nào.
 
+Khoảnh khắc bạn nối động cơ, mạch nguồn và vi điều khiển lên cùng một bộ khung chính là lúc robot chuyển từ "tập hợp các linh kiện rời" thành một hệ thống cơ điện tử thống nhất. Nhưng đây cũng là giai đoạn dễ mắc lỗi nối dây nhất: nối nhầm mạch ổn áp tuyến tính cho dòng lớn khiến mạch nóng bỏng tay, đi dây mass (GND) nối tiếp vòng vèo tạo nhiễu đất làm reset ESP32 mỗi lần động cơ đề-pa, hay quên đo thông mạch trước khi cắm pin. Làm đúng **kiến trúc phân phối nguồn** ngay từ bước lắp ráp sẽ tiết kiệm hàng ngày trời gỡ lỗi chập chờn về sau.
+
+## Bản đồ kiến thức nền: Mạch hạ áp Buck vs. LDO, Nối đất hình sao và Kiểm tra trước khi cấp nguồn
+
+### 1. Mạch ổn áp tuyến tính (LDO / 7805) vs. Mạch hạ áp xung (Buck Converter)
+- **LDO (như LM7805, AMS1117):** hoạt động như một điện trở tự điều chỉnh, **đốt toàn bộ phần điện áp chênh lệch thành nhiệt**: $$P_{\text{nhiệt}} = (V_{\text{in}} - V_{\text{out}}) \cdot I$$. Chỉ nên dùng cho dòng rất nhỏ ($$< 200\text{ mA}$$) hoặc chênh áp thấp.
+- **Buck Converter (hạ áp xung):** dùng cuộn cảm và MOSFET đóng ngắt tần số cao đạt hiệu suất **85%–93%**, mát rượi ngay cả khi hạ từ 12 V xuống 5 V ở dòng 2–3 A cho Raspberry Pi và ESP32.
+
+### 2. Nối đất hình sao (Star Grounding) — cách ly nhiễu động cơ khỏi vi điều khiển
+Dòng xung lớn của động cơ chạy qua dây mass sẽ tạo sụt áp nhiễu $$\Delta V = I \cdot R_{\text{dây}}$$. Nếu vi điều khiển và cảm biến dùng chung đoạn dây mass chạy sau động cơ, điện thế chuẩn 0 V của vi điều khiển sẽ "nhảy múa" theo động cơ. **Nối đất hình sao** gom dây mass công suất (driver) và dây mass tín hiệu (MCU/cảm biến) hội tụ riêng rẽ về đúng một điểm chung duy nhất tại cực âm nguồn tổng!
+
+### 3. Quy trình "Đo thông mạch trước – Cấp nguồn không tải sau"
+Trước khi cắm pin LiPo lần đầu, **luôn dùng đồng hồ vạn năng ở thang đo thông mạch (continuity)** chạm hai cực nguồn tổng: nếu đồng hồ kêu "bíp" ngắn mạch thì dừng ngay lập tức! Sau khi xác nhận không chập, cấp nguồn cho mạch Buck *khi chưa cắm vi điều khiển*, chỉnh chiết áp đo đúng $$5{,}00\text{ V}$$ rồi mới kết nối tải logic.
+
+### Khung giải thích: Cầm tay so sánh nhiệt lượng tỏa ra giữa LDO 7805 và Buck Converter khi cấp 5 V / 1 A từ pin 3S (nên đọc chậm)
+
+Giả sử bạn cần hạ áp từ pin LiPo 3S danh định **$$V_{\text{in}} = 11{,}1\text{ V}$$** xuống **$$V_{\text{out}} = 5{,}0\text{ V}$$** để cấp dòng **$$I_{\text{out}} = 1{,}0\text{ A}$$** (công suất hữu ích $$P_{\text{out}} = 5{,}0\text{ W}$$) cho mạch điều khiển và cảm biến:
+
+| Tiêu chí so sánh | Ổn áp tuyến tính **LDO 7805** | Mạch hạ áp xung **Buck ($$\eta = 90\%$$)** | Ý nghĩa thực tế trên robot |
+| :--- | :---: | :---: | :--- |
+| **Dòng hút từ pin 11,1 V** | $$1{,}00\text{ A}$$ | $$\frac{5{,}0}{0{,}90 \times 11{,}1} \approx 0{,}50\text{ A}$$ | Buck hút dòng từ pin chỉ bằng **một nửa**! |
+| **Công suất đầu vào** | $$11{,}1 \times 1{,}0 = 11{,}1\text{ W}$$ | $$5{,}0 / 0{,}90 = 5{,}56\text{ W}$$ | Tiết kiệm $$5{,}54\text{ W}$$ liên tục |
+| **Nhiệt tỏa ra trên mạch** | $$(11{,}1 - 5{,}0) \times 1{,}0 = 6{,}1\text{ W}$$ | $$5{,}56 - 5{,}0 = 0{,}56\text{ W}$$ | Buck mát hơn gần **11 lần**! |
+| **Hiệu suất năng lượng** | $$5{,}0 / 11{,}1 \approx 45{,}0\%$$ | $$90{,}0\%$$ | Tăng đáng kể thời lượng pin |
+
+Con số $$6{,}1\text{ W}$$ giải thích vì sao con chip ổn áp trên bo Arduino hay L298N nóng bỏng tay và tự ngắt chỉ sau 30 giây nếu bạn bắt nó cấp dòng 1 A từ pin 12 V!
+
 ## Mục tiêu học
 
 1. Lắp hai động cơ TT sao cho lốp không cọ tấm mica, gắn bánh caster với vết tiếp xúc nằm sau chốt xoay, và cố định pin để trọng tâm rơi vào khoảng giữa trục bánh chủ động và bánh caster.

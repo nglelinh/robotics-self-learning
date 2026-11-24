@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+If you blindfolded yourself and walked ten steps forward, turned 90 degrees left, and walked ten more steps, you could estimate where you stood in the room purely by counting footsteps — that is **dead reckoning (odometry)**. On a differential-drive robot, **quadrature wheel encoders** are those footsteps, turning every fraction of a millimeter of tire travel into signed integer counts that tell the robot both *how fast* each wheel spins and *which way* it is turning.
+
+This lesson unpacks quadrature phase decoding (`A/B` channels), differential-drive forward kinematics, and why encoder quantization sets a hard floor on slow-speed velocity estimation.r
+
+---
+
 Estimated time: **75–90 minutes**, most of it one careful hand revolution and the arithmetic that turns the count into meters.
 
 ## Learning objectives
@@ -20,6 +26,17 @@ By the end of this lesson you can look at the two square waves from a quadrature
 ## Prerequisites
 
 You can count edges on a GPIO and print them (Chapter 03), and you can tell a Hall puck on a yellow TT gearbox from a slotted disk (Lesson 04-02). A raw encoder is not the I2C bus from Lesson 04-01; UART is only how the count will leave the board. Use the Chapter 01 multimeter on the encoder’s high level before that wire touches a GPIO. You do not need ROS, and you do not need the wheels powered.
+
+## Background Knowledge Map: Quadrature Phase Decoding, Differential-Drive Kinematics, and Velocity Quantization
+
+Three kinematic and signal-processing pillars underlie encoder odometry:
+
+- **Quadrature Decoding (1×, 2×, 4×):** Two Hall or optical channels `A` and `B` sit $$90^\circ$$ out of phase. When `A` leads `B`, the wheel spins forward (`+1`); when `B` leads `A`, it spins backward (`-1`). Counting every rising and falling edge on both channels (4× decoding) quadruples spatial resolution to $$N_{\text{wheel}} = 4 \times \text{PPR} \times G_{\text{gear}}$$ counts per wheel revolution.
+- **Differential-Drive Odometry Update in $$\mathrm{SE}(2)$$:** Given left/right arc displacements $$\Delta s_L, \Delta s_R$$ over $$\Delta t$$, chassis center travel is $$\Delta s = \frac{\Delta s_R + \Delta s_L}{2}$$ and heading change is $$\Delta \theta = \frac{\Delta s_R - \Delta s_L}{L}$$, updating pose via midpoint integration:
+  $$x_{k+1} = x_k + \Delta s \cos\!\left(\theta_k + \frac{\Delta\theta}{2}\right), \qquad y_{k+1} = y_k + \Delta s \sin\!\left(\theta_k + \frac{\Delta\theta}{2}\right), \qquad \theta_{k+1} = \theta_k + \Delta\theta.$$
+- **Velocity Quantization Floor:** Estimating speed as $$v = \Delta c \cdot (\text{m/count}) / \Delta t$$ has a minimum non-zero step of 1 count per $$\Delta t$$. If $$\Delta t$$ is too short for a low-CPR encoder, velocity looks like a noisy staircase of `0, 1, 0, 1` counts.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -153,6 +170,38 @@ A quick check, wheels in the air: the same modest duty on both channels, run for
 Fixing it properly is not a one-time PWM fudge. That is closed-loop speed control on each wheel, the PID in [lesson 08-03]({% multilang_post_url contents/chapter08/08_03_pid_tuning %}), and the note in [lesson 08-04]({% multilang_post_url contents/chapter08/08_04_diff_kinematics %}) on why a straight command becomes a curve.
 
 Further watching: a short video by LPPS - 1 Robotics Team, [same power to both wheels, why the car will not drive straight](https://www.facebook.com/reel/1851960802892543).
+
+## Deep-Dive Explanation (Read Slowly): Hand-Computing One Complete Differential-Drive Odometry Step
+
+Let's execute one exact 2D pose update from raw encoder counts so you can verify your firmware's odometry math line by line:
+
+1. **Compute meters per count:** $$m_{\text{cnt}} = \frac{\pi D}{N_{\text{wheel}}}$$.
+2. **Convert tick deltas to wheel arc lengths:** $$\Delta s_L = \Delta c_L \cdot m_{\text{cnt}}$$, $$\Delta s_R = \Delta c_R \cdot m_{\text{cnt}}$$.
+3. **Compute chassis displacement $$\Delta s$$ and rotation $$\Delta \theta$$:** $$\Delta s = (\Delta s_R + \Delta s_L)/2$$, $$\Delta\theta = (\Delta s_R - \Delta s_L)/L$$.
+4. **Update pose $$(x, y, \theta)$$ using midpoint heading $$\theta_{\text{mid}} = \theta_k + \Delta\theta/2$$** (far more accurate on curves than Euler integration using $$\theta_k$$!).
+
+### Concrete Worked Example: Exact Pose Update on a Left-Curving Arc
+
+Robot specs: wheel diameter $$D = 0.065\text{ m}$$ (circumference $$\pi D = 0.20420\text{ m}$$), track width $$L = 0.160\text{ m}$$, $$N_{\text{wheel}} = 1\,021$$ counts/rev (so $$m_{\text{cnt}} = 0.20420 / 1021 = 0.000200\text{ m/count} = 0.2\text{ mm/count}$$).
+Initial pose: $$(x_0, y_0, \theta_0) = (0.000\text{ m},\, 0.000\text{ m},\, 0.000\text{ rad})$$.
+Over $$\Delta t = 0.10\text{ s}$$, encoders report $$\Delta c_L = 100$$ counts and $$\Delta c_R = 140$$ counts:
+
+- **Step 1 — Wheel displacements:**
+  $$\Delta s_L = 100 \times 0.0002 = 0.0200\text{ m}, \qquad \Delta s_R = 140 \times 0.0002 = 0.0280\text{ m}.$$
+- **Step 2 — Center travel and heading change:**
+  $$\Delta s = \frac{0.0280 + 0.0200}{2} = 0.0240\text{ m}, \qquad \Delta\theta = \frac{0.0280 - 0.0200}{0.160} = \frac{0.0080}{0.160} = +0.0500\text{ rad}\;\; (2.86^\circ\text{ left}).$$
+- **Step 3 — Midpoint pose update ($$\theta_{\text{mid}} = 0 + 0.025 = 0.025\text{ rad}$$, $$\cos 0.025 \approx 0.99969$$, $$\sin 0.025 \approx 0.02500$$):**
+  $$x_1 = 0 + 0.0240 \times 0.99969 = 0.02399\text{ m},$$
+  $$y_1 = 0 + 0.0240 \times 0.02500 = 0.00060\text{ m},$$
+  $$\theta_1 = 0.0500\text{ rad}.$$
+- **Step 4 — Instantaneous linear and angular velocities:**
+  $$v = \frac{0.0240}{0.10} = 0.240\text{ m/s}, \qquad \omega = \frac{0.0500}{0.10} = 0.500\text{ rad/s}.$$
+
+**Common Pitfall:** Reversed sign on one encoder channel (`A`/`B` swapped on the right wheel) — when driving straight, $$\Delta c_L = +100$$ and $$\Delta c_R = -100$$, so odometry thinks the robot is spinning furiously in place (`Δs = 0`)! Always spin each wheel forward by hand first and verify both counters increment positively.
+
+**Quick Check:** At 1 count quantization per $$\Delta t = 0.01\text{ s}$$ (100 Hz) with $$m_{\text{cnt}} = 0.0002\text{ m}$$, the velocity step size is $$0.0002 / 0.01 = 0.02\text{ m/s}$$ — crisp enough for smooth PID velocity control!
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

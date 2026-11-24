@@ -21,6 +21,39 @@ Sau buổi thực hành này, bạn sẽ lập được sơ đồ kiểm tra th�
 
 Bạn cần ôn lại kiến thức từ bài 02 đến bài 05 về breadboard, cách dùng đồng hồ vạn năng (thang thông mạch, thang ohm, thang diode), mã màu điện trở, tụ điện, diode và LED. Buổi này không dùng mỏ hàn và không cấp nguồn cho TB6612. Nếu thiếu linh kiện nào, hãy viết rõ quy trình đo và đánh dấu `dry-run` thay vì chép số liệu của người khác.
 
+---
+
+Lý thuyết đọc vạch màu, giải mã SMD hay tra bảng chân linh kiện chỉ thực sự trở thành phản xạ kỹ sư khi bạn tự tay cầm đồng hồ vạn năng đo kiểm từng linh kiện thật trên bàn! Bài thực hành này rèn cho bạn con mắt "bắt bệnh" các **số đo giả** — những tình huống mà đồng hồ hiển thị một con số hoàn toàn hợp lý về mặt vật lý nhưng lại đánh lừa người đo thiếu kinh nghiệm (như chạm hai ngón tay vào đầu que đo hay đo điện trở khi nó vẫn đang hàn song song trên mạch).
+
+## Bản đồ kiến thức nền: Kỹ thuật Đo kiểm Linh kiện và Nguồn gốc Số đo Giả
+
+1. **Hiệu ứng Điện trở Cơ thể Người:** Khi đo điện trở trị số lớn ($$> 100\text{ k}\Omega$$), nếu cả hai ngón tay bạn kẹp chặt hai đầu que đo, điện trở da tay (~$$50\text{–}300\text{ k}\Omega$$) mắc **song song** với linh kiện sẽ kéo tụt kết quả đo xuống thấp hơn thực tế rất nhiều!
+2. **Đo Trong mạch (In-Circuit) vs. Đo Ngoài mạch (Out-of-Circuit):** Khi linh kiện vẫn gắn trên PCB hoặc breadboard có nhánh song song khác, dòng đo của đồng hồ chia sang các nhánh phụ — kết quả đo điện trở trong mạch luôn **nhỏ hơn hoặc bằng** giá trị thật của linh kiện.
+3. **Thang đo Diode & Kiểm tra Phân cực:** Thang diode xuất ra điện áp thử ~$$2\text{–}3\text{ V}$$ đủ làm sáng mờ các LED đỏ/xanh lá và hiển thị chính xác điện áp rơi thuận $$V_f$$ của diode, giúp xác định cực tính Anode/Cathode ngay cả khi ký hiệu trên thân đã mờ.
+
+### Ví dụ cầm tay chỉ việc: Tính sai số do chạm tay khi đo điện trở $$1\text{ M}\Omega$$ và đo song song trong mạch
+
+**Tình huống 1 — Chạm hai tay vào que đo khi đo điện trở $$R = 1\text{ M}\Omega$$:** giả sử điện trở cơ thể giữa hai tay bạn là $$R_{\text{người}} = 200\text{ k}\Omega = 0.2\text{ M}\Omega$$. Hai điện trở mắc song song cho kết quả đồng hồ hiển thị:
+
+$$
+R_{\text{đo}} = \frac{R \cdot R_{\text{người}}}{R + R_{\text{người}}} = \frac{1.0 \times 0.2}{1.0 + 0.2} = \frac{0.2}{1.2} \approx \mathbf{0.167\text{ M}\Omega = 167\text{ k}\Omega}!
+$$
+
+Chỉ vì chạm tay, bạn đọc sai tới **83%** (tưởng nhầm điện trở $$1\text{ M}\Omega$$ bị hỏng thành $$167\text{ k}\Omega$$)!
+
+**Tình huống 2 — Đo một điện trở $$10\text{ k}\Omega$$ đang mắc song song với một điện trở $$10\text{ k}\Omega$$ khác trên bo mạch:** đồng hồ sẽ đo đúng $$\dfrac{10 \times 10}{10 + 10} = \mathbf{5.0\text{ k}\Omega}$$ — không phải điện trở bị hỏng, mà do nhánh song song chia dòng!
+
+### Khung giải thích: Quy trình 4 bước đo kiểm linh kiện chính xác không mắc bẫy (nên đọc chậm)
+
+1. **Bước 1 — Tách ít nhất một chân khỏi mạch khi đo điện trở hoặc tụ:** Muốn biết trị số thật của linh kiện trên breadboard, hãy nhấc 1 chân ra khỏi hàng lỗ rồi mới chấm que đo.
+2. **Bước 2 — Chỉ kẹp que đo bằng vỏ nhựa cách điện:** Đặc biệt khi đo điện trở từ $$10\text{ k}\Omega$$ trở lên, tuyệt đối không để ngón tay chạm vào cả hai đầu kim loại que đo.
+3. **Bước 3 — Xả tụ hóa trước khi đo thông mạch hoặc điện trở:** Tụ còn tích điện sẽ bơm ngược điện áp vào thang Ohm làm lệch số đo hoặc báo bíp giả trong 1 giây đầu.
+4. **Bước 4 — Ghi song song "Giá trị danh định (đọc mã)" và "Giá trị đo thật" vào sổ lab:** Tính độ lệch phần trăm $$\frac{\vert R_{\text{đo}} - R_{\text{mã}}\vert}{R_{\text{mã}}} \times 100\%$$ để xác nhận nằm trong dung sai $$\pm 1\%$$ hay $$\pm 5\%$$.
+
+**Kiểm tra nhanh.** Bạn đo một điện trở 4 vạch Đỏ–Đỏ–Nâu–Vàng kim (danh định $$220\ \Omega \pm 5\%$$) nhưng thấy đồng hồ hiển thị `216.4 Ω`. Điện trở này có đạt chuẩn không? Độ lệch là $$\frac{\vert 216.4 - 220\vert}{220} = \mathbf{1.64\%} \le 5\%$$ → **hoàn toàn đạt chuẩn!**
+
+---
+
 ## Vì sao bài này quan trọng
 
 Xe đồ án gồm ESP32 hoặc Pico 3,3 V, mạch lái TB6612, hai động cơ TT dùng pin riêng và cảm biến HC-SR04 có chân echo 5 V. Chỉ một linh kiện nhận diện nhầm cũng đủ gây hỏng mạch: LED báo trên chân GPIO cần đúng điện trở đã đo chứ không phải con bị đọc lệch một bậc mười; tụ đệm 100–470 µF trên chân VM là tụ hóa nhôm có vạch đánh dấu cực âm, trong khi nhiều tụ tantali lại dùng vạch chỉ cực dương nên nhầm quy tắc sẽ làm cháy nổ trên đường nguồn động cơ; còn cắm nhầm IC ổn áp TO-92 vào vị trí transistor (hoặc ngược lại) có thể làm hỏng đường 3,3 V. Bảng số liệu của buổi lab này là bằng chứng bạn đã kiểm soát được từng linh kiện trước khi lắp ráp.

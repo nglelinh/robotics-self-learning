@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~70 minutes**. About 25 minutes on the docs and the repository, 30 minutes on a dataset card, 15 minutes on the exercises.
 
+For decades, teaching a robot to fold a towel or plug in a cable meant hand-coding brittle perception pipelines and state machines for months. Open-source ecosystems like Hugging Face's **LeRobot** have flipped that workflow: standardize synchronized camera-and-joint datasets, train visuomotor policies directly from human teleoperation demonstrations, and evaluate them in simulation or on affordable desktop arms.
+
 ## Learning objectives
 
 You will name the three things the LeRobot project keeps on one contract: a dataset, a policy, and a robot. You will point at the SO-100 family, Koch v1.1, and LeKiwi as that project's own low-cost arms and mobile bases, and you will say why none of them is the Capstone diff-drive. You will write a one-page dataset card for a fake episode whose keys are a camera, forward speed $$v$$, and yaw rate $$\omega$$, with units that match at record time and at play time. You will copy the repository's one-sentence description from the README into `lab-notes.md`, with the date you read it.
@@ -21,6 +23,14 @@ You will name the three things the LeRobot project keeps on one contract: a data
 
 You can open a browser and a terminal. The Capstone already takes a forward speed in metres per second and a yaw rate in radians per second, and Chapter 08 still zeros the motors if no fresh frame arrives for 300 ms. Chapter 09's `geometry_msgs/Twist` is the same pair: `linear.x` and `angular.z`. You do not need a graphics card, a leader arm, or a second robot. If `pip` is painful on your network, skip it. The graded artifacts are a quotation and a card.
 
+
+## Background Knowledge Map: Visuomotor Policies, Synchronized Episode Datasets, and Control-Loop Inference
+
+Modern robot learning platforms like LeRobot rest on three engineering pillars:
+
+- **Visuomotor Policy Abstraction ($$\pi_\theta(a_t \mid o_t)$$):** Instead of hand-crafting explicit object poses and waypoints, a learned policy maps raw observations $$o_t$$ (camera images + proprioceptive joint positions) directly to continuous action vectors $$a_t$$ (target joint angles or end-effector deltas).
+- **Standardized Episode Datasets:** Robot demonstrations are stored as time-indexed tables (`episode_index`, `frame_index`, `observation.state`, `action`, `timestamp`) paired with compressed video streams—ensuring exact temporal alignment between what the robot *saw* and what the human *commanded*.
+- **Closed-Loop Inference Latency Budget:** A neural policy that runs at 2 Hz on a CPU cannot stabilize a 30 Hz manipulation task; measuring inference latency vs. control period is just as critical for learned policies as for PID loops in Chapter 08.
 ## Why this sits on the path
 
 Capstone A made a diff-drive base that moves when firmware accepts $$v$$ and $$\omega$$. ROS 2 Jazzy gave those two numbers a topic. A learning library does not replace that stack. It adds a file. The file has to contain the observation the robot can actually produce later, and the action the firmware will actually accept later. If one note says the action is motor PWM and another says it is radians, you have logged one robot and played the log on another. Lessons 12-02 and 12-03 assume the keys exist and then argue about how a policy fills them. Lesson 12-04 is the same mistake at the scale of a published checkpoint. Lesson 12-05 asks you to pick a month; the month is optional, this contract is not.
@@ -67,6 +77,18 @@ N = \text{fps} \times T = 10 \times 2.0 = 20
 $$
 
 Twenty images with `fps: 30` on the card are not a 2.0 s episode. Somebody will stretch the turn. Write the count you can verify by listing the folder.
+
+### Deep-Dive Explanation (Read Slowly): Sizing a LeRobot Demonstration Dataset and Control Loop Budget
+
+Suppose you collect $$E = 50$$ teleoperation demonstrations of a 6-DOF desktop arm picking up a cube, each lasting $$T = 12\ \text{s}$$ at $$f_s = 30\ \text{Hz}$$ with one 480×640 RGB wrist camera and 6 joint angles (`float32`):
+
+1. **Total state–action training transitions:**
+   $$N_{\text{frames}} = 50 \times 12 \times 30 = 18\,000\ \text{frames}.$$
+   Notice how modest $$18\,000$$ frames is compared to internet-scale vision datasets—which is why data quality, consistent camera mounting, and covering recovery states matter far more than raw dataset size.
+2. **State/action storage vs. video storage:**
+   - Proprioception + actions: $$18\,000 \times (6 + 6) \times 4\ \text{B} = 864\ \text{KB}$$ (less than 1 MB!).
+   - Uncompressed RGB video: $$18\,000 \times 640 \times 480 \times 3 \approx 16.6\ \text{GB}$$; encoded with H.264/AV1 at 2 Mbps for 600 s total video: $$\frac{2\ \text{Mb/s} \times 600\ \text{s}}{8} = 150\ \text{MB}$$ (**110× smaller**!).
+3. **Control-loop timing check:** At $$30\ \text{Hz}$$, the entire pipeline (camera grab + image resize + neural forward pass + serial motor write) must complete within $$1000 / 30 = 33.3\ \text{ms}$$.
 
 ## Lab
 

@@ -21,6 +21,40 @@ Sau bài học này, bạn có thể mở bất kỳ tài liệu PDF datasheet n
 
 Bạn cần nắm định luật Ohm (bài 01), thói quen đo an toàn bằng đồng hồ vạn năng (bài 02) và cực tính linh kiện (bài 04). Bài này không cấp nguồn động cơ; bạn chỉ cần một quyển sổ ghi chép rõ ràng để mang sang dùng tiếp ở Chương 02.
 
+---
+
+Khi mới học điện tử, thói quen phổ biến nhất là gõ Google tìm một sơ đồ nối dây vẽ sẵn trên blog rồi cắm theo y hệt — cho đến ngày bo mạch mua về có nhãn chân hơi khác, hoặc một cảm biến bốc khói mà không biết tại sao! **Datasheet** (tài liệu kỹ thuật chính hãng) là bản "hiến pháp" duy nhất đáng tin cậy 100% cho mọi con chip: bạn không cần đọc hết 800 trang, mà chỉ cần biết đúng **6 trang cốt lõi** chứa điện áp trần, sơ đồ chân và bảng sự thật.
+
+## Bản đồ kiến thức nền: Giải phẫu Một Tài liệu Kỹ thuật (Datasheet)
+
+1. **Absolute Maximum Ratings (Giới hạn Tuyệt đối — Vùng Chết):** Cho biết mức điện áp/dòng/nhiệt độ mà chỉ cần chạm tới là linh kiện có thể hỏng vĩnh viễn — *không bao giờ* thiết kế chạy sát ngưỡng này!
+2. **Recommended Operating Conditions (Vùng Làm việc Khuyến nghị):** Dải điện áp nguồn (`VCC`), mức logic nhận diện `HIGH/LOW` ($$V_{IH}, V_{IL}$$) và dòng tải liên tục an toàn.
+3. **Pinout & Truth Table (Sơ đồ Chân & Bảng Sự thật):** Xác định chính xác chân nào là nguồn, chân nào là chân khởi động nhạy cảm (*strapping pins* trên ESP32 như GPIO 0, 2, 12, 15), và tổ hợp mức logic nào làm động cơ quay thuận, nghịch hay phanh.
+
+### Ví dụ cầm tay chỉ việc: Áp dụng 6 bước đọc Datasheet kiểm tra ngưỡng 3,3 V của ESP32 và mạch phân áp
+
+Tra mục *Absolute Maximum Ratings* của ESP32: điện áp tối đa trên bất kỳ chân GPIO nào là $$V_{\text{IO,max}} = V_{DD} + 0.3\text{ V} = 3.3 + 0.3 = \mathbf{3.6\text{ V}}$$.
+- Nếu cảm biến siêu âm xuất tín hiệu Echo **$$5.0\text{ V}$$** nối thẳng vào GPIO ESP32: $$5.0\text{ V} > 3.6\text{ V}$$ (vượt trần $$1.4\text{ V}$$) → làm chảy diode kẹp bảo vệ bên trong chân chip!
+- Thiết kế nhanh mạch phân áp bảo vệ với hai điện trở phổ thông $$R_1 = 1.2\text{ k}\Omega$$ và $$R_2 = 2.2\text{ k}\Omega$$:
+  $$
+  V_{\text{GPIO}} = 5.0 \times \frac{2.2}{1.2 + 2.2} = 5.0 \times \frac{2.2}{3.4} \approx \mathbf{3.24\text{ V}}!
+  $$
+  Kiểm tra cả hai biên từ datasheet ESP32 ($$V_{IH} = 0.75 \times 3.3 = 2.475\text{ V}$$ và trần $$3.6\text{ V}$$):
+  $$
+  2.475\text{ V} < \mathbf{3.24\text{ V}} < 3.6\text{ V} \implies \text{nhận chắc mức HIGH và an toàn tuyệt đối!}
+  $$
+
+### Khung giải thích: Quy trình 4 bước tra Datasheet trong 3 phút (nên đọc chậm)
+
+1. **Bước 1 — Kiểm tra đúng mã hậu tố linh kiện:** `TB6612FNG` khác hoàn toàn chân với `DRV8833`; `ESP32-WROOM-32` có chân khác `ESP32-S3` — luôn đối chiếu đúng mã in trên lưng chip.
+2. **Bước 2 — Đọc `Absolute Maximum` trước `Typical`:** Đánh dấu ngay điện áp tối đa cho chân nguồn và chân tín hiệu để dựng rào chắn an toàn.
+3. **Bước 3 — Khoanh vùng các chân đặc biệt (Input-only, Strapping, ADC2):** Trên ESP32 cổ điển, GPIO 34–39 *chỉ đọc vào* (không xuất PWM được), còn nhóm ADC2 bị khóa khi bật Wi-Fi!
+4. **Bước 4 — Kiểm tra bảng sự thật (Truth Table) trước khi viết code:** Ví dụ trên TB6612FNG, `AIN1=H, AIN2=H` là phanh ngắn mạch (`Short Brake`), còn `AIN1=L, AIN2=L` là dừng thả trôi (`Stop`) — nắm bảng này giúp debug động cơ trong 30 giây.
+
+**Kiểm tra nhanh.** Trên mạch phân áp bảo vệ Echo ở trên, nếu nguồn 5 V của mạch Buck dao động lên mức cao nhất $$5.25\text{ V}$$, điện áp vào chân GPIO ESP32 là bao nhiêu? $$5.25 \times (2.2 / 3.4) \approx \mathbf{3.40\text{ V}} < 3.6\text{ V}$$ — vẫn giữ nguyên biên an toàn!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Xe Capstone là hệ dẫn động vi sai gồm hai động cơ TT, module TB6612FNG và vi điều khiển 3,3 V (ESP32 hoặc Pico). Nguồn VM lấy từ pin động cơ (không lấy từ USB), nguồn VCC nối vào đường 3,3 V, còn chân echo của HC-SR04 xuất 5 V nên không được nối trực tiếp vào GPIO 3,3 V. Nếu chỉ nhớ tên chân một cách máy móc theo nhãn dán, buổi chạy thử đầu tiên rất dễ gặp các lỗi tưởng như do phần mềm: bánh xe đứng yên vì quên kéo chân STBY, hoặc cháy chân GPIO ngay khi cảm biến phản hồi. Trình tự đọc datasheet giúp bạn phát hiện các giới hạn cấm trước khi đấu dây.

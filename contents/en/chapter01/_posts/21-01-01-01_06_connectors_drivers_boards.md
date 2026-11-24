@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In robotics competitions, more robots lose points to a vibrated-loose Dupont jumper wire than to a bug in their path planner. A mobile robot is a vibrating mechanical platform: every connector, motor driver breakout, and microcontroller dev-board is both an electrical interface and a mechanical joint.
+
+This lesson maps the physical ecosystem of connectors (`XT60`, `JST-XH`, `Dupont`), motor drivers, and MCU boards — explaining why keying, current ratings, and star-grounding separate a dependable robot from a fragile science-fair sculpture.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you will be able to tell a 2.54 mm Dupont jumper, which is a signal wire, from a connector that is allowed to carry motor current. You will refuse to force a JST-XH housing onto a servo plug or an XT30 onto an XT60. You will compute the voltage a TT motor actually sees from a 7.4 V pack through a TB6612 versus through an L298N, and you will name the DRV8833 as the smaller substitute with a 1.5 A ceiling that gets hot in a stall. You will distinguish an ESP32 dev board from a bare WROOM module, point at VBUS versus 3V3 on a Pico, and explain why an HC-SR04 echo must not land raw on a 3.3 V GPIO.
@@ -18,6 +24,16 @@ By the end of this lesson you will be able to tell a 2.54 mm Dupont jumper, whic
 ## Prerequisites
 
 You can measure DC voltage in parallel, you know a GPIO is a few tens of milliamperes, and you know a stalled TT motor is not. You do not need to PWM a motor yet. This lesson stops at chip markings, pin names, and one voltage-drop calculation before the first wheel turns.
+
+## Background Knowledge Map: Contact Mechanics, Connector Ampacity, and Ground-Loop Isolation
+
+Three practical engineering principles govern interconnects on a robot:
+
+- **Keyed vs. Unkeyed Connectors & Ampacity:** High-current battery connectors (`XT60` rated 60 A, `XT30` rated 30 A) and medium-current signal/power headers (`JST-XH` 2.54 mm, rated ~3 A) are physically **keyed** so you cannot plug them in backward. Friction-fit Dupont jumpers are unkeyed and rated only ~1–2 A — fine for breadboard prototypes, dangerous for permanent battery harnesses.
+- **Common Ground & Star-Grounding Topology:** Logic signals (PWM, encoder pulses) are voltages measured *relative to `GND`*. Your MCU and motor driver must share a common `GND`, yet high-current motor return paths should meet the logic ground at a single **star point** near the battery/regulator so motor current spikes do not lift the MCU's ground reference.
+- **Subsystem Modularity:** Treating the power board, motor driver, and MCU dev-board as modular blocks joined by keyed connectors lets you swap a blown driver in 60 seconds without desoldering the entire robot.r
+
+---
 
 ## Why this matters on the diff-drive robot
 
@@ -97,6 +113,31 @@ You should finish with two photographs and a labeled sketch, and with every moto
 | Housing will not mate without force | JST-XH, JR, XT30, and XT60 are different families | Stop. Match the family. Do not shave a key. |
 
 Safety: wheels off the table even though this lab does not spin them. Pack disconnected. Do not probe a pack with your fingers on the metal of the tips. The 7.4 V arithmetic is done on paper until a later lesson measures VM with the meter on a range above 10 V.
+
+## Deep-Dive Explanation (Read Slowly): Why Shared Return Wires Cause "Ground Bounce" on Sensors
+
+Have you ever wondered why an analog sensor reading jumps wildly the moment the motors turn on? Trace the 4-step ground-bounce mechanism:
+
+1. **Every return wire has non-zero resistance $$R_{\text{gnd}}$$:** A thin 20 cm Dupont wire plus two loose pin contacts easily totals $$R_{\text{gnd}} \approx 0.15\,\Omega$$.
+2. **Motor current returns through that shared wire:** If the MCU and sensor share the *same* ground wire back to the battery as the motor driver, a $$2.0\text{ A}$$ motor pulse flows through $$R_{\text{gnd}}$$.
+3. **Compute the ground lift (ground bounce):** $$\Delta V_{\text{gnd}} = I_{\text{motor}} \cdot R_{\text{gnd}}$$.
+4. **Fix with star grounding:** Give the motor driver its own thick (18–20 AWG) ground wire straight to the battery, and run a separate ground wire from the battery/regulator to the MCU and sensors. Now $$I_{\text{motor}}$$ never flows through the sensor's ground wire!
+
+### Concrete Worked Example: Ground Bounce Error on a 12-Bit ADC Sensor
+
+Suppose an analog IR distance sensor outputs $$1.500\text{ V}$$ relative to true battery ground, read by a 3.3 V, 12-bit ADC (4096 counts, $$0.806\text{ mV/count}$$).
+
+- **Bad wiring (daisy-chained thin ground wire, $$R_{\text{gnd}} = 0.15\,\Omega$$, motor surge $$I = 2.0\text{ A}$$):**
+  - Ground lift at sensor/MCU junction: $$\Delta V_{\text{gnd}} = 2.0\text{ A} \times 0.15\,\Omega = 0.300\text{ V}$$.
+  - ADC reading error: $$\frac{0.300\text{ V}}{0.000806\text{ V/count}} \approx 372\text{ ADC counts}$$ (a massive **20% phantom distance jump** every time the motor accelerates!).
+- **Good wiring (star ground with 18 AWG motor return, sensor ground carries only $$I_{\text{sensor}} = 0.02\text{ A}$$):**
+  - Ground lift on sensor wire: $$\Delta V_{\text{gnd}} = 0.02 \times 0.15 = 0.003\text{ V}$$ (only ~3.7 counts — 100× cleaner!).
+
+**Common Pitfall:** Forgetting to connect the MCU `GND` to the motor driver logic `GND` altogether — leaving the PWM input "floating" so the motor twitches unpredictably or ignores commands.
+
+**Quick Check:** If your robot uses 2S Li-ion power (peak 5 A), an `XT30` (30 A) or `XT60` (60 A) battery plug provides a 6×–12× current safety factor and physically prevents reverse-polarity accidents.
+
+---
 
 ## Exercises
 

@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~90 minutes**.
 
+Every beginner starts debugging microcontrollers with `Serial.println("ok")`, and for blinking LEDs that works fine. The moment a robot streams encoder ticks at 50 Hz while receiving velocity commands over the same wire, unstructured text collapses into garbled lines and dropped bytes. Moving beyond `println` means adopting framed packets, checksums, and deterministic state-machine parsers.
+
 ## Learning objectives
 
 By the end of this lesson you can design a small wheel-command frame that survives a split USB read, implement it on the host in Python and on an ESP32 or Pico, and explain why a bare `println` of `"40,-15"` is not a protocol. You will compute a one-byte XOR check, name the timeout that must zero the motors, and record one captured frame plus one deliberate failure in `lab-notes.md`. That skill is the contract Chapter 10’s ROS 2 bridge will reuse, so `cmd_vel` never becomes “whatever bytes happened to be in the buffer.”
@@ -21,6 +23,14 @@ By the end of this lesson you can design a small wheel-command frame that surviv
 
 You can blink an LED and print a line from Chapter 02, and you have a Capstone A teleop sketch from Chapter 07, even if it still sends raw text. You know a byte is 8 bits and that `115200 8N1` means 115200 bits per second, 8 data bits, no parity, one stop bit. A laptop with Python 3 is enough for the dry run. An ESP32 or Pico is the hardware version of the same lab.
 
+
+## Background Knowledge Map: Byte-Stream Framing, Error Detection (XOR/CRC), and Finite-State Parsers
+
+Robust robot serial links rely on three pillars from computer networking and embedded software:
+
+- **Framing & Synchronization:** Because UART transmits raw bytes without packet boundaries, receivers must locate frame starts using either a unique delimiter (e.g., `\n` in ASCII or COBS zero-byte framing in binary) or a sync header (`0xAA 0x55`) paired with an explicit payload length byte.
+- **Integrity Verification (Checksum / CRC):** Electromagnetic noise from brushed DC motors can flip bits on a UART line. Appending an XOR checksum or 8-bit CRC (CRC-8) lets the receiver discard corrupted frames silently rather than feeding a bit-flipped `v = 255` into the motor driver.
+- **Non-Blocking Finite-State Parsing:** Reading one byte at a time into a state machine (`WAIT_SYNC -> READ_LEN -> READ_PAYLOAD -> CHECK_CRC`) guarantees bounded worst-case execution time per control tick and zero heap allocation.
 ## Why this sits on the path
 
 Chapter 07 proved the robot can move when you type on a serial line. Chapter 08 turns that line into something a program can trust. Chapter 09 will introduce ROS 2 topics, which are also framed messages with types. Chapter 10’s bridge node is only a translator: `geometry_msgs/Twist` in, this frame out. If the frame is ambiguous, every later stack (Nav2, a vision loop, a learned policy) inherits a robot that lunges when a byte is lost. Robot learning in Chapter 12 assumes the low-level command channel already fails safe.
@@ -90,6 +100,20 @@ send(0, 0)
 ```
 
 Replace the port with the `socat` PTY from the lab when the robot is not on the bench. Wheels stay off the ground whenever a real motor driver is connected.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Computing a Binary Frame and Its XOR Checksum
+
+Suppose our compact binary velocity command has the format `[SYNC=0xAA] [TYPE=0x01] [v_L: int8] [v_R: int8] [CHK]`, where `CHK` is the bitwise XOR of `TYPE`, `v_L`, and `v_R`.
+
+1. **Encode command $$v_L = +40$$, $$v_R = -20$$ (signed 8-bit two's complement):**
+   - `TYPE` = `0x01` (binary `0000 0001`).
+   - `v_L = +40` = `0x28` (binary `0010 1000`).
+   - `v_R = -20`: in two's complement, $$256 - 20 = 236 = \text{0xEC}$$ (binary `1110 1100`).
+2. **Compute the XOR checksum bit by bit:**
+   - `0x01 XOR 0x28`: `0000 0001 ^ 0010 1000 = 0010 1001` (`0x29`).
+   - `0x29 XOR 0xEC`: `0010 1001 ^ 1110 1100 = 1100 0101` (`0xC5`).
+3. **Final 5-byte wire packet:** `AA 01 28 EC C5`.
+4. **Verify bit-flip detection:** If motor EMI flips bit 7 of `v_R` (`0xEC` becomes `0x6C`, which decodes to `+108` instead of `-20`!), the receiver recomputes `0x01 ^ 0x28 ^ 0x6C = 0x45 != 0xC5` and immediately **drops** the corrupted frame instead of violently reversing the right wheel.
 
 ## Lab
 

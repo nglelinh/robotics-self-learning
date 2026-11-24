@@ -13,6 +13,8 @@ draft: false
 
 You bolt the motors, trail the caster, strap the battery, and prove the power tree with a meter. No PWM yet.
 
+The single most dramatic moment in any hardware build is the first time you plug in the battery—and seasoned engineers make sure it is the most *boring* moment instead. By assembling the chassis with the mass centered low, wiring a clean star-ground power tree, and measuring every voltage rail with a multimeter *before* the microcontroller ever touches a socket, you turn "smoke test" from a gamble into a guaranteed pass.
+
 ## Learning objectives
 
 1. Mount both TT motors so the tires clear the plate, set the caster so its contact trails, and strap the battery so the center of gravity sits between the axle and the caster.
@@ -24,6 +26,14 @@ You bolt the motors, trail the caster, strap the battery, and prove the power tr
 
 Chapter 04 taught you that a sensor and a microcontroller share one ground. Chapter 05 taught the H-bridge: a TB6612 stays asleep while STBY is low, and an L298N's onboard 7805 is not an ESP32 supply. Chapter 06 left two lengths in the notes, track width $$b$$ between the tire contact centers and rolling radius $$r$$ from a one-revolution roll. A typical bench here has $$b = 0.15~\mathrm{m}$$ and $$r = 31.2~\mathrm{mm}$$. Copy them into today's notes. This lesson has no ROS node and no PWM.
 
+
+## Background Knowledge Map: Power-Tree Architecture, Buck Regulation, and Common-Ground Reference
+
+Safe mobile-robot wiring stands on three electrical and mechanical pillars:
+
+- **Power-Tree Topology & Voltage Regulation:** A 2S Li-Ion/LiPo battery swings from 8.4 V (full) down to ~6.4 V (discharged). Motor drivers handle this unregulated battery bus directly, while the microcontroller (3.3 V or 5 V) requires a switching buck regulator (high efficiency $$\eta \approx 85\text{–}92\%$$) or low-dropout linear regulator to stay within strict voltage limits.
+- **Star Grounding & Ground-Bounce Prevention:** High motor currents (1–3 A) returning through a thin wire shared with the MCU create a voltage drop $$\Delta V = I R_{\text{wire}}$$ that lifts the MCU's ground reference and corrupts serial/sensor signals. Routing motor-driver ground and logic ground separately back to a single star point at the battery/switch eliminates ground bounce.
+- **Mass Distribution & Pitch Stability:** Placing the heaviest component (the battery pack) low and slightly ahead of the drive axle lowers the center of mass and keeps positive normal force on both drive tires and the swivel caster during acceleration.
 ## Why this matters for Capstone A and the ROS path
 
 ROS 2 is not in this chapter. Later a `geometry_msgs/Twist` will carry `linear.x` as forward speed and `angular.z` as yaw rate, and some node will split that twist into two wheel commands. The split is useless if the nose lifts, the buck was never set, or the microcontroller browns out when the motors start. Lessons 03 and 04 use a text line as a stand-in for that twist. A Twist message cannot strap a battery.
@@ -73,6 +83,21 @@ $$
 in a small regulator. At $$12~\mathrm{V}$$ the same current is $$1.75~\mathrm{W}$$. The buck feeds the ESP32 either way.
 
 Lithium stays in a holder or a pack with a BMS. No dangling soldered bare leads. Charge with the matching charger, attended. A TP4056 is 1S only, full near $$4.2~\mathrm{V}$$. One TP4056 on a 2S pack will not make $$8.4~\mathrm{V}$$ and will not balance the cells.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Calculating Power-Tree Current, Efficiency, and Runtime
+
+Before plugging in the battery, verify your power tree with a three-line energy budget:
+
+1. **Load inventory on a 2S Li-Ion pack (nominal $$V_{\text{bat}} = 7.4\ \text{V}$$, capacity $$2200\ \text{mAh}$$):**
+   - Two drive motors cruising at $$0.40\ \text{A}$$ each directly on the battery rail: $$I_{\text{motors}} = 0.80\ \text{A}$$.
+   - ESP32 + sensors drawing $$0.25\ \text{A}$$ at $$5.0\ \text{V}$$ ($$P_{\text{logic}} = 1.25\ \text{W}$$) through a buck converter of efficiency $$\eta = 0.88$$.
+2. **Input current drawn by the buck converter from the 7.4 V pack:**
+   $$I_{\text{buck,in}} = \frac{P_{\text{logic}}}{\eta \, V_{\text{bat}}} = \frac{1.25}{0.88 \times 7.4} = 0.192\ \text{A}.$$
+   *(Compare with a linear 7805 regulator: it would draw the full $$0.25\ \text{A}$$ and waste $$(7.4 - 5.0) \times 0.25 = 0.60\ \text{W}$$ as heat!)*
+3. **Total battery current and conservative runtime (using 80% usable capacity):**
+   $$I_{\text{total}} = 0.80 + 0.192 = 0.992\ \text{A} \approx 1.0\ \text{A},$$
+   $$t_{\text{run}} = \frac{0.80 \times 2.2\ \text{Ah}}{1.0\ \text{A}} = 1.76\ \text{hours} \approx 105\ \text{minutes}.$$
+   Checking this budget confirms your fuse/switch rating (e.g., 5 A switch, 3 A fuse) and ensures your battery will survive a full field test.
 
 ## Lab
 

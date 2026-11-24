@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~75 phút**.
 
+Ở Chương 08, ta đã tự viết giao thức serial văn bản nối MCU (ESP32) với máy tính chủ — gọn gàng nhưng mỗi lần thêm một cảm biến mới bạn lại phải tự định nghĩa cú pháp chuỗi, tự parse và tự viết node ROS 2 trung gian. **micro-ROS** mang chính mô hình Node–Topic–Service của ROS 2 xuống tận vi điều khiển có vài trăm kilobyte RAM, biến ESP32 thành một "công dân hạng nhất" ngay trên đồ thị ROS 2.
+
+## Bản đồ kiến thức nền: Ba trụ cột của micro-ROS trên Vi điều khiển (MCU)
+
+1. **Kiến trúc Client–Agent trên chuẩn XRCE-DDS**:
+   Vì DDS đầy đủ quá nặng cho MCU, micro-ROS chạy thư viện nhẹ **XRCE-DDS Client** trên ESP32, nói chuyện qua UART/USB hoặc Wi-Fi UDP với một tiến trình **micro-ROS Agent** trên SBC/laptop — chính Agent làm cầu nối đại diện cho MCU tham gia mạng DDS của ROS 2.
+2. **Lập trình không cấp phát động (Static Allocation & Executor)**:
+   Trên MCU không có bộ nhớ ảo, gọi `malloc()` liên tục trong vòng lặp sẽ gây phân mảnh RAM và treo máy sau vài giờ. micro-ROS cấp phát tĩnh toàn bộ vùng nhớ message ngay lúc khởi động và điều phối callback bằng `rclc_executor`.
+3. **Đánh đổi giữa Custom Serial Bridge và micro-ROS**:
+   Custom serial gọn nhẹ, dễ gỡ lỗi bằng công cụ terminal thường; micro-ROS tốn thời gian thiết lập toolchain hơn nhưng chuẩn hóa hoàn toàn thông điệp và dễ mở rộng cho hệ thống nhiều cảm biến.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ giải thích được kiến trúc XRCE-DDS gồm một client chạy trên vi điều khiển (MCU) kết hợp với một agent trên máy tính — trong đó agent mới là thực thể (participant) DDS trực tiếp tham gia đồ thị ROS 2. Bạn sẽ dự đoán chính xác rằng `ros2 topic list` không hiển thị topic của MCU khi agent tắt, và vẫn chưa hiển thị khi agent đã bật nhưng chưa có client kết nối. Bạn khởi chạy được container micro-ROS agent phiên bản Jazzy qua giao thức UDP, viết đúng cú pháp lệnh tương ứng cho chế độ serial theo tài liệu của agent, đồng thời nắm rõ lộ trình khóa học: hoàn thiện cầu nối serial bằng Python ở bài 10-04 trước, sau đó mới chuyển sang micro-ROS khi đơn vị vận tốc và watchdog 300 ms đã được kiểm chứng. Cuối bài, bạn lập bản kế hoạch topic cho client (dùng lại `/cmd_vel`, topic telemetry và tên frame đồng bộ với mô phỏng) ngay cả khi chưa nạp mạch thật.
@@ -97,6 +108,14 @@ ros2 topic list
 Kết quả không được chứa `/capstone_mcu` — sự vắng mặt này chính là bằng chứng cho thấy agent chưa tạo thực thể khi chưa có client kết nối.
 
 Nhấn Ctrl-C để dừng container, tránh chiếm giữ cổng 8888 cho các lần chạy sau. Khi kết nối mạch thật ở buổi thực hành phần cứng, log của agent sẽ ghi nhận phiên mới và `ros2 node list` sẽ hiện đúng tên node bạn đã lên kế hoạch.
+
+### Khung giải thích (nên đọc chậm): Kiểm tra băng thông UART `115200 bps` cho cầu nối micro-ROS
+
+Giả sử ESP32 nối với Raspberry Pi qua UART ở tốc độ truyền mặc định **115.200 baud** (chuẩn 8N1 = 10 bit/byte, nên tốc độ tối đa lý thuyết là $$115.200 / 10 = \mathbf{11.520\text{ byte/s}}$$):
+- Nếu ESP32 xuất `/odom` (~120 byte đã tuần tự hóa CDR + header XRCE) ở **50 Hz**: tốn $$120 \times 50 = \mathbf{6.000\text{ byte/s}}$$ (~52% băng thông).
+- Nếu đồng thời xuất thêm `/imu/data` (~150 byte) ở **50 Hz**: tốn thêm $$150 \times 50 = \mathbf{7.500\text{ byte/s}}$$.
+- **Tổng yêu cầu = $$13.500\text{ byte/s} > 11.520\text{ byte/s}$$ → NGHẼN CỔ CHAI UART**, gây rớt gói và độ trễ tích lũy!
+- **Cách xử lý chuẩn:** Nâng tốc độ baud lên **`921600 bps`** (cho phép ~92 KB/s, gấp $$8\times$$) hoặc dùng kết nối USB-CDC / Wi-Fi UDP!
 
 ## Lab
 

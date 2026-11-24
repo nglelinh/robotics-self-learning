@@ -13,6 +13,37 @@ draft: false
 
 Thông số động cơ có hai mức dòng điện rất khác nhau: dòng không tải đo khi bánh quay tự do trên không, và dòng kẹt trục (stall) khi rô-to đứng yên khiến suất điện động ngược bằng 0. Bài này giúp bạn quy đổi dòng stall thành công suất tỏa nhiệt trên động cơ và mạch cầu H, chọn cỡ cầu chì phù hợp trên dây dương pin và xử lý tình huống sụt áp (brownout) như một lỗi điều khiển.
 
+Rất nhiều mạch driver và động cơ robot chết không phải vì quá áp, mà vì một kịch bản quen thuộc: bánh xe robot kẹt vào chân bàn, phần mềm vẫn vô tư đẩy PWM 100%, dòng điện vọt lên mức **dòng kẹt (stall current)** cao gấp 5–10 lần dòng chạy bình thường, và chỉ trong vài chục giây lớp sơn cách điện cuộn dây đồng nóng chảy bốc khói! Hiểu về **giới hạn dòng, dòng kẹt và mô hình nhiệt** là tấm khiên bắt buộc để bảo vệ cả phần cứng lẫn an toàn cháy nổ trong phòng lab.
+
+## Bản đồ kiến thức nền: Định luật Joule, Mạch nhiệt tương đương và Cắt dòng bảo vệ
+
+### 1. Vì sao dòng kẹt (Stall Current) lại nguy hiểm theo hàm bình phương?
+Khi bánh xe bị chặn cứng ($$\omega = 0$$), sức phản điện động $$E = K_e \omega$$ tụt về $$0$$, toàn bộ điện áp pin đặt thẳng lên điện trở cuộn dây nhỏ xíu $$R_a$$: $$I_{\text{stall}} = V / R_a$$. Tệ hơn nữa, công suất tỏa nhiệt tuân theo định luật Joule **$$P_{\text{nhiệt}} = I^2 R_a$$**: dòng tăng lên $$4$$ lần thì nhiệt lượng đốt nóng cuộn dây tăng vọt lên **$$16$$ lần**!
+
+### 2. Mô hình điện trở nhiệt (Thermal Resistance $$R_{\theta}$$)
+Trong kỹ thuật điện tử công suất, nhiệt chảy từ nhân bán dẫn (junction) ra môi trường y hệt dòng điện chảy qua điện trở:
+$$T_J = T_{\text{amb}} + P_{\text{loss}} \cdot R_{\theta JA},$$
+với $$T_J$$ là nhiệt độ nhân chip (thường giới hạn tối đa $$125\text{–}150^\circ\text{C}$$), $$T_{\text{amb}}$$ là nhiệt độ phòng, và $$R_{\theta JA}$$ ($$^\circ\text{C/W}$$) là tổng trở nhiệt từ nhân ra không khí. Chỉ cần biết công suất tổn hao $$P_{\text{loss}}$$ và $$R_{\theta JA}$$ trên datasheet, bạn tính được ngay chip có cần gắn tản nhiệt hay không trước khi cấp nguồn!
+
+### 3. Ba lớp phòng thủ: Cầu chì, Giới hạn dòng phần cứng (Chopper) và Giám sát phần mềm
+Một hệ thống robot chuẩn không bao giờ dựa vào một lớp bảo vệ duy nhất: (1) **Cầu chì / polyfuse** cắt mạch khi ngắn mạch nặng; (2) **Giới hạn dòng chủ động (current limiting / Vref)** trên driver tự băm xung khi dòng chạm ngưỡng; và (3) **Watchdog phát hiện kẹt trong firmware** (thấy PWM cao mà xung encoder bằng 0 trong > 1 giây thì tự ngắt động cơ).
+
+### Khung giải thích: Cầm tay tính công suất đốt nhiệt khi kẹt trục và nhiệt độ nhân chip driver (nên đọc chậm)
+
+**Phần A — Sức nóng khủng khiếp khi kẹt trục (Stall) so với khi có giới hạn dòng:**
+Xét động cơ DC $$12\text{ V}$$ có điện trở cuộn dây $$R_a = 1{,}5\,\Omega$$:
+1. **Khi kẹt cứng không có giới hạn dòng:**
+   $$I_{\text{stall}} = \frac{12\text{ V}}{1{,}5\,\Omega} = 8{,}0\text{ A} \implies P_{\text{nhiệt, stall}} = I_{\text{stall}}^2 R_a = 8{,}0^2 \times 1{,}5 = 96{,}0\text{ W}!$$
+   Động cơ nhỏ cầm tay đang biến thành một chiếc mỏ hàn $$96\text{ W}$$ — cháy cuộn dây chỉ trong vài giây!
+2. **Khi mạch driver đặt giới hạn dòng chủ động ở $$I_{\lim} = 2{,}0\text{ A}$$:**
+   $$P_{\text{nhiệt, lim}} = 2{,}0^2 \times 1{,}5 = 6{,}0\text{ W}$$
+   — giảm dòng đi $$4\times$$ nhưng cắt nhiệt lượng đốt nóng xuống tới **$$16\times$$** (từ $$96\text{ W}$$ còn $$6\text{ W}$$)!
+
+**Phần B — Kiểm tra nhiệt độ nhân chip driver bằng điện trở nhiệt:**
+Giả sử một chip driver không gắn tản nhiệt có $$R_{\theta JA} = 45^\circ\text{C/W}$$, đang tỏa công suất tổn hao $$P_{\text{loss}} = 2{,}5\text{ W}$$ trong phòng lab nóng $$T_{\text{amb}} = 30^\circ\text{C}$$:
+$$T_J = 30 + 2{,}5 \times 45 = 30 + 112{,}5 = 142{,}5^\circ\text{C}!$$
+Con số $$142{,}5^\circ\text{C}$$ đã chạm sát ngưỡng ngắt nhiệt ($$150^\circ\text{C}$$) của hầu hết IC bán dẫn — chứng minh bằng tính tay rằng bạn *bắt buộc* phải giảm dòng tải, đổi sang driver MOSFET có $$R_{\text{DS(on)}}$$ nhỏ hơn, hoặc gắn tản nhiệt trước khi chạy liên tục!
+
 ## Mục tiêu học
 
 Sau bài này, bạn phân biệt rõ dòng không tải với dòng stall và dùng dòng stall làm cơ sở chọn mạch cầu H cũng như cầu chì. Từ điện áp định mức và dòng stall, bạn ước lượng được điện trở cuộn dây và công suất nhiệt tỏa ra trong động cơ khi bị kẹt. Bạn tính được nhiệt tỏa trên L298N từ mức sụt áp của chip và giải thích vì sao TB6612 mát hơn ở cùng dòng tải. Bạn cũng biết vị trí lắp cầu chì trên dây dương pin và lý do phải coi hiện tượng sụt nguồn reset vi điều khiển là một sự cố điều khiển cần chặn bằng phần mềm.

@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~90 phút**.
 
+Mục tiêu tối thượng của một kiến trúc phần mềm robot chuyên nghiệp là **tính trong suốt giữa mô phỏng và phần cứng thật (Sim/Real Parity)**: cùng một lệnh `ros2 topic pub /cmd_vel ...` hay cùng một ngăn xếp Nav2 phía trên phải chạy y hệt nhau mà *không cần biết* bên dưới là Gazebo Harmonic hay chiếc xe Capstone thật đặt trên sàn phòng lab. Bài học này xây dựng hoàn chỉnh tầng cầu nối (`bridge_capstone`) biến điều đó thành hiện thực.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Cầu nối Phần cứng Capstone
+
+1. **Hợp đồng Giao diện Đồng nhất (Identical Topic & TF Contract)**:
+   Cả `sim_bringup` lẫn `real_bringup` đều nhận đúng `/cmd_vel` (`Twist`), xuất đúng `/odom` (`Odometry`) và phát đúng cây TF `odom → base_link` theo chuẩn REP-103/105.
+2. **Đóng gói Giao thức & Xử lý lỗi Kết nối (Reconnection & Watchdog)**:
+   Node cầu nối trên SBC kiểm soát mở/đóng cổng serial an toàn, phát hiện mất gói tin, tự gửi lệnh vận tốc `0` khi tắt node (`on_shutdown`) và xuất trạng thái chẩn đoán (`/diagnostics`).
+3. **Hoán đổi tầng thấp bằng Launch Argument (`use_sim:=true/false`)**:
+   Tách rạch ròi tầng phần cứng/mô phỏng khỏi tầng định vị và điều hướng, giúp bạn phát triển thuật toán ở nhà trên Gazebo rồi sáng hôm sau chạy thẳng trên xe thật tại phòng lab.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ chạy được một node `rclpy` đăng ký nhận `/cmd_vel`, chuyển đổi `linear.x` và `angular.z` thành vận tốc dài vành bánh trái và bánh phải với khoảng cách hai bánh $$L = 0.16$$ m, rồi ánh xạ sang dải số nguyên của chương 08. Bạn khai báo tập trung hệ số quy đổi (0,5 m/s tương ứng số nguyên 100) để kiểm chứng rằng lệnh chạy thẳng 0,2 m/s tạo ra payload `V,40,40`, đóng gói thành khung dữ liệu chuẩn (`STX 0xAA`, byte độ dài, payload ASCII, byte kiểm tra XOR và `0x0A`), đồng thời tự động gửi `V,0,0` khi quá 0,3 s không nhận được `Twist` mới. Bạn kiểm thử toàn bộ node mà không cần robot thật thông qua cặp cổng giả lập PTY (`socat`) cùng một bộ giải mã (parser) nhỏ, phân biệt được cơ chế nào vẫn dừng động cơ nếu tiến trình cầu nối bị tắt đột ngột, và luôn nhấc bánh xe khỏi mặt đất khi thử với phần cứng thật.
@@ -247,6 +258,20 @@ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
 ```
 
 Parser phải in ra `OK V,40,40` vài lần ở nhịp 20 Hz, sau đó (trong vòng chưa đầy một giây kể từ khi ngừng gửi) tự chuyển sang `OK V,0,0`. Log của node cầu nối cũng hiển thị chính xác hai chuỗi này khi giá trị thay đổi.
+
+### Khung giải thích (nên đọc chậm): Kiểm chứng độ trễ khứ hồi (Round-Trip Latency) trên cầu nối SBC ↔ MCU
+
+Để biết cầu nối phần cứng có đủ nhanh cho vòng điều hướng 20 Hz (`50 ms/nhịp`) hay không, ta cộng từng chặng trễ của 1 lệnh `/cmd_vel`:
+
+| Chặng xử lý trên đường đi của lệnh | Độ trễ ước lượng |
+| :--- | :---: |
+| 1. ROS 2 DDS truyền `/cmd_vel` nội bộ trên SBC | ~`0,5 ms` |
+| 2. Node cầu nối Python đóng gói khung tin + ghi xuống USB-Serial (`115200 bps`, 30 byte) | ~`3,0 ms` |
+| 3. MCU chờ đến nhịp vòng lặp điều khiển tiếp theo (50 Hz, trung bình $$T_s/2$$) | ~`10,0 ms` |
+| 4. MCU gửi ngược số đếm encoder (30 byte) về lại SBC và xuất `/odom` | ~`3,5 ms` |
+| **Tổng độ trễ khứ hồi (Round-Trip)** | **~`17,0 ms`** (< `50 ms` → Đạt chuẩn!) |
+
+Nếu tổng độ trễ vượt quá `40–50 ms` (ví dụ do `time.sleep()` chặn luồng hoặc buffer USB bị tích tụ), xe thật sẽ xuất hiện hiện tượng *lắc đuôi (oscillation)* khi Nav2 cố bám đường cong!
 
 ## Lab
 

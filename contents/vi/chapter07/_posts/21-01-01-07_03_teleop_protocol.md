@@ -13,6 +13,37 @@ draft: false
 
 Bài 02 đã chốt ý nghĩa chiều quay của giá trị dương trên từng bánh xe. Bài này thiết kế định dạng bản tin (giao thức) để gửi hai con số đó qua cổng nối tiếp; phần lập trình vòng lặp firmware sẽ thực hiện ở Bài 04.
 
+Ở những bài tập Arduino đầu tiên, ai cũng từng dùng kiểu điều khiển đơn giản: gõ chữ `'w'` trên bàn phím để xe chạy thẳng, `'s'` để lùi, `'x'` để dừng. Cách làm đó chạy vui trên bàn học nhưng sụp đổ ngay trên robot thực thụ: không gửi được vận tốc liên tục `(v, ω)`, không phát hiện được byte bị nhiễu giữa đường, và nếu cáp USB bị nhiễu mất một ký tự thì robot chạy theo một con số rác! Thiết kế một **giao thức teleop serial** chuẩn chỉnh — có khung gói rõ ràng (framing), phân tách trường và mã kiểm tra lỗi (checksum) — là bước chuyển mình từ "đồ chơi" sang "hệ thống điều khiển tin cậy".
+
+## Bản đồ kiến thức nền: Đóng khung gói tin (Framing), Checksum và Băng thông UART
+
+### 1. Framing — làm sao bên nhận biết đâu là đầu và cuối một gói lệnh?
+Đường truyền UART là một dòng byte liên tục không có ranh giới tự nhiên. Giao thức tốt luôn quy định **ký tự bắt đầu (SOF)** và **ký tự kết thúc (EOF)** rõ ràng — ví dụ kiểu bản tin NMEA của GPS: `$V,0.50,-0.25*43\n` (bắt đầu bằng `$`, thân lệnh `V,0.50,-0.25`, dấu `*`, mã kiểm tra hex `43`, kết thúc bằng `\n`). Nhờ framing, dù bên nhận bật lên giữa chừng của một gói cũ, nó vẫn bỏ qua phần rác và đồng bộ lại ngay ở dấu `$` tiếp theo!
+
+### 2. Kiểm tra toàn vẹn bằng Checksum XOR / CRC
+Nhiễu điện từ từ động cơ DC rất dễ lật 1 bit trên đường dây UART (ví dụ biến `0.10` thành `9.10`!). Gắn thêm **checksum XOR** (hoặc CRC-8/CRC-16) cuối mỗi gói tin giúp firmware loại bỏ ngay mọi gói hỏng thay vì thực thi lệnh sai gây tai nạn.
+
+### 3. Tính toán băng thông UART 8N1
+Chuẩn UART `115200 8N1` truyền 8 bit dữ liệu kèm 1 bit start và 1 bit stop — tức tốn đúng **10 bit cho mỗi byte**. Vì vậy, tốc độ tối đa là $$115\,200 / 10 = 11\,520\text{ byte/giây}$$. Giữ lưu lượng thực tế dưới 50% trần này giúp bộ đệm UART không bao giờ bị tràn!
+
+### Khung giải thích: Cầm tay tính băng thông gói lệnh 50 Hz và tự tay tính Checksum XOR (nên đọc chậm)
+
+**Phần A — Kiểm tra độ thoáng băng thông UART `115200 8N1`:**
+- Dung lượng đường truyền: $$115\,200 / 10 = 11\,520\text{ byte/giây}$$.
+- Mỗi gói lệnh teleop `$V,0.50,-0.25*43\n` dài **17 byte**, gửi ở tần số mượt **50 Hz** (mỗi 20 ms):
+  $$\text{Lưu lượng lệnh} = 17 \times 50 = 850\text{ byte/giây} \implies \text{Tỷ lệ chiếm dụng} = \frac{850}{11\,520} \approx 7{,}4\%!$$
+  Còn dư hơn 92% băng thông để robot gửi ngược telemetry (encoder, điện áp pin, IMU) về máy tính!
+
+**Phần B — Tự tay tính mã kiểm tra XOR (Checksum) trên 3 byte dữ liệu mẫu:**
+Giả sử phần thân gói tin gồm 3 byte thập lục phân `0x56`, `0x0A`, `0x1F`. Ta thực hiện phép toán **XOR từng bit** (`^`):
+1. `0x56` = `0101 0110`
+2. `0x0A` = `0000 1010`
+   $$\to \text{0x56} \oplus \text{0x0A} = \texttt{0101 1100} = \text{0x5C}.$$
+3. `0x1F` = `0001 1111`
+   $$\to \text{0x5C} \oplus \text{0x1F} = \texttt{0100 0011} = \text{0x43}.$$
+
+Bên gửi đính kèm `43` vào cuối gói. Nếu nhiễu động cơ làm lật chỉ 1 bit bất kỳ trong thân gói, phép XOR ở bên nhận sẽ ra khác `0x43` và firmware lập tức vứt bỏ gói lỗi đó!
+
 ## Mục tiêu học
 
 1. Đặc tả giao thức văn bản UTF-8 kết thúc bằng ký tự xuống dòng trên chuẩn 115200 8N1: lệnh `V <trái> <phải>` gồm hai số nguyên và lệnh `S` dùng để dừng khẩn cấp.

@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~90 phút**.
 
+Một robot tự hành thực thụ thường có từ 8 đến 20 node chạy song song. Bạn không thể mở 15 cửa sổ terminal để gõ tay từng lệnh `ros2 run` kèm chục tham số mỗi lần khởi động! **Launch files** (viết bằng Python/YAML), hệ thống **Parameters** động và chính sách chất lượng dịch vụ **QoS (Quality of Service)** chính là bộ ba công cụ biến các node rời rạc thành một hệ thống robot vận hành tin cậy chỉ bằng một lệnh duy nhất.
+
+## Bản đồ kiến thức nền: Ba trụ cột Vận hành Hệ thống ROS 2
+
+1. **Launch System (Khởi chạy đồng bộ & Remapping)**:
+   Khởi chạy nhiều node, nạp tệp cấu hình YAML chung và đổi tên topic (*remapping*) mà không phải sửa lại mã nguồn C++/Python.
+2. **Parameters (Tham số hóa động)**:
+   Tách toàn bộ hằng số tinh chỉnh (bán kính bánh $$r$$, hệ số PID, ngưỡng vận tốc tối đa) ra tệp YAML để có thể hiệu chỉnh ngay tại hiện trường mà không cần biên dịch lại.
+3. **Chính sách QoS (Reliability, Durability, History)**:
+   Quyết định hành vi truyền tin trên mạng không hoàn hảo: dữ liệu cảm biến tần số cao ưu tiên `BEST_EFFORT` (thà bỏ 1 khung cũ còn hơn chờ truyền lại làm trễ khung mới), còn bản đồ `/map` hay lệnh cấu hình cần `RELIABLE` + `TRANSIENT_LOCAL` (người nghe vào sau vẫn nhận được bản đồ!).
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ khởi chạy được hai node cùng lúc từ một tệp launch Python, ghi đè một tham số (parameter) từ cả tệp launch lẫn dòng lệnh, và chủ động tạo ra sự không tương thích QoS để quan sát tình huống `/chatter` vẫn hoạt động nhưng `ros2 topic echo` không nhận được dữ liệu. Bạn cũng sẽ đọc được đầu ra của `ros2 topic info -v` để xác định bên nào đang dùng chính sách `best_effort` và bên nào yêu cầu `reliable` — kỹ năng chẩn đoán quan trọng khi kết nối driver lidar với RViz ở chương 11.
@@ -143,6 +154,19 @@ ros2 topic echo /chatter --qos-reliability best_effort
 ```
 
 **Kết quả mong đợi:** chuỗi `data: hi` lập tức xuất hiện. Hãy ghi lại cặp lệnh này vào `lab-notes.md` để làm mẫu chẩn đoán cho tình huống "RViz không hiển thị dữ liệu quét laser" về sau.
+
+### Khung giải thích (nên đọc chậm): Ma trận tương thích QoS — Vì sao hai node cùng tên Topic nhưng KHÔNG nhận được tin?
+
+Một lỗi "tàng hình" rất hay gặp trong ROS 2 là Publisher và Subscriber trùng tên topic 100%, không báo lỗi biên dịch, nhưng hoàn toàn không truyền tin cho nhau do **xung đột QoS Reliability**:
+
+| Publisher (Bên phát) | Subscriber (Bên nhận) | Kết nối có khớp không? | Giải thích |
+| :---: | :---: | :---: | :--- |
+| `RELIABLE` | `RELIABLE` | **KHỚP** | Cả hai cam kết truyền tin cậy có gửi lại gói mất |
+| `RELIABLE` | `BEST_EFFORT` | **KHỚP** | Bên phát cho chất lượng cao hơn mức bên nhận yêu cầu |
+| `BEST_EFFORT` | `BEST_EFFORT` | **KHỚP** | Cả hai ưu tiên độ trễ thấp (chuẩn `SensorDataQoS` cho LiDAR/Camera) |
+| **`BEST_EFFORT`** | **`RELIABLE`** | **KHÔNG KHỚP (TỊT!)** | Bên nhận đòi hỏi tin cậy tuyệt đối nhưng bên phát không đảm bảo → DDS từ chối ghép kênh! |
+
+Mẹo chẩn đoán trong 3 giây: gõ `ros2 topic info /scan --verbose` để xem trực tiếp bảng QoS của cả Publisher và Subscriber!
 
 ## Lab
 

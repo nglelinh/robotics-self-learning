@@ -11,6 +11,10 @@ lesson_type: required
 draft: false
 ---
 
+Chapter 03 bridges bare electronics and intelligent autonomy: your microcontroller can now read buttons cleanly, generate silent high-frequency PWM, capture microsecond-fast edges with ISRs, and orchestrate behavior through a finite state machine. Before connecting real sensors (encoders, IMUs, ToF, cameras) in Chapter 04, this sign-off checklist verifies that your firmware architecture is deterministic, leak-free, and safe.r
+
+---
+
 ## Learning objectives
 
 By the end of this lesson you can close Chapter 03 with evidence rather than with a column of hopeful ticks. You will point at a button serial log, at PWM duty lines or a photograph of the LED at two duties, at a debounce count that matches your presses with error zero, and at a state diagram whose silence arrow is labeled 300 ms. You will write the sentence "PWM is zero in FAULT" only if the code makes that sentence true, and you will reject a checklist that marks PWM done when the only duty write sits in `setup()`.
@@ -18,6 +22,16 @@ By the end of this lesson you can close Chapter 03 with evidence rather than wit
 ## Prerequisites
 
 Lessons 1 through 5 are the work this page gates. You need the non-blocking heartbeat that replaced the [Chapter 02 blink]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}), the pull-up button, the LEDC or `duty_u16` breathe, the short ISR, and the IDLE / TELEOP / FAULT machine. Hardware that has not arrived yet does not earn a pass: a dry reading of your own source is allowed only if the files exist and you can quote the timeout and the duty-zero lines from them. "I will add the timeout when the chassis shows up" is a fail.
+
+## Background Knowledge Map: Firmware Verification, Real-Time Profiling, and Fault Injection
+
+Three verification practices close out embedded firmware bring-up:
+
+- **Timing & Jitter Profiling:** Measuring actual loop execution time (`t_end - t_start` in microseconds) proves your firmware has ample CPU headroom before adding I2C sensors and filtering math in Chapter 04.
+- **Fault Injection Testing:** Deliberately triggering every safety path — pressing E-stop, unplugging a command source (watchdog timeout), or simulating low battery — confirms the FSM always enters `FAULT` and zeroes PWM.
+- **Clean State Logging:** Printing state transitions (`t_ms,OLD_STATE->NEW_STATE,reason`) creates an auditable trace for diagnosing field behavior in seconds.r
+
+---
 
 ## Why it matters
 
@@ -89,6 +103,31 @@ Work down this list in your lab notes. An item without its artifact stays open.
 6. Motor boundary. Write "no motor on a GPIO, VM not connected, wheels up when a driver is added later." If you do not own a driver yet, that sentence is still required. Buying one is the TB6612 module at 45000₫, VM about 4.5 V to 10 V, about 1.2 A continuous, from the [hshop TB6612 listing](https://hshop.vn/mach-dieu-khien-dong-co-dc-tb6612fng-dc-motor-driver), and it is not part of today's wiring.
 
 A missing board is not item 6. If the hardware is late, items 1–3 stay open. Items 4 and 5 can be drafted from source you have actually compiled or syntax-checked, and they stay marked "source only" until the LED has performed them.
+
+## Deep-Dive Explanation (Read Slowly): Profiling Loop Headroom and Verifying Watchdog Cutoff Time
+
+Before signing off Chapter 03, run a quick 4-step quantitative firmware audit:
+
+1. **Measure worst-case loop duration $$t_{\max}$$:** Track `uint32_t dt = micros() - t0; if (dt > t_max) t_max = dt;` over 10 seconds of operation.
+2. **Compute CPU headroom:** $$\text{Headroom} = 1 - \frac{t_{\max}}{T_s}$$. Aim for $$\ge 70\%$$ headroom at the end of Chapter 03 so Chapters 04–05 (sensors + PID) fit effortlessly.
+3. **Measure E-stop / Watchdog latency:** From the instant a stop event fires to PWM duty reaching `0`, latency should be $$\le 1\text{ control tick}$$ (e.g., $$\le 10\text{ ms}$$).
+4. **Compute stopping distance during reaction latency:** $$d_{\text{react}} = v_{\max} \cdot t_{\text{latency}}$$.
+
+### Concrete Worked Example: Checking Reaction Distance and CPU Headroom at 100 Hz
+
+Suppose your Chapter 03 firmware runs at $$100\text{ Hz}$$ ($$T_s = 10\,000\,\mu\text{s}$$) with measured worst-case loop execution $$t_{\max} = 620\,\mu\text{s}$$, and your robot's top speed will be $$v_{\max} = 0.50\text{ m/s}$$:
+
+- **Step 1 — CPU headroom:**
+  $$\text{Headroom} = 1 - \frac{620}{10\,000} = 1 - 0.062 = 93.8\%$$ — huge margin for Chapter 04 sensors!
+- **Step 2 — Worst-case E-stop reaction distance (1 full loop tick = 10 ms):**
+  $$d_{\text{react}} = 0.50\text{ m/s} \times 0.010\text{ s} = 0.005\text{ m} = 5\text{ mm}.$$
+- **Step 3 — Watchdog timeout test:** If serial velocity commands arrive at 20 Hz (every 50 ms) and your watchdog timeout is set to `300 ms`, unplugging the USB cable halts the motors within $$0.30\text{ s}$$ (at most $$0.50 \times 0.30 = 15\text{ cm}$$ of travel instead of driving off the desk!).
+
+**Common Pitfall:** Leaving `t_max` unmeasured and assuming the loop is fast — one stray blocking `Serial.readString()` (default timeout `1000 ms`!) can silently add a 1-second freeze to your robot.
+
+**Quick Check:** If your firmware logs `IDLE -> DRIVE -> FAULT` cleanly, zeroes PWM within 10 ms of E-stop, and holds `t_max < 2000 µs` at 100 Hz, you are ready to wire sensors in Chapter 04.
+
+---
 
 ## Exercises
 

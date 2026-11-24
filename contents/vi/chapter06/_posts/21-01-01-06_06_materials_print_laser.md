@@ -13,6 +13,35 @@ draft: false
 
 Thời lượng ước tính: **70–90 phút**. Bạn có thể hoàn thành bài thực hành chỉ với một bức ảnh chi tiết in 3D bị gãy; việc có sẵn máy in hay không là tùy chọn.
 
+Khi bắt đầu chế tạo khung robot trong xưởng lab, hai công cụ chế mẫu nhanh phổ biến nhất nằm ngay trước mắt bạn: **máy in 3D FDM (nhựa PLA/PETG)** và **máy cắt laser (mica Acrylic / gỗ dán MDF/Plywood)**. Chọn sai công cụ không chỉ tốn hàng giờ chờ in mà còn tạo ra một bộ khung mềm oặt hoặc giòn gãy ngay cú va chạm đầu tiên. Bí quyết của người làm cơ khí robot là kết hợp cả hai: dùng cắt laser cho **các tấm khung phẳng chịu lực lớn** và dùng in 3D cho **các gá lắp hình học phức tạp** (giá đỡ động cơ, ngàm cảm biến, ống dẫn dây).
+
+## Bản đồ kiến thức nền: Cơ học vật liệu, Tính dị hướng của in 3D và Độ cứng uốn
+
+### 1. Tính dị hướng (Anisotropy) của in 3D FDM
+Chi tiết in 3D được đắp từng lớp nhựa nóng chảy chồng lên nhau theo trục Z. Vì liên kết giữa các lớp yếu hơn liên kết dọc sợi nhựa, một giá đỡ động cơ chịu lực kéo **vuông góc với mặt lớp in** rất dễ tách lớp (delamination) và gãy đôi! Định hướng chi tiết trên bàn in sao cho phương chịu kéo chính nằm dọc theo mặt phẳng XY là kỹ năng sống còn của người thiết kế CAD cho in 3D.
+
+### 2. Nhựa PLA vs. PETG vs. Tấm cắt Laser (Acrylic / Plywood)
+- **PLA:** cứng, dễ in, độ chính xác cao, nhưng giòn và mềm oặt ngay ở $$55\text{–}60^\circ\text{C}$$ (gắn trực tiếp lên động cơ nóng sẽ bị biến dạng!).
+- **PETG / ABS:** dẻo dai hơn, chịu nhiệt tốt hơn ($$75\text{–}95^\circ\text{C}$$), rất hợp làm gá động cơ và chi tiết chịu va đập.
+- **Acrylic (Mica) & Gỗ dán cắt laser:** cắt xong cả bộ khung 2 tầng chỉ trong **5 phút** (so với 8 tiếng in 3D!), độ cứng phẳng cực tốt, nhưng Acrylic giòn khi khoan/va chạm mạnh ở góc vuông sắc (luôn bo góc `fillet`!).
+
+### 3. Quy luật lập phương của độ cứng uốn ($$I = \frac{b h^3}{12}$$)
+Độ chống võng của một tấm khung phẳng tỉ lệ với mô-men quán tính mặt cắt $$I = \frac{b h^3}{12}$$ (với $$h$$ là chiều dày tấm). Tăng độ dày tấm lên gấp đôi khiến khối lượng tăng **2 lần**, nhưng độ cứng chống uốn tăng vọt lên tới **$$2^3 = 8$$ lần**!
+
+### Khung giải thích: Cầm tay so sánh độ cứng uốn và khối lượng giữa tấm khung in 3D và tấm cắt laser (nên đọc chậm)
+
+Xét một tấm sàn khung robot kích thước **$$200\text{ mm} \times 150\text{ mm}$$** (diện tích $$A = 300\text{ cm}^2$$):
+
+1. **Hiệu ứng tăng độ dày từ $$h_1 = 3\text{ mm}$$ lên $$h_2 = 6\text{ mm}$$:**
+   $$\frac{I_2}{I_1} = \left(\frac{h_2}{h_1}\right)^3 = \left(\frac{6}{3}\right)^3 = 2^3 = 8\times\text{ cứng hơn!}$$
+   Cùng một tải trọng pin đặt ở giữa sàn, độ võng giảm xuống chỉ còn **1/8**, trong khi trọng lượng tấm chỉ tăng $$2\times$$ (hoặc thậm chí ít hơn nếu ta thêm các gân tăng cứng thay vì làm đặc toàn bộ!).
+
+2. **So sánh khối lượng tấm dày $$h = 4\text{ mm}$$ (thể tích $$V = 300 \times 0{,}4 = 120\text{ cm}^3$$):**
+   - **Tấm in 3D PLA** (mật độ nhựa đặc $$1{,}24\text{ g/cm}^3$$, in 20% infill + vỏ thành → mật độ hiệu dụng $$\approx 0{,}45\text{ g/cm}^3$$):
+     $$m_{\text{PLA}} \approx 120 \times 0{,}45 = 54\text{ g}$$ (nhẹ, nhưng tốn ~3–4 giờ in).
+   - **Tấm Acrylic cắt laser đặc** ($$\rho = 1{,}18\text{ g/cm}^3$$):
+     $$m_{\text{Acrylic}} = 120 \times 1{,}18 = 141{,}6\text{ g}$$ (nặng hơn ~88 g, nhưng cắt xong trong **2 phút**, siêu phẳng và cứng!).
+
 ## Mục tiêu học
 
 Sau bài này, các bạn hiểu lý do nên chọn tấm khung mica 2WD mua sẵn cho Capstone A và chỉ dùng in 3D cho các giá đỡ, giá cảm biến và đai giữ pin. Các bạn tính được sự thay đổi kích thước lỗ khi cắt laser với khe cắt (kerf) 0,1–0,2 mm, biết ngưỡng nhiệt độ làm mềm nhựa PLA trong khoang ô tô kín, và biết xoay hướng in giá động cơ sao cho lực siết bu-lông không tách các lớp in ra khỏi nhau.

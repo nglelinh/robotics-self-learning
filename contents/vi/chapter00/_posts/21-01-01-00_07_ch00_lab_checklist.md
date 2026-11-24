@@ -21,6 +21,36 @@ Sau bài học này, bạn sẽ **rà soát** bàn lab theo một quy trình vă
 
 Bạn cần chuẩn bị đầy đủ sổ lab, câu lộ trình, thẻ quy trình cấp nguồn, ảnh kiểm kê Đợt 1 và tệp `bom.csv` từ bài 00-05. Nếu còn hạng mục nào bỏ dở, buổi kiểm tra sẽ ghi nhận trung thực tình trạng đó. Lúc này vẫn chưa cần robot chạy, chưa cần ROS 2 hay mối hàn nào; điều quan trọng nhất là sẵn sàng để trống những ô chưa thực sự đạt yêu cầu.
 
+---
+
+Trước mỗi chuyến bay, phi công dù có 10.000 giờ kinh nghiệm vẫn đọc từng dòng trong bảng kiểm (*pre-flight checklist*) — bởi trí nhớ con người rất dễ bỏ sót một công tắc nhỏ khi đang hào hứng! Trong phòng lab robot cũng vậy: **Checklist Chương 00** là cổng kiểm soát chất lượng cuối cùng để chắc chắn mặt bàn, nguồn điện, đồng hồ đo và thư mục làm việc của bạn đã đạt chuẩn trước khi cắm điện vào mạch thật ở Chương 01.
+
+## Bản đồ kiến thức nền: Tư duy Kiểm chứng bằng Bằng chứng (Evidence-Based Bring-Up)
+
+1. **Tiêu chuẩn "Đạt" phải đo được (Measurable Acceptance Criteria):** Trong kỹ thuật phần cứng, "đã xem qua" không phải bằng chứng; bằng chứng là một con số đo từ đồng hồ vạn năng, một ảnh chụp bàn lab gọn gàng, hoặc một dòng log biên dịch thành công.
+2. **Phân tách Miền Công suất (USB 500 mA vs. Pin Động cơ):** Cổng USB máy tính chỉ cung cấp an toàn tối đa $$500\text{ mA}$$ ở $$5\text{ V}$$ ($$2.5\text{ W}$$) — đủ cho mạch logic và cảm biến, nhưng hoàn toàn không đủ cho động cơ DC.
+3. **Kỷ luật Rà soát Trước khi Nâng tầng:** Hoàn thành trọn vẹn một chương nhỏ giúp lỗi ở Chương 00 không bị kéo dài và phóng đại thành lỗi khó tìm ở Chương 03–06.
+
+### Ví dụ cầm tay chỉ việc: Kiểm tra ngân sách dòng cổng USB (500 mA) trước khi cấp nguồn
+
+Giả sử bạn đang thử nghiệm cụm logic trên bàn chỉ bằng cáp USB nối máy tính (giới hạn an toàn $$500\text{ mA}$$):
+- Bo mạch ESP32 (Wi-Fi tắt): **$$80\text{ mA}$$** (đỉnh khởi động Wi-Fi có thể lên $$240\text{ mA}$$).
+- 2 đèn LED báo trạng thái ($$10\text{ mA}$$ mỗi đèn): **$$20\text{ mA}$$**.
+- Cảm biến IMU + 2 encoder quang: **$$30\text{ mA}$$**.
+- **Tổng dòng logic:** $$80 + 20 + 30 = \mathbf{130\text{ mA}} \le 500\text{ mA}$$ → **hoàn toàn an toàn** khi thử qua USB!
+- Giờ giả sử bạn lỡ nối cả 2 động cơ DC (dòng khởi động **$$600\text{ mA}$$** mỗi chiếc = **$$1{,}200\text{ mA}$$**) vào đường `5V` của USB: tổng dòng vọt lên **$$1{,}330\text{ mA}$$** (gấp **2,66 lần** giới hạn USB!) → máy tính lập tức ngắt cổng USB hoặc làm sập nguồn ESP32!
+
+### Khung giải thích: 4 bước hoàn tất cổng kiểm soát Chương 00 (nên đọc chậm)
+
+1. **Bước 1 — Xác minh mặt bàn & an toàn điện:** Không còn vụn kim loại, kính bảo hộ ở tầm tay, thẻ quy trình cấp nguồn đã viết rõ ràng.
+2. **Bước 2 — Xác minh bộ dụng cụ Đợt 1:** Đồng hồ vạn năng đo đúng điện áp 1 viên pin AA/18650 và kêu bíp rõ khi chập que đo.
+3. **Bước 3 — Xác minh lộ trình & BOM:** Đã chọn dứt khoát Lộ trình A hoặc B và đối chiếu đủ linh kiện Đợt 1–2.
+4. **Bước 4 — Xác minh Workspace:** Đã tạo cây thư mục chuẩn và ghi trang nhật ký đầu tiên vào sổ lab.
+
+**Kiểm tra nhanh.** Nếu đo một viên pin 18650 mới mua bằng đồng hồ vạn năng ở thang `20V DC` và thấy màn hình hiển thị **`-3.82 V`** (có dấu trừ), điều đó có nghĩa là pin bị hỏng không? **Không!** Dấu trừ chỉ báo bạn đang chạm que đỏ vào cực âm và que đen vào cực dương của pin — đảo lại que đo sẽ thấy `+3.82 V` (điện áp lưu kho bình thường của Li-ion).
+
+---
+
 ## Vì sao bài này gắn liền với Capstone
 
 Capstone A yêu cầu dừng bánh xe khi mất lệnh quá khoảng 300 ms — hành vi này chỉ tin cậy trên một bàn làm việc mà bạn phân biệt rõ điểm mass chung với các phỏng đoán cảm tính. Tầng ROS 2 về sau cũng không thể khắc phục hậu quả của việc đo ohm trên mạch đang cấp điện ở Chương 01, hay việc nhận cell lithium mà chưa kiểm tra bộ sạc. Buổi rà soát này giúp phát hiện sớm các lỗ hổng an toàn ngay khi linh kiện còn đang trong túi.

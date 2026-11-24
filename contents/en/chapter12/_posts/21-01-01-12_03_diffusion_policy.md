@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~65 minutes**. You will read a project page, stare at one average, and write a paragraph. You will not denoise anything on a GPU.
 
+Imagine teaching a robot to push a T-shaped block around a post: half of your demonstrations go *left* around the post, and half go *right*. A standard MSE regression network averages the two valid strategies—and drives the robot straight into the center of the post! **Diffusion Policy** eliminates mode averaging by treating action generation as iterative denoising: starting from pure Gaussian noise and sculpted step-by-step into one sharp, consistent action trajectory.
+
 ## Learning objectives
 
 You will explain why a diffusion policy generates an action trajectory by iterative denoising instead of emitting one regression. You will show, with two Capstone demonstrations around a chair, that the mean action drives into the chair. You will read the sketch $$x_{t-1} = f(x_t, \text{observation})$$ as a picture of a learned denoiser, not as the paper's update equation. You will contrast that picture with ACT in two paragraphs: one forward pass of a chunked CVAE, versus many steps that clean a trajectory.
@@ -21,6 +23,14 @@ You will explain why a diffusion policy generates an action trajectory by iterat
 
 Lessons 12-01 and 12-02 are done. You can say what a dataset key is, and you can say that an ACT chunk is open-loop for $$k/f$$ seconds. The chair in this lesson is furniture, not a new robot. No GPU, no conda environment, no checkpoint. The project page is public.
 
+
+## Background Knowledge Map: Multimodal Action Distributions, Score Matching, and Iterative Denoising (DDPM/DDIM)
+
+Diffusion Policy brings generative modeling directly into visuomotor control through three pillars:
+
+- **Multimodality & Failure of L2 Regression:** Minimizing mean-squared error $$\mathbb{E}[\lVert \hat{a} - a \rVert^2]$$ always outputs the conditional *mean* $$\mathbb{E}[a \mid o]$$. When $$p(a \mid o)$$ has two peaks (e.g., $$a = -1$$ and $$a = +1$$), the mean is $$0$$—a catastrophic collision! Generative policies sample from the full distribution instead of averaging modes.
+- **Forward Noising & Learned Noise Predictor $$\epsilon_\theta$$:** During training, Gaussian noise $$\epsilon \sim \mathcal{N}(0, I)$$ is added to an expert action chunk $$a^0$$ at noise level $$k$$: $$a^k = \sqrt{\bar\alpha_k} a^0 + \sqrt{1 - \bar\alpha_k}\,\epsilon$$. The network learns to predict $$\epsilon$$ conditioned on image observations $$o_t$$.
+- **Reverse Denoising & Receding-Horizon Control:** At deployment, starting from random $$a^K \sim \mathcal{N}(0, I)$$, the policy runs $$K$$ (or fast DDIM 10–15) denoising steps to recover a clean action chunk $$a^0$$, executes the first $$T_a$$ steps, then replans from fresh observations.
 ## Why this sits on the path
 
 Nav2 picks one path and a controller tracks it. Diffusion Policy is a different proposal for where a path comes from when two drivers did not agree. In a corridor they pass a chair on two sides. The average of those drives aims at the chair. Jazzy will publish that average as a `Twist`, and the firmware will turn it into PWM. Nothing in Chapters 08 through 11 computes "this is the mean of two good ideas." You notice the mean in the data. The 0.2 s abort from ACT still applies when the burst was denoised rather than regressed.
@@ -70,6 +80,18 @@ $$
 You do not get 2.7 s of warning inside a 0.16 s open-loop prefix. The prefix that carries the mean action is already pointed at the obstacle. A denoiser that has seen both demonstrations, conditioned on an image that shows the chair, should move a noise draw toward demo L or toward demo R. It should not be asked to output both and then averaged by your bridge. If you are unsure which mode you sampled, the safe command is $$v = 0$$, not the mean.
 
 Hold the sketch next to those numbers. At a late denoising step, $$x_t$$ might be a short sequence whose first action is near $$(0.15, 0.48)$$, a noisy left pass. Then $$f$$, given the image, pulls it toward $$(0.15, 0.50)$$. At an early step, $$x_t$$ is not yet a pass around anything, and sending it as `cmd_vel` is how you drive on pure noise. The index $$t$$ in the sketch is not the 50 Hz tick. Mixing those clocks is how a student executes step "noise" as if it were step "trajectory."
+
+### Deep-Dive Explanation (Read Slowly): Hand-Checking Mode Averaging and 1 Step of DDPM Denoising
+
+**Part A — Why MSE regression crashes while Diffusion succeeds:**
+Suppose at observation $$o$$, 50% of expert demos command steering $$a = -1.0\ \text{rad}$$ (go left around an obstacle) and 50% command $$a = +1.0\ \text{rad}$$ (go right).
+- An L2 regression network minimizes $$0.5(\hat a + 1)^2 + 0.5(\hat a - 1)^2 = \hat a^2 + 1$$, whose unique minimum is $$\hat a = 0.0\ \text{rad}$$ — **straight into the obstacle**!
+- A diffusion policy samples $$a^K \sim \mathcal{N}(0, 1)$$: if the initial noise seed is negative, the learned score field pulls it cleanly to $$-1.0$$; if positive, it pulls it cleanly to $$+1.0$$—never landing on the forbidden middle $$0.0$$.
+
+**Part B — One concrete reverse denoising step:**
+Suppose at denoising step $$k = 1$$ (final step to clean action), schedule constants are $$\alpha_1 = 0.90,\ \bar\alpha_1 = 0.90$$ (so $$\sqrt{\alpha_1} = 0.949,\ \sqrt{1 - \bar\alpha_1} = 0.316$$). Our noisy 1D action is $$a^1 = 1.15$$, and the network predicts noise $$\epsilon_\theta(o, a^1, 1) = +0.60$$. Applying the DDPM mean update:
+$$a^0 = \frac{1}{\sqrt{\alpha_1}}\left(a^1 - \frac{1 - \alpha_1}{\sqrt{1 - \bar\alpha_1}}\,\epsilon_\theta\right) = \frac{1}{0.949}\left(1.15 - \frac{0.10}{0.316}(0.60)\right) = \frac{1.15 - 0.190}{0.949} = \frac{0.960}{0.949} = 1.01\ \text{rad}.$$
+In one step, the noisy seed $$1.15$$ snaps right onto the valid expert mode $$+1.0\ \text{rad}$$.
 
 ## Lab
 

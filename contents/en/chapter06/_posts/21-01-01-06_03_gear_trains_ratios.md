@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **80–100 minutes**, including a tooth count on a gearbox you own or on a clear photo of one.
 
+A bare hobby DC motor spins at 10,000 RPM—fast enough to act as a cooling fan, yet too weak to roll a half-kilogram robot over a doorstep. Gears are the mechanical transformers of robotics: they trade excess speed for usable torque, and understanding their ratio, efficiency, and backlash tells you both how fast your robot can climb a ramp and why its wheels twitch before reversing.
+
 ## Learning objectives
 
 By the end of this lesson you can compute a gear ratio from tooth counts, predict the output angle for a given input angle, and keep the sign of each external mesh straight. You can say what a worm stage is for, quote the textbook planetary ratio while trusting the number stamped on a TT motor, and feel backlash as lost motion that shows up in encoder ticks when the robot reverses.
@@ -21,6 +23,14 @@ By the end of this lesson you can compute a gear ratio from tooth counts, predic
 
 You can measure track width and rolling radius (Lesson 01) and you know a set screw must sit on a D-flat (Lesson 02). Tooth counts are integers. A calculator for one division is enough.
 
+
+## Background Knowledge Map: Gear Kinematics, Power Conservation, and Nonlinear Backlash
+
+Gear trains sit directly between motor electrical dynamics and robot motion control:
+
+- **Kinematic Velocity Ratio & Compound Trains:** For two meshing spur gears with tooth counts $$Z_{\text{in}}$$ and $$Z_{\text{out}}$$, equal pitch-line velocity enforces $$\omega_{\text{in}} Z_{\text{in}} = \omega_{\text{out}} Z_{\text{out}}$$, giving gear ratio $$G = Z_{\text{out}}/Z_{\text{in}}$$. Multi-stage (compound) trains multiply stage ratios: $$G_{\text{total}} = G_1 \cdot G_2 \cdots G_k$$.
+- **Torque Multiplication & Efficiency:** Ideal power conservation gives $$\tau_{\text{out}} \omega_{\text{out}} = \tau_{\text{in}} \omega_{\text{in}}$$, so $$\tau_{\text{out}} = \eta G \tau_{\text{in}}$$, where $$\eta \in (0,1)$$ accounts for tooth-sliding and bearing losses (high for spur/planetary $$\approx 0.85\text{–}0.95$$ per stage; low for self-locking worm gears $$\approx 0.4\text{–}0.6$$).
+- **Backlash as a Control Deadzone:** Manufacturing clearance between mating teeth creates angular play $$\Delta\theta_{\text{bl}}$$. Every time motor torque reverses sign, the motor spins through $$\Delta\theta_{\text{bl}}$$ while the wheel remains stationary—a classic nonlinearity that induces limit-cycle oscillations in high-gain PID loops.
 ## Why this matters for Capstone A and the ROS path
 
 The encoder in Chapter 04 counts the motor shaft, or sometimes a shaft partway down the gearbox. The wheel that touches the floor has been slowed by the ratio $$i$$. `diff_drive_controller` turns ticks into meters only after that ratio, and the rolling radius, are both right. Swap which gear you call the input and you invert $$i$$. Distances in odometry are then wrong by $$i^2$$: a true ratio of 3 that you store as $$1/3$$ stretches or shrinks travel by a factor of 9. The circle you saw from a bad track width in Lesson 01 has a cousin here, a robot whose map scale is simply the wrong number. Write $$i$$ next to $$b$$ and $$r$$ in `lab-notes.md`.
@@ -82,6 +92,19 @@ $$
 Nine times too long, or nine times too short, depending on which side of the software multiplies. The fix is to point at the pinion, say “input” out loud, and only then divide.
 
 A stamped TT ratio of 1:48 is the number you keep even if a planetary picture in your head suggests $$1 + N_{\text{ring}}/N_{\text{sun}}$$. The stamp already did that arithmetic for the stages you cannot see.
+
+### Deep-Dive Explanation (Read Slowly): Compound Gear Ratio, Reflected Inertia, and Backlash Error
+
+Walk through a concrete 2-stage spur gearbox driving a wheel of radius $$r = 0.032\ \text{m}$$:
+
+1. **Compute total gear ratio:** Stage 1 meshes a 12-tooth pinion with a 48-tooth gear ($$G_1 = 48/12 = 4$$). Stage 2 meshes a 15-tooth pinion with a 60-tooth gear ($$G_2 = 60/15 = 4$$). Total reduction is:
+   $$G = G_1 \times G_2 = 4 \times 4 = 16 : 1.$$
+2. **Speed and torque at the wheel:** If the bare motor spins at $$\omega_m = 3200\ \text{RPM}$$ with torque $$\tau_m = 0.025\ \text{N}\cdot\text{m}$$ and stage efficiency $$\eta_1 = \eta_2 = 0.90$$ (total $$\eta = 0.90^2 = 0.81$$):
+   - Output shaft speed: $$\omega_w = 3200 / 16 = 200\ \text{RPM} = 20.94\ \text{rad/s}$$, giving linear speed $$v = \omega_w r = 20.94 \times 0.032 = 0.67\ \text{m/s}$$.
+   - Output torque: $$\tau_w = \eta G \tau_m = 0.81 \times 16 \times 0.025 = 0.324\ \text{N}\cdot\text{m}$$, giving forward traction force $$F = \tau_w / r = 0.324 / 0.032 = 10.1\ \text{N}$$.
+3. **Quantify linear deadband from backlash:** If the output shaft has $$2^\circ = 0.0349\ \text{rad}$$ of measured backlash, the wheel tread can rock freely by:
+   $$\Delta s = r \cdot \Delta\theta_{\text{bl}} = 32\ \text{mm} \times 0.0349 = 1.12\ \text{mm}$$
+   on every direction reversal—invisible to a motor-mounted encoder until the teeth re-engage.
 
 ## Lab: count, predict, compare
 

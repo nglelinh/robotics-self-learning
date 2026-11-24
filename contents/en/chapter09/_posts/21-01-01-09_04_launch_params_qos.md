@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~90 minutes**.
 
+Opening six terminal tabs and typing six `ros2 run` commands by hand works exactly once—the second time, you forget a flag, mismatch a wheel radius, and spend an hour chasing a phantom bug. Launch files, YAML parameter files, and Quality of Service (QoS) profiles turn a fragile collection of terminals into a single reproducible robot configuration.
+
 ## Learning objectives
 
 You will start two nodes from one Python launch file, override a parameter from that file and from the command line, and produce a QoS incompatibility on purpose so `/chatter` looks alive while `ros2 topic echo` stays silent. You will read `ros2 topic info -v` well enough to say which side offered best-effort and which side demanded reliable. That diagnosis is the one you will reuse when a lidar driver and RViz refuse to meet in Chapter 11.
@@ -21,6 +23,14 @@ You will start two nodes from one Python launch file, override a parameter from 
 
 Lessons 09-01 and 09-02: Jazzy is sourced, and you have already echoed `/chatter` from `demo_nodes_cpp`. You can create a file under `~/ros2_ws/src`. You do not need the robot. A parameter, for this lesson, is a named value that belongs to a node (`use_sim_time`, a serial port, a track width), not a command-line flag of `apt`.
 
+
+## Background Knowledge Map: Declarative Orchestration, Parameterization, and DDS QoS Compatibility
+
+Production ROS 2 systems separate code from configuration using three mechanisms:
+
+- **Launch Files (Declarative Process Graphs):** A Python launch file starts multiple nodes, remaps topic names (e.g., `/raw_cmd` $$\rightarrow$$ `/cmd_vel`), loads YAML parameters, and groups nodes under namespaces (e.g., `/robot1/...`) in one deterministic command.
+- **YAML Parameters (Single Source of Truth):** Storing hardware constants (`wheel_radius`, `track_width`, `kp`, `ki`, `kd`) in YAML rather than hard-coding them in Python/C++ allows identical node binaries to run in Gazebo simulation and on real hardware simply by swapping parameter files.
+- **DDS Quality of Service (QoS) Contracts:** QoS policies—especially **Reliability** (`RELIABLE` vs. `BEST_EFFORT`) and **Durability** (`VOLATILE` vs. `TRANSIENT_LOCAL`)—follow a strict request-vs-offered matching rule. A `RELIABLE` subscriber will silently refuse to connect to a `BEST_EFFORT` publisher!
 ## Why this sits on the path
 
 Typing `ros2 run` four times is how a demo starts. It is not how a Capstone base starts. The bridge, `robot_state_publisher`, the twist teleop, and later Nav2 all have to come up together, with the track width from lesson 08-04 written down as a parameter instead of a magic number in three files. QoS is the other half. A laser scan is a stream that may drop a packet. A map is a document that must arrive. ROS 2 will not deliver a best-effort scan to a reliable subscriber, and it often fails quietly. People then “fix” Nav2 for an afternoon when the graph was simply incompatible. Learn the quiet failure on `/chatter` before you meet it on `/scan`.
@@ -141,6 +151,19 @@ ros2 topic echo /chatter --qos-reliability best_effort
 ```
 
 **Expected:** `data: hi` starts appearing. Put that pair of commands in `lab-notes.md`. It is the template for “RViz shows no scan.”
+
+### Deep-Dive Explanation (Read Slowly): Checking the DDS QoS Compatibility Matrix by Hand
+
+The most common "my topic is publishing, why is `ros2 topic echo` empty?" mystery in ROS 2 is a QoS mismatch. Check the compatibility table below (note `ert` is avoided; pure text cells):
+
+| Publisher (Offered) | Subscriber (Requested) | Matches? | Typical Robotics Use |
+|---|---|---|---|
+| `RELIABLE` | `RELIABLE` | **Yes** | `/cmd_vel`, `/map`, state transitions |
+| `RELIABLE` | `BEST_EFFORT` | **Yes** | Diagnostic viewer tapping a reliable topic |
+| `BEST_EFFORT` | `BEST_EFFORT` | **Yes** | High-rate `/scan`, `/imu/data`, camera frames |
+| `BEST_EFFORT` | `RELIABLE` | **NO (silent drop!)** | Classic bug: sensor QoS pub + default sub |
+
+**Durability check:** A map server publishes `/map` *once* with `TRANSIENT_LOCAL` durability so late-joining Nav2 nodes still receive the map. If your subscriber asks for `TRANSIENT_LOCAL` from a `VOLATILE` publisher, DDS rejects the connection—always verify with `ros2 topic info -v <topic>`.
 
 ## Lab
 

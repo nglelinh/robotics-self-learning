@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~70 phút** (khoảng 25 phút đọc tài liệu và kho mã nguồn, 30 phút viết dataset card, 15 phút làm bài tập).
 
+Suốt 11 chương vừa qua, ta lập trình robot theo lối cổ điển: tự viết phương trình động học, tự thiết kế bản đồ và tự chỉnh hàng chục tham số PID/Nav2. Cách tiếp cận đó cực kỳ chính xác với xe chạy trong hành lang, nhưng lại bó tay trước những thao tác tưởng chừng đơn giản với trẻ lên 5: *gấp một chiếc áo sơ mi, nhặt một sợi dây cáp mềm hay múc một thìa cà phê*. Chương 12 mở ra làn sóng **Robot Học (Robot Learning)** với hệ sinh thái mã nguồn mở **LeRobot (Hugging Face)** — nơi robot học kỹ năng trực tiếp từ dữ liệu trình diễn của con người.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Hệ sinh thái LeRobot
+
+1. **Chuẩn Dữ liệu Tập trình diễn (`LeRobotDataset`)**:
+   Lưu trữ đồng bộ từng khung hình camera (video nén MP4/AV1), trạng thái góc khớp `observation.state` và hành động mục tiêu `action` theo đúng khung thời gian (ví dụ 30 Hz) dưới dạng Parquet + Video chuẩn hóa, dễ chia sẻ trên Hugging Face Hub.
+2. **Đường ống Teleoperation → Train → Eval Thống nhất**:
+   Dùng cánh tay chủ–tớ (leader–follower như SO-101) ghi lại 50–100 lượt trình diễn sạch, huấn luyện chính sách học bắt chước (ACT, Diffusion Policy) trên GPU rồi triển khai vòng kín ngay trên cùng giao diện phần mềm.
+3. **Không thay thế mà Xây trên nền Kỹ thuật Robot Cổ điển**:
+   Hiệu chuẩn góc 0 của servo, đồng bộ tốc độ khung hình camera, giới hạn mô-men an toàn và độ trễ vòng lặp từ Chương 08–10 vẫn quyết định 80% sự thành bại của dữ liệu huấn luyện!
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ xác định đúng ba thành phần mà hệ sinh thái LeRobot liên kết trên cùng một giao ước dữ liệu: **dataset**, **policy** và **robot**. Bạn nhận diện được các phần cứng tiêu biểu của dự án như SO-100, Koch v1.1 và LeKiwi (các mẫu cánh tay và đế di động chi phí thấp) và giải thích vì sao chúng khác với khung xe vi sai Capstone. Bạn sẽ viết một bảng mô tả tập dữ liệu (dataset card) dài một trang cho một tập mẫu giả định gồm camera, vận tốc dài $$v$$ và vận tốc góc $$\omega$$ với hệ đơn vị thống nhất giữa lúc ghi và lúc phát lại, đồng thời trích nguyên văn dòng mô tả trên README của kho lưu trữ vào `lab-notes.md` kèm ngày truy cập.
@@ -79,6 +90,18 @@ N = \text{fps} \times T = 10 \times 2.0 = 20
 $$
 
 Nếu thư mục chỉ có 20 ảnh nhưng card lại ghi nhầm `fps: 30`, thời lượng thực tế sẽ bị bóp méo và các thao tác quay sẽ bị kéo giãn sai tốc độ.
+
+### Khung giải thích (nên đọc chậm): Tính tay kích thước bộ dữ liệu 50 lượt trình diễn (episodes) trên LeRobot
+
+Giả sử bạn thu thập **50 lượt trình diễn** gắp một khối lập phương bằng cánh tay **6 khớp (SO-101)** gắn 2 camera (1 camera cổ tay + 1 camera toàn cảnh), mỗi lượt dài **15 giây** ở tần số **30 Hz**:
+- Tổng số bước thời gian (frames) trong toàn bộ dataset:
+  $$N_{\text{frames}} = 50\text{ lượt} \times 15\text{ s} \times 30\text{ Hz} = \mathbf{22.500\text{ bước}}.$$
+- Kích thước bảng trạng thái & hành động (Parquet: 6 float32 `state` + 6 float32 `action` = 48 byte/bước):
+  $$22.500 \times 48\text{ B} \approx \mathbf{1{,}08\text{ MB}}$$ (siêu nhẹ!).
+- Kích thước 2 luồng video nén H.264/AV1 (~1,5 Mbps mỗi camera, tổng 750 giây = 12,5 phút):
+  $$2 \times \frac{1{,}5\text{ Mb/s}}{8} \times 750\text{ s} \approx \mathbf{281\text{ MB}}.$$
+
+Toàn bộ bộ dữ liệu huấn luyện một kỹ năng thao tác khéo léo chỉ nặng dưới **300 MB** — hoàn toàn tải được trong vài giây và huấn luyện xong trong 30–60 phút trên 1 GPU tầm trung!
 
 ## Lab
 

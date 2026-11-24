@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng ước tính: **~75 phút**.
 
+Một robot hai bánh không hề hiểu "rẽ trái với bán kính 0,5 m" là gì — hai động cơ DC bên dưới chỉ biết quay ở vận tốc bao nhiêu vòng/phút. Cầu nối toán học biến ý định chuyển động của thân xe $$(v, \omega)$$ thành lệnh cho từng bánh xe $$(v_L, v_R)$$, và ngược lại biến số xung encoder thành vị trí $$(x, y, \theta)$$ trên sàn, chính là **động học dẫn động vi sai (differential-drive kinematics)**.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Động học Robot Vi sai
+
+1. **Hệ tọa độ thân robot chuẩn REP-103**:
+   Trục $$+x$$ hướng về mũi xe, $$+y$$ sang trái, $$+z$$ hướng lên trên; quy tắc bàn tay phải cho $$\omega > 0$$ là quay ngược chiều kim đồng hồ (rẽ trái, tức bánh phải chạy nhanh hơn bánh trái).
+2. **Động học thuận, nghịch & Ràng buộc phi holonomic**:
+   Hai phương trình tuyến tính $$v = (v_R + v_L)/2$$ và $$\omega = (v_R - v_L)/L$$ nối vận tốc bánh với vận tốc thân. Vì không có thành phần trượt ngang $$v_y = 0$$, robot là hệ *phi holonomic*: muốn dịch ngang bắt buộc phải thực hiện chuỗi quay–tiến–quay.
+3. **Tích phân Odometry (Từ xung encoder đến tư thế $$(x, y, \theta)$$)**:
+   Cộng dồn quãng đường vi phân $$\Delta s$$ và góc quay $$\Delta \theta$$ ở từng chu kỳ lấy mẫu $$\Delta t$$ giúp ước lượng vị trí liên tục — nhưng sai số trôi góc $$\Delta \theta$$ sẽ tích lũy theo thời gian nếu không có cảm biến ngoài (IMU/LiDAR) hiệu chỉnh.
+
 ## Mục tiêu
 
 Sau bài này, bạn đo chính xác khổ vết (khẩu độ bánh) của khung Capstone, chuyển đổi vận tốc thân robot $$(v, \omega)$$ thành tốc độ vành bánh trái và phải, rồi tính ngược lại để kiểm chứng. Bạn biết dự đoán bán kính quay của một lệnh điều khiển trước khi robot di chuyển và giải thích được vì sao cơ cấu vi sai không thể trượt ngang. Hai phương trình động học này là phần cốt lõi của mọi hàm xử lý `cmd_vel` từ Chương 10 trở đi.
@@ -196,6 +207,23 @@ print(round(x, 4), round(y, 4), round(psi, 4))
 Kết quả in ra phải xấp xỉ `1.0 0.5 1.5708`. Nếu giá trị $y$ bị âm, bạn đã đảo nhầm bánh trái và bánh phải khi quay.
 
 Hàm trên chính là phần lõi tạo nên thông điệp `nav_msgs/Odometry` sau này: $x, y$ và góc yaw (chuyển sang quaternion theo Bài 08-00) điền vào trường tư thế, còn $\Delta s / \Delta t$ và $\Delta\psi / \Delta t$ điền vào trường vận tốc — tuyệt đối không ghi trực tiếp số xung thô vào `linear.x`.
+
+### Khung giải thích (nên đọc chậm): Tính tay quỹ đạo Odometry sau 2 bước thời gian $$\Delta t = 0{,}5\text{ s}$$
+
+Giả sử robot có khổ vết $$L = 0{,}20\text{ m}$$, xuất phát tại gốc $$(x_0, y_0, \theta_0) = (0, 0, 0)$$. Trong mỗi nhịp $$\Delta t = 0{,}5\text{ s}$$, bộ mã hóa đo được vận tốc vành bánh $$v_L = 0{,}20\text{ m/s}$$ và $$v_R = 0{,}30\text{ m/s}$$:
+
+1. **Tính vận tốc thân xe:**
+   $$v = \frac{0{,}30 + 0{,}20}{2} = \mathbf{0{,}25\text{ m/s}}, \qquad \omega = \frac{0{,}30 - 0{,}20}{0{,}20} = \mathbf{0{,}50\text{ rad/s}}.$$
+   Bán kính cung quay là $$R = v / \omega = 0{,}25 / 0{,}50 = \mathbf{0{,}50\text{ m}}$$ về phía bên trái.
+2. **Cập nhật tư thế theo tích phân điểm giữa (Midpoint Odometry) mỗi bước $$\Delta s = v\Delta t = 0{,}125\text{ m}$$, $$\Delta\theta = \omega\Delta t = 0{,}25\text{ rad}$$:**
+
+| Bước $$k$$ | Góc giữa $$\theta_{k-1} + \Delta\theta/2$$ | $$x_k$$ (m) | $$y_k$$ (m) | $$\theta_k$$ (rad) |
+| :---: | :---: | :---: | :---: | :---: |
+| 0 | — | $$0{,}000$$ | $$0{,}000$$ | $$0{,}000$$ |
+| 1 | $$0{,}125\text{ rad}$$ | $$0 + 0{,}125\cos(0{,}125) \approx \mathbf{0{,}124}$$ | $$0 + 0{,}125\sin(0{,}125) \approx \mathbf{0{,}016}$$ | $$0{,}250$$ |
+| 2 | $$0{,}375\text{ rad}$$ | $$0{,}124 + 0{,}125\cos(0{,}375) \approx \mathbf{0{,}240}$$ | $$0{,}016 + 0{,}125\sin(0{,}375) \approx \mathbf{0{,}062}$$ | $$0{,}500$$ |
+
+Chú ý: nếu đo nhầm khổ vết $$L$$ sai 10% (ví dụ nhập $$0{,}18\text{ m}$$ thay vì $$0{,}20\text{ m}$$), góc quay tính ra sai lệch ngay 11% ở mỗi vòng quay — đó là lý do hiệu chuẩn thực nghiệm $$L$$ cực kỳ quan trọng trước khi vào SLAM!
 
 ## Lab
 

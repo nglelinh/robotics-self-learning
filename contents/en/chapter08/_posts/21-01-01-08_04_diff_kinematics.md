@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~75 minutes**.
 
+When a ROS 2 navigation stack decides the robot should curve gently around a chair, it knows nothing about your motor drivers or wheel diameters—it simply publishes a body twist $$(v, \omega)$$. Differential-drive kinematics is the exact two-way translator between that universal body language and the two physical tires touching the floor.
+
 ## Learning objectives
 
 You will measure the track width of your Capstone base, convert a body velocity $$(v, \omega)$$ into left and right tread speeds, and convert those speeds back to check the arithmetic. You will predict the turning radius of a joystick command before the robot moves, and you will explain why a differential-drive base cannot slide sideways. Those two equations are the body of every `cmd_vel` callback from Chapter 10 onward.
@@ -21,6 +23,14 @@ You will measure the track width of your Capstone base, convert a body velocity 
 
 You can identify which wheel is left when you sit on the robot looking forward. Chapter 07’s open-loop teleop already spins those wheels. A ruler or a tailor’s tape is the only new tool. PID from lesson 08-03 is optional here: kinematics produces speed targets, and open-loop PWM can still demonstrate the shape of a turn with the wheels in the air.
 
+
+## Background Knowledge Map: Nonholonomic Constraints, Jacobian Mapping, and Dead-Reckoning Odometry
+
+Differential-drive kinematics bridges planar geometry and state estimation across three pillars:
+
+- **Nonholonomic Rolling Constraint:** A rolling tire cannot slide sideways ($$\dot{y}_{\text{body}} = 0$$). In world coordinates $$(x, y, \theta)$$, this imposes the Pfaffian constraint $$-\dot{x}\sin\theta + \dot{y}\cos\theta = 0$$—meaning the robot can reach any $$(x, y, \theta)$$ pose (via parallel-parking maneuvers) but cannot instantaneously move sideways.
+- **Forward & Inverse Velocity Jacobian:** The invertible $$2\times 2$$ matrix $$J = \begin{bmatrix} 1/2 & 1/2 \\ 1/L & -1/L \end{bmatrix}$$ maps wheel linear speeds $$(v_R, v_L)$$ to body twist $$(v, \omega)$$, and its inverse $$J^{-1} = \begin{bmatrix} 1 & L/2 \\ 1 & -L/2 \end{bmatrix}$$ converts `cmd_vel` into wheel setpoints.
+- **Odometry Integration (Euler vs. Midpoint / Exact Arc):** Integrating $$\dot{x} = v\cos\theta,\ \dot{y} = v\sin\theta,\ \dot{\theta} = \omega$$ over step $$\Delta t$$ produces wheel odometry. Using the midpoint heading $$\theta_k + \frac{1}{2}\omega\Delta t$$ dramatically reduces truncation error during turns compared to naive Euler.
 ## Why this sits on the path
 
 `geometry_msgs/Twist` is not a left motor and a right motor. Nav2, teleop_twist_keyboard, and any later policy publish forward speed and yaw rate in the robot’s body frame. Someone must invert that into two wheel speeds. If that someone uses the wrong track width, every map in Chapter 11 is scaled wrong even when the SLAM software is perfect. If the sign of $$\omega$$ is flipped, the robot turns away from the goal and the planner “fails” for a mechanical reason. Write the inverse once, with units, and call it from the serial bridge.
@@ -117,6 +127,21 @@ assert abs(body_from_wheels(*wheel_speeds(0.2, 0.5, 0.16), 0.16)[1] - 0.5) < 1e-
 ```
 
 A pure spin, $$v = 0$$, $$\omega = 1.0$$, $$L = 0.16$$: $$v_R = 0.08$$, $$v_L = -0.08$$. If both numbers come out positive, you added $$\omega L$$ to both wheels instead of splitting the sign.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Integrating One Odometry Step on a Curved Arc
+
+Using the lesson's worked command $$v = 0.20\ \text{m/s}$$, $$\omega = 0.50\ \text{rad/s}$$ from initial pose $$(x_0, y_0, \theta_0) = (0, 0, 0)$$ over a $$\Delta t = 1.0\ \text{s}$$ arc, compare naive Euler integration against midpoint (Runge–Kutta 2) integration:
+
+1. **Exact arc geometry ($$R = v/\omega = 0.40\ \text{m}$$, $$\Delta\theta = \omega\Delta t = 0.50\ \text{rad}$$):**
+   $$x_{\text{exact}} = R\sin(\Delta\theta) = 0.40\sin(0.50) = 0.40(0.4794) = 0.1918\ \text{m},$$
+   $$y_{\text{exact}} = R(1 - \cos\Delta\theta) = 0.40(1 - 0.8776) = 0.0490\ \text{m}, \qquad \theta_1 = 0.50\ \text{rad}.$$
+2. **Naive Euler integration (using $$\theta_0 = 0$$ for the whole step):**
+   $$x_{\text{Euler}} = 0 + 0.20\cos(0)(1.0) = 0.2000\ \text{m}, \qquad y_{\text{Euler}} = 0 + 0.20\sin(0)(1.0) = 0.0000\ \text{m}$$
+   — completely missing the $$4.9\ \text{cm}$$ sideways curve!
+3. **Midpoint integration (using $$\theta_{\text{mid}} = \theta_0 + \frac{1}{2}\Delta\theta = 0.25\ \text{rad}$$):**
+   $$x_{\text{mid}} = 0 + 0.20\cos(0.25) = 0.20(0.9689) = 0.1938\ \text{m},$$
+   $$y_{\text{mid}} = 0 + 0.20\sin(0.25) = 0.20(0.2474) = 0.0495\ \text{m}.$$
+   With one extra line of math (evaluating at $$\theta + \Delta\theta/2$$), the lateral error drops from **49 mm** down to **0.5 mm**!
 
 ## Lab
 

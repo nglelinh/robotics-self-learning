@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Ask any hardware team what delayed their robot prototype by three weeks and the answer is rarely a difficult differential equation — it is a missing 2-pin JST connector, an incompatible 5 V vs. 3.3 V logic module, or a motor driver whose current rating was read as "continuous" when the datasheet meant "10-millisecond peak." A disciplined **Bill of Materials (BOM)** is your first engineering design document.
+
+This lesson walks through every component of the Vietnam-sourced robot kit, showing how voltage rails, stall currents, logic levels, and mechanical mounts must agree on paper before you click "Buy.r
+
+---
+
 Estimated time: **90–120 minutes**, including the spreadsheet lab. Prices below were read from public Hshop product pages on **23 September 2026**. They will move. Treat every đồng figure as a snapshot, then confirm the live listing before you pay.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ By the end of this lesson you can build a Track A bill of materials for the diff
 ## Prerequisites
 
 You only need the habit of writing things down. Lesson 00-02 (which track you are on) helps you decide whether Wi-Fi has to be on the microcontroller now. You do not need Ohm's law yet; the driver and battery sections teach the two numbers you must not get wrong. A phone camera is the inspection tool until the multimeter arrives.
+
+## Background Knowledge Map: Systems Integration, Electrical Compatibility, and BOM Verification
+
+Building a robot from off-the-shelf modules is an exercise in **interface matching** across three pillars:
+
+- **Electrical Rail & Current Matching:** Every load has a supply voltage window $$[V_{\min}, V_{\max}]$$ and peak current $$I_{\text{peak}}$$. Your battery and buck converters must supply $$\sum I_{\text{peak}}$$ with headroom while staying inside every IC's absolute maximum rating.
+- **Logic-Level Compatibility:** Modern MCUs (ESP32, RP2040) operate at $$3.3\text{ V}$$ logic and are *not* 5 V tolerant on GPIO inputs. Mixing a 5 V ultrasonic sensor (HC-SR04 `ECHO` pin) with a 3.3 V MCU requires a resistive voltage divider or logic level shifter.
+- **Mechanical & Mounting Compatibility:** Wheel hub shafts (D-shaft vs. double-flat TT shaft), encoder mounting brackets, and M3 standoff patterns must match the chassis plate before assembly begins.r
+
+---
 
 ## Why it matters
 
@@ -271,6 +287,34 @@ A sum you can explain to a classmate in one minute, a driver row whose substitut
 | Motors on Dupont wires in the notes | Breadboard will brown out or melt | Screw terminals and the red/black lead |
 
 **Safety.** Lithium cells are the hazard in this lesson, not the spreadsheet. Charge where you can see the cell. Do not short the holder. Do not connect VM to the ESP32 5 V or 3.3 V pin to "test the battery".
+
+## Deep-Dive Explanation (Read Slowly): Auditing a Robot BOM with a Quantitative Compatibility Check
+
+Before purchasing any kit, run a 4-step paper audit on your BOM:
+
+1. **Check the voltage tree:** Map every component to its exact rail (raw battery `VBAT`, regulated `5V`, or MCU `3.3V`).
+2. **Sum worst-case current per rail:** Add logic idle currents plus simultaneous motor stall currents to size the buck converter and motor driver.
+3. **Verify driver voltage drop:** Bipolar drivers like the L298N lose $$V_{\text{drop}} \approx 2.0\text{–}3.0\text{ V}$$ internally, whereas MOSFET drivers (TB6612FNG, DRV8833) drop only $$I \cdot R_{\text{DS(on)}} \approx 0.2\text{–}0.5\text{ V}$$.
+4. **Audit spare margin:** Include 10–15% spares on consumables (JST connectors, M3 screws, fuses, resistors) so one bent pin does not stall a weekend lab.
+
+### Concrete Worked Example: Comparing L298N vs. TB6612FNG on Your 2S Battery BOM
+
+Suppose your BOM uses a 2S Li-ion pack ($$V_{\text{bat}} = 7.4\text{ V}$$) driving two 6 V DC gearmotors drawing $$I = 1.0\text{ A}$$ each under heavy load ($$2.0\text{ A}$$ total):
+
+| Metric | L298N (BJT H-Bridge) | TB6612FNG (MOSFET H-Bridge) |
+| --- | --- | --- |
+| Typical voltage drop $$V_{\text{drop}}$$ at 1 A/ch | $$\approx 2.4\text{ V}$$ | $$I \cdot R_{\text{on}} = 1.0 \times 0.5\,\Omega = 0.5\text{ V}$$ |
+| Voltage actually reaching motor | $$7.4 - 2.4 = 5.0\text{ V}$$ | $$7.4 - 0.5 = 6.9\text{ V}$$ |
+| Power wasted as heat (2 channels) | $$2 \times (2.4 \times 1.0) = 4.8\text{ W}$$ | $$2 \times (0.5 \times 1.0) = 1.0\text{ W}$$ |
+| Electrical efficiency $$\eta$$ | $$5.0 / 7.4 \approx 67.6\%$$ | $$6.9 / 7.4 \approx 93.2\%$$ |
+
+Look at that result: swapping a single line item on the BOM cuts wasted driver heat by nearly **5×** (from 4.8 W down to 1.0 W) and boosts motor efficiency from 67.6% to 93.2%!
+
+**Common Pitfall:** Ordering motors rated for 12 V alongside a 2S (7.4 V) battery pack and wondering why the robot barely creeps across carpet.
+
+**Quick Check:** If your 5 V buck converter supplies 0.35 A to the MCU + sensors, its output power is $$5.0 \times 0.35 = 1.75\text{ W}$$; at 85% efficiency it draws $$1.75 / (0.85 \times 7.4) \approx 0.28\text{ A}$$ from the 7.4 V battery.
+
+---
 
 ## Exercises
 

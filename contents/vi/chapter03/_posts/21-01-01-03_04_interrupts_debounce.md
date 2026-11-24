@@ -19,6 +19,40 @@ Sau bài này, bạn phân biệt được hiện tượng dội cơ khí (bounc
 
 Ở bài GPIO, bạn đã đấu nút nhấn từ chân GPIO xuống mass với kéo lên nội và lọc tín hiệu ổn định 20 ms bằng cách đọc liên tục trong vòng lặp. Bài này chuyển việc phát hiện sự kiện cạnh sang ngắt ngoài, còn bước kiểm tra thời gian ổn định vẫn nằm trong vòng lặp không chặn của bài 1 (thay thế kiểu [nhịp tim `delay(500)` của chương 02]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %})). Bạn dùng lại nút nhấn sẵn có, chưa cần thêm linh kiện hay nối động cơ.
 
+---
+
+Khi bạn nhấn một chiếc nút cơ khí, mắt thường thấy nó đóng "tách" một cái dứt khoát — nhưng dưới con mắt tốc độ MHz của vi điều khiển, hai lá đồng bên trong bật nảy lên xuống tới **5–15 lần trong vòng 10 mili-giây** (**hiện tượng dội tiếp điểm — switch bounce**)! Cùng lúc đó, hai đĩa mã hóa vòng quay (encoder) trên trục bánh xe phát ra hàng trăm xung mỗi giây mà vòng lặp chính không thể lúc nào cũng đứng chờ để kiểm tra. **Ngắt phần cứng (Interrupt / ISR)** kết hợp **chống dội (debounce)** chính là đôi tai nhạy bén giúp robot không bao giờ bỏ lỡ sự kiện tốc độ cao.
+
+## Bản đồ kiến thức nền: Ngắt Phần cứng (ISR), Chống dội và Đồng bộ Dữ liệu
+
+1. **Thăm dò (Polling) vs. Ngắt Phần cứng (Interrupt):** *Polling* liên tục hỏi trong vòng lặp chính (dễ bỏ lỡ xung ngắn khi CPU đang bận); *Interrupt* buộc phần cứng tạm dừng chương trình chính ngay khi có cạnh lên/xuống trên chân GPIO, nhảy vào **Hàm phục vụ ngắt (ISR)** rồi quay lại đúng chỗ cũ trong vài micro-giây!
+2. **Quy tắc Vàng cho ISR ("Ngắn — Nhanh — Không chặn"):** Trong ISR tuyệt đối *không* gọi `Serial.print()`, `delay()`, I2C hay cấp phát bộ nhớ! ISR chỉ nên tăng một biến đếm hoặc bật một cờ báo khai báo với từ khóa **`volatile`** (và gắn `IRAM_ATTR` trên ESP32) để vòng lặp chính xử lý sau.
+3. **Chống dội Tiếp điểm (Debouncing):** Với nút nhấn cơ khí (dội trong 5–20 ms), ta lọc nhiễu bằng cách chỉ chấp nhận thay đổi trạng thái sau khi tín hiệu giữ ổn định qua một khoảng thời gian `debounce_ms` (thường 25–50 ms).
+
+### Ví dụ cầm tay chỉ việc: Tính tần số ngắt Encoder và chứng minh vì sao cấm `Serial.print()` trong ISR
+
+Giả sử bánh xe robot quay ở tốc độ **300 vòng/phút** ($$5\text{ vòng/giây}$$) với đĩa encoder **20 khe** đọc đầy đủ 4 cạnh pha A/B (quadrature 4× → **80 xung/vòng**):
+1. **Tần số xung ngắt trên 1 bánh xe:**
+   $$
+   f_{\text{xung}} = 5\text{ vòng/s} \times 80\text{ xung/vòng} = \mathbf{400\text{ xung/giây}} \quad (\text{mỗi xung cách nhau }\mathbf{2.5\text{ ms}}).
+   $$
+2. **Tải CPU nếu viết ISR chuẩn (chỉ tăng biến `volatile int32_t ticks++`, tốn $$1\ \mu\text{s}$$):**
+   $$
+   \text{Tải CPU} = 400 \times 1\ \mu\text{s} = 400\ \mu\text{s/s} = \mathbf{0.04\%\text{ CPU}} \quad (\text{nhẹ như lông hồng!}).
+   $$
+3. **Thảm họa nếu lỡ viết `Serial.println(ticks)` (tốn ~$$5\text{ ms}$$) bên trong ISR:** mỗi lần gọi ISR dài gấp đôi khoảng cách giữa 2 xung ($$5\text{ ms} > 2.5\text{ ms}$$), làm chồng chéo ngắt, mất sạch xung đếm và khiến bộ giám sát **Watchdog Timer** của ESP32 lập tức reset bo mạch!
+
+### Khung giải thích: 4 bước thiết kế Ngắt và Chống dội an toàn tuyệt đối (nên đọc chậm)
+
+1. **Bước 1 — Khai báo mọi biến chia sẻ giữa ISR và `loop()` là `volatile`:** Nếu thiếu `volatile`, trình biên dịch C++ có thể tối ưu hóa bằng cách lưu biến trong thanh ghi CPU và không bao giờ thấy giá trị mới mà ISR vừa cập nhật!
+2. **Bước 2 — Đọc biến đa byte (như `int32_t` / `int64_t`) trong vùng cấm ngắt ngắn (Critical Section):** Tắt ngắt 1 micro-giây để sao chép `ticks` ra biến cục bộ rồi bật ngắt lại ngay, tránh đọc phải giá trị bị xé đôi (*torn read*) khi ISR nhảy vào giữa chừng.
+3. **Bước 3 — Phân biệt nút nhấn cơ khí (cần debounce 30 ms) với cảm biến quang/Hall encoder (tín hiệu sạch, KHÔNG debounce bằng 30 ms!):** Nếu bạn áp dụng bộ lọc 30 ms lên encoder 400 Hz, bạn sẽ lọc sạch 90% xung quay bánh xe!
+4. **Bước 4 — Dùng bộ đếm phần cứng (PCNT trên ESP32 / PIO trên Pico) khi tốc độ xung rất cao:** Khi encoder gắn trước hộp số (vài chục nghìn xung/giây), phần cứng đếm tự động giúp giải phóng hoàn toàn CPU.
+
+**Kiểm tra nhanh.** Một encoder gắn trực tiếp lên trục động cơ (trước hộp số tỉ số truyền 1:48) có 11 xung/vòng, quay ở 6.000 vòng/phút (100 vòng/giây). Tần số xung tạo ra là bao nhiêu? $$100 \times 11 = \mathbf{1{,}100\text{ xung/giây}}$$ (đọc 4 cạnh là **4.400 xung/giây** — cách nhau chỉ $$227\ \mu\text{s}$$!) — lúc này giữ ISR dưới $$2\ \mu\text{s}$$ hoặc dùng bộ đếm phần cứng là bắt buộc!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Trên Capstone A, nút nhấn dùng để xóa trạng thái lỗi (FAULT), còn ngắt phần cứng về sau dùng để đếm xung encoder bánh xe trong lúc firmware vẫn đang cập nhật PWM. Nếu một ISR in dữ liệu serial, cấp phát bộ nhớ hoặc gọi `delay()`, nó sẽ chiếm dụng CPU khiến vòng lặp chính không kịp kiểm tra ngưỡng mất lệnh 300 ms để đưa hai kênh TB6612 về 0. Ở chiều ngược lại, nếu không chống dội, một lần nhấn nút có thể tạo ra 5 đến 30 cạnh tín hiệu khiến thao tác xóa lỗi kích hoạt lặp lại nhiều lần. Do đó, ISR phải thật ngắn gọn để vòng giám sát luôn có CPU, còn mọi thao tác chờ theo thời gian phải nằm trong vòng lặp chính.

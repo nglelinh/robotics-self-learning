@@ -19,6 +19,42 @@ Sau bài học này, bạn sẽ nhận biết được vạch đánh dấu chân
 
 Bạn đã vận dụng được định luật Ohm $V = IR$, biết chọn điện trở hạn dòng cho LED đỏ trên nguồn 3,3 V, và nắm quy tắc chỉ sử dụng thang đo diode trên linh kiện đã ngắt nguồn (que đỏ nằm ở lỗ V/Ω, không ở lỗ đo dòng). Nếu chưa có bộ kit trên tay, các hình minh họa trong bài vẫn đủ để học cách nhận diện cực tính; phần thực hành chỉ dùng phép thử diode không cấp nguồn.
 
+---
+
+Nếu điện trở là chiếc van hãm dòng chảy, thì **tụ điện** là chiếc bình tích áp nhỏ giữ ổn định đường nguồn khi động cơ đột ngột khởi động, còn **diode** là chiếc van một chiều ngăn dòng điện chảy ngược làm cháy vi điều khiển. Rất nhiều người mới lầm tưởng cắm một tụ hóa $$100\ \mu\text{F}$$ to vào đường nguồn là đủ "cứu" một viên pin yếu — nhưng chỉ cần làm một phép tính năng lượng 3 dòng, bạn sẽ thấy ngay giới hạn thật sự của tụ đệm!
+
+## Bản đồ kiến thức nền: Tụ điện, Diode và LED trong Mạch Robot
+
+1. **Tụ điện (Tụ gốm $$0.1\ \mu\text{F}$$ vs. Tụ hóa $$100\text{–}470\ \mu\text{F}$$):** Tích trữ năng lượng trong điện trường ($$E = \tfrac{1}{2}CV^2$$) và chống lại sự thay đổi đột ngột của điện áp ($$I = C\frac{dV}{dt}$$). Tụ gốm nhỏ đặt sát chân IC lọc nhiễu cao tần; tụ hóa lớn (có cực tính âm–dương!) gánh các xung dòng ngắn vài chục micro-giây.
+2. **Diode (Van một chiều & Bảo vệ Xung ngược):** Chỉ dẫn dòng từ Anode sang Cathode (đầu có vạch trắng/bạc) khi vượt ngưỡng sụt áp thuận ($$V_f \approx 0.7\text{ V}$$ cho diode silicon `1N4007`, $$0.3\text{ V}$$ cho diode Schottky `1N5819`). Cực kỳ quan trọng làm **diode dập xung ngược (flyback)** khi tắt cuộn dây động cơ/rơ-le!
+3. **LED (Diode Phát quang):** Là một diode phát sáng với $$V_f$$ cao hơn ($$1.8\text{–}3.2\text{ V}$$ tùy màu), chân dài là Anode (`+`), cạnh vát phẳng trên thân nhựa là Cathode (`-`), và *luôn* cần điện trở hạn dòng.
+
+### Ví dụ cầm tay chỉ việc: Tính năng lượng và thời gian gánh tải của tụ đệm $$100\ \mu\text{F}$$
+
+Xét một tụ hóa $$C = 100\ \mu\text{F} = 10^{-4}\text{ F}$$ mắc trên đường nguồn $$V = 5.0\text{ V}$$ của xe robot:
+1. **Tổng năng lượng tích trữ trong tụ:**
+   $$
+   E = \frac{1}{2} C V^2 = \frac{1}{2} (10^{-4}\text{ F})(5.0\text{ V})^2 = \mathbf{1.25 \times 10^{-3}\text{ J} = 1.25\text{ mJ}}!
+   $$
+   *(So sánh với 1 viên pin 18650 chứa tới **30.000 J** — lớn hơn gấp **24 triệu lần**!)*
+2. **Thời gian tụ gánh được xung dòng động cơ $$I = 1.0\text{ A}$$ trước khi điện áp sụt quá $$\Delta V = 0.5\text{ V}$$:**
+   Từ $$I = C\dfrac{\Delta V}{\Delta t}$$, rút ra:
+   $$
+   \Delta t = \frac{C \cdot \Delta V}{I} = \frac{10^{-4} \times 0.5}{1.0} = \mathbf{5 \times 10^{-5}\text{ s} = 50\ \mu\text{s}}!
+   $$
+   Con số **50 micro-giây** nói lên tất cả: tụ $$100\ \mu\text{F}$$ cực kỳ hiệu quả để dập gai nhiễu chuyển mạch siêu ngắn, nhưng hoàn toàn *không thể* thay thế một nguồn pin đủ dòng khi động cơ khởi động kéo dài vài trăm mili-giây!
+
+### Khung giải thích: 4 quy tắc sống còn với Tụ điện, Diode và LED (nên đọc chậm)
+
+1. **Bước 1 — Không bao giờ cắm ngược cực tụ hóa:** Tụ hóa có dải sọc trắng dấu `-` đánh dấu chân âm; cắm ngược cực hoặc vượt điện áp định mức (ví dụ dùng tụ 6,3 V trên pin 8,4 V) có thể làm tụ phồng và nổ bốp! Luôn chọn điện áp tụ tối thiểu gấp $$1.5\text{–}2\times$$ điện áp nguồn (dùng tụ 16 V hoặc 25 V cho mạch 5–8,4 V).
+2. **Bước 2 — Đọc mã 3 số trên tụ gốm (đơn vị picofarad):** Mã `104` nghĩa là $$10 \times 10^4\text{ pF} = 100{,}000\text{ pF} = \mathbf{100\text{ nF} = 0.1\ \mu\text{F}}$$ — tụ lọc nhiễu kinh điển đặt sát mọi chân nguồn IC!
+3. **Bước 3 — Kiểm tra diode bằng thang đo Diode trên đồng hồ:** Que đỏ vào Anode, que đen vào Cathode sẽ đọc $$0.5\text{–}0.7\text{ V}$$ (silicon) hoặc $$0.2\text{–}0.3\text{ V}$$ (Schottky); đảo ngược que phải đọc `OL` (hở mạch).
+4. **Bước 4 — Nhận diện cực LED bằng cạnh vát, không chỉ bằng độ dài chân:** Khi chân LED đã bị cắt bằng nhau trên mạch cũ, cạnh vát phẳng trên vành nhựa (và bản cực lớn hơn bên trong bầu LED) luôn là **Cathode (`-`)**.
+
+**Kiểm tra nhanh.** Một tụ gốm nhỏ màu vàng in mã **`103`**, còn một tụ khác in **`224`**. Giá trị điện dung của chúng là bao nhiêu? `103` = $$10 \times 10^3\text{ pF} = \mathbf{10\text{ nF} = 0.01\ \mu\text{F}}$$; `224` = $$22 \times 10^4\text{ pF} = \mathbf{220\text{ nF} = 0.22\ \mu\text{F}}$$!
+
+---
+
 ## Vì sao cần phân biệt tụ đệm với nguồn pin trên xe hai bánh
 
 Trên xe đồ án, ESP32 hoặc Pico hoạt động ở mức 3,3 V; mạch lái TB6612 nhận nguồn động cơ ở chân VM (4,5 V đến 10 V) và nguồn logic ở chân VCC (3,3 V). Một tụ hóa 100 µF mắc ngang chân VM đóng vai trò bộ đệm năng lượng cục bộ cho các xung đóng cắt PWM của động cơ TT, nhưng **không phải là nguồn pin**: lượng năng lượng tích trữ trong tụ 100 µF cạn sạch trong chưa tới một mili giây khi động cơ kẹt trục. Do đó xe vẫn bắt buộc có bộ pin động cơ riêng, cách ly khỏi chân GPIO.

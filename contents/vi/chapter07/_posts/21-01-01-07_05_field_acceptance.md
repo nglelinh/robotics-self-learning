@@ -13,6 +13,35 @@ draft: false
 
 Đã kết thúc giai đoạn thử trên hộp kê. Trong bài này, bạn đặt robot xuống một làn sàn trống, chạy thử đủ bốn hướng ở mức PWM đã giới hạn và lập nhật ký (log) đủ tin cậy làm cơ sở cho chương sau. Tiêu chuẩn đạt dựa trên tập các quan sát đo được cụ thể, không dựa vào cảm tính “xe chạy được là ổn”.
 
+Trong thế giới phần mềm, bạn viết unit test để biết code đúng hay sai. Trong thế giới robotics, unit test trên laptop không bao giờ đủ — một robot chỉ được coi là hoàn thiện khi vượt qua **bài kiểm tra nghiệm thu thực địa (Field Acceptance Test)** trên mặt sàn thật với các tiêu chí **đạt / không đạt (Pass/Fail) định lượng** rõ ràng và có tệp nhật ký (log) chứng minh! Nếu không có bài test định lượng, bạn sẽ không bao giờ biết lần sửa code mới nhất giúp robot chạy thẳng hơn hay thực ra làm nó tệ đi.
+
+## Bản đồ kiến thức nền: Kiểm thử thực địa, Ghi nhật ký đồng bộ và Tiêu chí nghiệm thu
+
+### 1. Bộ 4 bài test thực địa kinh điển cho robot vi sai
+Một quy trình nghiệm thu chuẩn gồm 4 kịch bản lặp lại được: (1) **Chạy thẳng 3–5 m** đo độ lệch ngang (đánh giá cân bằng bánh & odometry); (2) **Quay tại chỗ $$360^\circ$$** đo sai số góc (đánh giá hiệu chuẩn khoảng cách hai bánh $$L$$); (3) **Test ngắt kết nối đột ngột** kiểm tra Watchdog dừng đúng ngưỡng; và (4) **Test chạy bền 10 phút** giám sát nhiệt độ driver và đường cong tụt áp pin.
+
+### 2. Ghi log có dấu thời gian (Timestamped Telemetry CSV)
+Mắt thường rất dễ đánh lừa: bạn thấy xe "hơi giật", nhưng không biết do mất gói UART, do điện áp pin tụt, hay do encoder nhảy xung. Ghi log định dạng CSV gồm `(timestamp_ms, cmd_v, cmd_w, enc_L, enc_R, v_bat)` giúp bạn vẽ đồ thị phân tích hậu kiểm chính xác đến từng mili-giây.
+
+### 3. Nghiệm thu dựa trên ngưỡng định lượng (Acceptance Criteria)
+Mọi yêu cầu phải chuyển thành con số đo được trước khi chạy test (ví dụ: lệch ngang $$< 5\%$$ quãng đường, sai số quay $$360^\circ$$ nhỏ hơn $$\pm 10^\circ$$, thời gian dừng khẩn cấp $$< 0{,}5\text{ s}$$).
+
+### Khung giải thích: Cầm tay đánh giá kết quả bài test chạy thẳng 5 mét và truy ngược sai số đường kính bánh (nên đọc chậm)
+
+Bạn dán một đường băng keo thẳng dài **$$D = 5{,}00\text{ m}$$** trên sàn hành lang, đặt robot ngay vạch xuất phát rồi cho chạy thẳng $$5{,}00\text{ m}$$ với tiêu chí nghiệm thu **độ lệch ngang $$\le 5\%$$ ($$\le 25\text{ cm}$$)** và **sai số quãng đường $$\le 3\%$$ ($$\pm 15\text{ cm}$$)**.
+
+Kết quả đo thực địa bằng thước dây:
+- Xe dừng ở tọa độ dọc $$x = 4{,}92\text{ m}$$ và lệch sang trái $$\Delta y = 0{,}15\text{ m}\;(15\text{ cm})$$.
+
+Kiểm tra các chỉ số nghiệm thu:
+1. **Sai số quãng đường dọc:**
+   $$\frac{\vert 4{,}92 - 5{,}00 \vert}{5{,}00} = \frac{0{,}08}{5{,}00} = 1{,}6\% \le 3\% \implies \textbf{ĐẠT}.$$
+2. **Độ lệch ngang và góc lệch hướng tương đương:**
+   $$\text{Tỷ lệ lệch ngang} = \frac{0{,}15}{5{,}00} = 3{,}0\% \le 5\% \implies \textbf{ĐẠT}.$$
+   Góc lệch hướng trung bình: $$\theta_{\text{lệch}} \approx \arctan\!\left(\frac{0{,}15}{5{,}00}\right) \approx 1{,}72^\circ.$$
+3. **Chẩn đoán nếu lần sau xe lệch tới $$\Delta y = 0{,}45\text{ m}$$ ($$9\% \to \textbf{KHÔNG ĐẠT}$$):**
+   Vì xe đi theo cung tròn bán kính $$R \approx \frac{D^2}{2 \Delta y} = \frac{25}{0{,}90} \approx 27{,}8\text{ m}$$, với track width $$L = 0{,}20\text{ m}$$, hai bánh đang chênh nhau khoảng $$\frac{L}{R} = \frac{0{,}20}{27{,}8} \approx 0{,}72\%$$ — chỉ cần chỉnh lại hệ số bù đường kính bánh trái/phải $$0{,}7\%$$ trong cấu hình là xe lập tức chạy thẳng tắp!
+
 ## Mục tiêu học
 
 1. Thực hiện chuỗi thử nghiệm trên làn sàn trống dài $$2~\mathrm{m}$$: tiến khoảng $$2~\mathrm{s}$$, dừng, lùi, quay trái và quay phải trong giới hạn $$\pm 180$$, luôn giữ tay sẵn sàng tại công tắc nguồn pin.

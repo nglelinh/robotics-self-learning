@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~75 phút**.
 
+Nếu bạn viết toàn bộ mã đọc LiDAR, chạy SLAM, tính đường đi và điều khiển động cơ vào một tệp `main.py` khổng lồ, chỉ cần camera bị treo một nhịp là cả động cơ cũng đứng hình theo. **ROS 2** giải quyết triệt để vấn đề đó bằng kiến trúc đồ thị tính toán phân tán: chia robot thành hàng chục tiến trình nhỏ độc lập gọi là **Node**, nói chuyện với nhau qua các kênh dữ liệu có kiểu định nghĩa chặt chẽ gọi là **Topic**.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Node và Topic trong ROS 2
+
+1. **Tách rời hoàn toàn (Decoupling) bằng Publish / Subscribe**:
+   Node phát (`Publisher`) chỉ gửi thông điệp lên tên topic (ví dụ `/scan`) mà không cần biết có bao nhiêu node đang nghe; node nhận (`Subscriber`) đăng ký topic đó mà không phụ thuộc ngôn ngữ lập trình của bên phát (C++ nói chuyện tự nhiên với Python).
+2. **Hợp đồng kiểu dữ liệu (Message Interface) & Tần số xuất bản**:
+   Mỗi topic gắn chặt với một cấu trúc tin chuẩn (như `geometry_msgs/msg/Twist`, `sensor_msgs/msg/LaserScan`) và một tần số cam kết (Hz). Tần số là một phần của hợp đồng thời gian thực!
+3. **Middleware DDS (Khám phá ngang hàng không cần `roscore`)**:
+   Khác với ROS 1 phụ thuộc một máy chủ trung tâm dễ hỏng (`roscore`), ROS 2 chạy trên chuẩn công nghiệp **DDS** cho phép các node tự phát hiện lẫn nhau trong mạng LAN.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ chạy được cặp node mẫu `talker` và `listener` trong ROS 2 Jazzy, xác định được tên topic cùng kiểu message kết nối chúng và đo tần số truyền tin bằng `ros2 topic hz`. Bạn cũng sẽ xuất bản thủ công một message `geometry_msgs/Twist`, chỉ ra đúng hai trường dữ liệu mà khung xe vi sai thực sự sử dụng, đồng thời hiểu vai trò của gói định nghĩa giao diện (interface package) để về sau các message bánh xe tự định nghĩa luôn có cấu trúc rõ ràng thay vì truyền dữ liệu kiểu `dict` Python rời rạc.
@@ -69,6 +80,19 @@ ros2 topic hz /cmd_vel
 ```
 
 **Kết quả mong đợi:** tần số xấp xỉ 5 Hz và robot không di chuyển vì chưa có node điều khiển động cơ nào đăng ký nghe topic này. Để chạy khoảng mười giây rồi nhấn Ctrl-C để dừng và ghi lại tần số đo được. Cầu nối ở chương 10 sẽ quy ước dừng xe nếu không nhận được message nào trong 300 ms. Ở tần số 5 Hz, chu kỳ giữa hai message là 200 ms — nằm gọn trong ngưỡng an toàn; ngược lại, ở 1 Hz chu kỳ lên tới 1000 ms khiến watchdog liên tục ngắt lệnh làm xe chạy giật cục. Đây là bài toán về thời gian và động học mà bạn hoàn toàn có thể kiểm chứng trước khi đặt robot xuống sàn.
+
+### Khung giải thích (nên đọc chậm): Tính tay ngân sách băng thông mạng Wi-Fi cho đồ thị 3 Topic của robot
+
+Giả sử robot phát đồng thời 3 topic về laptop giám sát qua Wi-Fi:
+
+| Topic | Kiểu thông điệp | Kích thước / tin | Tần số | Lưu lượng (KB/s) |
+| :--- | :--- | :---: | :---: | :---: |
+| `/cmd_vel` | `geometry_msgs/Twist` | 48 byte | 20 Hz | $$48 \times 20 \approx \mathbf{1\text{ KB/s}}$$ |
+| `/odom` | `nav_msgs/Odometry` | ~700 byte | 50 Hz | $$700 \times 50 = \mathbf{35\text{ KB/s}}$$ |
+| `/scan` | `sensor_msgs/LaserScan` (720 tia) | ~6 KB | 10 Hz | $$6 \times 10 = \mathbf{60\text{ KB/s}}$$ |
+| **Tổng cộng** | | | | **~96 KB/s (< 0,8 Mbps)** |
+
+Toàn bộ dữ liệu điều khiển và LiDAR 2D chỉ tốn chưa tới **1 Mbps** — cực kỳ nhẹ nhàng trên Wi-Fi 5 GHz. Ngược lại, chỉ cần mở thêm 1 topic ảnh thô `/camera/image_raw` (~27 MB/s = 216 Mbps) là toàn bộ mạng Wi-Fi tắc nghẽn ngay lập tức!
 
 ## Lab
 

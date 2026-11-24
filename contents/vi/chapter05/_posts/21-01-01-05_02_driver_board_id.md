@@ -13,6 +13,32 @@ draft: false
 
 Trước khi làm theo bất kỳ sơ đồ đấu nối nào trên mạng, bạn cần nhận diện chính xác con chip được hàn trên bo mạch cầu H, vì L298N, TB6612 và DRV8833 khác nhau hoàn toàn về mức sụt áp, nguồn logic, chân kích hoạt (standby/sleep) và khả năng chịu dòng stall của động cơ TT. Bài này hướng dẫn cách phân biệt ba dòng mạch phổ biến và đo kiểm các đường nguồn trước khi nối chân vi điều khiển.
 
+Nếu bạn từng mua bộ kit xe robot sinh viên và thấy trên mạch có một con chip to đùng gắn miếng tản nhiệt nhôm khổng lồ màu đen mang tên **L298N**, hẳn bạn từng tự hỏi: *tại sao cùng kéo 2 động cơ bánh xe nhỏ xíu mà mạch L298N lại to nặng và nóng ran, còn mạch TB6612FNG hay DRV8833 lại nhỏ bằng đầu ngón tay cái và mát rượi?* Câu trả lời nằm ngay ở công nghệ bán dẫn bên trong cầu H: thế hệ transistor **BJT Darlington** từ thập niên 1980 so với **MOSFET** hiện đại — một khác biệt nhỏ trong datasheet nhưng quyết định trực tiếp việc xe bạn chạy được 20 phút hay 1 giờ trên cùng một cục pin!
+
+## Bản đồ kiến thức nền: So sánh công nghệ bán dẫn trong Driver động cơ
+
+### 1. BJT Darlington (L298N) — sụt áp cố định lớn và tổn hao nhiệt tuyến tính
+Mạch L298N dùng các cặp transistor lưỡng cực (BJT) mắc Darlington. Nhược điểm cố hữu của BJT là dù dòng nhỏ hay lớn, mỗi cầu H luôn bị **sụt áp bão hòa $$V_{\text{CE(sat)}} \approx 1{,}8\text{–}3{,}2\text{ V}$$**. Điện áp sụt này không biến mất mà biến thành nhiệt tỏa ra trên miếng nhôm tản nhiệt theo $$P_{\text{tổn hao}} = V_{\text{drop}} \cdot I$$, đồng thời "ăn mất" phần lớn điện áp pin nếu bạn dùng pin 2S (7,4 V) hoặc pin AA (6 V).
+
+### 2. MOSFET (TB6612FNG, DRV8833) — điện trở kênh $$R_{\text{DS(on)}}$$ cực nhỏ
+Các driver thế hệ mới dùng công tắc **MOSFET** hoạt động như một điện trở cực nhỏ $$R_{\text{DS(on)}} \approx 0{,}2\text{–}0{,}5\,\Omega$$ (tổng cả nhánh trên + nhánh dưới). Sụt áp chỉ là $$V_{\text{drop}} = I \cdot R_{\text{DS(on)}}$$ và tổn hao nhiệt là $$P = I^2 R_{\text{DS(on)}}$$ — nhỏ hơn L298N từ 4 đến 10 lần ở dòng 1 A, cho phép thu nhỏ mạch xuống cỡ con tem mà không cần tản nhiệt cồng kềnh.
+
+### 3. Mức logic điều khiển (3,3 V vs. 5 V) và các chân bảo vệ
+Khi chọn driver cho ESP32/Raspberry Pi (logic 3,3 V) hay Arduino (5 V), cần kiểm tra 4 thông số vàng trên datasheet: dải điện áp động cơ ($$V_M$$), dòng liên tục/đỉnh ($$I_{\text{rms}} / I_{\text{peak}}$$), ngưỡng logic đầu vào ($$V_{\text{IH}}$$), và tính năng bảo vệ quá nhiệt/quá dòng (như chân `STBY` trên TB6612 hoặc giới hạn dòng `AISEN/BISEN` trên DRV8833).
+
+### Khung giải thích: Cầm tay so sánh sụt áp và nhiệt tỏa ra giữa L298N và TB6612FNG trên pin LiPo 2S (nên đọc chậm)
+
+Giả sử robot dùng pin LiPo 2S (**$$V_{\text{bat}} = 7{,}4\text{ V}$$**) kéo **2 động cơ**, mỗi động cơ ăn dòng liên tục **$$I = 1{,}0\text{ A}$$** (tổng công suất cấp từ pin $$P_{\text{pin}} = 7{,}4 \times 2{,}0 = 14{,}8\text{ W}$$):
+
+| Thông số đánh giá (ở $$I = 1{,}0\text{ A/kênh}$$) | Driver **L298N** (BJT, $$V_{\text{drop}} \approx 2{,}0\text{ V}$$) | Driver **TB6612FNG** (MOSFET, $$R_{\text{DS(on)}} \approx 0{,}5\,\Omega$$) | Chênh lệch thực tế |
+| :--- | :---: | :---: | :--- |
+| **Sụt áp trên mỗi cầu H** | $$2{,}0\text{ V}$$ | $$1{,}0 \times 0{,}5 = 0{,}5\text{ V}$$ | L298N mất áp gấp **4×** |
+| **Điện áp thực đến động cơ** | $$7{,}4 - 2{,}0 = 5{,}4\text{ V}$$ | $$7{,}4 - 0{,}5 = 6{,}9\text{ V}$$ | TB6612 giúp xe chạy nhanh hơn **28%**! |
+| **Nhiệt lãng phí (cả 2 kênh)** | $$2 \times (2{,}0 \times 1{,}0) = 4{,}0\text{ W}$$ | $$2 \times (1{,}0^2 \times 0{,}5) = 1{,}0\text{ W}$$ | L298N đốt nhiệt gấp **4×** |
+| **Hiệu suất truyền điện của driver** | $$5{,}4 / 7{,}4 \approx 73{,}0\%$$ | $$6{,}9 / 7{,}4 \approx 93{,}2\%$$ | Tiết kiệm **20,2%** dung lượng pin! |
+
+Bảng tính ngắn gọn này cho thấy rõ: L298N chỉ còn phù hợp làm mô hình học tập giá rẻ khi cấp nguồn 12 V; còn với mọi robot chạy pin 2S thực thụ, chuyển sang TB6612FNG hoặc DRV8833 là nâng cấp rẻ mà hiệu quả nhất bạn có thể làm!
+
 ## Mục tiêu học
 
 Sau bài này, bạn nhận diện được module L298N, TB6612 và DRV8833 dựa trên vỏ chip, tản nhiệt và nhãn chân. Bạn giải thích được chức năng jumper 5 V trên L298N, thời điểm bắt buộc phải tháo jumper và lý do không dùng mạch ổn áp 7805 tích hợp để cấp nguồn cho ESP32. Bạn hiểu rõ vì sao phải kéo chân `STBY` của TB6612 lên mức cao và giới hạn sử dụng của DRV8833 trên pin 1S–2S dưới 10 V. Bạn cũng thực hiện được phép đo `VM` và đường nguồn logic bằng đồng hồ vạn năng trước khi nối bất kỳ chân GPIO nào.

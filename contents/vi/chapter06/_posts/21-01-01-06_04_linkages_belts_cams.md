@@ -13,6 +13,37 @@ draft: false
 
 Thời lượng ước tính: **80–100 phút**, bao gồm thực hành dựng cơ cấu bốn thanh bằng bìa cứng hoặc đếm răng pulley GT2 nếu bạn có sẵn linh kiện.
 
+Động cơ chỉ biết làm một việc duy nhất: **quay tròn**. Nhưng robot trong đời thực lại cần gắp đồ song song, nâng hạ thẳng đứng, bước đi như chân nhện, hoặc truyền lực từ động cơ đặt gọn trong thân ra tận khớp cổ tay cách đó 30 centimet. Khoảng trống giữa *chuyển động quay tròn đơn điệu của động cơ* và *mọi quỹ đạo phức tạp của robot* được lấp đầy bởi bốn họ cơ cấu kinh điển: **cơ cấu thanh (linkages), đai răng (timing belts), cam và bánh răng–thanh răng (rack-and-pinion)**.
+
+## Bản đồ kiến thức nền: Biến đổi chuyển động trong thiết kế cơ cấu robot
+
+### 1. Cơ cấu 4 khâu (Four-Bar Linkage) và định lý Grashof
+Cơ cấu 4 khâu là "viên gạch Lego" linh hoạt nhất của cơ học máy: dùng để tạo tay kẹp song song, chân robot biết bước (cơ cấu Klann/Jansen) hoặc tay nâng không bị nghiêng góc. Gọi độ dài khâu ngắn nhất là $$s$$, dài nhất là $$l$$, hai khâu còn lại là $$p, q$$. **Điều kiện Grashof** phát biểu rằng ít nhất một khâu có thể quay tròn liên tục $$360^\circ$$ khi và chỉ khi:
+$$s + l \le p + q.$$
+
+### 2. Đai răng (GT2 Timing Belt) và Truyền động bánh răng–thanh răng
+- **Đai răng (như GT2, bước răng $$2\text{ mm}$$):** truyền lực êm, không trượt, gần như không có backlash và cho phép đặt động cơ nặng ở sát gốc (giảm quán tính cánh tay!).
+- **Bánh răng – thanh răng (Rack & Pinion):** biến chuyển động quay trực tiếp thành tịnh tiến dọc thanh răng, chịu tải lớn và dễ kéo dài hành trình hơn trục vitme.
+
+### 3. Cơ cấu Cam — "bộ nhớ cơ khí" lập trình sẵn quỹ đạo
+Một đĩa cam được cắt biên dạng phi tròn có thể biến tốc độ quay đều thành chuyển động nâng–dừng–hạ phức tạp mà không cần thêm cảm biến hay phần mềm — rất hữu ích cho các cơ cấu kẹp nhanh hoặc nạp đạn lặp đi lặp lại trong thi đấu robotics.
+
+### Khung giải thích: Cầm tay tính hành trình đai răng GT2 và kiểm tra điều kiện Grashof (nên đọc chậm)
+
+**Phần A — Tính bước dịch chuyển tuyến tính của hệ truyền động đai GT2:**
+Một trục trượt tuyến tính (giống trục X/Y máy in 3D) dùng đai răng **GT2** (bước răng $$p = 2{,}0\text{ mm}$$) kéo bởi puly **$$Z = 20$$ răng**, gắn trên động cơ bước chạy vi bước **1/16** ($$3\,200\text{ vi bước/vòng}$$):
+1. **Quãng đường tịnh tiến mỗi vòng quay động cơ:**
+   $$S_{\text{vòng}} = Z \times p = 20 \times 2{,}0 = 40{,}0\text{ mm/vòng}.$$
+2. **Độ phân giải tuyến tính lý thuyết mỗi vi bước:**
+   $$\Delta x = \frac{40{,}0\text{ mm}}{3\,200} = 0{,}0125\text{ mm/vi bước}\;(12{,}5\,\mu\text{m}!).$$
+3. **Để trượt chính xác $$150\text{ mm}$$:** vi điều khiển cần phát đúng $$\frac{150}{0{,}0125} = 12\,000$$ xung `STEP`.
+
+**Phần B — Kiểm tra nhanh một cơ cấu 4 khâu có quay tròn liên tục được không?**
+Giả sử bạn thiết kế cơ cấu 4 khâu với chiều dài các thanh (cm): $$s = 3,\; l = 10,\; p = 7,\; q = 8$$:
+- Tổng ngắn nhất + dài nhất: $$s + l = 3 + 10 = 13\text{ cm}$$.
+- Tổng hai khâu còn lại: $$p + q = 7 + 8 = 15\text{ cm}$$.
+- Vì $$13 \le 15$$, cơ cấu **thỏa điều kiện Grashof** — cố định một khâu kề khâu ngắn nhất $$s = 3$$ sẽ cho ta cơ cấu tay quay–con lắc (*crank-rocker*) quay trọn $$360^\circ$$ mượt mà không bị kẹt chết!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn kiểm tra được cơ cấu bốn thanh bằng điều kiện Grashof để nhận diện dạng maniven – cần lắc, tính được tỉ số truyền của bộ truyền đai răng từ số răng pulley, và quy đổi đường kính vòng chia của bánh răng dẫn thành hành trình thanh răng trên mỗi vòng quay. Các bạn cũng mô tả được đoạn nâng và đoạn dừng của cam, đồng thời biết nhân gộp tỉ số truyền của đai (nếu có) vào tỉ số tổng từ encoder tới bánh xe trước khi cấu hình ROS.

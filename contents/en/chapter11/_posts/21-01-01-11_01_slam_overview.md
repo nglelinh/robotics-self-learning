@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: about 70 minutes with ROS 2 Jazzy already sourced, or about 50 minutes if you stop at the written interface contract because no lidar is on the desk.
 
+Drop a blindfolded robot into an unfamiliar building and ask it to draw a floor plan: to know where the walls are, it needs to know where *it* is; yet to know where it is without GPS, it needs a map of the walls. That chicken-and-egg paradox—**Simultaneous Localization and Mapping (SLAM)**—was one of the defining breakthroughs of modern robotics, solved by fusing wheel odometry with LiDAR scan matching and loop closure.
+
 ## Learning objectives
 
 You can draw the three-edge transform chain `slam_toolbox` expects, name the topics that must exist before `online_async_launch.py`, tell a bent hallway caused by a reversed encoder from a hallway that was never scanned, and say why a TF-Luna cannot fill `sensor_msgs/msg/LaserScan`.
@@ -21,6 +23,14 @@ You can draw the three-edge transform chain `slam_toolbox` expects, name the top
 
 You can use `ros2 topic info` and you know a transform tree is named frames, not a picture of the room. From the Capstone base, wheel encoders produce odometry, and a sign error on one motor makes a straight command look like a turn. Gazebo is only a mental picture of a simulated laser here.
 
+
+## Background Knowledge Map: Occupancy Grids, Bayesian Log-Odds Updates, and Pose-Graph Loop Closure
+
+Modern 2D LiDAR SLAM (such as ROS 2 `slam_toolbox`) stands on three mathematical pillars:
+
+- **Occupancy Grid Mapping (Log-Odds Bayes Filter):** The world is discretized into cells $$m_i \in \{0, 1\}$$ (free vs. occupied). Storing each cell's belief as **log-odds** $$l_i = \log\frac{p(m_i = 1)}{1 - p(m_i = 1)}$$ turns recursive Bayesian updates into fast addition: $$l_i^{(t)} = l_i^{(t-1)} + l_{\text{obs}} - l_0$$.
+- **Scan Matching (Front-End Odometry Correction):** Wheel odometry drifts continuously. Matching each incoming LiDAR scan against the local map (via ICP or correlative scan matching) computes the small $$SE(2)$$ correction $$(\Delta x, \Delta y, \Delta\theta)$$ that snaps walls into sharp alignment.
+- **Pose-Graph Optimization & Loop Closure (Back-End):** When the robot revisits a corridor it mapped minutes earlier, recognizing the overlap adds a *loop-closure constraint* between non-adjacent poses and solves a sparse nonlinear least-squares graph optimization to erase accumulated global drift.
 ## Why this lesson sits on the path
 
 The course path runs from the Capstone differential-drive base, through ROS 2 Jazzy, through Gazebo, and only then into autonomy. A map is the first autonomy artifact that is not a motor command. `slam_toolbox` estimates where the robot is and what the walls are, at the same time, once a planar lidar exists. Gazebo can publish a pretend scan. The Capstone robot cannot. Until a real `LaserScan` and honest odometry exist, launching the mapper only reports missing interfaces. Later, Nav2 will consume this map. It will not draw it for you.
@@ -73,6 +83,20 @@ ros2 run tf2_ros tf2_echo odom base_link
 ```
 
 `/scan` should be `sensor_msgs/msg/LaserScan` with a publisher count of at least one. `/odom` should be `nav_msgs/msg/Odometry`, `frame_id` `odom`, `child_frame_id` `base_link`. Pushing the robot forward should change translation, and rotating it should change yaw. Only then does the launch have a chance. Healthy SLAM adds `map` to `odom` (`ros2 run tf2_ros tf2_echo map odom`). That third echo is an outcome, not a transform you publish yourself.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Updating an Occupancy Grid Cell in Log-Odds Space
+
+Suppose a map cell starts completely unknown with prior probability $$p_0 = 0.50$$, so its initial log-odds is $$l_0 = \log(0.5 / 0.5) = 0.0$$. Your LiDAR sensor model says:
+- A laser *hit* inside the cell implies $$p_{\text{hit}} = 0.80 \implies l_{\text{hit}} = \ln(0.80 / 0.20) = \ln(4) = +1.386$$.
+- A laser ray *passing through* the cell implies $$p_{\text{free}} = 0.30 \implies l_{\text{free}} = \ln(0.30 / 0.70) = -0.847$$.
+
+Trace the cell's occupancy probability over three consecutive scans:
+
+1. **Scan 1 — LiDAR hit:** $$l_1 = 0.0 + 1.386 = +1.386 \implies p_1 = \frac{1}{1 + e^{-1.386}} = 0.800$$ (80% occupied).
+2. **Scan 2 — Second LiDAR hit:** $$l_2 = 1.386 + 1.386 = +2.772 \implies p_2 = \frac{1}{1 + e^{-2.772}} = \frac{1}{1 + 0.0625} = 0.941$$ (94.1% occupied — wall confirmed!).
+3. **Scan 3 — Person walks away, laser passes through (free):** $$l_3 = 2.772 - 0.847 = +1.925 \implies p_3 = \frac{1}{1 + e^{-1.925}} = 0.873$$ (belief drops smoothly rather than flipping wildly on one noisy ray).
+
+That single addition rule is how SLAM builds crisp, noise-resistant maps in real time.
 
 ## Lab
 

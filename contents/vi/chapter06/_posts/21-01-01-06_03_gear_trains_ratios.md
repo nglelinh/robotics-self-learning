@@ -13,6 +13,39 @@ draft: false
 
 Thời lượng ước tính: **80–100 phút**, bao gồm thời gian đếm răng trực tiếp trên hộp giảm tốc bạn đang có hoặc trên một ảnh chụp rõ nét của hộp số đó.
 
+Một động cơ DC nhỏ thường quay tít mù ở tốc độ $$6\,000\text{ RPM}$$ nhưng lại yếu đến mức chỉ cần hai ngón tay bóp nhẹ là đứng khựng lại. Làm sao biến sự "nhanh mà yếu" đó thành chuyển động "chậm mà khỏe" đủ đẩy cả con robot leo dốc? Câu trả lời cổ điển nhất của kỹ thuật cơ khí là **hộp số bánh răng (gear train)** — bộ biến áp cơ học đánh đổi trực tiếp tốc độ góc lấy mô-men xoắn theo định luật bảo toàn công suất.
+
+## Bản đồ kiến thức nền: Các họ bánh răng, Tỉ số truyền và Độ rơ (Backlash)
+
+### 1. Bánh răng trụ (Spur), Trục vít (Worm) và Hành tinh (Planetary)
+- **Bánh răng trụ (Spur):** dễ chế tạo, hiệu suất cao (~90%–95% mỗi cấp), nhưng ồn ở tốc độ cao và tốn diện tích khi cần tỉ số lớn.
+- **Trục vít – bánh vít (Worm):** đạt tỉ số truyền cực lớn (20:1 đến 60:1) trong 1 cấp và có tính **tự hãm (self-locking)** khi mất điện (tay robot không bị rơi tự do), nhưng hiệu suất thấp (40%–70%) do ma sát trượt lớn.
+- **Bánh răng hành tinh (Planetary):** đồng trục, chia tải đều lên 3–4 bánh răng vệ tinh nên cực gọn, chịu mô-men rất lớn và độ rơ thấp — tiêu chuẩn vàng cho khớp cánh tay robot và xe tự hành hiệu suất cao.
+
+### 2. Tỉ số truyền $$G$$ và hiệu suất nối tiếp $$\eta$$
+Khi bánh chủ động có $$Z_{\text{in}}$$ răng ăn khớp với bánh bị động $$Z_{\text{out}}$$ răng, tỉ số truyền là $$G = Z_{\text{out}} / Z_{\text{in}}$$. Tốc độ giảm $$G$$ lần ($$\omega_{\text{out}} = \omega_{\text{in}} / G$$), còn mô-men tăng lên $$\tau_{\text{out}} = \tau_{\text{in}} \cdot G \cdot \eta$$ (với $$\eta < 1$$ là hiệu suất do ma sát). Nhiều cấp nối tiếp thì **nhân** cả tỉ số truyền lẫn hiệu suất!
+
+### 3. Độ rơ bánh răng (Backlash) — kẻ thù thầm lặng của độ chính xác
+Giữa hai răng ăn khớp luôn phải có một khe hở nhỏ để bôi trơn và tránh kẹt nhiệt. Khi động cơ đảo chiều, trục ra đứng yên một khoảnh khắc nhỏ trước khi răng bên kia chạm vào — góc rơ tự do đó gọi là **backlash**. Trên cánh tay robot dài, chỉ $$1^\circ$$ backlash ở khớp vai đã tạo ra sai số vài milimet ở đầu kẹp!
+
+### Khung giải thích: Cầm tay tính hộp số 2 cấp và sai số đầu tay kẹp do Backlash (nên đọc chậm)
+
+**Phần A — Hộp số bánh răng trụ 2 cấp:**
+- Cấp 1: bánh dẫn $$Z_1 = 12$$ răng ăn khớp bánh bị dẫn $$Z_2 = 36$$ răng $$\implies G_1 = 36/12 = 3{:}1$$.
+- Cấp 2: bánh dẫn $$Z_3 = 12$$ răng ăn khớp bánh bị dẫn $$Z_4 = 48$$ răng $$\implies G_2 = 48/12 = 4{:}1$$.
+- **Tổng tỉ số truyền:** $$G_{\text{tổng}} = G_1 \times G_2 = 3 \times 4 = 12{:}1$$.
+
+Giả sử động cơ đầu vào quay **$$3\,600\text{ RPM}$$** với mô-men **$$0{,}05\text{ N}\cdot\text{m}$$**, mỗi cấp ăn khớp đạt hiệu suất **$$\eta = 90\% = 0{,}90$$**:
+1. **Tốc độ trục ra:** $$\omega_{\text{out}} = \frac{3\,600}{12} = 300\text{ RPM}$$.
+2. **Tổng hiệu suất 2 cấp:** $$\eta_{\text{tổng}} = 0{,}90 \times 0{,}90 = 0{,}81\;(81\%)$$.
+3. **Mô-men trục ra thực tế:** $$\tau_{\text{out}} = 0{,}05 \times 12 \times 0{,}81 = 0{,}486\text{ N}\cdot\text{m}$$ (mạnh hơn gần **10 lần** động cơ gốc!).
+
+**Phần B — Tác động của $$1{,}0^\circ$$ backlash lên cánh tay dài $$L = 200\text{ mm}$$:**
+Đổi $$1{,}0^\circ$$ sang radian: $$\Delta\theta = 1{,}0 \times \frac{\pi}{180} \approx 0{,}01745\text{ rad}$$.
+Độ rơ lắc tự do ngay tại đầu gắp:
+$$\Delta x = L \cdot \Delta\theta = 200 \times 0{,}01745 \approx 3{,}49\text{ mm}!$$
+Thấy rõ ngay: dù encoder trục động cơ chính xác tới $$0{,}01^\circ$$, độ rơ cơ khí $$1^\circ$$ trong hộp số vẫn làm đầu tay kẹp lệch gần $$3{,}5\text{ mm}$$ nếu bạn không đặt encoder ở trục ra hoặc dùng hộp số độ rơ thấp!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn tính được tỉ số truyền từ số răng của từng cặp bánh răng, dự đoán góc quay đầu ra tương ứng với một góc quay đầu vào cho trước, và xác định đúng chiều quay qua mỗi cặp ăn khớp ngoài. Các bạn cũng phân biệt được công dụng của bộ truyền trục vít – bánh vít (worm), nắm được công thức tỉ số truyền hành tinh trong giáo trình đồng thời biết tin vào tỉ số đóng dấu trên vỏ động cơ TT, và nhận diện độ rơ (backlash) như phần chuyển động bị trễ xuất hiện dưới dạng xung encoder khi robot đảo chiều.

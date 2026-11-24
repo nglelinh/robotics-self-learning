@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Every robotics engineer eventually faces an architectural fork in the road: should intelligence live on a bare-metal microcontroller executing deterministic loops, or on a Linux single-board computer running a full middleware stack like ROS 2? In industry, the answer is almost always **both** — a low-level real-time controller paired with a high-level autonomy computer.
+
+This lesson explains why splitting the course into a budget MCU track (Capstone A) and a later ROS 2 track mirrors real production robots from warehouse AMRs to autonomous rovers — and how to budget both compute and power before spending a single đồng.r
+
+---
+
 Plan about an hour. You need the Capstone sentence from the welcome lesson and an honest description of the computer you actually own. Prices in this lesson are shapes of a budget, not a cart. The cart is [lesson 00-05]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %}).
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You leave this lesson able to **choose** Track A or Track B in a sentence that n
 ## Prerequisites
 
 Lesson 00-01: you can state the wheels-up teleop test and the 300 ms PWM stop, and you have a journal with the six fields. You do not need Ubuntu, ROS, or a paid order. If you already own a Raspberry Pi, or a laptop that dual-boots Linux, you still start from the same chassis. Ownership is not a reason to skip the firmware robot.
+
+## Background Knowledge Map: Real-Time Embedded Control vs. High-Level Autonomy Middleware
+
+Understanding the two-track architecture requires connecting three core systems-engineering concepts:
+
+- **Hard Real-Time vs. Soft Real-Time Computing:** Microcontrollers (ESP32, RP2040, STM32) run tight control loops with microsecond-level timing predictability, ideal for PWM generation, encoder counting, and PID velocity control. General-purpose Linux hosts (Raspberry Pi, Jetson) excel at high-bandwidth perception, SLAM, and path planning, but OS scheduling introduces millisecond jitter.
+- **Power–Compute–Weight Trade-offs:** Every watt drawn by an onboard computer reduces battery runtime and increases chassis mass, which in turn demands higher motor torque. Starting with an MCU-only robot lets you master actuation, sensing, and closed-loop control at a fraction of the power and cost.
+- **Interface Boundaries (Serial / micro-ROS):** Clean robotics systems isolate low-level firmware behind a simple velocity command interface $$(v_{\text{cmd}}, \omega_{\text{cmd}})$$ and odometry telemetry stream $$(x, y, \theta, v, \omega)$$, so upgrading from MCU-only to ROS 2 requires swapping the brain without rebuilding the chassis.r
+
+---
 
 ## Why it matters
 
@@ -93,6 +109,33 @@ Minh has a Windows laptop and a ceiling of about 1.5–2.0 million VND for the m
 A second student, Lan, already runs Ubuntu 24.04 on her own laptop. She is allowed to follow the [Jazzy installation page](https://docs.ros.org/en/jazzy/Installation.html) in parallel, in a separate sitting, and to record the version string in her journal. She is not allowed to skip the bench. Her robot is still TT motors, a TB6612FNG, an HC-SR04, and firmware that zeros PWM when packets stop. If Jazzy installs cleanly and the motors are still in a bag, she is not ahead. She has a messaging layer and no physics. Gazebo Harmonic stays named and unopened until the chassis has passed wheels-up teleop at least once. micro-ROS stays a link, [micro.ros.org](https://micro.ros.org/), until the same board has moved the wheels without it.
 
 Minh sketches the Darlington loss so the driver choice is not a brand preference. At 7.4 V with about 2 V dropped, the motor sees 5.4 V. A MOSFET drop of about 0.3 V leaves 7.1 V. He writes "TB6612FNG, not L298N" in the track sentence. Both students end the entry with the LiDAR refusal. Neither opens a second spreadsheet. Lesson 00-05 is the cart.
+
+## Deep-Dive Explanation (Read Slowly): Quantifying the Power and Runtime Budget of Both Tracks
+
+Why not bolt a Raspberry Pi 4 and LiDAR onto your robot on day one? Let's compute the power and battery runtime of Track A (MCU-only) versus Track B (MCU + SBC) step by step:
+
+1. **Sum steady-state current draws:** Separate *logic current* (MCU, sensors, SBC) from *actuator current* (two DC motors under cruise vs. stall load).
+2. **Convert to battery-side power:** Account for DC–DC buck converter efficiency $$\eta \approx 0.85$$ when stepping a 7.4 V (2S Li-ion) pack down to 5 V.
+3. **Compute usable battery energy:** A 2S 18650 pack rated at $$2000\text{ mAh}$$ and $$7.4\text{ V}$$ nominal stores $$E = 7.4 \times 2.0 = 14.8\text{ Wh}$$; keeping a 20% safety margin leaves $$E_{\text{usable}} = 11.84\text{ Wh}$$.
+4. **Divide usable energy by average power:** $$T_{\text{run}} = E_{\text{usable}} / P_{\text{avg}}$$.
+
+### Concrete Worked Example: Comparing Battery Runtime on a 2S 2000 mAh Pack
+
+| Subsystem | Track A (ESP32 MCU only) | Track B (ESP32 + Raspberry Pi 4 + LiDAR) |
+| --- | --- | --- |
+| Logic rail (at 5 V) | $$0.25\text{ A} \implies 1.25\text{ W}$$ | $$2.00\text{ A} \implies 10.00\text{ W}$$ |
+| Battery power for logic ($$\eta = 0.85$$) | $$1.25 / 0.85 \approx 1.47\text{ W}$$ | $$10.00 / 0.85 \approx 11.76\text{ W}$$ |
+| Two DC motors (cruise, 7.4 V, 0.4 A total) | $$7.4 \times 0.40 = 2.96\text{ W}$$ | $$7.4 \times 0.40 = 2.96\text{ W}$$ |
+| **Total average power $$P_{\text{avg}}$$** | **$$4.43\text{ W}$$** | **$$14.72\text{ W}$$** |
+| **Usable runtime ($$11.84\text{ Wh}$$)** | **$$11.84 / 4.43 \approx 2.67\text{ hours}$$** | **$$11.84 / 14.72 \approx 0.80\text{ hours (48 min)}$$** |
+
+Notice the engineering lesson: adding a Linux SBC and LiDAR triples power draw, cuts runtime from nearly 3 hours to 48 minutes, and requires a 5 V / 3 A buck regulator to prevent voltage sags.
+
+**Common Pitfall:** Powering a Raspberry Pi and DC motors off a weak 1 A linear regulator or USB power bank that resets the Pi every time the motors accelerate.
+
+**Quick Check:** In Track A, even if motor cruise current doubles to $$0.8\text{ A}$$ ($$5.92\text{ W}$$), total power is $$7.39\text{ W}$$ and runtime is still $$11.84 / 7.39 \approx 1.60\text{ hours}$$ — plenty for an entire afternoon of PID tuning.
+
+---
 
 ## Exercises
 

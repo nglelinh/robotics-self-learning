@@ -13,6 +13,36 @@ draft: false
 
 Mọi bộ điều khiển robot về sau đều tuân theo chung một vòng lặp ba khối: **cảm nhận** (sense), **tính toán** (compute) và **tác động** (act). Bài thực hành này khép kín vòng lặp đó bằng luật điều khiển đơn giản nhất (điều khiển bật/tắt hay bang-bang): nếu khoảng cách nhỏ hơn 20 cm thì đưa PWM bánh xe về 0, ngược lại cho phép chạy tiến ở mức PWM vừa phải. Bộ điều khiển PID sẽ học ở Chương 08; trọng tâm của bài hôm nay là thiết lập nguyên tắc an toàn bắt buộc cho mọi luật điều khiển sau này: **cảm biến lỗi hoặc mất tín hiệu thì phải dừng**.
 
+Nếu bạn đặt hai bánh xe robot cùng một mức PWM 60% và thả chạy thẳng trên hành lang, chuyện gì sẽ xảy ra? Chỉ sau 2 mét, robot sẽ lượn cong sang một bên! Lý do rất đời thường: không có hai động cơ nào giống hệt nhau 100% về ma sát, điện áp pin giảm dần mỗi phút, và mặt sàn chỗ trơn chỗ nhám. **Điều khiển vòng kín (closed-loop control)** biến một cỗ máy "mù" chạy theo lệnh cố định thành một hệ thống biết tự sửa sai liên tục qua chu trình 3 bước kinh điển: **Cảm nhận (Sense) → Tính sai số (Compute) → Tác động (Act)**.
+
+## Bản đồ kiến thức nền: Vòng hở vs. Vòng kín và Tư duy phản hồi âm
+
+### 1. Hạn chế cố hữu của vòng hở (Open-Loop)
+Trong hệ vòng hở, lệnh điều khiển $$u$$ chỉ phụ thuộc vào mục tiêu $$r$$ mà không hề nhìn xem đầu ra thực tế $$y$$ đang ở đâu. Bất kỳ **nhiễu loạn ngoài (disturbance)** nào — như robot leo lên thảm dày, chở thêm tải, hay pin tụt từ 8,4 V xuống 7,2 V — đều truyền thẳng 100% thành sai số đầu ra.
+
+### 2. Phản hồi âm (Negative Feedback) và sức mạnh khử nhiễu
+Hệ vòng kín đo đầu ra thực tế $$y$$ (ví dụ vận tốc bánh từ encoder), tính sai số $$e = r - y$$, rồi điều chỉnh lệnh tác động $$u = K_p e$$ ngược chiều sai số: nếu bánh chạy chậm hơn mục tiêu ($$e > 0$$), tăng PWM lên; nếu chạy lố ($$e < 0$$), giảm PWM xuống. Chính cơ chế phản hồi âm này tự động nén ảnh hưởng của nhiễu loạn và sai lệch phần cứng xuống $$(1 + K_p)$$ lần!
+
+### 3. Độ trễ lấy mẫu và ranh giới mất ổn định
+Phản hồi âm không thể vặn hệ số $$K_p$$ lớn vô hạn. Vì mọi vòng điều khiển số đều có chu kỳ lấy mẫu $$\Delta t$$ và quán tính cơ khí, tăng $$K_p$$ quá cao sẽ khiến robot liên tục sửa "quá tay" sang trái rồi lại quá tay sang phải — sinh ra **dao động (oscillation)** hoặc mất ổn định. Đây chính là tiền đề dẫn tới bộ điều khiển PID ở Chương 08.
+
+### Khung giải thích: Cầm tay chứng minh phản hồi âm nén sai số nhiễu loạn giảm đi 5 lần (nên đọc chậm)
+
+Xét một bánh xe robot có mô hình tĩnh đơn giản: ở trạng thái xác lập, tốc độ bánh bằng lệnh điều khiển cộng với nhiễu tải (ví dụ khi leo lên thảm dày làm hụt tốc độ $$d = -0{,}30\text{ m/s}$$):
+$$v = u + d, \qquad \text{mục tiêu } v^* = 1{,}00\text{ m/s}.$$
+
+1. **Trường hợp 1 — Điều khiển vòng hở (Open-Loop):**
+   Ta đặt cứng lệnh $$u = v^* = 1{,}00$$. Khi gặp thảm dày ($$d = -0{,}30$$):
+   $$v_{\text{hở}} = 1{,}00 - 0{,}30 = 0{,}70\text{ m/s} \implies \text{Sai số } e_{\text{hở}} = 1{,}00 - 0{,}70 = 0{,}30\text{ m/s}\;(30\%!).$$
+
+2. **Trường hợp 2 — Điều khiển vòng kín tỷ lệ với $$u = u_{\text{ff}} + K_p(v^* - v)$$ (đặt $$u_{\text{ff}} = 1{,}00$$, độ lợi $$K_p = 4$$):**
+   Thay vào phương trình $$v = u_{\text{ff}} + K_p(v^* - v) + d$$:
+   $$v = 1{,}00 + 4(1{,}00 - v) - 0{,}30 \implies v + 4v = 4{,}70 \implies 5v = 4{,}70 \implies v_{\text{kín}} = 0{,}94\text{ m/s}!$$
+   Sai số còn lại chỉ là:
+   $$e_{\text{kín}} = 1{,}00 - 0{,}94 = 0{,}06\text{ m/s} = \frac{0{,}30}{1 + K_p} = \frac{0{,}30}{5}!$$
+
+Không cần biết trước tấm thảm dày bao nhiêu hay pin yếu đi mấy volt, chỉ riêng một vòng phản hồi tỷ lệ với $$K_p = 4$$ đã tự động nén sai số tốc độ từ **30% xuống còn 6%** (giảm đúng **5 lần**) — và đó mới chỉ là khởi đầu trước khi ta thêm thành phần tích phân (I) để kéo sai số về đúng $$0$$!
+
 ## Mục tiêu học
 
 Sau bài này, bạn vẽ được sơ đồ vòng kín cảm nhận–tính–tác động nối cảm biến khoảng cách với lệnh điều khiển động cơ. Bạn triển khai được luật bang-bang tại ngưỡng 20 cm có xử lý timeout ép PWM về 0, đồng thời bổ sung vùng trễ (hysteresis) để động cơ không đóng ngắt liên tục quanh ngưỡng. Bạn cũng xác định được vị trí của subscriber ROS 2 `/cmd_vel` trên sơ đồ và giải thích vì sao cơ chế dừng an toàn vẫn phải giữ lại ở tầng firmware.

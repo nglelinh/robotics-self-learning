@@ -13,6 +13,8 @@ draft: false
 
 This lesson is a gate. Chapter 06 will put your drive on a chassis, and Chapter 07 will assemble signed left and right PWM, a battery, and a fuse. You pass the gate when the table below is filled with your own evidence: a named driver, a truth table, a motor supply that is not USB, a stall or no-load note, a servo-pulse calculation even if you skipped the horn, a bang-bang stop you can describe, a wiring photo, and two failure modes you either hit or deliberately rehearsed. A blank row means you are still in Chapter 05.
 
+Before any spacecraft leaves a cleanroom, engineers run a formal readiness gate: every power rail, actuator channel, and thermal margin must be backed by a measured number rather than a memory. Your Chapter 05 checklist plays the exact same role on the workbench—it is the line separating a drive stage you *hope* works from one you can bolt onto a rolling robot without burning a driver IC.
+
 ## Learning objectives
 
 1. Complete the sign-off table with measured or computed evidence, not with a retelling of the lesson titles.
@@ -24,6 +26,14 @@ This lesson is a gate. Chapter 06 will put your drive on a chassis, and Chapter 
 
 Lessons 05-01 through 05-06 are the source of every row. You need `lab-notes.md` open, the multimeter, and the photo you took when the wires were actually on the driver. If a hardware row was impossible, the row still needs the written calculation this checklist names. "I will do it later" is not a pass.
 
+
+## Background Knowledge Map: Electromechanical Verification, Power Budgets, and Gate Discipline
+
+A checklist is not bureaucracy; it compresses three pillars of robotics engineering into a single auditable table:
+
+- **Electromechanical Actuation (DC Motors & H-Bridges):** A brushed DC motor converts electrical power $$P_e = V I$$ into mechanical power $$P_m = \tau \omega$$ minus copper losses $$I^2 R_a$$. At stall ($$\omega = 0$$), back-EMF vanishes and current spikes to $$I_{\text{stall}} = V / R_a$$, which dictates your H-bridge peak-current rating and thermal margin.
+- **Power Distribution & Decoupling:** Inductive loads inject voltage spikes and current dips onto the supply rail whenever PWM switches. Separating logic rails (3.3 V / 5 V) from motor rails with a common star ground and bulk capacitance prevents brownout resets on the microcontroller.
+- **Systems Verification & Traceability:** In systems engineering, a *gate* requires measured evidence (bench voltage, no-load current, thermal rise, polarity sign) logged with units and dates so downstream integration (Chapter 07 firmware and ROS 2) inherits verified constants instead of guesses.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A is a two-wheel robot whose later ROS 2 base receives a twist and emits two wheel efforts. That software is only as honest as the signs you recorded here. A truth table copied from a classmate, a servo pulse you have never calculated, or a stall current you have never compared with your fuse, becomes a robot that yaws the wrong way, browns out, or drives through a timeout. The gate is deliberately boring. Chapter 06's brackets and Chapter 07's harness assume these answers already exist in your notebook.
@@ -75,6 +85,18 @@ Use these three as the pictures you should be able to narrate while you sign the
 ![Stall versus no-load, the curve behind your current note]({{ site.imgurl }}/generated/stall_current.png)
 
 ![Sense, compute, act, including the stop that a failed read must take]({{ site.imgurl }}/generated/sense_compute_act.png)
+
+### Deep-Dive Explanation (Read Slowly): Hand-Verifying a Driver Thermal & Current Margin Gate
+
+Suppose your checklist records a 6 V battery rail driving two identical brushed DC gearmotors through a dual H-bridge whose on-resistance per channel is $$R_{\text{DS(on)}} = 0.5\ \Omega$$ (high-side plus low-side combined) and continuous current limit is $$1.2\ \text{A}$$.
+
+1. **Measure winding resistance and predict stall current:** With the motor disconnected, a multimeter reads $$R_a = 4.0\ \Omega$$ across the terminals. Under a 6.0 V rail, the worst-case stall current is:
+   $$I_{\text{stall}} = \frac{V}{R_a + R_{\text{DS(on)}}} = \frac{6.0}{4.0 + 0.5} = 1.33\ \text{A}.$$
+   Notice this already exceeds the $$1.2\ \text{A}$$ continuous rating—meaning a brief stall is survivable only if your firmware limits duty cycle or cuts power on stall.
+2. **Check steady-state thermal dissipation at load:** During normal driving, you measure $$I_{\text{load}} = 0.60\ \text{A}$$ per channel. Each channel dissipates:
+   $$P_{\text{ch}} = I_{\text{load}}^2 R_{\text{DS(on)}} = (0.60)^2 (0.5) = 0.18\ \text{W}.$$
+   With both channels running, total IC heat is $$0.36\ \text{W}$$. If the package thermal resistance is $$R_{\theta JA} = 60\ ^\circ\text{C/W}$$ in a $$25\ ^\circ\text{C}$$ room, the junction temperature rises to $$25 + 0.36 \times 60 = 46.6\ ^\circ\text{C}$$—completely safe.
+3. **Verify the gate verdict:** At $$1.33\ \text{A}$$ stall on both channels simultaneously, heat jumps to $$2 \times (1.33)^2 (0.5) = 1.77\ \text{W}$$ ($$\Delta T = 106\ ^\circ\text{C}$$, pushing the chip past $$131\ ^\circ\text{C}$$). Writing this exact calculation in your lab notebook tells you *why* a stall must never be held—turning a checklist row into quantitative engineering protection.
 
 ## Lab
 

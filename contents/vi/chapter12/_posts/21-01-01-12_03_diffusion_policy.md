@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~65 phút**, dành để đọc trang dự án, phân tích phép tính trung bình hành động và viết một đoạn nhận xét (không chạy khử nhiễu hay huấn luyện trên GPU).
 
+Trong bài toán đẩy một khối chữ T vào đúng vị trí mục tiêu (Push-T), nếu tay máy gặp góc vuông đối xứng, đi vòng sang trái hay đi vòng sang phải đều hoàn hảo — nhưng đi **chính giữa** (trung bình của trái và phải) thì lại đẩy hỏng! **Diffusion Policy** mang chính ý tưởng khử nhiễu dần từ mô hình sinh ảnh sang không gian hành động robot: thay vì đoán trực tiếp một điểm trung bình mờ nhạt, mạng học trường vector **khử nhiễu từng bước** để kéo một chuỗi hành động ngẫu nhiên về đúng một nhánh quỹ đạo sắc nét hợp lệ.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Diffusion Policy
+
+1. **Biểu diễn Phân phối Đa đỉnh (Multimodal Action Distribution)**:
+   Mô hình hóa phân phối xác suất điều kiện $$p(\mathbf{A}_t \mid \mathbf{O}_t)$$ trên cả một khối hành động tương lai (action horizon $$T_p$$), giữ nguyên mọi nhánh rẽ hợp lệ thay vì bị sụp đổ về giá trị trung bình.
+2. **Quá trình Khuếch tán Thuận (Thêm nhiễu) & Ngược (Khử nhiễu $$K$$ bước)**:
+   Trong huấn luyện, mạng dự đoán phần nhiễu $$\varepsilon_\theta(\mathbf{A}_t^k, \mathbf{O}_t, k)$$ đã thêm vào hành động thật. Khi suy luận trên robot, ta bắt đầu từ nhiễu Gaussian trắng $$\mathbf{A}_t^K \sim \mathcal{N}(0, I)$$ và chạy vòng lặp khử nhiễu (DDPM / DDIM) để thu được quỹ đạo sạch $$\mathbf{A}_t^0$$.
+3. **Ba Cửa sổ Thời gian ($$T_o, T_p, T_a$$ — Receding Horizon Control)**:
+   Quan sát $$T_o$$ khung hình gần nhất → dự đoán khối $$T_p$$ bước hành động tương lai → chỉ thực thi $$T_a$$ bước đầu tiên ($$T_a \le T_p$$) rồi quan sát lại và lập kế hoạch mới!
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ giải thích được vì sao Diffusion Policy tạo ra quỹ đạo hành động bằng quá trình khử nhiễu lặp thay vì hồi quy một lần duy nhất. Thông qua ví dụ hai phiên mẫu xe Capstone vòng tránh một chiếc ghế, bạn sẽ chứng minh được vì sao lệnh trung bình lại đâm thẳng vào vật cản, đọc hiểu biểu diễn giản lược $$x_{t-1} = f(x_t, \text{observation})$$ như sơ đồ tư duy của bộ khử nhiễu đã học (chứ không phải phương trình cập nhật đầy đủ của bài báo), và đối chiếu rõ nét cơ chế của Diffusion Policy với ACT trong hai đoạn ngắn.
@@ -81,6 +92,14 @@ Xe Capstone có vector hành động 2 chiều $(v, \omega)$, còn cánh tay fol
 Trên tài liệu imitation learning của LeRobot tại thời điểm đối chiếu, lệnh ví dụ `lerobot-train` đang dùng `--policy.type=act`, còn `diffusion` là một lớp con (subclass) đăng ký trong mã nguồn. Ở [bài lab SO-101]({% multilang_post_url contents/chapter12/12_06_so101_arm_lab %}), bạn sẽ kiểm tra tệp cấu hình trước khi thay đổi `policy.type` (vẫn không yêu cầu GPU).
 
 ![Sáu khớp không phải vector của một VLA khác thân]({{ site.imgurl }}/generated/ch12_so101_action.png)
+
+### Khung giải thích (nên đọc chậm): Tính tay ngân sách thời gian suy luận DDIM trên cánh tay robot chạy ở 10 Hz
+
+Giả sử cánh tay robot cập nhật lệnh điều khiển ở **10 Hz** (mỗi nhịp chỉ có đúng `100 ms`), và ta cấu hình Diffusion Policy với $$T_o = 2$$ khung quan sát, $$T_p = 16$$ bước dự đoán và chỉ thực thi $$T_a = 8$$ bước đầu tiên:
+- **Thời gian thực thi 1 khối hành động $$T_a = 8$$ bước:** $$8 \times 100\text{ ms} = \mathbf{800\text{ ms}}$$ (robot có cả 0,8 giây quỹ thời gian trước khi cần khối mới!).
+- **So sánh DDPM (100 bước khử nhiễu) vs. DDIM (10 bước khử nhiễu)** khi mỗi lượt forward mạng U-Net/Transformer tốn `12 ms` trên GPU:
+  - Dùng DDPM 100 bước: $$100 \times 12\text{ ms} = \mathbf{1.200\text{ ms}} > 800\text{ ms}$$ → **Quá hạn!** Robot bị khựng lại chờ tính toán!
+  - Dùng DDIM 10 bước: $$10 \times 12\text{ ms} = \mathbf{120\text{ ms}} \ll 800\text{ ms}$$ → **Chạy mượt thời gian thực**, thậm chí đủ nhanh để giảm $$T_a = 2$$ bước giúp phản ứng cực nhạy trước vật cản di động!
 
 ## Lab
 

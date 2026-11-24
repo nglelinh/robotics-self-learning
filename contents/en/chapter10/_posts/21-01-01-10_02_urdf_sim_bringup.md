@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~90 minutes**.
 
+A URDF sitting in RViz is just a statue—it shows your robot's geometry, yet nothing moves, nothing collides, and gravity does not exist. Bringing that URDF into Gazebo Harmonic with `gz-sim-diff-drive-system` and `ros_gz_bridge` breathes physical life into the blueprint: wheel torque meets floor friction, encoders publish odometry, and `teleop_twist_keyboard` drives your virtual rover across a simulated room.
+
 ## Learning objectives
 
 You will bring the Chapter 09 xacro into a running Harmonic world in a fixed order: expand the model, start `robot_state_publisher`, launch `empty.sdf -r`, spawn with `ros_gz_sim create`, then bridge `/clock` one way and `/cmd_vel` both ways. You will set the diff-drive plugin’s wheel joint names, separation, and radius to the same numbers as the xacro, using the course example of track 0.16 m and wheel radius 0.033 m. You will publish a slow `Twist` and watch the wheels roll in the Gazebo world itself. You will name five bring-up failures that leave a pretty RViz model while the simulated robot does nothing or falls through the floor. You will keep `use_sim_time` consistent with the bridged clock so timers and TF share one time base.
@@ -21,6 +23,14 @@ You will bring the Chapter 09 xacro into a running Harmonic world in a fixed ord
 
 Lesson 10-01’s empty world launches and `gz topic -l` shows `/clock`. Lesson 09-06’s xacro exists, with a box body, cylindrical wheels, `continuous` wheel joints, and inertial tags. Lesson 08-04’s inverse kinematics is the meaning of `cmd_vel`: $$v$$ forward and $$\omega$$ about $$+z$$. You can source Jazzy in every new terminal. RViz is optional tonight; the pass condition is motion in the simulator.
 
+
+## Background Knowledge Map: Multibody Contact Friction, Joint Actuation Plugins, and State Publishers
+
+Simulation bring-up unites three distinct subsystems of a digital twin:
+
+- **Coulomb Tire–Floor Friction ($$\mu_1, \mu_2$$):** A differential-drive tire needs high longitudinal friction ($$\mu \approx 0.8\text{–}1.0$$) to transmit traction without spinning out, while a passive caster sphere needs very low friction ($$\mu \approx 0.01\text{–}0.05$$) so it glides instead of dragging the nose off course.
+- **Actuator Plugin vs. `ros2_control`:** Gazebo's `diff_drive` plugin subscribes to `cmd_vel`, converts $$(v, \omega)$$ into wheel angular velocities using `<wheel_separation>` and `<wheel_radius>`, integrates wheel motion, and publishes `/odom` plus `odom -> base_footprint` on `/tf`.
+- **Joint State & TF Consistency:** `robot_state_publisher` reads `/joint_states` to animate rotating wheel transforms, while the diff-drive plugin publishes the moving base transform—if either link name or wheel separation mismatches your URDF, RViz shows detached or drifting wheels.
 ## Why this sits on the path
 
 The xacro was a drawing and a TF tree. Harmonic is the first time that drawing has mass, contact, and a clock. Nav2 will later publish `geometry_msgs/Twist` on `/cmd_vel`. In simulation the listener is Gazebo’s diff-drive system. On the real Capstone, lesson 10-04’s serial bridge is a second listener on the same topic. If the plugin’s track or radius disagrees with the xacro, every later bag inherits that scale error. Spawn order is the skill. A random stack of terminals looks like a physics bug.
@@ -159,6 +169,19 @@ ros2 topic pub --times 20 /cmd_vel geometry_msgs/msg/Twist \
 ```
 
 Twenty messages is a short roll, not a drive across the room. In the Gazebo window the base moves along its $$+x$$ and both wheels spin. When the publisher ends, the model must stop being driven. `linear.y` stays 0 because a diff-drive cannot sideslip. With $$L/2 = 0.08$$, $$v = 0.2$$ and $$\omega = 0$$ ask both treads for 0.2 m/s. You need to see both wheels turn the same way.
+
+### Deep-Dive Explanation (Read Slowly): Checking Wheel Slip Margin and Torque Limit in Gazebo
+
+Suppose your simulated robot has total mass $$m = 1.20\ \text{kg}$$ with $$70\%$$ of weight resting evenly on the two drive wheels ($$0.42\ \text{kg}$$ per wheel, normal force $$N = 0.42 \times 9.81 = 4.12\ \text{N}$$), wheel radius $$r = 0.032\ \text{m}$$, and tire–floor friction coefficient $$\mu = 0.80$$.
+
+1. **Maximum traction force per wheel before tire slip:**
+   $$F_{\max} = \mu N = 0.80 \times 4.12 = 3.30\ \text{N}.$$
+2. **Corresponding maximum useful wheel torque:**
+   $$\tau_{\max} = F_{\max} \cdot r = 3.30 \times 0.032 = 0.106\ \text{N}\cdot\text{m}.$$
+   Setting Gazebo's `<max_wheel_torque>` to $$100\ \text{N}\cdot\text{m}$$ lets the simulator spin tires unrealistically and jump off the floor; setting it near your real motor's $$0.15\text{–}0.30\ \text{N}\cdot\text{m}$$ keeps simulation dynamics realistic.
+3. **Maximum linear acceleration without wheelspin (both wheels driving):**
+   $$a_{\max} = \frac{2 F_{\max}}{m} = \frac{6.60}{1.20} = 5.50\ \text{m/s}^2.$$
+   If your commanded `<max_linear_acceleration>` is $$1.0\ \text{m/s}^2$$, you stay well inside the no-slip envelope (18% of traction limit), keeping simulated odometry clean.
 
 ## Lab
 

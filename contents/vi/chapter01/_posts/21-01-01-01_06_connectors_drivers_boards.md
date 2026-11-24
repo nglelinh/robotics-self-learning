@@ -19,6 +19,37 @@ Sau bài học này, bạn sẽ phân biệt rõ dây cắm Dupont bước 2,54 
 
 Bạn đã biết đo điện áp một chiều song song, nắm rõ dòng giới hạn của chân GPIO chỉ ở mức vài chục miliampe và biết động cơ TT kẹt trục tiêu thụ dòng lớn hơn nhiều. Bài này chưa điều khiển PWM động cơ mà dừng ở việc đọc ký hiệu IC, tên chân và tính toán sụt áp trước khi quay bánh xe đầu tiên.
 
+---
+
+Một chiếc xe robot có thuật toán PID tinh vi đến đâu cũng sẽ đâm sầm vào chân bàn nếu chỉ vì một sợi dây Dupont lỏng lẻo tuột khỏi chân driver khi xe chạy qua gờ gạch! Trong thực tế cơ điện tử, **giắc nối**, **mạch lái động cơ (motor driver)** và **bo vi điều khiển** là ba điểm giao tiếp cơ–điện dễ sinh lỗi nhất nhưng lại thường bị người mới coi nhẹ nhất.
+
+## Bản đồ kiến thức nền: Giao diện Cơ–Điện, Mạch lái Cầu H và Ngưỡng Điện áp Bo mạch
+
+1. **Chuẩn Bước chân Giắc nối (Pitch):** Đầu nối điện tử khác nhau ở từng phần trăm milimét — chuẩn header/Dupont là **2,54 mm** (0,1 inch), chuẩn JST-XH trên pin/bo mạch là **2,50 mm**, còn JST-PH nhỏ hơn là **2,00 mm**. Cố ép cắm chéo hai chuẩn sẽ làm cong chân và hỏng tiếp xúc!
+2. **Nguyên lý Cầu H (H-Bridge):** Bốn công tắc bán dẫn bố trí hình chữ H quanh động cơ DC cho phép đảo chiều dòng điện (quay thuận/nghịch), phanh ngắn mạch (brake) hoặc thả trôi (coast), và điều tốc bằng xung PWM.
+3. **Ranh giới Điện áp giữa Đường `VIN / 5V` và Chân Logic `3V3`:** Trên bo ESP32/Pico, chân `VIN`/`VBUS` đi qua ổn áp để tạo nguồn 3,3 V cho chip, nhưng các chân tín hiệu GPIO nối thẳng vào silicon 3,3 V — không chịu được điện áp 5 V!
+
+### Ví dụ cầm tay chỉ việc: Tính độ lệch tích lũy khi cắm nhầm giắc JST-XH (2,50 mm) vào header 2,54 mm
+
+Giả sử bạn cố cắm một đầu nối cái **JST-XH 10 chân** (bước chân $$2.50\text{ mm}$$) vào hàng chân rào **Dupont 10 chân** (bước chân $$2.54\text{ mm}$$):
+- Mỗi khoảng chân lệch nhau $$2.54 - 2.50 = 0.04\text{ mm}$$.
+- Qua 9 khoảng chân (từ chân 1 đến chân 10), tổng độ lệch tích lũy là:
+  $$
+  \Delta L = 9 \times 0.04\text{ mm} = \mathbf{0.36\text{ mm}}!
+  $$
+  Với độ dày chân kim loại chỉ $$0.64\text{ mm}$$, độ lệch $$0.36\text{ mm}$$ đủ làm cong gãy chân số 9–10 hoặc nứt vỏ nhựa! Tương tự, tính lại sụt áp trên pin $$7.4\text{ V}$$: qua **L298N** động cơ chỉ còn $$7.4 - 2.0 = \mathbf{5.4\text{ V}}$$ (mất 27% lực kéo), còn qua **TB6612FNG** động cơ giữ được $$7.4 - 0.5 = \mathbf{6.9\text{ V}}$$!
+
+### Khung giải thích: 4 nguyên tắc chọn giắc nối và mạch lái bền bỉ cho xe robot (nên đọc chậm)
+
+1. **Bước 1 — Dùng giắc có khóa gài (JST / XT30) cho mọi đường nguồn và động cơ:** Giắc Dupont chỉ dùng trên bàn thử nghiệm breadboard; khi xe chạy rung lắc, giắc có ngàm chống cắm ngược cực vừa chắc chắn vừa chống cháy mạch.
+2. **Bước 2 — Luôn nối chung mass (`GND`) giữa bo MCU và mạch lái động cơ:** Hai nguồn riêng (pin động cơ và USB/Buck logic) *bắt buộc* phải nối chung một dây `GND` chuẩn tham chiếu, nếu không tín hiệu PWM sẽ bị "trôi" vô nghĩa.
+3. **Bước 3 — Kiểm tra chân `STBY` (Standby) trên TB6612FNG:** Rất nhiều người lắp xong động cơ không quay chỉ vì quên kéo chân `STBY` lên mức `HIGH` (3,3 V)!
+4. **Bước 4 — Ghi nhãn rõ điện áp trên từng cụm giắc:** Dán băng keo màu đánh dấu `7.4V BAT`, `5V BUCK`, `3.3V LOGIC` ngay trên khung xe để không bao giờ cắm nhầm khi tháo lắp nhanh.
+
+**Kiểm tra nhanh.** Nếu hai động cơ trên xe có dòng làm việc mỗi chiếc $$0.6\text{ A}$$ và dòng hãm trục (khi kẹt bánh) là $$1.8\text{ A}$$, một kênh của TB6612FNG (dòng liên tục $$1.2\text{ A}$$, dòng đỉnh $$3.2\text{ A}$$) có đáp ứng an toàn không? **Có!** Cả dòng làm việc ($$0.6 < 1.2\text{ A}$$) lẫn dòng hãm ngắn hạn ($$1.8 < 3.2\text{ A}$$) đều nằm gọn trong giới hạn an toàn.
+
+---
+
 ## Vì sao xe hai bánh thường hỏng ở giắc nối và mạch lái
 
 Hệ thống xe đồ án gồm hai động cơ TT, một mạch lái TB6612, vi điều khiển ESP32 hoặc Pico chạy mức 3,3 V và cảm biến siêu âm HC-SR04. Dây cắm Dupont phù hợp để nối các chân điều khiển AIN1, AIN2, PWMA và STBY, nhưng không phù hợp để dẫn dòng kẹt động cơ vào chân VM — và càng không thể coi chân GPIO là nguồn VM.

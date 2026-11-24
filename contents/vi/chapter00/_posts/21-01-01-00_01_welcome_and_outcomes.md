@@ -21,6 +21,44 @@ Sau bài học này, bạn sẽ **trình bày** được cấu trúc cốt lõi 
 
 Bạn chỉ cần đọc hiểu được tài liệu kỹ thuật ở tốc độ chậm và biết tạo thư mục trên máy tính. Lúc này bạn chưa cần đồng hồ vạn năng, mỏ hàn hay kiến thức nền về robot. Định luật Ohm sẽ được học ở Chương 01 thông qua thực hành đo đạc thay vì học thuộc lòng. Thói quen quan trọng nhất cần rèn ngay từ đầu là ghi chép trung thực những gì gặp lỗi; một dòng nhật ký chung chung như "bắt đầu khóa học" sẽ không giúp ích gì khi bạn cần gỡ lỗi ở tuần thứ chín.
 
+---
+
+Hãy tưởng tượng khoảnh khắc đầu tiên chiếc xe robot hai bánh bạn tự tay lắp ráp chạy thẳng đúng một mét, dừng êm ái trước vật cản rồi quay góc $$90^\circ$$ mà không cần bạn chạm vào bàn phím. Đằng sau khoảnh khắc kỳ diệu ấy không phải là phép màu lập trình, mà là sự phối hợp nhịp nhàng giữa **điện tử cơ bản**, **vi điều khiển thời gian thực**, **toán học động học–điều khiển** và **kỷ luật kiểm thử phần cứng**. Bài mở đầu này đặt ra bản đồ tư duy để bạn bước từ bàn học lý thuyết sang bàn lab cơ điện tử một cách chắc chắn nhất.
+
+## Bản đồ kiến thức nền: Kỹ thuật Robot (Robotics) là gì và nghiên cứu những gì?
+
+Với sinh viên đại học, robot học là giao điểm thực chiến của ba trụ cột kỹ thuật cốt lõi:
+
+1. **Vòng lặp Cảm nhận – Lập kế hoạch – Hành động (Sense–Plan–Act):** Mọi robot tự hành đều lặp đi lặp lại một chu trình kín ở tần số cố định: cảm biến đo thế giới thực (*Sense*) → thuật toán ước lượng trạng thái và tính lệnh điều khiển (*Plan*) → động cơ thực thi lực/mô-men (*Act*).
+2. **Sự ràng buộc của Vật lý và Thời gian thực (Real-Time Constraints):** Khác với phần mềm web có thể chờ 200 ms không sao, một robot tự cân bằng hay xe chạy $$1\text{ m/s}$$ bị trễ 200 ms đã lao thẳng vào tường (đi thêm $$20\text{ cm}$$ mất kiểm soát!).
+3. **Kỹ thuật kiểm chứng theo tầng (Incremental Bring-Up):** Không bao giờ lắp hết mạch rồi mới cắm pin; kỹ sư robot kiểm chứng từng tầng độc lập — Nguồn → Vi điều khiển → Cảm biến → Động cơ → Điều khiển vòng kín.
+
+### Ví dụ cầm tay chỉ việc: Tính ngân sách thời gian cho vòng lặp điều khiển $$50\text{ Hz}$$
+
+Giả sử xe robot của bạn chạy vòng lặp điều khiển chính ở tần số $$f = 50\text{ Hz}$$. Khi đó mỗi chu kỳ điều khiển chỉ có đúng:
+
+$$
+T = \frac{1}{f} = \frac{1}{50\text{ s}^{-1}} = \mathbf{20\text{ ms}}.
+$$
+
+Ta cộng tay thời gian thực thi của 3 khối trong một chu kỳ trên ESP32:
+- **Cảm nhận (Sense):** đọc 2 bộ mã hóa vòng quay (encoder) + cảm biến IMU qua I2C mất **$$2.5\text{ ms}$$**.
+- **Lập kế hoạch (Plan):** tính vận tốc góc, chạy bộ điều khiển PID và cập nhật trạng thái mất **$$0.8\text{ ms}$$**.
+- **Hành động (Act):** cập nhật độ rộng xung PWM cho 2 động cơ + ghi log nhẹ mất **$$0.7\text{ ms}$$**.
+
+Tổng thời gian tính toán là $$2.5 + 0.8 + 0.7 = \mathbf{4.0\text{ ms}} \ll 20\text{ ms}$$ (chỉ chiếm $$20\%$$ CPU, còn $$16\text{ ms}$$ dự phòng!). Nhưng nếu bạn lỡ viết một lệnh `delay(50)` để chờ cảm biến siêu âm, chu kỳ lập tức vọt lên $$54\text{ ms}$$ (tần số tụt xuống $$18.5\text{ Hz}$$) và bộ điều khiển PID lập tức bị dao động!
+
+### Khung giải thích: Bốn nguyên tắc vàng để tự học Robotics không bỏ cuộc giữa chừng (nên đọc chậm)
+
+1. **Bước 1 — Tách biệt lỗi phần cứng với lỗi phần mềm:** Trước khi sửa 100 dòng code, luôn đo điện áp đường nguồn bằng đồng hồ vạn năng — hơn một nửa "lỗi code" ở người mới thực chất là dây cắm lỏng hoặc sụt áp pin.
+2. **Bước 2 — Ghi sổ lab bằng con số đo được:** Đừng ghi *"xe chạy tạm ổn"*; hãy ghi *"Pin 7.82 V, sai số quãng đường 1.00 m là +1.8 cm, dòng không tải 210 mA"*.
+3. **Bước 3 — Luôn có trạng thái an toàn mặc định:** Mọi firmware phải khởi động với động cơ tắt (PWM = 0) và có nút hoặc lệnh dừng khẩn cấp.
+4. **Bước 4 — Đi từ mô hình nhỏ kiểm chứng được bằng tay:** Hiểu rõ xe vi sai 2 bánh trên bàn làm việc giúp bạn mở rộng mượt mà lên robot tự hành chạy ROS 2 trong công nghiệp.
+
+**Kiểm tra nhanh.** Nếu xe robot chạy với vận tốc $$v = 0.8\text{ m/s}$$ và vòng lặp điều khiển chạy ở $$f = 20\text{ Hz}$$ ($$T = 50\text{ ms}$$), giữa hai lần cập nhật lệnh xe đi được bao xa? Đúng $$0.8 \times 0.05 = \mathbf{0.04\text{ m} = 4\text{ cm}}$$ — đó là lý do xe chạy càng nhanh thì tần số vòng lặp phải càng cao!
+
+---
+
 ## Vì sao bài này gắn liền với Capstone
 
 Chương 07 là mốc **Capstone A**: một xe dẫn động vi sai gồm hai bánh chủ động và một bánh đa hướng (caster), được bạn điều khiển thủ công khi bánh xe đang nhấc khỏi mặt bàn. Điều khiển từ xa (teleop) nghĩa là bạn trực tiếp gửi lệnh lái chứ chưa để robot tự tìm đường. Quy tắc an toàn cốt lõi là nếu không có lệnh mới trong hơn 300 ms, chu kỳ xung (duty PWM) phải tự động đưa về 0. ROS 2 Jazzy chỉ xuất hiện sau khi bạn vượt qua bài kiểm tra này. Về bản chất, một topic trong ROS 2 chỉ là một kênh truyền thông điệp có tên nằm phía trên phần cứng mà bạn đã kiểm chứng, chứ bản thân topic không tạo ra mô-men xoắn. Gazebo Harmonic và micro-ROS cũng tuân theo nguyên tắc đó ở tầng mô phỏng và vi điều khiển. Nếu ngay từ bây giờ bạn chưa nắm rõ quy tắc dừng 300 ms, mọi việc cài đặt phần mềm về sau rất dễ trở thành cách né tránh thực hành trên bàn lab.

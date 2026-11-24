@@ -21,6 +21,41 @@ Sau bài học này, bạn sẽ **gọi tên** được ba mối nguy thực t�
 
 Từ bài 00-01 và 00-02, bạn đã nắm rõ quy tắc dừng PWM sau 300 ms và đã chốt Lộ trình A hoặc B trong sổ lab. Lúc này chưa cần có sẵn linh kiện. Hãy ghi nhớ hai nguyên tắc nền tảng: chân GPIO chỉ dùng cho tín hiệu logic chứ không phải nguồn công suất, và một bánh xe còn chạm mặt bàn có thể kéo cả robot trượt đi ngay khi xung PWM khác 0.
 
+---
+
+Một viên pin Li-ion 18650 nhỏ gọn nằm lọt trong lòng bàn tay trông có vẻ vô hại — cho đến khi hai sợi dây đỏ và đen vô tình chạm nhau trên mặt bàn lộn xộn vụn thiếc hàn. Trong chưa đầy một giây, dòng điện vọt qua ngưỡng hàng chục ampe, lớp vỏ nhựa bốc khói và mạch vi điều khiển cháy rụi! **Tư duy an toàn phòng lab** không phải là danh sách nội quy nhàm chán; đó là kỹ năng phòng thủ bằng vật lý giúp bạn bảo vệ đôi mắt, bàn tay và chính ví tiền của mình.
+
+## Bản đồ kiến thức nền: Vật lý của Sự cố Điện và An toàn Pin Lithium
+
+1. **Ngắn mạch & Công suất nhiệt Joule ($$P = I^2 R = V^2 / R$$):** Khi hai cực nguồn chạm trực tiếp, điện trở mạch giảm xuống chỉ còn nội trở pin $$r$$ (vài chục mili-ohm), đẩy dòng điện và nhiệt lượng tăng vọt theo bình phương dòng điện!
+2. **An toàn Hóa học Pin Lithium (Li-ion / LiPo):** Pin lithium có mật độ năng lượng rất cao và chất điện phân dễ cháy. Xả sâu dưới $$3.0\text{ V/cell}$$, sạc quá $$4.2\text{ V/cell}$$ hoặc ngắn mạch đều có thể gây phồng pin và thoát nhiệt mất kiểm soát (*thermal runaway*).
+3. **Trình tự cấp nguồn phân tầng (Power-On Sequence):** Luôn kiểm tra thông mạch nguồn–GND ở trạng thái tắt pin, cấp nguồn qua cổng USB giới hạn dòng 500 mA trước, rồi mới đóng cầu chì và bật công tắc pin động cơ.
+
+### Ví dụ cầm tay chỉ việc: Tính dòng ngắn mạch của bộ pin 2S 18650
+
+Xét một bộ pin 2S Li-ion sạc đầy có điện áp $$V = 2 \times 4.2\text{ V} = \mathbf{8.4\text{ V}}$$ và tổng nội trở (2 cell + dây dẫn ngắn) chỉ khoảng $$r = 0.08\ \Omega$$. Nếu hai đầu dây nguồn vô tình chập nhau không qua cầu chì:
+
+$$
+I_{\text{ngắn mạch}} = \frac{V}{r} = \frac{8.4\text{ V}}{0.08\ \Omega} = \mathbf{105\text{ A}},
+$$
+
+$$
+P_{\text{nhiệt}} = V \cdot I = 8.4 \times 105 = \mathbf{882\text{ W}}!
+$$
+
+Gần **900 watt** nhiệt tỏa ra ngay trong hai viên pin và sợi dây đồng mảnh — tương đương một chiếc bàn ủi điện dồn vào một điểm tiếp xúc 2 mm! Giờ lắp nối tiếp một **cầu chì 5 A** sát cực dương pin: ngay khi dòng vượt 10 A, dây chì chảy đứt trong vài mili-giây, ngắt hoàn toàn mạch trước khi pin kịp nóng lên!
+
+### Khung giải thích: Quy trình 4 bước cấp nguồn an toàn không bao giờ bỏ qua (nên đọc chậm)
+
+1. **Bước 1 — Dọn sạch mặt bàn kim loại trước khi mở công tắc:** Vụn chân linh kiện, tua-vít hay kẹp kim loại nằm dưới gầm bo mạch là nguyên nhân số 1 gây chập mạch bất ngờ.
+2. **Bước 2 — Đo thông mạch `VCC–GND` khi chưa có điện:** Dùng thang đo thông mạch/Ohm của đồng hồ vạn năng; nếu kêu bíp liên tục ($$R < 5\ \Omega$$), tuyệt đối *không* cấp nguồn cho đến khi tìm ra điểm chạm!
+3. **Bước 3 — Kiểm tra cực tính bằng màu dây chuẩn hóa:** Quy ước cứng Đỏ = Dương (`+`), Đen = Âm (`GND`); chỉ cần cắm ngược cực 0,5 giây là đủ phá hủy IC ổn áp không có diode bảo vệ.
+4. **Bước 4 — Sờ nhanh kiểm tra nhiệt sau 5 giây đầu:** Sau khi bật nguồn, chạm nhẹ mu bàn tay gần IC ổn áp và driver động cơ; nếu nóng rát bất thường, tắt công tắc ngay lập tức!
+
+**Kiểm tra nhanh.** Một cell pin 18650 đang đo được $$2.6\text{ V}$$ (thấp hơn ngưỡng xả sâu $$3.0\text{ V}$$). Bạn có nên cắm ngay vào bộ sạc nhanh 2 A để "cứu" pin không? **Tuyệt đối không!** Sạc dòng cao vào cell xả kiệt có thể tạo nhánh kim loại lithium (*dendrite*) gây chập ngầm bên trong và cháy nổ — cần loại bỏ an toàn hoặc chỉ phục hồi cực chậm bằng bộ sạc chuyên dụng có giám sát nhiệt.
+
+---
+
 ## Vì sao bài này gắn liền với Capstone
 
 Bản demo Chương 07 chỉ đáng tin cậy khi xe chạy theo lệnh và dừng ngay khi mất lệnh. Điều đó trở nên vô nghĩa nếu ngay lần cấp nguồn đầu tiên, xe lao khỏi bàn hoặc điện áp pin động cơ đi thẳng vào chân 3,3 V. Cơ chế timeout chỉ hoạt động khi vi điều khiển còn sống và đang chạy chương trình; các topic ROS 2 về sau cũng không thể cứu một chân mạch đã bị cháy.

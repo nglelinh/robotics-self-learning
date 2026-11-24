@@ -19,6 +19,40 @@ Sau bài này, bạn xây dựng được máy trạng thái gồm ba trạng th
 
 Bạn đã biết tính thời gian trôi qua bằng `millis()` hoặc `time.ticks_diff()` từ bài 1 (thay thế nhịp tim chặn ở [bài serial chương 02]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %})), biết đọc cạnh nút nhấn và xuất PWM bằng `ledcWrite` hoặc `duty_u16` mà không dựa vào `analogWrite` mặc định. Trong bài này, đèn LED từ bài GPIO đóng vai trò chỉ báo "động cơ đang được phép chạy"; mạch TB6612 vẫn chưa được nối.
 
+---
+
+Hãy hình dung đoạn code robot của một người mới sau ba tuần thêm tính năng: 7 biến cờ kiểu `is_running`, `obstacle_seen`, `turning_left`, `button_held`, `low_battery` đan chéo nhau trong một rừng câu lệnh `if / else if` dài 200 dòng! Chỉ cần vừa gặp vật cản *đồng thời* pin yếu, robot rơi vào một tổ hợp trạng thái bất hợp lệ khiến nó vừa tiến vừa báo lỗi! **Máy trạng thái hữu hạn (Finite State Machine — FSM)** quét sạch mớ hỗn độn đó bằng một mô hình toán học trong sáng: tại mọi thời điểm, robot chỉ ở **đúng một trạng thái** duy nhất với các luật chuyển trạng thái tường minh.
+
+## Bản đồ kiến thức nền: Lý thuyết Máy Trạng thái Hữu hạn (FSM) trong Firmware Robot
+
+1. **Bộ Tứ Định nghĩa FSM (States, Events, Transitions, Actions):** Gồm tập hữu hạn các *trạng thái* (ví dụ `IDLE`, `RUN`, `AVOID`, `ESTOP`), các *sự kiện* đầu vào (nhấn nút, cảm biến $$< 25\text{ cm}$$, hết thời gian quay), *hàm chuyển trạng thái* và *hành động* khi vào/đang ở/thoát trạng thái.
+2. **Đảm bảo Bất biến An toàn (Safety Invariants):** Thay vì kiểm tra `if (!estop)` ở 15 chỗ khác nhau, ta biến `ESTOP` thành một trạng thái ưu tiên cao nhất có hành động *vào trạng thái* (`on_enter`) cưỡng bức cắt PWM về 0 ngay lập tức — và chỉ thoát ra được khi người vận hành chủ động nhấn reset!
+3. **Kết hợp FSM với Vòng lặp Không chặn:** Mỗi lần chạy `loop()`, hàm `switch (state)` chỉ thực thi nhanh nhánh của trạng thái hiện tại (vài micro-giây) và kiểm tra điều kiện chuyển tiếp bằng `millis()` — tạo ra kiến trúc firmware sạch, dễ vẽ sơ đồ và dễ kiểm thử.
+
+### Ví dụ cầm tay chỉ việc: Bảng chuyển trạng thái 4 trạng thái cho xe robot tránh vật cản
+
+Thay vì 4 biến cờ Boolean (tạo ra tới $$2^4 = 16$$ tổ hợp, trong đó 12 tổ hợp vô nghĩa!), ta khóa chặt hành vi xe vào **đúng 4 trạng thái**:
+
+| Trạng thái hiện tại | Hành động liên tục | Sự kiện kích hoạt | Trạng thái kế tiếp |
+|---|---|---|---|
+| **`IDLE`** (Đứng chờ) | `PWM_L = 0, PWM_R = 0`, LED nhấp 1 Hz | Nhấn nút Start (đã chống dội) | **`RUN`** |
+| **`RUN`** (Chạy thẳng) | `PWM_L = 50%, PWM_R = 50%` | Khoảng cách $$d < 25\text{ cm}$$ | **`AVOID`** (ghi `t_enter = now`) |
+| **`AVOID`** (Quay né) | `PWM_L = -40%, PWM_R = +40%` | `now - t_enter >= 400 ms` và $$d \ge 35\text{ cm}$$ | **`RUN`** |
+| **Bất kỳ trạng thái nào** | — | Nhấn nút `ESTOP` hoặc $$V_{\text{pin}} < 6.4\text{ V}$$ | **`ESTOP`** (`PWM = 0`, LED nhấp 5 Hz) |
+
+Chú ý chi tiết **độ trễ trễ ngưỡng (hysteresis)** trong bảng: vào `AVOID` khi $$d < 25\text{ cm}$$ nhưng chỉ quay lại `RUN` khi $$d \ge 35\text{ cm}$$ (khoảng đệm **10 cm**) — chặn đứng hoàn toàn hiện tượng xe giật lắc qua lại liên tục ngay tại mép 25 cm!
+
+### Khung giải thích: 4 bước chuyển hóa yêu cầu robot thành FSM không lỗi (nên đọc chậm)
+
+1. **Bước 1 — Vẽ sơ đồ trạng thái trên giấy *trước* khi mở trình soạn thảo:** Liệt kê mọi trạng thái có thể, mũi tên chuyển và đảm bảo mọi trạng thái đều có lối ra hợp lệ (không bị kẹt chết).
+2. **Bước 2 — Thiết lập thứ tự ưu tiên sự kiện (An toàn luôn đứng đầu):** Trong mỗi chu kỳ, luôn kiểm tra `ESTOP` và sụt áp pin *trước* mọi logic điều hướng khác.
+3. **Bước 3 — Dùng hàm `enter_state(next)` tập trung để ghi log chuyển trạng thái:** Mỗi khi đổi trạng thái, in đúng 1 dòng log `t=12450ms: RUN -> AVOID (d=22cm)` — đọc log bạn biết ngay robot đang nghĩ gì!
+4. **Bước 4 — Thêm ngưỡng trễ (Hysteresis) và Timeout cho trạng thái né tránh:** Nếu xe kẹt trong góc tường quá 3 giây không thoát được `AVOID`, timeout sẽ chuyển xe về `IDLE` hoặc `ESTOP` thay vì quay tròn vô tận đến hết pin!
+
+**Kiểm tra nhanh.** Nếu robot đang chạy vòng lặp FSM ở 50 Hz ($$T = 20\text{ ms}$$) với vận tốc $$0.5\text{ m/s}$$ và bạn nhấn nút `ESTOP`, quãng đường tối đa xe đi thêm trước khi lệnh cắt `PWM = 0` được thực thi là bao nhiêu? Tối đa 1 chu kỳ vòng lặp: $$0.5\text{ m/s} \times 0.02\text{ s} = \mathbf{1\text{ cm}}$$ (chưa kể quán tính cơ học trượt nhẹ)!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Firmware điều khiển từ xa (teleop) của Capstone A không nên là tập hợp các câu lệnh `if` rời rạc. Tại mọi thời điểm, robot chỉ ở một trong ba tình huống: đang chờ (`IDLE`), đang chạy theo lệnh còn hạn (`TELEOP`), hoặc đã dừng an toàn do mất lệnh (`FAULT`). Tín hiệu PWM là ngõ ra phụ thuộc trực tiếp vào trạng thái hiện tại, tránh bị khối lệnh khác ghi đè ngoài ý muốn. Khi tích hợp với ROS ở các chương sau, cơ chế này bảo đảm cả hai kênh TB6612 luôn về duty 0 trong `IDLE` và `FAULT`. Ngược lại, cách viết dùng hai biến boolean độc lập (như cờ nháy đèn và cờ chạy động cơ) có thể để cả hai cùng bằng `true`, khiến robot vẫn chạy trong khi đèn báo trạng thái lỗi đang nháy.

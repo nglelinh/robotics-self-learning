@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Nothing derails a robotics project faster than "works on my laptop yesterday, refuses to compile today." Unlike pure web scripts, robot software spans firmware builds, hardware pin maps, calibration logs, and plotting notebooks — and a bug in any one of them can send a physical chassis into a table leg.
+
+This lesson establishes a disciplined workspace layout and toolchain mental model (PlatformIO/C++ for deterministic MCU firmware, Python for offline analysis and telemetry plotting, and later ROS 2 workspaces) so every experiment is reproducible.r
+
+---
+
 Plan about 70 minutes at the computer you will actually use for firmware. You need the track sentence from lesson 00-02. You do not need the robot, Ubuntu, or a successful compile. The point is a folder layout and an install log that tell the truth about what is installed today.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will **create** a workspace with `notes/`, either `firmware/esp32/` or `firm
 ## Prerequisites
 
 You can create directories and you can paste text into `notes/lab-notes.md`. Lessons 00-01 through 00-04 gave you the journal fields, the track, the power-up card, and the tool inventory. Lesson 00-05, the bill of materials, should already exist as `bom.csv` or as a dated note; if it does not, write `bom.csv missing` in the install log rather than inventing prices. You do not need to have soldered.
+
+## Background Knowledge Map: Cross-Compilation, Flashing Pipelines, and Telemetry Analysis
+
+Three software-engineering pillars separate reliable robotics code from fragile hobby sketches:
+
+- **Cross-Compilation & Toolchains:** Your laptop (x86_64 or ARM64) compiles C++ source code using a target compiler (`xtensa-esp32-elf-g++` or `arm-none-eabi-gcc`) into machine binary instructions for a completely different CPU architecture on the microcontroller, then flashes that binary over UART/USB.
+- **Deterministic Project Configuration:** Pinning board definitions, library versions, and compiler flags in a manifest (such as `platformio.ini`) guarantees that rebuilding a project six months later produces identical timing and behavior.
+- **Offline Data Logging & Telemetry:** Real-time control loops cannot pause to draw plots. Standard robotics practice streams compact CSV/binary telemetry over serial (e.g., `t_ms,v_ref,v_meas,pwm`) to the host computer, where Python computes step-response metrics (rise time, overshoot, steady-state error).r
+
+---
 
 ## Why it matters
 
@@ -117,6 +133,35 @@ A Pico log names BOOTSEL and the UF2 instead of `esp32dev`. Paste the log into t
 Trang is on Windows, Track A, ESP32, ceiling already decided in lesson 00-02. She creates `firmware/esp32/` and `ros_ws/`. She does not install the IDE in this sitting because the lab PC at school already has Arduino IDE 2.3 and she would rather learn one install. Her log says `Arduino IDE: not on this laptop; school lab PC, confirm version Thursday`. The firmware README says "Track A, ESP32, Wi-Fi teleop later, tool is Arduino IDE 2.x, board class esp32dev, serial 115200." She computes the byte time, about 87 µs, and writes "300 ms timeout is about 3000 byte-times; baud is not the safety layer." Her `ros_ws/README.md` says "This laptop is Windows 11. Jazzy waits for the Ubuntu 24.04 lab PC. Gazebo Harmonic is not installed. WSL will not be used as the robot lab."
 
 A classmate on Ubuntu 24.04 may install Jazzy in another hour and paste a real version string. That classmate still owes the same firmware folder. Trang does not copy a version she did not run.
+
+## Deep-Dive Explanation (Read Slowly): Sizing Your Serial Telemetry Bandwidth by Hand
+
+A classic beginner mistake is printing verbose debug sentences inside a 100 Hz control loop and accidentally breaking real-time control. Let's calculate the exact serial bandwidth budget step by step:
+
+1. **Understand UART frame overhead:** Standard `8N1` serial sends 1 start bit + 8 data bits + 1 stop bit = **10 bits per byte**.
+2. **Compute maximum byte throughput:** At baud rate $$B$$ (bits/second), maximum raw throughput is $$B / 10$$ bytes/second.
+3. **Measure your telemetry line length:** Count every character (including commas and `\r\n`) in one telemetry packet.
+4. **Compare packet rate against control rate:** Required bandwidth $$= (\text{bytes/line}) \times f_s$$ must stay comfortably below $$70\%$$ of $$B/10$$ to prevent TX buffer blocking.
+
+### Concrete Worked Example: Will 115200 Baud Keep Up with a 200 Hz Control Loop?
+
+Suppose your firmware logs one CSV line per tick:
+`12345,0.350,0.342,148\r\n` — count the characters: $$5+1+5+1+5+1+3+2 = 23\text{ bytes}$$.
+
+- **Step 1 — Maximum link capacity at 115,200 baud (8N1):**
+  $$\text{Capacity} = \frac{115\,200\text{ bits/s}}{10\text{ bits/byte}} = 11\,520\text{ bytes/s}.$$
+- **Step 2 — Bandwidth needed at $$f_s = 200\text{ Hz}$$:**
+  $$\text{Demand} = 23\text{ bytes/tick} \times 200\text{ ticks/s} = 4\,600\text{ bytes/s}.$$
+  Utilization is $$4600 / 11520 \approx 39.9\%$$ — comfortably safe!
+- **Step 3 — What if you instead print a verbose 120-byte debug sentence at 200 Hz?**
+  $$\text{Demand} = 120 \times 200 = 24\,000\text{ bytes/s} > 11\,520\text{ bytes/s}!$$
+  The serial TX buffer fills completely within milliseconds, `Serial.print()` blocks the CPU, and your 200 Hz PID loop collapses to $$11520 / 120 = 96\text{ Hz}$$ with severe jitter.
+
+**Common Pitfall:** Leaving `Serial.begin(9600)` (only $$960\text{ bytes/s}$$!) from an introductory blink tutorial while logging PID data at 100 Hz.
+
+**Quick Check:** Raising baud rate to `921600` boosts capacity to $$92\,160\text{ bytes/s}$$ — enough for 23-byte telemetry lines at over 4,000 Hz (or decimated 50 Hz telemetry with huge headroom).
+
+---
 
 ## Exercises
 

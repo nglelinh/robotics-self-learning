@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~90 minutes**.
 
+This is the moment your two worlds—the physical Capstone A rover you wired in Chapter 07 and the ROS 2 ecosystem you built in Chapters 09–10—finally snap together. A clean bridge node translates standard `geometry_msgs/Twist` commands into your MCU's serial protocol and converts returning encoder ticks into `/odom` and TF2, making your physical robot look identical to your Gazebo twin.
+
 ## Learning objectives
 
 You will run an `rclpy` node that subscribes to `/cmd_vel`, converts `linear.x` and `angular.z` into left and right tread speeds with track $$L = 0.16$$ m, and maps those speeds onto the Chapter 08 integers. You will document the scale in one place, 0.5 m/s of tread to the integer 100, and you will show that a straight 0.2 m/s command becomes the payload `V,40,40`. You will write that payload as the length-delimited frame `STX 0xAA`, length, ASCII payload, XOR, `0x0A`, and you will force `V,0,0` onto the wire when no Twist has arrived for 0.3 s. You will prove the node with a `socat` PTY pair and a tiny parser, so the lab does not need a robot. You will state what still stops the motors if the bridge process itself is killed, and you will keep the wheels off the ground if a real driver is connected.
@@ -21,6 +23,14 @@ You will run an `rclpy` node that subscribes to `/cmd_vel`, converts `linear.x` 
 
 Lesson 08-01’s frame and 300 ms firmware timeout, lesson 08-04’s inverse kinematics, and a Jazzy shell with `rclpy`. Python package `pyserial` comes from apt as `python3-serial`, so it stays on the same interpreter as ROS. `socat` provides the fake serial port. You do not need Gazebo running, and you should not have the micro-ROS serial agent holding a port. The real Capstone is optional and comes last, wheels up.
 
+
+## Background Knowledge Map: Hardware Abstraction Layers, Sign-Convention Alignment, and Odometry Covariance
+
+Bridging real firmware to ROS 2 relies on three core integration principles:
+
+- **Hardware Abstraction Layer (HAL):** By exposing the exact same topic interface (`/cmd_vel`, `/odom`, `/tf`) as Gazebo's diff-drive plugin, every higher-level ROS 2 package (teleop, SLAM Toolbox, Nav2) runs unmodified on both simulation and real hardware.
+- **End-to-End Sign & Unit Alignment (REP-103):** A single minus-sign flip between `cmd_vel.angular.z` ($$+z$$ = CCW left turn) and the serial left/right motor mapping will make autonomous navigation spin endlessly away from its goal. Verifying forward, spin-left, and encoder tick signs in lockstep eliminates the #1 integration bug.
+- **Odometry Pose & Covariance Propagation:** Publishing `nav_msgs/Odometry` requires both the integrated pose $$(x, y, \theta)$$ and a realistic diagonal covariance matrix (larger uncertainty in yaw $$\sigma_\theta^2$$ than in forward distance $$\sigma_x^2$$) so downstream EKF or SLAM fuses wheel odometry appropriately.
 ## Why this sits on the path
 
 This node is the first time the ROS graph and the Capstone firmware share a command. Simulation already listens to `/cmd_vel`. Nav2, and a learned policy later, should publish that same type. Neither knows what `0xAA` means, and the current ESP32 firmware does not know what a Twist is. The bridge is the only place where metres per second become the −100…100 integers. micro-ROS is allowed only after this file works: same topic names, same scale, same watchdog, with a parser log as evidence.
@@ -243,6 +253,21 @@ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
 ```
 
 The parser should print `OK V,40,40` several times, about 20 Hz, and within a second of silence it should print `OK V,0,0`. The bridge log should show the same two strings when the integers change. That pair is the lab.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Tracing One Full Bridge Cycle (`Twist -> Serial -> Ticks -> Odom`)
+
+Trace one $$\Delta t = 0.05\ \text{s}$$ (20 Hz) bridge cycle on a robot with $$b = 0.16\ \text{m}$$, $$K = 10\,000\ \text{ticks/m}$$, and open-loop gain $$100\ \text{PWM units} = 0.40\ \text{m/s}$$:
+
+1. **Incoming ROS 2 command:** `/cmd_vel` delivers $$v = 0.20\ \text{m/s}$$, $$\omega = +0.50\ \text{rad/s}$$ (left turn).
+2. **Inverse kinematics & scaling to serial integers:**
+   $$v_R = 0.20 + 0.50(0.08) = 0.24\ \text{m/s} \implies u_R = \frac{0.24}{0.40} \times 100 = +60,$$
+   $$v_L = 0.20 - 0.50(0.08) = 0.16\ \text{m/s} \implies u_L = \frac{0.16}{0.40} \times 100 = +40.$$
+   Bridge sends `V,+40,+60\n` over serial.
+3. **Returning encoder deltas from MCU:** After $$0.05\ \text{s}$$, MCU reports $$\Delta N_L = +80$$ ticks and $$\Delta N_R = +120$$ ticks.
+   - Wheel distances: $$\Delta s_L = 80/10000 = 0.008\ \text{m}$$, $$\Delta s_R = 120/10000 = 0.012\ \text{m}$$.
+   - Body displacement & yaw increment:
+     $$\Delta s = \frac{0.012 + 0.008}{2} = 0.010\ \text{m}, \qquad \Delta\theta = \frac{0.012 - 0.008}{0.16} = +0.025\ \text{rad}.$$
+   - Measured velocities published in `/odom`: $$v_{\text{meas}} = 0.010 / 0.05 = 0.20\ \text{m/s}$$, $$\omega_{\text{meas}} = 0.025 / 0.05 = +0.50\ \text{rad/s}$$ — exact closed-loop round-trip match!
 
 ## Lab
 

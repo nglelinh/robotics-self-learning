@@ -13,6 +13,34 @@ draft: false
 
 Thời lượng: **75–90 phút**. Phần lớn thời gian dành cho việc tự quay bánh bằng tay đúng một vòng để đo số xung thực tế, rồi quy đổi sang quãng đường theo mét.
 
+Nếu bạn nhắm mắt bước đi trong phòng tối, làm sao bạn biết mình đã đi được bao xa? Bạn đếm số bước chân của chính mình! Với robot di động, **encoder** gắn sau đuôi trục động cơ chính là "bộ đếm bước chân" cơ điện tử đó: mỗi khi bánh xe quay thêm một góc nhỏ li ti, encoder phát ra một xung điện để vi điều khiển cộng dồn thành quãng đường và vận tốc (**odometry**). Tuy nhiên, giống như việc đi trên sàn trơn khiến số bước chân không còn khớp với quãng đường thực, hiểu sâu về encoder nghĩa là nắm cả độ phân giải xung lẫn nguyên nhân khiến sai số odometry tích lũy dần theo thời gian.
+
+## Bản đồ kiến thức nền: Từ xung vuông cầu phương đến odometry bánh xe
+
+### 1. Giải mã cầu phương (Quadrature Decoding 4×) và chiều quay
+Một encoder quang học hoặc từ tính (Hall) chuẩn có hai kênh **A** và **B** lệch pha nhau đúng $$90^\circ$$ (một phần tư chu kỳ). Nếu chỉ đếm cạnh lên của kênh A, bạn không biết bánh đang tiến hay lùi. Khi kết hợp cả hai kênh A và B: kênh A đi trước B báo hiệu quay thuận, B đi trước A báo hiệu quay nghịch. Đếm cả cạnh lên lẫn cạnh xuống trên cả A và B (**chế độ 4×**) giúp tăng độ phân giải góc lên gấp **4 lần** so với chỉ số PPR gốc trên trục động cơ.
+
+### 2. Nhân độ phân giải qua hộp số và bẫy tràn số nguyên (Integer Overflow)
+Đặt encoder ở *trục động cơ* (trước hộp số giảm tốc tỉ số $$G$$) thay vì trục bánh xe giúp tăng mật độ xung lên $$G$$ lần, cho phép đo vận tốc cực mượt ở tốc độ thấp. Nhưng mật độ xung cao cũng kéo theo hai rủi ro phần mềm: phải dùng **ngắt phần cứng (hardware interrupt / timer encoder mode)** để không mất xung ở tốc độ cao, và phải tính hiệu $$\Delta N$$ theo số học bù hai an toàn khi bộ đếm 16-bit hoặc 32-bit quay vòng.
+
+### 3. Bản chất tích phân của Odometry và sai số trôi tích lũy
+Từ số xung $$\Delta N$$, ta tính quãng đường bánh xe $$\Delta s = \frac{\Delta N}{N_{\text{rev}}} \pi D$$. Vì vị trí $$(x, y, \theta)$$ là tổng tích phân của hàng nghìn bước nhỏ liên tiếp, chỉ cần sai số đường kính bánh xe $$1\%$$ hay một cú trượt bánh thoáng qua cũng khiến sai số vị trí lệch hàng chục centimet sau vài mét — lý do odometry luôn cần kết hợp thêm IMU hoặc LiDAR/camera.
+
+### Khung giải thích: Cầm tay tính độ phân giải odometry và vận tốc bánh xe từ số xung thực (nên đọc chậm)
+
+Giả sử robot dùng động cơ DC có encoder **11 PPR** gắn ở trục sau động cơ, qua hộp số giảm tốc tỉ số **$$G = 30{:}1$$**, chạy giải mã cầu phương **4×**, lắp bánh xe đường kính **$$D = 65\text{ mm}$$**:
+
+1. **Tổng số xung trên 1 vòng quay hoàn chỉnh của bánh xe:**
+   $$N_{\text{rev}} = 11\text{ PPR} \times 4 \times 30 = 1\,320\text{ xung/vòng bánh}.$$
+2. **Chu vi bánh xe và độ phân giải tuyến tính mỗi xung:**
+   $$C = \pi D = \pi \times 65 \approx 204{,}2\text{ mm} \implies \Delta s_{\text{1 xung}} = \frac{204{,}2}{1\,320} \approx 0{,}155\text{ mm/xung}.$$
+3. **Tính quãng đường và vận tốc khi đọc được $$\Delta N = 660$$ xung trong $$\Delta t = 0{,}5\text{ s}$$:**
+   - Số vòng quay: $$660 / 1\,320 = 0{,}5\text{ vòng}$$.
+   - Quãng đường bánh đi được: $$\Delta s = 0{,}5 \times 204{,}2 = 102{,}1\text{ mm} = 0{,}1021\text{ m}$$.
+   - Vận tốc tuyến tính: $$v = \frac{0{,}1021}{0{,}5} = 0{,}2042\text{ m/s}$$.
+
+Nếu lốp cao su bị mòn hoặc non hơi làm đường kính thực giảm từ $$65\text{ mm}$$ xuống $$63{,}7\text{ mm}$$ (chỉ lệch $$2\%$$), sau $$10\text{ m}$$ chạy thẳng, odometry sẽ báo nhầm tới $$20\text{ cm}$$ — đó là lý do bước hiệu chuẩn đường kính bánh thực tế luôn bắt buộc trước khi chạy điều hướng!
+
 ## Mục tiêu học
 
 Sau bài này, bạn đọc được hai sóng vuông lệch pha (quadrature) của encoder hai kênh A và B để xác định kênh nào dẫn trước, từ đó phân biệt chiều tiến và chiều lùi. Bạn không tin mù quáng vào thông số "PPR" trên trang bán hàng mà tự đo số xung thực tế trên một vòng trục ra của bánh theo đúng chế độ giải mã trong firmware. Bạn quy đổi được số đếm thành cung tròn với bánh đường kính 65 mm, rồi từ quãng đường hai bánh tính được một bước ước lượng vị trí (dead reckoning): quãng đường tịnh tiến của tâm trục và góc quay theo radian — nền tảng trực tiếp của `nav_msgs/Odometry`.

@@ -13,6 +13,33 @@ draft: false
 
 Thời lượng ước tính: **~90 phút**.
 
+Ai học vi điều khiển cũng bắt đầu bằng `Serial.println(sensor_value)` để in chữ ra màn hình cho người đọc. Nhưng khi hai cỗ máy nói chuyện với nhau ở tần số 100 Hz — ví dụ ESP32 gửi vận tốc, quaternion IMU và số xung encoder lên Raspberry Pi chạy ROS 2 — việc chuyển đổi số thực sang chuỗi văn bản ASCII/JSON rồi lại phân tích ngược thành số thực ở đầu kia vừa chậm chạp, vừa tốn gấp đôi băng thông, lại dễ vỡ định dạng khi dính nhiễu. Bài học này đưa bạn vượt qua `println` sang **giao thức nhị phân đóng khung (binary framing), mã hóa COBS và kiểm lỗi CRC-16** — tiêu chuẩn thực thụ của truyền thông nhúng chuyên nghiệp.
+
+## Bản đồ kiến thức nền: Giao thức nhị phân, Byte-Stuffing (COBS) và Kiểm lỗi CRC
+
+### 1. Văn bản (CSV / JSON) vs. Nhị phân đóng gói (Packed Binary Struct)
+Định dạng văn bản dễ đọc bằng mắt khi gỡ lỗi nhanh, nhưng mỗi chữ số tốn 1 byte và hàm `sscanf`/`JSON.parse` ngốn nhiều chu kỳ CPU. Định dạng **nhị phân** đóng gói trực tiếp các biến `float32` (4 byte) hoặc `int32` (4 byte) theo quy ước thứ tự byte rõ ràng (**little-endian**) giúp giảm kích thước gói từ 2–4 lần và giải mã trong vài nano-giây bằng một phép `memcpy`.
+
+### 2. Bài toán trùng byte đánh dấu và giải pháp COBS (Consistent Overhead Byte Stuffing)
+Trong gói nhị phân, giả sử bạn chọn byte `0x00` làm dấu kết thúc gói tin. Chuyện gì xảy ra nếu chính giá trị cảm biến của bạn bằng `0` (chứa byte `0x00`)? Bên nhận sẽ cắt ngang gói tin giữa chừng! Thuật toán **COBS** giải quyết triệt để vấn đề này bằng cách loại bỏ hoàn toàn mọi byte `0x00` khỏi phần thân gói với chi phí phụ cực nhỏ (chỉ thêm đúng **1 byte** cho mỗi 254 byte dữ liệu!).
+
+### 3. Tại sao CRC-16 vượt trội hơn Checksum cộng/XOR đơn giản?
+Checksum cộng hoặc XOR không phát hiện được lỗi hoán vị hai byte hay lỗi hai bit cùng vị trí bị lật đồng thời. **CRC-16 (Cyclic Redundancy Check)** dùng phép chia đa thức modulo 2 trong trường hữu hạn $$GF(2)$$, phát hiện được 100% lỗi đơn bit, lỗi 2 bit và mọi cụm nhiễu liên tiếp dài tới 16 bit.
+
+### Khung giải thích: Cầm tay so sánh băng thông và chi phí đóng gói giữa JSON và Nhị phân ở 100 Hz (nên đọc chậm)
+
+Giả sử ESP32 cần gửi đều đặn 3 giá trị số thực dấu phẩy động `(vx, vy, wz)` lên máy tính chủ ở tần số **100 Hz** trên đường UART `115200 8N1` (trần băng thông $$11\,520\text{ byte/giây}$$):
+
+1. **Cách 1 — Gửi chuỗi JSON (`{"vx":0.1234,"vy":0.0000,"wz":-0.5678}\n`):**
+   - Độ dài mỗi gói: **40 byte**.
+   - Lưu lượng ở 100 Hz: $$40 \times 100 = 4\,000\text{ byte/giây}$$ (chiếm **$$34{,}7\%$$** đường UART, chưa kể thời gian CPU chuyển số thực sang chuỗi và parse ngược!).
+
+2. **Cách 2 — Gửi gói Nhị phân đóng khung (`[SOF 2B] + [LEN 1B] + [3 × float32 = 12B] + [CRC16 2B]`):**
+   - Độ dài mỗi gói cố định: $$2 + 1 + 12 + 2 = 17\text{ byte}$$.
+   - Lưu lượng ở 100 Hz: $$17 \times 100 = 1\,700\text{ byte/giây}$$ (chỉ chiếm **$$14{,}8\%$$** đường UART!).
+
+**Kết luận định lượng:** Gói nhị phân nhỏ hơn **$$2{,}35\times$$**, giải mã nhanh gấp hàng chục lần, và tích hợp sẵn mã kiểm lỗi **CRC-16** — lý do mọi giao thức robotics nổi tiếng (MAVLink của drone, Dynamixel, micro-ROS) đều dùng framing nhị phân!
+
 ## Mục tiêu
 
 Sau bài này, bạn thiết kế được một định dạng khung lệnh bánh xe bền vững ngay cả khi cổng USB giao dữ liệu bị cắt mảnh, cài đặt được phía gửi bằng Python và phía nhận trên ESP32/Pico, đồng thời giải thích được vì sao dùng `println` gửi chuỗi `"40,-15"` chưa phải là một giao thức tin cậy. Bạn cũng tính được byte kiểm tra XOR, xác định ngưỡng timeout để đưa động cơ về 0, và ghi lại cả một khung hợp lệ lẫn một khung cố ý làm hỏng vào `lab-notes.md`. Đây chính là giao ước truyền thông mà node cầu nối ROS 2 ở Chương 10 sẽ sử dụng để `cmd_vel` không bao giờ biến thành các byte rời rạc trong bộ đệm.

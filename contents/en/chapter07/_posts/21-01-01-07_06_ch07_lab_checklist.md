@@ -13,6 +13,8 @@ draft: false
 
 This is the sign-off for the first moving base. You have evidence for four behaviors, or you have one named repair and you are not starting Chapter 08.
 
+Capstone A is the milestone where separate components—acrylic plate, gearmotors, H-bridge, buck converter, and serial firmware—become an actual teleoperated robot. Signing off the Chapter 07 checklist is not a formality; it is the interface contract that lets Chapters 08–10 layer PID loops, kinematics, and ROS 2 on top without fighting hidden hardware bugs.
+
 ## Learning objectives
 
 1. Judge a lab notebook against four definition-of-done lines: teleop in four directions, stop on host timeout, battery secured with no bare lithium leads, and notes that hold a photo, the protocol, the sign map, and the voltages.
@@ -24,6 +26,14 @@ This is the sign-off for the first moving base. You have evidence for four behav
 
 Lessons 07-01 through 07-05 are the evidence: assembly, wheels-up sign map, `V` and `S`, timeout and slew, floor log. Chapter 05 is the H-bridge, STBY, the 7805 jumper, and the stall current behind the 2–3 A fuse. Chapter 06 is $$b$$ and $$r$$ (examples $$0.15~\mathrm{m}$$ or your $$148~\mathrm{mm}$$, and $$31.2~\mathrm{mm}$$). Chapter 08 is PID. Chapter 09 replaces the text line with a `geometry_msgs/Twist` (`linear.x`, `angular.z`). Neither chapter repairs a missing timeout or a reversed tire. This checklist does not implement ROS.
 
+
+## Background Knowledge Map: Interface Contracts, Hardware-in-the-Loop Readiness, and Regression Baselines
+
+A capstone readiness checklist operationalizes three systems-engineering disciplines:
+
+- **Hardware–Software Interface Contract:** Locking baud rate, packet syntax, sign convention ($$+\text{cmd}$$ = forward on both wheels), and timeout behavior creates a stable abstraction boundary between low-level firmware and higher-level ROS 2 bridges.
+- **Reproducible Regression Baselines:** Recording measured no-load current, full-speed wheel velocity, and battery sag gives you a quantitative baseline; if a future firmware change degrades behavior, you can prove whether hardware drifted or software broke.
+- **Safety-First Verification Order:** Verifying emergency power cut, watchdog stop, and brownout immunity *before* adding autonomous planners ensures that no downstream software bug can override physical safety.
 ## Why this matters for Capstone A and the ROS path
 
 PID amplifies the plant. A reversed right wheel turns a positive error into a larger wrong command. A topic graph has the same stuck-PWM bug as serial if firmware keeps the last duty when messages stop. Twist replaces the text line only after the four done-lines below are true. Until Chapter 08 calibrates, PWM 80 is not $$0.2~\mathrm{m/s}$$.
@@ -72,6 +82,16 @@ Chapter 09 may assume the base stops when the stream stops. Twist will carry `li
 ![Run only while the command is fresh; silence is stop]({{ site.imgurl }}/generated/teleop_states.png)
 
 If the log cannot point at that STOP box with a measurement, the checklist is not done.
+
+### Deep-Dive Explanation (Read Slowly): Auditing a Capstone A Acceptance Log by Hand
+
+Before signing off Chapter 07, walk through a sample three-metric audit to verify whether a robot is truly ready for Chapter 08:
+
+1. **Left–right speed symmetry:** At open-loop command `+60` on both channels, the left wheel rolls $$1.00\ \text{m}$$ in $$4.10\ \text{s}$$ ($$v_L = 0.244\ \text{m/s}$$) and the right wheel rolls $$1.00\ \text{m}$$ in $$3.95\ \text{s}$$ ($$v_R = 0.253\ \text{m/s}$$). Relative mismatch is:
+   $$\frac{\lvert v_R - v_L \rvert}{(v_R + v_L)/2} = \frac{0.009}{0.2485} = 3.6\%.$$
+   A 3.6% open-loop motor mismatch is normal for hobby gearmotors and easily corrected by Chapter 08 PID—whereas a 25% mismatch would signal a binding axle or failing H-bridge channel that must be fixed mechanically first.
+2. **Watchdog response check:** Host stops transmitting at `t = 12,400 ms`; telemetry logs `STATE=TIMEOUT_STOP, pwm=0` at `t = 12,710 ms`, confirming actual timeout latency $$\Delta t = 310\ \text{ms}$$ (within a $$300 \pm 20\ \text{ms}$$ spec).
+3. **Verdict:** Both mechanical symmetry and safety latency are quantified and logged—clearing the gate into Chapter 08.
 
 ## Lab
 

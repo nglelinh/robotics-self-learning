@@ -21,6 +21,39 @@ Sau bài này, bạn có thể chọn đúng chuẩn giao tiếp I2C, SPI hay UA
 
 Bạn đã biết đo thông mạch và điện áp một chiều bằng đồng hồ vạn năng (Chương 01), nắm được các chân GPIO 3,3 V trên ESP32 hoặc Pico (Chương 02), và đã nạp thành công chương trình nháy LED (Chương 03). Bài này chưa cần cài ROS.
 
+---
+
+Một con robot hiện đại mang trên mình hàng loạt "giác quan": gia tốc kế–con quay hồi chuyển (IMU), cảm biến khoảng cách laser (ToF), màn hình OLED, bộ thu GPS, LiDAR... Nếu mỗi cảm biến đòi riêng 8 sợi dây song song thì bo vi điều khiển sẽ hết sạch chân ngay từ cảm biến thứ hai! Ba chuẩn truyền thông nối tiếp kinh điển — **I2C**, **SPI** và **UART** — ra đời để chia sẻ hàng chục thiết bị trên chỉ 2 đến 4 sợi dây mỏng, mỗi chuẩn tối ưu cho một bài toán tốc độ, khoảng cách và số lượng thiết bị khác nhau.
+
+## Bản đồ kiến thức nền: Ba Chuẩn Bus Cảm biến Cốt lõi trên Robot
+
+1. **I2C (Inter-Integrated Circuit — 2 dây `SDA, SCL`):** Bus đồng bộ dùng chung cho nhiều cảm biến bằng **địa chỉ 7-bit** (ví dụ IMU `0x68`, OLED `0x3C`), tốc độ chuẩn 100 kHz hoặc 400 kHz. Vì là chuẩn cực máng hở (*open-drain*), bus I2C **bắt buộc phải có điện trở kéo lên** (thường $$4.7\text{ k}\Omega$$ lên 3,3 V).
+2. **SPI (Serial Peripheral Interface — 4 dây `MOSI, MISO, SCLK, CS`):** Bus đồng bộ song công toàn phần tốc độ cực cao (1–40 MHz!), không cần địa chỉ mà chọn từng thiết bị bằng chân riêng `CS` (Chip Select) — lý tưởng cho màn hình màu, thẻ nhớ SD và IMU tốc độ lấy mẫu kHz.
+3. **UART (Universal Asynchronous Receiver/Transmitter — 2 dây chéo `TX ↔ RX`):** Truyền bất đồng bộ điểm–điểm không cần dây xung nhịp (hai bên tự thống nhất tốc độ baud như `115200 bps`) — dùng cho GPS, LiDAR 2D và giao tiếp giữa ESP32 với máy tính Raspberry Pi!
+
+### Ví dụ cầm tay chỉ việc: Tính thời gian đọc 14 byte từ IMU MPU6050 qua I2C (400 kHz) vs. SPI (4 MHz)
+
+Một lần đọc đầy đủ gia tốc (6 byte) + nhiệt độ (2 byte) + vận tốc góc (6 byte) từ IMU cần truyền **14 byte** dữ liệu:
+- **Qua I2C Fast Mode ($$400\text{ kHz}$$):** mỗi byte trên I2C cần **9 xung clock** (8 bit dữ liệu + 1 bit `ACK`), cộng khoảng 3 khung mở đầu (địa chỉ ghi + thanh ghi bắt đầu + địa chỉ đọc) = $$17 \times 9 = \mathbf{153\text{ xung clock}}$$:
+  $$
+  t_{\text{I2C}} \approx \frac{153}{400{,}000\text{ Hz}} \approx \mathbf{0.383\text{ ms}} \quad (\text{dư sức cho vòng lặp 100–200 Hz!}).
+  $$
+- **Qua SPI ($$4\text{ MHz}$$):** truyền 1 byte địa chỉ + 14 byte dữ liệu = $$15 \times 8 = \mathbf{120\text{ xung clock}}$$:
+  $$
+  t_{\text{SPI}} = \frac{120}{4{,}000{,}000\text{ Hz}} = \mathbf{0.030\text{ ms}} \quad (\mathbf{12.7\times\text{ nhanh hơn I2C!}}).
+  $$
+
+### Khung giải thích: 4 bước đấu nối và gỡ lỗi Bus Cảm biến không bao giờ đoán mò (nên đọc chậm)
+
+1. **Bước 1 — Chạy `I2C Scanner` trước khi viết bất kỳ dòng code giải mã nào:** Nếu chương trình quét địa chỉ báo `Found 0x68` (IMU) và `Found 0x29` (ToF VL53L0X), bạn chắc chắn 100% dây `SDA/SCL`, nguồn và điện trở kéo lên đều đúng!
+2. **Bước 2 — Đổi địa chỉ khi hai cảm biến I2C trùng nhau:** Ví dụ muốn gắn 2 cảm biến MPU6050 trên cùng 1 bus I2C, kéo chân `AD0` của con thứ hai lên 3,3 V để đổi địa chỉ từ `0x68` sang `0x69`.
+3. **Bước 3 — Nhớ quy tắc đấu chéo của UART (`TX → RX`, `RX → TX`):** Khác với I2C (`SDA → SDA`) và SPI (`MOSI → MOSI`), UART phải nối chân phát của bên này vào chân thu của bên kia — và *luôn* nối chung `GND`!
+4. **Bước 4 — Giữ dây I2C/SPI ngắn (< 20 cm) và tránh đi song song sát dây động cơ:** Dây I2C dài quá làm tăng điện dung ký sinh làm méo cạnh xung, dễ gây treo bus khi động cơ phát nhiễu điện từ!
+
+**Kiểm tra nhanh.** Nếu bạn mắc **hai** cảm biến giống hệt nhau có cùng địa chỉ I2C cố định `0x29` (như hai cảm biến laser VL53L0X) lên cùng một bus `SDA/SCL` mà không tách chân `XSHUT` để đổi địa chỉ phần mềm hoặc dùng bộ chia kênh `TCA9548A`, chuyện gì sẽ xảy ra? Cả hai cảm biến cùng kéo đường `SDA` trả lời đồng thời gây **xung đột bus (bus contention)** và trả về dữ liệu sai hoàn toàn!
+
+---
+
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
 Capstone A ở Chương 07 điều khiển robot vi sai từ laptop qua cổng serial — đó chính là giao tiếp UART với tốc độ baud cố định, cặp chân TX/RX đã được bắt chéo bên trong chip USB-serial và quy tắc tự dừng khi mất lệnh. Khi cơ chế dừng an toàn đã chạy ổn định, ta mới gắn thêm IMU và cảm biến ToF (thường là VL53L0X) dùng chung bus I2C. Đến Chương 09, các số đo này sẽ được xuất thành bản tin `sensor_msgs/Imu` và `sensor_msgs/Range` (hoặc đưa qua micro-ROS ở Chương 10). Nếu bus thiếu điện trở kéo lên hoặc sai địa chỉ, đồ thị ROS sẽ không có dữ liệu — nguyên nhân nằm ở phần đấu dây breadboard chứ không phải tệp launch.

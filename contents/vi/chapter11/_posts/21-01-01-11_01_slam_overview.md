@@ -13,6 +13,19 @@ draft: false
 
 Thời lượng ước tính: **~70 phút** nếu máy đã cài và nạp sẵn ROS 2 Jazzy, hoặc khoảng 50 phút nếu bạn dừng ở bước kiểm tra giao diện do chưa có lidar thật trên bàn.
 
+Hãy tưởng tượng bạn bị bịt mắt thả vào một căn phòng lạ hoàn toàn mới, trong tay chỉ có cây gậy dò khoảng cách. Muốn biết mình đang đứng ở đâu, bạn cần một tấm bản đồ; nhưng muốn vẽ được tấm bản đồ chính xác, bạn lại phải biết mình đang đứng ở đâu! Nghịch lý "con gà và quả trứng" nổi tiếng đó chính là bài toán **SLAM (Simultaneous Localization and Mapping — Định vị và Xây dựng Bản đồ Đồng thời)**, viên gạch nền của mọi robot tự hành hiện đại.
+
+## Bản đồ kiến thức nền: Bốn trụ cột của Bài toán SLAM 2D (`slam_toolbox`)
+
+1. **Khớp quét (Scan Matching — Front-end)**:
+   So khớp hai lát cắt LiDAR liên tiếp (ICP hoặc Correlative Scan Matching) để ước lượng độ dịch chuyển thực tế của xe, sửa sai số trượt bánh của odometry.
+2. **Đồ thị Tư thế (Pose Graph) & Tối ưu hóa Back-end**:
+   Mỗi vị trí robot là một nút (node), mỗi phép đo odometry hay khớp quét là một cạnh lò xo (constraint) nối hai nút. Khi robot đi một vòng lớn, sai số góc nhỏ tích tụ khiến tường vẽ bị lệch đôi.
+3. **Đóng vòng lặp (Loop Closure)**:
+   Khi robot quay lại một góc hành lang từng đi qua, SLAM nhận diện sự trùng khớp hình học, thêm một "cạnh ràng buộc dài" nối quá khứ với hiện tại và tối ưu lại toàn bộ đồ thị tư thế để kéo bản đồ khít lại làm một!
+4. **Bản đồ Lưới chiếm dụng (Occupancy Grid Map — Log-Odds)**:
+   Biểu diễn mặt bằng dưới dạng lưới ô vuông (ví dụ `5 cm × 5 cm`), mỗi ô lưu xác suất bị vật cản chiếm chỗ (đen = tường, trắng = trống, xám = chưa biết) cập nhật bằng công thức cộng *log-odds* siêu nhanh.
+
 ## Mục tiêu học
 
 Sau bài học này, bạn sẽ vẽ được chuỗi ba cạnh TF mà `slam_toolbox` yêu cầu, liệt kê đúng các topic phải tồn tại trước khi chạy `online_async_launch.py`, phân biệt được bản đồ hành lang bị cong do lỗi encoder với khu vực chưa được quét, và giải thích rõ vì sao cảm biến đơn điểm TF-Luna không thể cung cấp dữ liệu `sensor_msgs/msg/LaserScan`.
@@ -73,6 +86,19 @@ ros2 run tf2_ros tf2_echo odom base_link
 ```
 
 Topic `/scan` phải có kiểu `sensor_msgs/msg/LaserScan` với ít nhất một publisher. Topic `/odom` phải có kiểu `nav_msgs/msg/Odometry` với `frame_id` là `odom` và `child_frame_id` là `base_link`; khi đẩy thẳng robot, tọa độ tịnh tiến phải tăng tương ứng, còn khi xoay tại chỗ góc yaw phải thay đổi đúng chiều. Khi các điều kiện này thỏa mãn và SLAM hoạt động bình thường, chính SLAM sẽ tự động xuất bản thêm cạnh `map → odom` (kiểm tra bằng `ros2 run tf2_ros tf2_echo map odom` — đây là đầu ra của SLAM, không phải cạnh bạn tự phát tĩnh).
+
+### Khung giải thích (nên đọc chậm): Tính tay cập nhật xác suất 1 ô lưới Occupancy Grid bằng Log-Odds
+
+Xét 1 ô lưới ban đầu chưa biết trạng thái ($$p_0 = 0{,}5 \implies \ell_0 = \ln\frac{0{,}5}{0{,}5} = \mathbf{0}$$). Giả sử mô hình cảm biến LiDAR cho:
+- Khi tia laser **đập trúng ô** (occupied): cộng $$\ell_{\text{occ}} = +0{,}85$$ (tương ứng $$p \approx 0{,}70$$).
+- Khi tia laser **xuyên qua ô** (free): cộng $$\ell_{\text{free}} = -0{,}40$$ (tương ứng $$p \approx 0{,}40$$).
+
+Theo dõi 3 lần quét liên tiếp đi qua đúng ô đó:
+1. **Lần 1 (trúng vật cản):** $$\ell_1 = 0 + 0{,}85 = +0{,}85 \implies p_1 = \frac{1}{1 + e^{-0{,}85}} \approx \mathbf{0{,}70}$$.
+2. **Lần 2 (nhiễu giả, tia xuyên qua):** $$\ell_2 = 0{,}85 - 0{,}40 = +0{,}45 \implies p_2 = \frac{1}{1 + e^{-0{,}45}} \approx \mathbf{0{,}61}$$ (không bị 1 tia nhiễu xóa sạch tường!).
+3. **Lần 3 (trúng lại vật cản):** $$\ell_3 = 0{,}45 + 0{,}85 = +1{,}30 \implies p_3 = \frac{1}{1 + e^{-1{,}30}} \approx \mathbf{0{,}79}$$ (khẳng định chắc chắn là tường!).
+
+Chính phép cộng tuyến tính log-odds này giúp `slam_toolbox` cập nhật hàng chục nghìn ô lưới mỗi giây mà vẫn kháng nhiễu cực tốt!
 
 ## Lab
 

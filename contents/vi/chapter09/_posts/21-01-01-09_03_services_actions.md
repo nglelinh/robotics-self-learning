@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~75 phút**.
 
+Topic dạng dòng chảy liên tục rất tuyệt cho cảm biến LiDAR hay vận tốc bánh xe, nhưng lại cực kỳ bất tiện khi bạn muốn hỏi *"Lưu bản đồ này xong chưa?"* hoặc ra lệnh *"Hãy di chuyển tới phòng 302, báo tiến độ mỗi giây và dừng ngay nếu tôi bấm Hủy!"*. Đó là lý do ROS 2 cung cấp thêm hai mẫu giao tiếp bậc cao hơn: **Service** (hỏi–đáp đồng bộ ngắn) và **Action** (tác vụ dài có phản hồi tiến độ và hỗ trợ hủy).
+
+## Bản đồ kiến thức nền: So sánh ba mẫu giao tiếp trong ROS 2
+
+1. **Topic (Luồng một chiều, nhiều–nhiều)**:
+   Dành cho dữ liệu liên tục có tần suất (cảm biến, odometry, `cmd_vel`). Không xác nhận đã nhận từng gói.
+2. **Service (Yêu cầu – Phản hồi ngắn, 1–1)**:
+   Dành cho thao tác nhanh, rời rạc cần kết quả xác nhận (reset odometry, đổi chế độ lái, bật/tắt rơ-le). Không được dùng cho tác vụ kéo dài nhiều giây vì sẽ chặn luồng xử lý.
+3. **Action (Goal – Feedback – Result + Cancel)**:
+   Xây dựng từ bộ ba kênh (gửi mục tiêu, nhận tiến độ định kỳ, nhận kết quả cuối và cho phép hủy ngang an toàn). Đây là chuẩn bắt buộc cho **Nav2** (`NavigateToPose`) và **MoveIt 2** (điều khiển cánh tay).
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ gọi được một service cộng hai số để nhận phản hồi trực tiếp, đồng thời gửi mục tiêu (goal) cho action Fibonacci và phân biệt rõ phản hồi tiến độ (feedback) với kết quả cuối cùng (result). Bạn cũng sẽ chọn đúng cơ chế topic, service hoặc action cho bốn tác vụ phổ biến: truyền liên tục vận tốc bánh xe, đặt lại bộ đếm encoder, di chuyển tới một tư thế (pose) đích và xuất bản dữ liệu quét laser. Nhờ đó, khi gặp action `NavigateToPose` của Nav2 ở chương sau, bạn sẽ nhận ra nó có cùng cấu trúc với ví dụ Fibonacci nhưng được bổ sung thêm bản đồ.
@@ -63,6 +74,15 @@ ros2 node list
 **Kết quả mong đợi:** `/fibonacci` và node server vẫn tồn tại. Nếu bạn gửi tiếp một goal ngắn hơn (`order: 5`), server vẫn phải tính và trả về kết quả bình thường. Đây chính là đặc tính cần có ở Nav2 sau này: một lượt điều hướng bị hủy hoặc thất bại không buộc bạn phải khởi động lại toàn bộ hệ thống. Service không có khả năng này — không tồn tại lệnh `ros2 service cancel`; client hoặc phải chờ, hoặc bị tắt ngang trong khi server có thể vẫn đang kẹt giữa chừng.
 
 Ghi chú thêm về hệ quả đối với động cơ: hủy `NavigateToPose` chỉ làm action server ngừng gửi feedback mới, chứ không tự động đặt `Twist` cuối về 0 nếu bộ điều khiển hoặc cầu nối không chủ động làm việc đó. Watchdog 300 ms trên firmware (chương 08) đóng vai trò lưới an toàn cuối cùng. Một cầu nối thiết kế tốt sẽ chủ động xuất bản `Twist` bằng 0 cả khi nhận lệnh hủy *lẫn* khi mất luồng dữ liệu, tránh tình trạng xe vẫn tiếp tục trôi sau khi bạn bấm nút dừng trên RViz.
+
+### Khung giải thích (nên đọc chậm): Chọn đúng mẫu giao tiếp cho 4 tình huống thực tế trên robot
+
+| Yêu cầu trên robot | Chọn mẫu nào? | Lý do kỹ thuật |
+| :--- | :---: | :--- |
+| Đọc góc nghiêng từ cảm biến IMU ở 100 Hz | **Topic** | Dữ liệu liên tục tần suất cao, nhiều node (EKF, điều khiển) cùng cần nghe |
+| Xóa sạch bộ đếm odometry về `(0, 0, 0)` trước khi chạy test | **Service** | Thao tác rời rạc dưới 5 ms, cần biết chắc MCU đã thực hiện xong |
+| Ra lệnh robot tự hành đi 15 mét qua hành lang tới phòng lab | **Action** | Kéo dài 30 giây, cần xem khoảng cách còn lại (`feedback`) và phải hủy được ngay khi gặp sự cố |
+| Nhấn nút dừng khẩn cấp (E-Stop) | **Phần cứng ngắt nguồn + Topic ưu tiên** | Không bao giờ chờ phản hồi đồng bộ khi cần cắt điện khẩn cấp! |
 
 ## Lab
 

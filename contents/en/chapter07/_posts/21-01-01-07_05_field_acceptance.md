@@ -13,6 +13,8 @@ draft: false
 
 The box test is over. This lesson puts the robot on the floor in a clear lane, runs four directions at the clamped PWM, and writes a log that a later chapter can trust. Passing is a set of observations, not a feeling that it "sort of drove."
 
+A robot sitting on blocks on a desk can look invincible—wheels spinning crisply, telemetry streaming cleanly—until the moment its tires touch the floor. Real floor tests expose voltage sag under load, caster shimmy on tile seams, and watchdog latencies that bench tests hide. Field acceptance is the disciplined ritual of turning a rolling trial into a signed, quantitative verdict.
+
 ## Learning objectives
 
 1. Run a scripted floor sequence in a clear $$2~\mathrm{m}$$ lane: forward about $$2~\mathrm{s}$$, stop, back, spin left, spin right, all inside the $$\pm 180$$ clamp, with a hand on the battery switch.
@@ -24,6 +26,14 @@ The box test is over. This lesson puts the robot on the floor in a clear lane, r
 
 Lessons 07-01 through 07-04 are the plant: strapped pack, fused positive lead, buck at 5.0 V, sign map, text protocol, slew, and timeout. Chapter 05 is the stall and the hot-driver rule. Chapter 06's $$b$$ and $$r$$ are already in `lab-notes.md` (course examples $$b = 0.15~\mathrm{m}$$ or your $$148~\mathrm{mm}$$, and $$r = 31.2~\mathrm{mm}$$). You still do not publish Twist. You may record distance and time. You may not stamp them onto PWM as a law. Chapter 08 earns m/s.
 
+
+## Background Knowledge Map: Battery Internal Resistance, Acceptance Testing, and Structured Telemetry
+
+Field testing sits at the intersection of electrical physics and test engineering:
+
+- **Battery Internal Resistance & Voltage Sag:** A real battery behaves as an ideal open-circuit voltage $$V_{\text{oc}}$$ in series with an internal resistance $$R_{\text{int}}$$. Under acceleration current $$I$$, terminal voltage drops to $$V_{\text{term}} = V_{\text{oc}} - I R_{\text{int}}$$. If $$V_{\text{term}}$$ dips below your buck converter's dropout threshold, the MCU browns out mid-turn.
+- **Acceptance Criteria & Pass/Fail Envelopes:** Professional robotics teams define numeric acceptance thresholds *before* the run (stopping distance on kill/timeout, lateral drift over 2 m, minimum rail voltage under launch) so confirmation bias cannot turn a borderline run into a "pass."
+- **Time-Stamped Telemetry Logging:** Recording `t_ms, v_bat, cmd_l, cmd_r, state` at fixed intervals lets you reconstruct transient faults after the run instead of staring at a robot wondering why it paused.
 ## Why this matters for Capstone A and the ROS path
 
 Chapter 08's PID assumes the sign is right and that a lost command stops the wheels. A reversed right tire makes the proportional term add the wrong yaw. Chapter 09 assumes the base is safe when the publisher dies, and a sleeping laptop is that publisher. Acceptance is the gate: four directions match the sign map, silence stops the robot, the battery cannot fall off, and the notes hold a wiring photo, the protocol, the voltages, and $$b$$ and $$r$$.
@@ -79,6 +89,19 @@ Each row is one event. The hypothesis column stays empty when the event matched 
 Do not average a bad row into a pass. If the sender dies and the robot rolls into the tape, the timeout was never coded and the last PWM stayed in LEDC. Put lesson 04's check back, prove the box stop, then repeat the lane. If `V 80 80` yaws, one sign is wrong: swap that motor's leads or the firmware polarity, not both. Chapter 08 does not start while either row is still open.
 
 Pass means all of these: four directions match the sign map; the timeout stop works; the battery is strapped, with no bare soldered lithium leads; the notes include the wiring photo, a protocol snippet (`V`, `S`, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), the sign map, the voltages, and $$b$$ and $$r$$.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Checking Voltage Sag and Stopping Distance on a Field Run
+
+Suppose your 2S Li-Ion pack reads $$V_{\text{oc}} = 7.40\ \text{V}$$ at rest and has combined pack + wiring resistance $$R_{\text{int}} = 0.45\ \Omega$$. Your 5 V buck regulator requires at least $$V_{\text{in,min}} = 6.20\ \text{V}$$ to maintain clean 5.0 V output.
+
+1. **Predict voltage sag during a hard launch ($$I_{\text{peak}} = 2.4\ \text{A}$$):**
+   $$V_{\text{term}} = 7.40 - (2.4)(0.45) = 7.40 - 1.08 = 6.32\ \text{V}.$$
+   At 7.40 V (half-charged), $$6.32\ \text{V} > 6.20\ \text{V}$$ passes with a slim $$0.12\ \text{V}$$ margin.
+2. **Check the same launch near end-of-charge ($$V_{\text{oc}} = 6.80\ \text{V}$$):**
+   $$V_{\text{term}} = 6.80 - 1.08 = 5.72\ \text{V} < 6.20\ \text{V}!$$
+   The 5 V rail droops and the ESP32 reboots right on launch. Lowering the slew-rate limit or tightening a loose battery connector (cutting $$R_{\text{int}}$$ to $$0.20\ \Omega$$) raises $$V_{\text{term}}$$ to $$6.32\ \text{V}$$ and eliminates the brownout.
+3. **Check stopping distance on watchdog trip:** Cruising at $$v = 0.35\ \text{m/s}$$ with watchdog $$T_{\text{wd}} = 0.25\ \text{s}$$ and coasting deceleration $$a = 1.4\ \text{m/s}^2$$, total stopping distance is:
+   $$d_{\text{total}} = v T_{\text{wd}} + \frac{v^2}{2a} = 0.35(0.25) + \frac{0.35^2}{2(1.4)} = 0.0875 + 0.0438 = 0.131\ \text{m} \approx 13\ \text{cm}.$$
 
 ## Lab
 

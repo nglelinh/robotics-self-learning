@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **80–110 minutes**. This lesson is the hands-on. Power stays off for every mechanical check.
 
+Spec sheets lie—not maliciously, but because gearboxes get substituted in kits, tires compress under battery weight, and nominal ratios like "1:48" are often rounded from 48.2:1. A ten-minute bench calibration with two tape pointers turns an unknown kit into a known mechanical plant before you write a single line of control code.
+
 ## Learning objectives
 
 By the end of this lesson you have a gear ratio you both predicted and checked, a backlash estimate at the wheel in degrees, and a written assembly checklist you can run before any voltage in Chapter 07. You can tell a simple idler from a ratio change, and you can multiply a gearbox stamp by an external belt when both exist.
@@ -21,6 +23,14 @@ By the end of this lesson you have a gear ratio you both predicted and checked, 
 
 Lessons 01–07. You need $$b$$, $$r$$, an M3 habit, the ratio definition $$i = N_{\text{out}}/N_{\text{in}} = \omega_{\text{in}}/\omega_{\text{out}}$$, and the strain-relief tug. A cardboard pointer and a protractor, or a paper protractor, are enough instruments.
 
+
+## Background Knowledge Map: Experimental System Identification, Measurement Uncertainty, and Bias vs. Variance
+
+This bench lab introduces experimental identification—the empirical half of robotics engineering:
+
+- **Direct Mechanical Identification:** Counting input revolutions $$N_{\text{in}}$$ per exact output revolution $$N_{\text{out}}$$ measures the true gear ratio $$G = N_{\text{in}} / N_{\text{out}}$$ without disassembling a sealed gearbox, while reversing direction under a light finger load reveals angular backlash $$\Delta\theta_{\text{bl}}$$.
+- **Error Reduction by Multi-Revolution Averaging:** Measuring a single revolution with a $$\pm 2^\circ$$ eye error yields $$2/360 = 0.56\%$$ uncertainty. Averaging over $$K = 10$$ revolutions divides the endpoint reading error by $$K$$ (down to $$0.056\%$$)—a standard metrology technique.
+- **Left–Right Symmetry Check:** Differential-drive robots rely on matched left and right drivetrains. Comparing $$G_L$$ vs. $$G_R$$ and free-spin friction between both sides catches bent shafts or binding housings before PID tries to mask a mechanical defect.
 ## Why this matters for Capstone A and the ROS path
 
 Chapter 07 is the first time this chassis is allowed to see voltage. The checklist below is the gate. A wheel that scrapes, a battery that slides, or a set screw on the round will waste that lab on a failure Lesson 07 already named. The ratio you measure is the ratio `diff_drive_controller` will turn into meters. A result within about 10 percent of the nameplate is what molded teeth can support. If the kit is still in transit, the drawing prediction is the deliverable and you label it as a drawing. You do not invent a measured angle you did not take.
@@ -58,6 +68,18 @@ $$
 about 7 percent, inside the 10 percent band for molded teeth and a handmade pointer. You write $$i = 48$$ and “checked, 24° versus 22.5°.” If the pointer had landed near $$45^\circ$$, the error is a factor of two: a missed 2:1 belt, or a stamp you halved. If it had landed near $$67.5^\circ$$, you used $$i = 16$$ or you turned the wrong shaft. Backlash measured by rocking the wheel, say $$5^\circ$$, is recorded next to the ratio and is not “fixed” by tightening the mesh until it binds.
 
 Direction: one external mesh, or an odd number of them, reverses the wheel relative to the motor. Your firmware sign in Lesson 05 has to agree with this observation, still with power off, by turning the shaft the way the motor will turn.
+
+### Deep-Dive Explanation (Read Slowly): Computing Effective Encoder Ticks per Meter by Hand
+
+Once you measure the true gear ratio $$G$$ and rolling radius $$r$$ in this lab, combine them into the exact conversion constant your firmware and ROS 2 odometry need:
+
+1. **Measured bench constants:** Suppose your motor rear shaft has a magnetic encoder producing $$P_{\text{motor}} = 11\ \text{PPR}$$ (pulses per motor revolution) on each channel, read in **4× quadrature** mode ($$44\ \text{ticks/motor rev}$$). Your pointer test counts $$N_{\text{in}} = 450$$ motor turns for $$N_{\text{out}} = 10$$ wheel turns, giving $$G = 45.0$$. Your loaded roll test measures $$r = 0.0315\ \text{m}$$.
+2. **Ticks per wheel revolution:**
+   $$N_{\text{wheel}} = 4 \times P_{\text{motor}} \times G = 44 \times 45.0 = 1980\ \text{ticks/wheel rev}.$$
+3. **Wheel circumference and ticks per meter:**
+   $$C = 2\pi r = 2\pi (0.0315) = 0.1979\ \text{m/rev},$$
+   $$K_{\text{ticks/m}} = \frac{1980}{0.1979} \approx 10\,004\ \text{ticks/m} \quad (\approx 0.10\ \text{mm/tick}).$$
+4. **Sanity check:** If the wheel advances 1,000 ticks in 0.50 s, linear wheel speed is $$v = \frac{1000 / 10004}{0.50} = 0.200\ \text{m/s}$$. Recording $$10\,004\ \text{ticks/m}$$ in `lab-notes.md` eliminates guesswork across Chapters 07–11.
 
 ## Lab: pointers, then the list
 

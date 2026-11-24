@@ -10,6 +10,10 @@ lesson_type: required
 draft: false
 ---
 
+You now have a working microcontroller toolchain, a non-blocking heartbeat, reliable serial telemetry, and a verified pin/power map. This Chapter 02 sign-off checklist locks down your MCU foundation before Chapter 03 introduces timers, PWM, interrupts, and firmware state machines.r
+
+---
+
 ## Objectives
 
 You will close Chapter 02 only with evidence you can point at. You will record the toolchain and its version string. You will show that the onboard LED blinks at a period you chose, and you will paste the serial heartbeat rather than describe it. You will finish a pin card for the board on the desk: which GPIO is the LED, and which pins are safe outputs. You will write the two rail measurements, 3.3 V and 5 V or VBUS. You will add one sentence that names the motor pins you will not use yet, VM and the battery. If a tick fails, you will reopen the lesson that taught it instead of buying a second board.
@@ -17,6 +21,16 @@ You will close Chapter 02 only with evidence you can point at. You will record t
 ## Prerequisites
 
 Lessons 1 through 5 are the evidence this page consumes. You need the decision sentence (ESP32 dev board or a named Pico), the toolchain that matches it, the heartbeat log or an honest blank, and the pin card. A meter is required for the rail tick. The full cart remains Chapter 00 ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Re-read the wheels-up sentence in the heartbeat sketch so this checklist does not “pass” a robot that can already roll.
+
+## Background Knowledge Map: Reproducible Firmware Baselines and Interface Contracts
+
+Three engineering disciplines turn a Chapter 02 bring-up into a reusable platform:
+
+- **Pinned Pin-Map Header (`pins.h` / `pins.py`):** Centralizing every GPIO number in one file eliminates "magic numbers" scattered across code and lets you verify zero pin collisions in seconds.
+- **Deterministic Telemetry Schema:** Fixing a versioned CSV header (e.g., `t_ms,state,v_bat`) lets your host Python scripts plot data across chapters without rewriting parsers.
+- **Cold-Boot Recovery Test:** Power-cycling the robot on battery alone (no USB cable!) proves that your firmware boots cleanly without waiting forever on `while (!Serial)` and without strapping-pin conflicts.r
+
+---
 
 ## Why it matters for Capstone A
 
@@ -79,6 +93,32 @@ A third note, rejected, is the one the exercises use.
 Open `lab-notes.md`. Create a section titled with the date and “Chapter 02 gates.” For each of the six ticks, write PASS plus the evidence, or OPEN plus the lesson you will repeat. If the board is absent, mark blink, serial, and the meter as pending in those words. Read the section once. Any tick you cannot point at with a finger — a version string, a line of serial, a voltage, a pin number, the words VM and battery — becomes OPEN before you save.
 
 A chapter pass is all six ticks PASS, wheels-up sentence present, no motor connected. A dry run is toolchain, decision, and a photo-traced pin card, with the three measured ticks explicitly pending. There is no third state called “close enough.”
+
+## Deep-Dive Explanation (Read Slowly): Verifying Battery-Only Cold Boot and Telemetry Integrity
+
+Many students pass every bench test while tethered to USB, then watch their robot sit lifeless the first time they unplug USB and flip the battery switch. Audit these four failure modes:
+
+1. **Check for blocking USB waits:** Code like `while (!Serial) {}` (common on native-USB boards like Pico/Leonardo) freezes forever when no laptop is attached. Always add a timeout (e.g., 2 seconds max).
+2. **Verify strapping-pin states at reset:** Measure `GPIO0` (must be HIGH) and `GPIO12` (must be LOW on 3.3 V flash ESP32) before pressing `EN/RST`.
+3. **Measure steady heartbeat period:** Time 10 full LED cycles with a stopwatch; if expected period is $$1.00\text{ s}$$, 10 cycles should take $$10.0 \pm 0.2\text{ s}$$.
+4. **Check zero dropped serial lines:** Over 100 consecutive telemetry lines, verify monotonic timestamps `t_ms[k] - t_ms[k-1] == period_ms`.
+
+### Concrete Worked Example: Computing Loop Jitter from a 5-Line Serial Telemetry Log
+
+Suppose your firmware targets a 20 Hz telemetry stream (expected $$\Delta t = 50\text{ ms}$$) and logs five consecutive timestamps (in ms): `1000, 1050, 1101, 1150, 1200`.
+
+- **Step 1 — Compute inter-sample intervals $$\Delta t_k$$:**
+  `50 ms, 51 ms, 49 ms, 50 ms`.
+- **Step 2 — Mean period and peak jitter:**
+  - Mean: $$\overline{\Delta t} = \frac{50 + 51 + 49 + 50}{4} = 50.00\text{ ms}$$ (zero drift — proving `last += period` works!).
+  - Peak jitter: $$\max \lvert \Delta t_k - 50 \rvert = 1\text{ ms}$$ (2% of period — completely normal for 1 ms `millis()` tick quantization).
+- **Step 3 — Contrast with a hidden `delay(20)` bug:** If intervals read `70, 70, 70, 70 ms`, your actual frequency collapsed to $$1000/70 = 14.3\text{ Hz}$$ — caught immediately by checking `Δt`!
+
+**Common Pitfall:** Testing only with USB plugged in and forgetting that the battery-powered 5 V buck rail has slightly different startup ramp timing than USB 5 V.
+
+**Quick Check:** Disconnect USB, switch ON battery power, and confirm the heartbeat LED begins blinking within 2 seconds — that is your official green light for Chapter 03.
+
+---
 
 ## Exercises
 

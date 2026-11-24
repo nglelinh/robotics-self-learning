@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~90 phút** (có thể lâu hơn nếu bạn vừa cài mới Ubuntu).
 
+Một lỗi kinh điển của người mới học ROS 2 là gõ `ros2 run ...` rồi nhận thông báo `Package not found` dù vừa biên dịch xong không một lỗi nào. Nguyên nhân gần như luôn nằm ở một khái niệm cốt lõi: **chuỗi chồng lớp không gian làm việc (underlay / overlay workspace)** và cách `colcon` nạp biến môi trường vào shell hiện tại.
+
+## Bản đồ kiến thức nền: Ba trụ cột Cài đặt ROS 2 Jazzy & Workspace `colcon`
+
+1. **Kiến trúc Underlay vs. Overlay**:
+   `/opt/ros/jazzy/setup.bash` là lớp nền (*underlay*) chứa các gói chuẩn của hệ thống; `~/ros2_ws/install/setup.bash` là lớp phủ (*overlay*) chứa mã nguồn của riêng bạn. Luôn source underlay trước khi build và source overlay trước khi chạy.
+2. **Công cụ biên dịch `colcon` & Cấu trúc gói (`package.xml`, `setup.py` / `CMakeLists.txt`)**:
+   `colcon build --symlink-install` giúp thay đổi tệp Python hay tệp YAML có hiệu lực ngay mà không cần biên dịch lại toàn bộ không gian làm việc.
+3. **Quản lý phụ thuộc bằng `rosdep` & Cô lập mạng bằng `ROS_DOMAIN_ID`**:
+   Trong phòng lab có 20 nhóm sinh viên dùng chung Wi-Fi, đặt mỗi nhóm một `ROS_DOMAIN_ID` riêng (từ 0 đến 101) giúp robot của bạn không nhận nhầm lệnh `cmd_vel` từ bàn bên cạnh!
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ cài đặt được ROS 2 Jazzy Jalisco trên Ubuntu 24.04 từ gói `.deb` chính thức, tạo workspace overlay bằng `colcon` và kiểm chứng rằng lệnh `ros2 topic list` chỉ hoạt động trong terminal mới sau khi nạp (source) đúng thứ tự underlay rồi đến overlay. Bạn cũng sẽ nhận diện được lỗi trộn môi trường giữa Humble và Jazzy qua thông báo hệ thống, đồng thời xác định rõ vai trò của máy tính chạy ROS so với vi điều khiển (MCU) trên xe Capstone.
@@ -38,6 +49,13 @@ Hệ thống cần được thiết lập bảng mã UTF-8 trước khi thêm kh
 ![Underlay rồi mới overlay]({{ site.imgurl }}/generated/ch09_workspace.png)
 
 Khóa học này không hỗ trợ gỡ lỗi trên Windows hay macOS. Nếu bạn chỉ có máy tính Windows, hãy cài Ubuntu 24.04 trong máy ảo (tối thiểu 4 GB RAM và 30 GB ổ cứng) hoặc dùng một máy tính phụ. WSL2 có thể chạy được nhưng thường phát sinh nhiều vấn đề ngoài phạm vi bài học (như đồ họa, truyền cổng serial USB, Gazebo). Cài trực tiếp Ubuntu là phương án khớp hoàn toàn với tài liệu thực hành.
+
+### Khung giải thích (nên đọc chậm): Truy vết nhanh 3 biến môi trường khi `ros2 pkg list` không thấy gói của bạn
+
+Khi gặp lỗi không tìm thấy gói hoặc xung đột giữa hai nhóm trong phòng lab, hãy kiểm tra đúng 3 dòng lệnh theo thứ tự:
+1. `echo $AMENT_PREFIX_PATH` → Nếu chỉ thấy `/opt/ros/jazzy` mà **thiếu** `/home/.../ros2_ws/install/...`, bạn quên chạy `source ~/ros2_ws/install/setup.bash` trong cửa sổ terminal mới mở!
+2. `echo $ROS_DOMAIN_ID` → Nếu máy tính và robot có hai số khác nhau (ví dụ máy tính là `0`, robot là `17`), hai bên sẽ hoàn toàn "điếc" trước topic của nhau vì DDS dùng cổng UDP khác nhau theo công thức $$\text{Port} = 7400 + 250 \times \text{DOMAIN\_ID}$$.
+3. `colcon build --packages-select my_pkg --symlink-install` → Biên dịch riêng 1 gói thay vì build lại cả 20 gói trong workspace, tiết kiệm từ 3 phút xuống còn vài giây.
 
 ## Lab
 

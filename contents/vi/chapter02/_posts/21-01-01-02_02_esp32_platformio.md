@@ -18,6 +18,35 @@ Trong bài này, bạn sẽ cài đặt một bộ công cụ (toolchain) duy nh
 
 Bạn cần đã chốt bo mạch ESP32 làm vi điều khiển chính từ bài trước. Nếu bạn chọn dòng Pico, hãy đọc nhanh bài này để nắm tổng quan rồi chuyển sang bài về Pico. Cài đặt cả hai bộ công cụ trong cùng một buổi rất dễ dẫn đến nhầm lẫn cấu hình bo mạch trong dự án. Về phần cứng, bạn cần một laptop và một sợi cáp USB có hỗ trợ truyền dữ liệu. Danh mục linh kiện đầy đủ nằm ở bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
+---
+
+Arduino IDE rất tuyệt vời để nhấp nháy đèn LED đầu tiên trong 5 phút, nhưng khi dự án robot của bạn lớn lên thành 8 file mã nguồn (`motors.cpp`, `encoders.cpp`, `pid.cpp`, `imu.cpp`...) với 4 thư viện ngoài, việc quản lý thư viện toàn cục trong Arduino IDE rất dễ biến thành cơn ác mộng "hôm qua chạy, hôm nay báo lỗi biên dịch"! **PlatformIO trên VS Code** giải quyết dứt điểm điều đó bằng cấu hình khai báo theo từng dự án (`platformio.ini`), tự động gợi ý mã thông minh và quản lý toolchain ESP32 chuẩn công nghiệp.
+
+## Bản đồ kiến thức nền: Kiến trúc Biên dịch & Nạp Firmware ESP32 với PlatformIO
+
+1. **Cấu hình Khai báo (`platformio.ini`):** Một tệp duy nhất khóa chặt bo mạch (`board = esp32dev`), framework (`arduino` hoặc `espidf`), tốc độ nạp (`upload_speed`), tốc độ cổng Serial (`monitor_speed = 115200`) và danh sách thư viện kèm đúng số phiên bản (`lib_deps`).
+2. **Bản đồ Bộ nhớ ESP32 (Flash vs. SRAM):** Mã chương trình nằm trong bộ nhớ **Flash** (thường 4 MB — mất điện không mất dữ liệu); biến toàn cục, ngăn xếp (stack) và bộ đệm chạy nằm trong **SRAM** (520 KB — cực nhanh nhưng giới hạn!).
+3. **Kênh Nạp & Chẩn đoán USB-UART (CP2102 / CH340):** Cầu nối USB-UART biến cổng USB máy tính thành cổng COM ảo; lỗi nạp thường đến từ thiếu driver cầu nối, cáp USB chỉ có dây sạc (không có dây dữ liệu D+/D-), hoặc quên nhấn giữ nút `BOOT` trên một số bo devkit đời cũ.
+
+### Ví dụ cầm tay chỉ việc: Đọc báo cáo bộ nhớ biên dịch PlatformIO của một firmware robot ESP32
+
+Sau khi bấm `Build`, PlatformIO in ra bảng thống kê bộ nhớ tương tự:
+- **RAM (DRAM khả dụng cho ứng dụng = 327.680 byte):** dùng `48.200 byte` → $$\dfrac{48{,}200}{327{,}680} = \mathbf{14.7\%}$$ (còn dư **279 KB** RAM!).
+- **Flash (phân vùng app mặc định = 1.310.720 byte trong 4 MB):** dùng `820.400 byte` → $$\dfrac{820{,}400}{1{,}310{,}720} = \mathbf{62.6\%}$$ (khi bật Wi-Fi + BLE, dung lượng thư viện có thể vượt 1,3 MB → cần đổi bảng phân vùng `board_build.partitions = huge_app.csv` để mở rộng lên **3 MB**!).
+
+Chỉ bằng 2 phép chia phần trăm này, bạn biết ngay khi nào cần mở rộng phân vùng Flash và đảm bảo không bao giờ để RAM chạm mức nguy hiểm ($$> 80\%$$) gây tràn stack ngẫu nhiên!
+
+### Khung giải thích: 4 bước gỡ lỗi nạp ESP32 nhanh trong 60 giây (nên đọc chậm)
+
+1. **Bước 1 — Kiểm tra cáp USB truyền dữ liệu:** Cáp sạc điện thoại giá rẻ thường cắt bỏ 2 dây dữ liệu — nếu cắm vào mà không xuất hiện cổng `COM` / `/dev/ttyUSB0` mới, hãy đổi ngay sang cáp có truyền dữ liệu!
+2. **Bước 2 — Đóng các cửa sổ Serial Monitor khác đang chiếm cổng:** Một cổng COM chỉ cho phép **1 chương trình** mở tại một thời điểm; nếu để mở màn hình Serial ở cửa sổ khác, lệnh `Upload` sẽ báo `Permission denied` hoặc `Port busy`.
+3. **Bước 3 — Xử lý lỗi `Connecting........_____.....`:** Giữ nút `BOOT` trên ESP32, bấm nhả nút `EN` (Reset), rồi thả `BOOT` ngay khi thấy dòng `Writing at 0x00010000...`.
+4. **Bước 4 — Đồng bộ tốc độ baud Serial (`115200`):** Nếu màn hình Serial in toàn ký tự rác kiểu `⸮⸮x⸮`, hãy kiểm tra `Serial.begin(115200)` trong code có khớp với `monitor_speed = 115200` trong `platformio.ini` hay không!
+
+**Kiểm tra nhanh.** Tại sao một dự án ESP32 dung lượng biên dịch `1.45 MB` lại báo lỗi *"Sketch too big"* dù trên vỏ bo ghi rõ Flash **4 MB**? Vì bảng phân vùng mặc định của ESP32 chia 4 MB thành 2 phân vùng OTA (mỗi phân vùng app chỉ **1,25 MB**) cộng phân vùng lưu tệp SPIFFS — đổi sang phân vùng `huge_app.csv` sẽ gộp lại thành **3 MB** cho ứng dụng!
+
+---
+
 ## Vì sao bài này gắn với Capstone A
 
 Chương trình điều khiển từ xa (teleop) cho xe vi sai ở chương 07 chạy trực tiếp trên chính vi điều khiển này, thực hiện xuất PWM cho hai bánh qua TB6612, tự ngắt sau khoảng 300 ms không có lệnh và yêu cầu nhấc bánh khi thử nghiệm lần đầu. Firmware đó chỉ đáng tin cậy khi bo mạch của bạn đã nhận được tệp nạp (binary), điều khiển chính xác một chân GPIO đã chọn và gửi được dữ liệu lên máy tính ở đúng tốc độ baud. Phần teleop qua Wi-Fi ở chương 08 cũng sử dụng chung quy trình nạp này. Trước khi bật kết nối không dây, Serial Monitor ở tốc độ 115200 baud là công cụ quan sát chính để kiểm tra hoạt động của hệ thống.

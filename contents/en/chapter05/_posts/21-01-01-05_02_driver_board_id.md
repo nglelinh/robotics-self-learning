@@ -11,6 +11,10 @@ lesson_type: required
 draft: false
 ---
 
+Three motor driver boards dominate student robotics kits — the bulky red **L298N**, the tiny blue **TB6612FNG**, and the postage-stamp **DRV8833** — and picking the wrong one is the fastest way to turn half your battery into waste heat or melt a breakout board under stall load. Knowing how to read their topology (BJT Darlington vs. MOSFET), pin semantics (`AIN1/AIN2/PWMA` vs. `IN1/IN2`), and standby pins turns driver selection into an exact science.r
+
+---
+
 The silkscreen on a red module is part of the circuit. Before you trust a tutorial pinout, you identify which chip is actually soldered on your board, because the L298N, the TB6612, and the DRV8833 disagree about voltage drop, logic supply, standby, and how much current a TT gearmotor may ask for at stall. This lesson teaches you to name the board in your hand and to measure its rails before a microcontroller pin ever touches it.
 
 ## Learning objectives
@@ -23,6 +27,16 @@ The silkscreen on a red module is part of the circuit. Before you trust a tutori
 ## Prerequisites
 
 You can use the DC volts range of a multimeter and you know which probe is black. Lesson 05-01's H-bridge vocabulary (forward path, reverse path, shoot-through, PWM on enable) is the map you are now matching to a physical board. You also know that motor current does not come from USB.
+
+## Background Knowledge Map: BJT vs. MOSFET H-Bridges, Voltage Dropout, and Control Pin Topologies
+
+Three hardware-selection criteria distinguish modern motor drivers:
+
+- **BJT Darlington (`L298N`) vs. MOSFET (`TB6612FNG`, `DRV8833`):** The 1980s-era `L298N` drops a fixed $$V_{\text{CE(sat)}} \approx 1.8\text{–}3.2\text{ V}$$ across its bipolar transistors regardless of low current, wasting huge power and requiring a metal heatsink. Modern MOSFET drivers (`TB6612FNG`: $$R_{\text{on}} \approx 0.5\,\Omega$$; `DRV8833`: $$R_{\text{on}} \approx 0.36\,\Omega$$) drop only $$I \cdot R_{\text{on}}$$, staying tiny and cool.
+- **Control Pin Semantics:** `TB6612FNG` uses 2 direction pins (`AIN1`, `AIN2`) + 1 dedicated `PWMA` pin + a mandatory `STBY` pin (must be pulled `HIGH` to enable!). `DRV8833` uses just 2 PWM-capable pins (`IN1`, `IN2`) per channel + `nSLEEP` (`HIGH` to enable).
+- **Absolute Voltage & Current Windows:** `DRV8833` tops out at `10.8 V` (ideal for 1S/2S packs, *destroyed* by 3S 12.6 V packs!), whereas `TB6612FNG` handles up to `13.5 V` continuous (`1.2 A` cont / `3.2 A` peak per channel).r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -114,6 +128,33 @@ You can name the chip, you have a pin-labeled photo, and you have two meter read
 | TB6612 outputs stay dead | STBY is low or floating. Drive it high and remeasure. |
 | DRV8833 shuts down on a TT motor | Stall current is above what the small bridge can hold. Change the motor or the driver. |
 | MX1508 gets too hot to touch | The motor is too large for that board. Remove power. |
+
+## Deep-Dive Explanation (Read Slowly): Selecting the Optimal Motor Driver via Quantitative Loss & Margin Analysis
+
+Before wiring a motor driver, run this 4-step selection matrix against your battery pack and motor stall current:
+
+1. **Check maximum battery voltage (fully charged!):** A 2S Li-ion pack is `8.4 V` fresh (safe for all three); a 3S pack is `12.6 V` fresh (instantly kills a `10.8 V` max `DRV8833`!).
+2. **Check continuous vs. peak stall current per channel:** Verify driver continuous current $$\ge$$ cruise load and peak current $$\ge I_{\text{stall}}$$.
+3. **Compute driver heat dissipation at cruise (two channels):**
+   - BJT: $$P = 2 \cdot V_{\text{drop}} \cdot I$$.
+   - MOSFET: $$P = 2 \cdot I^2 \cdot R_{\text{DS(on)}}$$.
+4. **Verify effective voltage delivered to the motors:** $$V_{\text{motor}} = V_{\text{bat}} - V_{\text{drop}}$$.
+
+### Concrete Worked Example: Head-to-Head Comparison at $$V_{\text{bat}} = 7.4\text{ V}$$, $$I = 0.8\text{ A/channel}$$ (2 Motors)
+
+| Driver | Max $$V_{\text{M}}$$ | Drop per Channel at 0.8 A | Voltage at Motor | Total Heat (2 Ch) | Verdict on 2S Robot |
+| --- | --- | --- | --- | --- | --- |
+| **L298N** | $$46\text{ V}$$ | $$\approx 2.20\text{ V}$$ | $$5.20\text{ V}$$ (70%) | $$2(2.20)(0.8) = 3.52\text{ W}$$ | Heavy, hot, poor 2S efficiency |
+| **TB6612FNG** | $$13.5\text{ V}$$ | $$0.8 \times 0.50 = 0.40\text{ V}$$ | $$7.00\text{ V}$$ (95%) | $$2(0.8^2)(0.50) = 0.64\text{ W}$$ | **Best all-around (2S & 3S)** |
+| **DRV8833** | $$10.8\text{ V}$$ | $$0.8 \times 0.36 = 0.29\text{ V}$$ | $$7.11\text{ V}$$ (96%) | $$2(0.8^2)(0.36) = 0.46\text{ W}$$ | **Best for low-voltage 1S–2S** |
+
+Notice that at `0.8 A/channel`, the `TB6612FNG` and `DRV8833` waste **5.5× to 7.6× less heat** than an `L298N` and deliver almost 2 extra volts straight to the wheels!
+
+**Common Pitfall:** Wiring a `TB6612FNG` completely correctly except leaving `STBY` floating (or wiring a `DRV8833` with `nSLEEP` floating) — the driver stays asleep and outputs `0 V` forever. Tie `STBY` / `nSLEEP` to `3.3V` (or a software safety-enable GPIO).
+
+**Quick Check:** If you upgrade later to a 3S LiPo battery (`12.6 V` fully charged), which of the two MOSFET drivers survives? Only the **TB6612FNG** (`13.5 V` max, with caution) — the `DRV8833` (`10.8 V` max) will burn instantly.
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

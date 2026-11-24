@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~60 phút**. Sau khi bài 10-05 đã đối chiếu giữa mô phỏng và thực tế, bài kiểm tra cuối chương này tổng hợp toàn bộ kết quả của chương 10: Gazebo Harmonic có `/clock`, spawn thành công URDF, cầu nối serial hoặc micro-ROS, và ba dòng kiểm định sim-to-real.
 
+Hoàn thành Chương 10 nghĩa là bạn đã dựng xong "cặp song sinh số" (Digital Twin) cho robot của mình: một phiên bản chạy trên Gazebo Harmonic và một phiên bản chạy trên phần cứng thật, cùng chia sẻ chung một giao diện ROS 2. Bảng nghiệm thu này giúp xác nhận cả hai phiên bản hoạt động đồng nhất trước khi bước vào bài toán tự hành SLAM và Nav2 ở Chương 11.
+
+## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Mô phỏng & Cầu nối (Chương 10)
+
+1. **Chạy song song sạch trên Gazebo Harmonic (`sim_bringup`)**:
+   Xe sinh ra đúng tư thế trên mặt đất (không lún, không nổ), RTF ổn định ($$\ge 0{,}7$$), `/clock` hoạt động chuẩn và toàn bộ cảm biến giả lập phát đúng hệ tọa độ TF2.
+2. **Cầu nối Phần cứng Tin cậy (`real_bringup`)**:
+   Lệnh `/cmd_vel` điều khiển mượt trên xe thật, Watchdog ngắt động cơ đúng hạn khi rút cáp/tắt node, và sai số odometry vòng hở nằm trong ngưỡng đã hiệu chuẩn.
+3. **Ghi nhận Hồ sơ Sim-to-Real**:
+   Lưu trữ rõ các thông số sai lệch đo được giữa mô phỏng và xe thật (deadzone, ma sát, độ trễ) để làm đầu vào tinh chỉnh cho bộ lập kế hoạch Nav2 ở Chương 11.
+
 ## Mục tiêu
 
 Bạn cần hoàn thành và xác nhận đủ năm tiêu chí kèm log hoặc ảnh minh chứng: world Harmonic hoạt động, mô hình robot spawn thành công, lệnh `Twist` làm bánh xe mô phỏng lăn tiến, cầu nối tới firmware hoạt động (hoặc có ghi chú hoãn micro-ROS kèm ngày cụ thể) và bảng kiểm sim-to-real đã điền đủ. Nếu thiếu `/clock` thì dù đã mở được cửa sổ Gazebo vẫn chưa đạt.
@@ -36,6 +47,13 @@ Capstone B ở chương 11 sẽ sử dụng chính môi trường mô phỏng v�
 **Cầu nối phần cứng.** Nếu có xe thật: cầu nối serial hoặc micro-ROS agent chuyển `Twist` thành chuyển động bánh xe (nhấc trên không) rồi tự về 0 khi ngừng gửi lệnh. Nếu chưa có xe: ghi chú hoãn có ngày cụ thể, nhưng tiêu chí gửi lệnh trong mô phỏng vẫn bắt buộc đạt.
 
 **Đối chiếu sim-to-real.** Điền đủ ba dòng đạt/không đạt theo bài 10-05, kèm ít nhất một số đo thực tế hoặc xác nhận loại bỏ `use_sim_time` trên tệp launch robot thật.
+
+### Khung giải thích (nên đọc chậm): Bài test "Đổi công tắc không đổi mã" (Sim/Real Parity Check)
+
+Để chứng minh kiến trúc Chương 10 đã đạt chuẩn, hãy thực hiện đúng bài test 3 bước với cùng một script chạy hình vuông (`square_test.py` chỉ gửi `/cmd_vel` và đọc `/odom`):
+1. Chạy `sim_bringup` → chạy `square_test.py` → xác nhận xe vẽ hình vuông trong Gazebo và quay về gần điểm xuất phát.
+2. Tắt mô phỏng, bật `real_bringup` trên xe thật → chạy **chính xác cùng tệp `square_test.py` không sửa một ký tự nào**!
+3. Đo khoảng cách lệch giữa điểm đầu và điểm cuối trên sàn thật (ví dụ lệch `12 cm` và lệch góc `8°`) rồi ghi vào sổ lab làm mốc chuẩn trước khi bật SLAM ở Chương 11.
 
 ## Lab
 

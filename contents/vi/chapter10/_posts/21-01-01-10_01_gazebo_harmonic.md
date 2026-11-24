@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~70 phút**.
 
+Nếu mỗi lần sửa một dòng thuật toán tránh vật cản bạn lại phải nạp firmware, sạc pin, đặt robot xuống sàn và chạy theo đỡ khi xe lao vào chân bàn, tốc độ nghiên cứu sẽ chậm đi hàng chục lần. **Gazebo Harmonic** là phòng thí nghiệm vật lý số giúp bạn kiểm thử hàng trăm kịch bản va chạm, trơn trượt và cảm biến giả lập ngay trên máy tính trước khi chạm vào phần cứng thật.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Mô phỏng Vật lý Gazebo Harmonic
+
+1. **Động cơ vật lý (Physics Engine — DART) & Bước thời gian mô phỏng**:
+   Tính toán trọng lực, ma sát lốp–sàn, mô-men động cơ và va chạm ở từng bước rời rạc (thường `max_step_size = 0.001 s`, tức 1000 Hz) rồi xuất thời gian mô phỏng lên topic `/clock`.
+2. **Cầu nối `ros_gz_bridge` & Tách biệt đồng hồ (`use_sim_time`)**:
+   Gazebo Harmonic dùng hệ thống truyền tin riêng (`gz-transport`). `ros_gz_bridge` ánh xạ hai chiều giữa topic Gazebo và ROS 2 (`/cmd_vel`, `/odom`, `/scan`, `/clock`). Mọi node ROS 2 khi chạy mô phỏng **bắt buộc** đặt `use_sim_time:=true` để không bị lệch đồng hồ tường!
+3. **Hệ số Thời gian Thực (RTF — Real-Time Factor)**:
+   $$\text{RTF} = \frac{\text{Thời gian mô phỏng trôi qua}}{\text{Thời gian thực ngoài đời}}$$. Nếu $$\text{RTF} = 1{,}0$$, 1 giây trong Gazebo đúng bằng 1 giây thật; nếu $$\text{RTF} < 0{,}5$$ do máy yếu hoặc mesh quá nặng, thuật toán điều khiển thời gian thực sẽ bị méo nhịp.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ mở được một môi trường mô phỏng (world) của Gazebo Harmonic từ terminal ROS 2 Jazzy và phân biệt rõ lệnh `gz sim` với tệp thực thi `gazebo` của dòng Classic cũ. Bạn sẽ giải thích được vì sao khóa học kết hợp Jazzy với Harmonic, và vì sao việc nạp Humble hoặc cài gói Classic sẽ dẫn sang một bộ mô phỏng khác. Bạn dùng `gz topic -l` để xác nhận world đang chạy đã có `/clock`, hiểu vai trò của cờ `-r` gắn với nút chạy (play) để không nhầm trạng thái tạm dừng là lỗi cài đặt, đồng thời đọc hiểu ký hiệu chiều truyền dữ liệu của `ros_gz_bridge` (chưa chạy cầu nối trong bài này). Cuối cùng, bạn lưu lại ảnh cửa sổ giao diện hoặc log chạy server không màn hình làm minh chứng world trống hoạt động bình thường.
@@ -110,6 +121,12 @@ gz topic -l
 ```
 
 Kiểm tra sự xuất hiện của `/clock`. Lúc này `ros2 topic list` vẫn gần như trống vì chưa có cầu nối giữa hai đồ thị; Gazebo đang xuất bản trên hệ thống nội bộ của riêng nó. Nếu bạn nhấn Ctrl-C ở terminal đầu tiên, server tắt và danh sách topic Gazebo cũng biến mất.
+
+### Khung giải thích (nên đọc chậm): Tính tay ảnh hưởng của `RTF = 0,4` và lỗi quên `use_sim_time`
+
+Giả sử bạn chạy mô phỏng một thế giới phức tạp trên laptop không có GPU rời nên **RTF tụt xuống `0,4`** (mất 2,5 giây ngoài đời mới mô phỏng xong 1 giây trong Gazebo):
+- Nếu bạn ra lệnh cho xe chạy với $$v = 0{,}5\text{ m/s}$$ trong đúng **4 giây thời gian mô phỏng**, xe đi đúng `2,0 m` trong thế giới ảo (nhưng ngoài đời bạn phải ngồi nhìn màn hình mất $$4 / 0{,}4 = \mathbf{10\text{ giây}}$$).
+- **Thảm họa nếu quên bật `use_sim_time:=true` trên một node điều khiển:** Gazebo gán dấu thời gian `/scan` theo `/clock` (ví dụ `t = 12,0 s`), trong khi node quên cờ lại dùng đồng hồ hệ thống Unix (`t = 1.732.000.000 s`) → TF2 lập tức báo lỗi **`Extrapolation Error`** và loại bỏ toàn bộ dữ liệu cảm biến!
 
 ## Lab
 

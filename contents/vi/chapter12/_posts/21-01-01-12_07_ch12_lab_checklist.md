@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~40 phút**. Bất kỳ tệp checkpoint nào tải về cũng không thay thế được phần phân tích bằng văn bản trong sổ thực hành.
 
+Danh sách nghiệm thu cuối cùng của khóa học tổng kết toàn bộ quy trình thực hành **Robot Learning** ở Chương 12 — từ việc kiểm tra vòng teleoperation ổn định, xuất bản bộ dữ liệu chuẩn `LeRobotDataset`, huấn luyện thành công chính sách bắt chước (ACT hoặc Diffusion Policy) cho tới đánh giá định lượng tỷ lệ thành công trên các lần thử nghiệm độc lập.
+
+## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Robot Learning (Chương 12)
+
+1. **Dữ liệu Chuẩn hóa & Tái lập được**:
+   Dataset ghi đủ số lượt trình diễn yêu cầu, tần số khung hình ổn định, không lệch đồng bộ giữa camera và góc khớp, và đọc lại sạch bằng trình xem của `LeRobot`.
+2. **Huấn luyện Hội tụ & Theo dõi Loss Minh bạch**:
+   Lưu đầy đủ tệp cấu hình siêu tham số, đường cong hàm mất mát (loss curve) và checkpoint mô hình để bất kỳ ai cũng có thể đánh giá lại.
+3. **Đánh giá Định lượng Công bằng (Multi-Trial Evaluation)**:
+   Không chỉ quay 1 video "chọn lọc lúc thành công": phải chạy đủ số lượt kiểm thử liên tiếp (ví dụ 10 lượt ở các vị trí vật thể khác nhau), ghi rõ tỷ lệ thành công và phân tích nguyên nhân các lượt thất bại.
+
 ## Mục tiêu
 
 Bạn cần hoàn thành và xác nhận bốn tiêu chí đọc hiểu cùng một tiêu chí thực hành tay SO-101: dataset card, đoạn phân tích đa phương án (diffusion), bảng đối chiếu VLA, kế hoạch lộ trình tháng tới và log lab tay SO-101 (hoặc ghi chú hoãn có ngày). Việc chạy huấn luyện thành công trên GPU không bù đắp được cho một dataset card thiếu đơn vị.
@@ -36,6 +47,18 @@ Hoàn thành các bài từ 12-01 đến 12-06. Xe Capstone vẫn giữ cặp h�
 **Lộ trình tiếp theo.** Chọn duy nhất một hướng cho tháng tới từ bài 12-05, ghi rõ một đường dẫn đầu tiên sẽ mở và nêu ít nhất một món sẽ không mua theo cảm tính.
 
 **Thực hành tay SO-101.** Theo bài 12-06: có log cổng kết nối cùng một lần hiệu chỉnh/teleop, hoặc có ghi chú hoãn ghi rõ ngày (do chưa có phần cứng) đi kèm dataset card trên giấy. Việc mua tay máy không phải điều kiện bắt buộc để đạt.
+
+### Khung giải thích (nên đọc chậm): Cách báo cáo kết quả đánh giá chính sách Robot Learning đúng chuẩn khoa học
+
+Giả sử bạn đánh giá chính sách ACT vừa huấn luyện trên **10 lượt thử liên tiếp** (đặt khối vật thể ở 5 vị trí trong tập huấn luyện và 5 vị trí dịch lệch mới):
+
+| Nhóm kiểm thử | Số lượt thành công / tổng | Tỷ lệ thành công | Ghi chú phân tích lỗi |
+| :--- | :---: | :---: | :--- |
+| Trong vùng vị trí huấn luyện (In-Distribution) | `4 / 5` | **80%** | 1 lượt kẹp hơi lệch mép khi bóng đèn chiếu chói |
+| Vị trí mới dịch lệch 5 cm (Out-of-Distribution) | `2 / 5` | **40%** | Cần bổ sung thêm 20 lượt trình diễn phủ rộng biên bàn |
+| **Tổng hợp báo cáo** | **`6 / 10`** | **60%** | Trung thực, có hướng cải thiện dữ liệu rõ ràng! |
+
+Thói quen đánh giá tách biệt In-Distribution và Out-of-Distribution này là tiêu chuẩn vàng trong mọi bài báo và sản phẩm Robot Learning hiện đại.
 
 ## Lab
 

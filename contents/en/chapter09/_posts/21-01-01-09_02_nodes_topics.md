@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~75 minutes**.
 
+Imagine an orchestra where the violinist never waits for the drummer to finish a bar before reading the sheet music, yet everyone stays tightly synchronized through a shared tempo. That is the ROS 2 computation graph: independent **nodes** publishing typed **messages** over named **topics**, decoupled in both time and code so you can swap a real LiDAR for a Gazebo simulator without changing a single line of your planner.
+
 ## Learning objectives
 
 You will start a talker and a listener from the Jazzy demos, name the topic and the message type that connect them, and read a rate with `ros2 topic hz`. You will publish one `geometry_msgs/Twist` by hand and point at the two fields a differential-drive base actually uses. You will also say what an interface package is, so a later custom wheel message is a package and not a Python dict you hope the other node guesses.
@@ -21,6 +23,14 @@ You will start a talker and a listener from the Jazzy demos, name the topic and 
 
 Lesson 09-01: `printenv ROS_DISTRO` prints `jazzy` in the terminal you are about to use. Chapter 08’s kinematics: `linear.x` will mean $$v$$ and `angular.z` will mean $$\omega$$. No robot is required.
 
+
+## Background Knowledge Map: Computation Graphs, Strongly Typed Messages, and Rate Contracts
+
+ROS 2 topics formalize three architectural ideas that scale from a 2-node rover to a 200-node autonomous car:
+
+- **Directed Computation Graph:** Nodes are independent OS processes (or composable threads); topics are named, many-to-many asynchronous buses. Because publishers and subscribers never hold direct pointers to each other, any node can be recorded (`ros2 bag`), replayed, or replaced live.
+- **Strongly Typed IDL Interfaces:** Standard messages like `geometry_msgs/msg/Twist` or `sensor_msgs/msg/LaserScan` enforce exact field names, types, and SI units (metres, radians, seconds — REP-103), eliminating the ad-hoc CSV parsing bugs of custom scripts.
+- **Rate & Latency Contracts:** Every topic carries an implicit timing contract: control commands (`cmd_vel` at 20–50 Hz), odometry (`odom` at 20–50 Hz), and scans (`scan` at 5–20 Hz). Knowing message size and publish rate lets you calculate network load before saturating Wi-Fi.
 ## Why this sits on the path
 
 The Capstone bridge is a node. `cmd_vel` is a topic. `Twist` is a message. Until those three words are boring, Gazebo, Nav2, and a camera pipeline are just more nodes you cannot see. A learned policy that “publishes actions” is the same picture with a different message. If you cannot draw the talker–topic–listener graph, you cannot debug a silent robot.
@@ -69,6 +79,20 @@ ros2 topic hz /cmd_vel
 ```
 
 **Expected:** about 5 Hz, and the robot still does not move, because nothing subscribes with a motor. Leave this running for ten seconds and then Ctrl-C. Write down the rate. Chapter 10’s bridge will treat “no message for 300 ms” as stop. At 5 Hz the gap between messages is 200 ms, inside that window. At 1 Hz the gap is 1000 ms and the watchdog will chop the command into pulses. That is a kinematics-and-timing bug you can now predict without the robot on the floor.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Calculating Topic Bandwidth for Telemetry vs. Sensors
+
+Before streaming topics over Wi-Fi between an onboard SBC and a laptop, estimate their exact wire throughput:
+
+1. **Command topic `/cmd_vel` (`geometry_msgs/msg/Twist`):** Contains 6 `float64` fields ($$6 \times 8 = 48\ \text{bytes}$$ payload, $$\approx 80\ \text{bytes}$$ with DDS headers). At $$50\ \text{Hz}$$:
+   $$\text{BW}_{\text{cmd}} = 80 \times 50 = 4\,000\ \text{B/s} = 32\ \text{kbps}$$
+   — virtually zero load on Wi-Fi.
+2. **2D LiDAR `/scan` (`sensor_msgs/msg/LaserScan`):** Suppose 720 range floats + 720 intensity floats ($$1440 \times 4 = 5\,760\ \text{bytes}$$) at $$10\ \text{Hz}$$:
+   $$\text{BW}_{\text{scan}} = 5\,760 \times 10 \approx 57.6\ \text{kB/s} \approx 0.46\ \text{Mbps}$$
+   — still easy for Wi-Fi.
+3. **Raw RGB camera `/image_raw` (640×480×3 bytes = 921,600 bytes/frame) at $$30\ \text{Hz}$$:**
+   $$\text{BW}_{\text{raw}} = 921\,600 \times 30 = 27.65\ \text{MB/s} = 221\ \text{Mbps}!$$
+   That single uncompressed camera topic will saturate typical 2.4 GHz Wi-Fi and starve `/cmd_vel`—proving why raw images should stay local on the robot or use `compressed` transport.
 
 ## Lab
 

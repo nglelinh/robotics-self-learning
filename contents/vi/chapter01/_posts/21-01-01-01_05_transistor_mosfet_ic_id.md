@@ -19,6 +19,37 @@ Sau bài học này, bạn sẽ loại bỏ thói quen đoán sơ đồ chân li
 
 Bạn đã biết xác định catot của diode bằng vạch sơn và sử dụng thang đo diode trên linh kiện không cấp nguồn. Bạn cũng nhớ chân GPIO chỉ chịu dòng khoảng 12 mA đến 40 mA trong khi động cơ TT khi kẹt kéo dòng cỡ ampe. Bài này tập trung vào kỹ năng nhận dạng vỏ linh kiện cùng hai yếu tố tránh cháy hỏng: đúng thứ tự chân và kiểm soát công suất tỏa nhiệt.
 
+---
+
+Nếu vi điều khiển là "bộ não" thì **transistor, MOSFET và IC ổn áp** chính là "cơ bắp và hệ tuần hoàn" của xe robot. Một chân GPIO chỉ đủ sức thắp một đèn LED nhỏ 10 mA, nhưng nhờ một con MOSFET công suất nhỏ bằng hạt đậu, tín hiệu 3,3 V yếu ớt ấy có thể đóng ngắt dòng điện hàng chục ampe cho động cơ! Ngược lại, chọn nhầm một IC ổn áp tuyến tính để hạ trực tiếp pin 8,4 V xuống 3,3 V sẽ biến bo mạch thành một chiếc lò sưởi mini chỉ sau 10 giây.
+
+## Bản đồ kiến thức nền: Linh kiện Bán dẫn Công suất và Ổn áp trên Robot
+
+1. **Transistor Lưỡng cực (BJT) vs. MOSFET:** BJT điều khiển bằng *dòng điện* cực Base ($$I_C = \beta I_B$$, sụt áp $$V_{CE(\text{sat})} \approx 0.2\text{–}1\text{ V}$$); MOSFET điều khiển bằng *điện áp* cực Gate ($$V_{GS}$$) với dòng kích gần bằng 0 và điện trở mở $$R_{DS(\text{on})}$$ chỉ vài chục mili-ohm — mát hơn và hiệu quả hơn hẳn cho đóng cắt động cơ.
+2. **Cạm bẫy Điện áp Ngưỡng $$V_{GS(\text{th})}$$:** Trong datasheet, $$V_{GS(\text{th})}$$ là mức điện áp MOSFET *mới chớm mở* (dòng chỉ vài trăm $$\mu\text{A}$$), **không phải** mức mở bão hòa hoàn toàn! Với GPIO 3,3 V, phải chọn **Logic-Level MOSFET** có thông số $$R_{DS(\text{on})}$$ được đặc tả ngay tại $$V_{GS} = 2.5\text{–}3.3\text{ V}$$.
+3. **Ổn áp Tuyến tính (LDO như AMS1117) vs. Ổn áp Xung (Buck Converter):** LDO đốt toàn bộ phần điện áp dư $$(V_{\text{in}} - V_{\text{out}}) \cdot I$$ thành nhiệt; Buck đóng ngắt cuộn cảm ở tần số cao đạt hiệu suất $$85\text{–}95\%$$, bắt buộc dùng khi chênh lệch áp lớn hoặc dòng tải cao.
+
+### Ví dụ cầm tay chỉ việc: So sánh tỏa nhiệt giữa LDO tuyến tính và mạch Buck ở dòng 0,4 A
+
+Giả sử bạn hạ nguồn pin Li-ion 2S đầy ($$V_{\text{in}} = 8.4\text{ V}$$) xuống $$V_{\text{out}} = 3.3\text{ V}$$ để nuôi ESP32 + cảm biến ăn dòng $$I = 0.4\text{ A}$$ (công suất hữu ích $$P_{\text{out}} = 3.3 \times 0.4 = \mathbf{1.32\text{ W}}$$):
+
+| Loại mạch ổn áp | Công suất tỏa nhiệt $$P_{\text{nhiệt}}$$ | Hiệu suất $$\eta$$ | Hậu quả thực tế trên bàn lab |
+|---|---|---|---|
+| **LDO tuyến tính (AMS1117-3.3)** | $$(8.4 - 3.3) \times 0.4 = \mathbf{2.04\text{ W}}$$ | $$\dfrac{3.3}{8.4} = \mathbf{39.3\%}$$ | Vỏ SOT-223 nóng vọt quá $$120^\circ\text{C}$$ → tự ngắt nhiệt hoặc cháy! |
+| **Mạch hạ áp xung Buck ($$\eta = 90\%$$)** | $$1.32 \times \left(\dfrac{1}{0.90} - 1
+ight) = \mathbf{0.147\text{ W}}$$ | **$$90\%$$** | Mát hơn **14 lần** — chạm tay chỉ hơi ấm nhẹ! |
+
+### Khung giải thích: 4 bước chọn đúng linh kiện bán dẫn cho robot (nên đọc chậm)
+
+1. **Bước 1 — Đọc kỹ dạng vỏ (TO-92, TO-220, SOT-23, SOT-223):** Dạng vỏ quyết định khả năng thoát nhiệt tối đa — cùng là ổn áp 3,3 V nhưng vỏ TO-220 chịu nhiệt tốt hơn vỏ SOT-23 gấp nhiều lần.
+2. **Bước 2 — Luôn tra $$R_{DS(\text{on})}$$ tại đúng điện áp GPIO (3,3 V):** Nếu datasheet chỉ ghi $$R_{DS(\text{on})}$$ tại $$V_{GS} = 10\text{ V}$$ (như IRF540N cổ điển), cắm vào ESP32 3,3 V sẽ làm MOSFET mở lửng, nóng rực và động cơ quay yếu.
+3. **Bước 3 — Dùng IC cầu H tích hợp (TB6612FNG / DRV8833) thay vì tự ráp 4 transistor rời:** IC tích hợp sẵn mạch bảo vệ chống ngắn mạch chéo (*shoot-through*), diode dập xung và chân điều khiển PWM gọn gàng.
+4. **Bước 4 — Dùng Buck cho tầng hạ áp lớn, LDO cho tầng lọc sạch cuối:** Hạ 8,4 V → 5,0 V bằng Buck rồi dùng LDO tích hợp trên bo ESP32 hạ 5,0 V → 3,3 V là công thức tối ưu cả hiệu suất lẫn độ sạch nhiễu!
+
+**Kiểm tra nhanh.** Nếu LDO trên bo ESP32 hạ từ $$5.0\text{ V}$$ (đầu ra Buck) xuống $$3.3\text{ V}$$ ở dòng $$0.25\text{ A}$$, công suất nhiệt trên LDO còn bao nhiêu? Chỉ $$(5.0 - 3.3) \times 0.25 = \mathbf{0.425\text{ W}}$$ — hoàn toàn nằm trong ngưỡng an toàn của vỏ SOT-223!
+
+---
+
 ## Vì sao xe hai bánh không dùng transistor rời để lái động cơ
 
 Mạch ESP32 tích hợp sẵn IC ổn áp AMS1117-3.3 (hoặc tương đương) giữa nguồn USB 5 V và đường nguồn 3,3 V; Raspberry Pi Pico cũng có mạch ổn áp riêng giữa VBUS và 3V3. Nhờ đó vi điều khiển xuất mức logic 3,3 V tương thích với dải logic 2,7 V đến 5,5 V của TB6612. Tuy nhiên, sự có mặt của ổn áp trên mạch không đồng nghĩa bạn được phép đưa nguồn pin 12 V vào chân 5 V của board.

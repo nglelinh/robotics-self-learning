@@ -11,6 +11,10 @@ lesson_type: required
 draft: false
 ---
 
+A modern mobile robot is a miniature city of specialized silicon chips: an IMU measuring rotation at 400 Hz, a laser Time-of-Flight sensor reporting millimeter range, a LiDAR streaming 360-degree scans, and an MCU orchestrating them all. Yet every one of those chips speaks one of just **three serial languages**: **I2C**, **SPI**, or **UART**. Understanding their electrical physics, addressing schemes, and timing budgets turns "my sensor returns all zeros" from a mystery into a 60-second diagnosis.r
+
+---
+
 Estimated time: **70–90 minutes**, including one I2C scan on a real board or a careful dry-run if the module has not arrived.
 
 ## Learning objectives
@@ -20,6 +24,16 @@ By the end of this lesson you can choose I2C, SPI, or UART for a sensor from its
 ## Prerequisites
 
 You can use a multimeter for continuity and DC voltage (Chapter 01), you know which pins on your ESP32 or Pico are 3.3 V GPIO (Chapter 02), and you can blink an LED from firmware (Chapter 03). You do not need ROS installed for this lesson.
+
+## Background Knowledge Map: Synchronous vs. Asynchronous Buses, Open-Drain Pull-Ups, and Bus Bandwidth
+
+Three digital-communications pillars govern sensor integration in robotics:
+
+- **I2C (2-Wire, Addressed, Open-Drain):** Uses `SDA` + `SCL` with pull-up resistors (typically $$2.2\text{–}4.7\text{ k}\Omega$$). Multiple sensors share two pins via 7-bit addresses (`0x68` for MPU6050, `0x29` for VL53L0X), running at `100 kHz` (standard) or `400 kHz` (fast mode). Sensitive to long cable capacitance and address collisions.
+- **SPI (4-Wire, Push-Pull, High-Speed):** Uses `MOSI`, `MISO`, `SCLK`, plus one dedicated `CS` (chip select) per device. Because outputs are actively driven push-pull, SPI runs cleanly at `1–20 MHz` — ideal for high-rate IMUs, SD logging, and displays.
+- **UART (2-Wire, Asynchronous, Point-to-Point):** Uses `TX` → `RX` and `RX` ← `TX` with no shared clock; both sides must agree on baud rate (`115200`, `230400`, etc.). Standard for GPS receivers, 2D LiDARs, and MCU-to-ROS 2 serial bridges.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -105,6 +119,32 @@ One module: a single stable address (`0x68` for a typical GY-521 with AD0 ground
 | Every address ACKs | SDA shorted to GND |
 | Works at 100 kHz, fails at 400 kHz | Long wires or missing pull-ups |
 | Library says “device not found” but scan works | Library uses a different address or different pins |
+
+## Deep-Dive Explanation (Read Slowly): Computing I2C Bus Read Time and Pull-Up RC Rise Time
+
+Can your 100 Hz control loop read a 14-byte IMU burst over I2C without eating half your CPU budget? Calculate the exact bus time in four steps:
+
+1. **Count total bit-clocks per I2C byte:** Each byte requires **9 clock cycles** (8 data bits + 1 ACK/NACK bit).
+2. **Count transaction overhead:** A standard register read sends `[START + Addr(W)]` (1 byte) + `[RegAddr]` (1 byte) + `[Re-START + Addr(R)]` (1 byte) + `[N data bytes]` + `STOP` $$\approx N + 3$$ byte-frames.
+3. **Divide by SCL frequency $$f_{\text{SCL}}$$:** $$t_{\text{read}} \approx \frac{9(N + 3)}{f_{\text{SCL}}}$$.
+4. **Check RC rise time on pull-ups:** With pull-up $$R_p$$ and total bus capacitance $$C_b$$, rise time is $$t_r \approx 0.847\,R_p C_b$$ (must stay $$< 300\text{ ns}$$ for 400 kHz fast-mode I2C!).
+
+### Concrete Worked Example: Reading 14 Bytes from an MPU6050 at 100 kHz vs. 400 kHz
+
+An `MPU6050` burst read fetches 6 bytes accelerometer + 2 bytes temperature + 6 bytes gyro $$= 14\text{ bytes}$$ ($$N + 3 = 17$$ frames $$= 153\text{ clock cycles}$$):
+
+- **At 100 kHz standard I2C:**
+  $$t_{\text{read}} = \frac{153}{100\,000\text{ Hz}} = 1.53\text{ ms}$$ (over 15% of a 10 ms loop spent blocking on one sensor!).
+- **At 400 kHz fast-mode I2C:**
+  $$t_{\text{read}} = \frac{153}{400\,000\text{ Hz}} = 0.383\text{ ms}$$ — 4× faster, freeing > 1.1 ms every tick!
+- **Pull-up RC check with $$R_p = 4.7\text{ k}\Omega$$ and wire capacitance $$C_b = 50\text{ pF}$$:**
+  $$t_r \approx 0.847 \times 4700 \times 50\times 10^{-12} \approx 199\text{ ns} < 300\text{ ns}$$ — crisp edges at 400 kHz!
+
+**Common Pitfall:** Wiring `TX` to `TX` and `RX` to `RX` on UART (nothing arrives!), or putting two identical `VL53L0X` sensors on one I2C bus without toggling their `XSHUT` pins to reassign unique addresses.
+
+**Quick Check:** Running an I2C scanner sketch that prints `0x68` confirms four things simultaneously: power is good, `GND` is shared, `SDA/SCL` are not swapped, and pull-ups are working.
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

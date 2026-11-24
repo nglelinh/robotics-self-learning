@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **60–80 minutes**, including a power-off tug test and one strain-relief fix with a before-and-after photo.
 
+Watch a student robot drive smoothly on a desk, then watch what happens ten minutes later on a tiled hallway: a motor wire snaps flush with the solder tab, an encoder plug backs halfway out, and the robot starts spinning in circles. Almost all early field failures are not algorithmic—they are **fatigue, vibration loosening, and missing strain relief**.
+
 ## Learning objectives
 
 By the end of this lesson you can name the failure when a wheel clicks while the encoder still counts, when a plastic horn strips, when a solder joint breaks after the chassis flexes, and when a rubbing wheel smells like a stall. You can add strain relief so the joint sees no bend, leave a service loop, and write two failure modes you will check on Capstone day before you call the robot ready.
@@ -21,6 +23,14 @@ By the end of this lesson you can name the failure when a wheel clicks while the
 
 Lessons 01 through 06: $$b$$ and $$r$$, set screws on D-flats, gear ratio, caster trail, and a chassis material that can crack. Chapter 05 is where stall current became a number on your motor. This lab never applies that current. Power stays off.
 
+
+## Background Knowledge Map: Mechanical Fatigue, Vibration Loosening, and Strain Relief
+
+Reliability on a rolling robot comes from anticipating three physical failure mechanisms before they strike:
+
+- **Metal Fatigue & Bend Radius:** Copper wire strands survive thousands of flex cycles when bent gently, but fatigue and fracture rapidly when bent sharply right at a rigid solder joint (where solder wicks up the strands and creates a sudden stiffness discontinuity). Securing the cable insulation to the chassis *before* the solder joint transfers all bending away from the joint.
+- **Vibration-Induced Fastener Loosening:** Rolling over floor grout and gear tooth meshing excite continuous transverse micro-slip under bolt heads, gradually unwinding nuts. Positive retention (nyloc nuts, split washers, or medium-strength threadlocker) breaks this unwinding mechanism.
+- **Connector Retention & Mechanical Keys:** Pin headers and Dupont jumpers rely on light friction and vibrate loose easily. Locking connectors (JST-XH, XT30/XT60) plus zip-tie anchor points eliminate intermittent opens that masquerade as "random firmware bugs".
 ## Why this matters for Capstone A and the ROS path
 
 ROS will plot a smooth odometry trail from encoder ticks and from the $$i$$, $$b$$, and $$r$$ in your notes. Several mechanical failures leave those ticks perfect and the floor path wrong. A set screw off the flat, a stripped hub, a wheel that rubs, and a caster that lifts all look, on a topic monitor, like a tuning problem. They are hand problems. You fix them with the battery disconnected, then you earn the right to tune. Strain relief is the one that shows up an hour into a demo: the joint flexed every bump, the copper fatigued, and `cmd_vel` still publishes into a motor that is electrically gone.
@@ -54,6 +64,16 @@ $$
 The map gains about 20 cm the tile never gave. Two such slips per meter of commanded travel is a 40 cm scale error that no covariance setting will honestly cover. The repair is mechanical: flat under the screw, tug the wheel, photograph it.
 
 A rubbing wheel is the thermal cousin. If the free-rolling motor in Chapter 05 drew a small no-load current and a rub pushes the operating point toward stall, the heat in the winding follows that current. You do not need a new number today. You need the scrape gone before voltage returns.
+
+### Deep-Dive Explanation (Read Slowly): Estimating Impact Force and Wire Strain Margin
+
+Why does a tiny 0.5 kg robot bumping a wall at walking speed snap an unrestrained connector? A quick impulse calculation reveals the hidden forces:
+
+1. **Collision deceleration force:** Suppose your $$m = 0.8\ \text{kg}$$ chassis drives at $$v = 0.5\ \text{m/s}$$ into a rigid baseboard and stops over a deformation distance of $$d = 2\ \text{mm} = 0.002\ \text{m}$$. By work-energy ($$F_{\text{avg}} d = \frac{1}{2} m v^2$$):
+   $$F_{\text{avg}} = \frac{0.5 \times 0.8 \times 0.5^2}{0.002} = \frac{0.10}{0.002} = 50\ \text{N}$$
+   — equivalent to a **5 kg** weight slamming into the front edge (over $$6g$$ of deceleration)!
+2. **Effect on an unstrapped 200 g battery pack:** Under $$6g$$ deceleration, a $$0.20\ \text{kg}$$ battery pulls forward on its power leads with $$F = 0.20 \times 6 \times 9.81 \approx 11.8\ \text{N}$$, easily yanking a standard JST-PH plug (retention force $$\approx 5\text{–}8\ \text{N}$$) or tearing a thin solder pad right off a PCB.
+3. **Strain-relief fix:** Anchoring the battery mechanically with Velcro + a rigid stop and zip-tying the motor cable 15 mm behind the solder lug drops the tension reaching the electrical joint to nearly $$0\ \text{N}$$.
 
 ## Lab: tug test and one relief
 

@@ -21,6 +21,37 @@ Sau bài học này, bạn sẽ thực hiện đúng trình tự hàn chuẩn: l
 
 Bạn đã biết sử dụng thang thông mạch từ bài 02 và phân biệt được hai đầu của thanh header. Buổi thực hành này chỉ dùng dây và mạch thử bỏ đi (có thể đặt tờ sơ đồ chân bài 07 bên cạnh để tham khảo), tuyệt đối không đặt khung xe hay pin lithium lên bàn. Hãy đọc kỹ mục An toàn trước khi cắm điện mỏ hàn.
 
+---
+
+Dây cắm breadboard rất tuyệt để thử nghiệm trong 10 phút, nhưng ngay khi xe robot chạy qua khe gạch trên sàn nhà, rung động cơ học sẽ làm dây tiếp xúc chập chờn và tạo ra những lỗi ma quái không thể tái hiện! **Kỹ năng hàn thiếc (Soldering)** tạo ra liên kết luyện kim bền vững giữa dây đồng và pad mạch in — và bí mật của một mối hàn bóng đẹp nằm ở **truyền nhiệt đúng thứ tự**, chứ không phải bôi thật nhiều thiếc.
+
+## Bản đồ kiến thức nền: Vật lý Luyện kim của Mối hàn Điện tử
+
+1. **Cơ chế Liên kết Luyện kim (Intermetallic Bond):** Thiếc hàn không phải là "keo dán" — khi cả chân linh kiện và pad đồng đạt nhiệt độ nóng chảy (~$$183^\circ\text{C}$$ với thiếc chì 63/37 hoặc ~$$217^\circ\text{C}$$ với thiếc không chì SAC305), hợp kim thiếc hòa tan bề mặt đồng tạo thành lớp nối điện–cơ bền chắc.
+2. **Vai trò của Nhựa thông (Flux):** Bề mặt đồng luôn có lớp oxit ngăn thiếc bám dính. Lõi nhựa thông (flux) bên trong cuộn thiếc bay hơi và khử lớp oxit ngay tại khoảnh khắc nung nóng — giữ mỏ hàn quá lâu làm cháy hết flux sẽ tạo ra **mối hàn nguội** xỉn màu, nứt gãy.
+3. **Giảm lực kéo cơ học (Strain Relief):** Dây đồng nhiều sợi rất dễ gãy ngay sát chân mối hàn cứng khi bị uốn lặp đi lặp lại; ống co nhiệt (heat-shrink) và kẹp cố định dây bảo vệ mối hàn sống sót qua hàng trăm giờ chạy xe.
+
+### Ví dụ cầm tay chỉ việc: Tính sụt áp và tỏa nhiệt trên một mối hàn nguội (Cold Joint)
+
+Giả sử dây nguồn cấp cho cặp động cơ robot kéo dòng $$I = 2.0\text{ A}$$ đi qua một mối hàn nối dây:
+- **Mối hàn đạt chuẩn (bóng mượt, hình nón lõm):** điện trở tiếp xúc chỉ $$R_{\text{tốt}} = 0.01\ \Omega$$:
+  - Sụt áp: $$\Delta V = 2.0 \times 0.01 = \mathbf{0.02\text{ V}}$$ (không đáng kể).
+  - Công suất nhiệt: $$P = 2.0^2 \times 0.01 = \mathbf{0.04\text{ W}}$$ (hoàn toàn mát lạnh).
+- **Mối hàn nguội / dính oxit (xỉn, vón cục):** điện trở tiếp xúc tăng vọt lên $$R_{\text{nguội}} = 0.8\ \Omega$$:
+  - Sụt áp: $$\Delta V = 2.0 \times 0.8 = \mathbf{1.6\text{ V}}$$ (xe đột ngột mất lực hoặc reset!).
+  - Công suất nhiệt dồn tại đúng hạt thiếc nhỏ: $$P = 2.0^2 \times 0.8 = \mathbf{3.2\text{ W}}$$ — đủ làm chảy vỏ nhựa và bong mạch đồng!
+
+### Khung giải thích: Quy trình 4 bước tạo mối hàn chuẩn công nghiệp (nên đọc chậm)
+
+1. **Bước 1 — Lau sạch mũi hàn và tráng một lớp thiếc mỏng (tinning):** Mũi hàn đen bị oxy hóa không truyền nhiệt được; một giọt thiếc tươi trên đầu mũi giúp truyền nhiệt sang pad nhanh gấp nhiều lần.
+2. **Bước 2 — Chạm mũi hàn vào *cả* pad đồng và chân linh kiện (1–2 giây):** Làm nóng bề mặt cần hàn trước, tuyệt đối không nhỏ thiếc lên đầu mũi hàn rồi quệt sang!
+3. **Bước 3 — Đưa sợi thiếc vào phía đối diện của chân linh kiện:** Thiếc sẽ tự chảy mượt bao quanh chân thành hình chóp núi lửa lõm (concave fillet); rút dây thiếc trước, rồi mới nhấc mũi hàn ra.
+4. **Bước 4 — Giữ bất động 2 giây và kiểm tra bằng mắt + lực kéo nhẹ:** Mối hàn tốt phải bóng, mượt, không có gai nhọn và chịu được lực kéo nhẹ bằng tay không bong.
+
+**Kiểm tra nhanh.** Nếu bạn thấy mối hàn bị vón thành hình quả cầu tròn ngồi lên trên pad đồng (chân linh kiện không dính xuống pad), lỗi xảy ra ở bước nào? Bạn đã chỉ làm nóng chân linh kiện (hoặc nhỏ thiếc lên mũi hàn) mà **chưa làm nóng đủ pad đồng** — chỉ cần thêm chút nhựa thông và chạm mũi hàn đều vào cả pad lẫn chân trong 2 giây, thiếc sẽ tự kéo mượt xuống pad!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Xe Capstone điều khiển hai động cơ TT qua TB6612 bằng nguồn pin riêng. Các sợi dây nối ra cặp chân `AO1`/`AO2` và `BO1`/`BO2` thường xuyên bị uốn cong tại các điểm cố định trên khung. Một mối hàn nguội vẫn có thể kêu bíp khi đo thông mạch không tải, nhưng lại gây sụt áp đáng kể khi bánh xe kẹt, khiến xe chạy lệch hướng dù hai bánh nhận cùng mức PWM. Tương tự, ở cụm dây cảm biến HC-SR04, mối hàn kém chất lượng khiến dây echo 5 V chạm sang chân 3,3 V bên cạnh sẽ gây hỏng nặng hơn cả đứt dây. Dây Dupont chỉ dùng trên breadboard, còn đường động cơ cần mối hàn chuẩn, bọc gen co nhiệt và có vòng dây chùng giảm lực kéo.

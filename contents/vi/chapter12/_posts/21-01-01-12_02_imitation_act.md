@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~70 phút**, tập trung đọc kỹ phần tóm tắt (abstract) của bài báo gốc và phân tích phép tính số học về 0,2 s chuyển động hở vòng (không chạy huấn luyện).
 
+Nếu bạn huấn luyện một mạng nơ-ron đơn giản kiểu Hành vi Nhân bản (Behavioral Cloning) dự đoán **từng bước hành động một** ($$o_t \mapsto a_t$$), một căn bệnh chết người lập tức xuất hiện: **sai số cộng dồn (compounding errors)**. Chỉ cần tay máy lệch 2 mm ở giây thứ 3, nó rơi vào trạng thái chưa từng thấy trong dữ liệu mẫu, rồi lệch thành 1 cm ở giây thứ 4 và gắp trượt hoàn toàn! Kiến trúc **ACT (Action Chunking with Transformers)** giải quyết căn bệnh đó bằng một ý tưởng cực kỳ thông minh: thay vì dự đoán 1 bước, hãy dự đoán hẳn **một khối $$k$$ bước hành động liên tiếp** và làm mượt bằng tổ hợp thời gian.
+
+## Bản đồ kiến thức nền: Ba trụ cột của Chính sách ACT (Action Chunking with Transformers)
+
+1. **Phân khối Hành động (Action Chunking — dự đoán $$k$$ bước cùng lúc)**:
+   Giảm độ dài hiệu dụng của bài toán xuống $$k$$ lần (ví dụ với $$k = 100$$ bước ở 50 Hz = 2 giây), cắt mạnh sai số tích lũy và xử lý mượt các đoạn dừng tạm tự nhiên của người trình diễn.
+2. **CVAE (Conditional Variational Autoencoder) xử lý Dữ liệu Đa mẫu (Multimodal)**:
+   Cùng một vật trên bàn, người trình diễn lúc thì vòng tay từ trái sang, lúc thì từ phải sang. Nếu chỉ hồi quy MSE thuần túy, mạng sẽ lấy *trung bình* hai đường đi và đâm thẳng vào vật cản! Biến ẩn $$z$$ của CVAE giúp mô hình biểu diễn trọn vẹn nhiều phong cách hoàn thành khác nhau.
+3. **Tổ hợp Thời gian (Temporal Ensembling)**:
+   Ở mỗi bước $$t$$, mô hình kết hợp trung bình có trọng số mũ $$w_i = \exp(-m \cdot i)$$ giữa dự đoán mới nhất và các dự đoán còn dư từ những bước trước đó để chuyển động cánh tay êm mượt không giật cục.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ định nghĩa được **học bắt chước hành vi** (behavior cloning) là ánh xạ từ quan sát (observation) sang hành động (action) học từ dữ liệu mẫu thay vì hàm phần thưởng (reward). Bạn nắm rõ đầu ra của mô hình ACT (Zhao và cộng sự, RSS 2023): một khối (**chunk**) gồm $$k$$ hành động tương lai do kiến trúc transformer sinh ra, được huấn luyện theo khung conditional variational autoencoder (CVAE) để xử lý nhiều cách thực hiện hợp lệ cùng lúc. Bạn tự tính được cửa sổ hở vòng cho $$k = 10$$ ở tần số 50 Hz, đối chiếu trực tiếp với watchdog chương 08, và giải thích bản chất của cơ chế kết hợp theo thời gian (temporal ensemble) là phép lấy trung bình các chunk chồng lấp.
@@ -83,6 +94,18 @@ $$
 cửa sổ hở vòng lên tới 2 giây nếu không lập kế hoạch lại sớm — hoàn toàn không an toàn cho xe di động chạy trong hành lang. Do đó không thể áp dụng máy móc độ dài chunk của bài báo gốc sang xe Capstone.
 
 Xét thêm tác động của temporal ensemble tại một thời điểm chồng lấp: chunk cũ dự đoán $$v = 0.25$$ m/s tại $$t = 0.20$$ s, còn chunk mới (sau khi thấy vật cản) dự đoán $$v = 0.00$$ m/s. Trung bình cộng vẫn cho ra $$0.125$$ m/s; ngay cả khi dùng trung bình có trọng số nghiêng về chunk mới (tỉ lệ 3/4 mới và 1/4 cũ), kết quả vẫn là $$0.0625$$ m/s — xe vẫn tiến lên. Ensemble chỉ làm mượt lệnh chứ không thay thế được lệnh dừng `0`.
+
+### Khung giải thích (nên đọc chậm): Tính tay trọng số Tổ hợp Thời gian (Temporal Ensembling) trong ACT
+
+Giả sử tại bước thời gian $$t = 10$$, ta đang có **3 dự đoán** cho góc khớp vai $$q_1(10)$$ đến từ 3 lần suy luận gần nhất (với hệ số suy giảm $$m = 0{,}5$$):
+- Dự đoán từ bước $$t = 10$$ (mới nhất, tuổi $$i = 0$$): $$\hat{a}^{(0)} = 42{,}0^\circ$$, trọng số $$w_0 = e^{-0{,}5 \times 0} = \mathbf{1{,}000}$$.
+- Dự đoán từ bước $$t = 9$$ (tuổi $$i = 1$$): $$\hat{a}^{(1)} = 40{,}0^\circ$$, trọng số $$w_1 = e^{-0{,}5 \times 1} \approx \mathbf{0{,}607}$$.
+- Dự đoán từ bước $$t = 8$$ (tuổi $$i = 2$$): $$\hat{a}^{(2)} = 39{,}0^\circ$$, trọng số $$w_2 = e^{-0{,}5 \times 2} \approx \mathbf{0{,}368}$$.
+
+**Tính hành động thực tế gửi xuống động cơ:**
+$$a_{10}^* = \frac{1{,}000(42{,}0) + 0{,}607(40{,}0) + 0{,}368(39{,}0)}{1{,}000 + 0{,}607 + 0{,}368} = \frac{42{,}00 + 24{,}28 + 14{,}35}{1{,}975} = \frac{80{,}63}{1{,}975} \approx \mathbf{40{,}83^\circ}.$$
+
+Thay vì nhảy giật từ $$40^\circ$$ lên $$42^\circ$$ rồi lại tụt xuống, cơ chế trung bình mũ tạo ra quỹ đạo góc khớp cực kỳ mượt mà cho động cơ servo!
 
 ## Lab
 

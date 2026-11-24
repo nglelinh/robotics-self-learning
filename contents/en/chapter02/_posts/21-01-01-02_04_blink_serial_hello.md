@@ -10,6 +10,12 @@ lesson_type: required
 draft: false
 ---
 
+To an outsider, blinking an LED and printing "Hello" over USB looks like a toy exercise. To a robotics engineer, a **non-blocking heartbeat LED plus structured serial telemetry** is a life-support monitor: when your robot freezes mid-corridor three weeks from now, the heartbeat LED instantly tells you whether the CPU is deadlocked, reset-looping, or alive and waiting for a command.
+
+This lab replaces beginner `delay()` loops with non-blocking `millis()`/`ticks_ms()` scheduling — the exact timing pattern that will drive every sensor read and PID update for the rest of the course.r
+
+---
+
 ## Objectives
 
 You will show that the toolchain from the previous lab is still alive, and you will replace a blocking blink with a loop that can do more than one job. You will toggle an LED every 250 ms and print a heartbeat line every 500 ms containing the millisecond time and the LED state. You will write that loop with `millis()` on an ESP32 or `time.ticks_ms()` on a Pico, and you will run only the listing that matches your board. You will explain why `delay(1000)` or `time.sleep` cannot sit in the way of a later 300 ms stop. You will recognize a reset loop, a wrong LED pin, and a monitor left at 9600.
@@ -17,6 +23,16 @@ You will show that the toolchain from the previous lab is still alive, and you w
 ## Prerequisites
 
 ESP32 track: a finished upload from the PlatformIO or Arduino IDE lesson, a port you can name, and 115200 agreed on both sides. Pico track: MicroPython on the board, Thonny or `mpremote` aimed at the Pico, and a lamp that already answered to `Pin("LED")` or GPIO 25. You need one of those two setups. No driver, no battery, no chassis. If your cable was marginal, this is the lab that will show it.
+
+## Background Knowledge Map: Non-Blocking Scheduling, Watchdogs, and Monotonic Clocks
+
+Three embedded-firmware concepts transform a simple blink into production robotics infrastructure:
+
+- **Blocking (`delay`) vs. Non-Blocking (`millis` / `micros`) Timing:** Calling `delay(500)` halts the entire CPU for half a second — during which an emergency stop button, encoder check, or serial command is completely ignored. Comparing elapsed time `now - last_tick >= period` lets multiple tasks (LED heartbeat at 2 Hz, telemetry at 20 Hz, PID at 100 Hz) run cooperatively on one core.
+- **Unsigned Rollover-Safe Arithmetic:** A 32-bit `millis()` counter wraps from $$2^{32}-1$$ back to $$0$$ after $$\approx 49.7$$ days. Writing `(uint32_t)(now - last) >= period` handles wrap-around mathematically without glitches, whereas `now >= last + period` breaks at rollover!
+- **Heartbeat & Watchdog Diagnostics:** A steady 1 Hz blink means the main loop is healthy; a rapid 5 Hz blink signals a fault state (e.g., low battery or lost IMU); a frozen solid LED means the loop hung.r
+
+---
 
 ## Why it matters for Capstone A
 
@@ -162,6 +178,36 @@ The arithmetic Dũng writes in the margin is the reason `delay(1000)` left the f
 5. If the banner repeats, stop and fix the cable or a short before you edit the print.
 
 Stop there. Do not add Wi-Fi, a driver, or a battery in order to make the log “more real.”
+
+## Deep-Dive Explanation (Read Slowly): Proving Unsigned Wrap-Around Safety & Drift-Free Scheduling
+
+Two subtle timing bugs haunt robot firmware: **clock rollover** and **cumulative schedule drift**. Trace both with exact numbers:
+
+1. **Rollover-safe subtraction (demonstrated on an 8-bit counter $$0\text{–}255$$):** Suppose `last = 250`, `period = 10`, and the counter wraps to `now = 4`.
+   - Modulo-256 unsigned subtraction: `(4 - 250) mod 256 = (-246) mod 256 = 10 >= 10` — triggers at the *exact* right tick!
+2. **Preventing cumulative period drift:**
+   - Drifting update: `last = now;` — if one iteration starts 1 ms late, every future tick shifts 1 ms permanently.
+   - Drift-free update: `last += period;` — keeps average frequency locked to exact $$1/\text{period}$$ over hours.
+3. **Compute multi-rate loop utilization:** Sum $$t_i / T_i$$ across all cooperative tasks to verify total CPU load $$U = \sum (t_i / T_i) < 1$$.
+
+### Concrete Worked Example: Multi-Task Cooperative Timing Budget on One Core
+
+Suppose your firmware runs three non-blocking tasks using `millis()`/`micros()`:
+- **Task 1 (PID control):** period $$T_1 = 10\text{ ms}$$ (100 Hz), execution time $$t_1 = 0.8\text{ ms}$$.
+- **Task 2 (Serial telemetry):** period $$T_2 = 50\text{ ms}$$ (20 Hz), execution time $$t_2 = 0.5\text{ ms}$$.
+- **Task 3 (Heartbeat LED toggle):** period $$T_3 = 500\text{ ms}$$ (2 Hz), execution time $$t_3 = 0.01\text{ ms}$$.
+
+- **Step 1 — CPU utilization sum:**
+  $$U = \frac{0.8}{10} + \frac{0.5}{50} + \frac{0.01}{500} = 0.08 + 0.01 + 0.00002 = 0.09002 \quad (9.0\%).$$
+- **Step 2 — Worst-case simultaneous tick (every 500 ms when all three fire together):**
+  $$t_{\text{worst}} = 0.8 + 0.5 + 0.01 = 1.31\text{ ms} \ll 10\text{ ms}.$$
+  Even on the busiest millisecond of the day, the CPU finishes in 1.31 ms with 8.69 ms to spare!
+
+**Common Pitfall:** Using `last += period` without a catch-up guard after a long pause — if a task was paused for 2 seconds, it would fire 200 times back-to-back. If `now - last > 2 * period`, resync `last = now`.
+
+**Quick Check:** How long before a 32-bit `micros()` counter overflows? $$2^{32}\text{ }\mu\text{s} \approx 4.295 \times 10^9\text{ }\mu\text{s} \approx 71.58\text{ minutes}$$ — shorter than a single afternoon lab, which is why rollover-safe unsigned subtraction matters immediately!
+
+---
 
 ## Exercises
 

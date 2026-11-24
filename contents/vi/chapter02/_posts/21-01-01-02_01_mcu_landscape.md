@@ -18,6 +18,37 @@ Sau bài này, bạn có thể so sánh ba lựa chọn thực tế cho một ro
 
 Bạn chỉ cần biết chỉnh đồng hồ vạn năng sang thang đo điện áp một chiều và hiểu GPIO là chân mà vi điều khiển có thể xuất hoặc đọc tín hiệu. Kiến thức về điện trở nối tiếp trước LED ở chương 01 là đủ; bạn chưa cần kinh nghiệm nạp firmware. Danh sách linh kiện đầy đủ nằm ở bài mua sắm chương 00 ([Hóa đơn linh kiện và cách mua]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Bài này chỉ tập trung chọn bộ điều khiển trung tâm và cáp dữ liệu để máy tính nhận diện bo mạch.
 
+---
+
+Bước vào thế giới vi điều khiển lần đầu, bạn dễ choáng ngợp trước hàng chục cái tên: Arduino Uno, ESP32, Raspberry Pi Pico, STM32, Teensy... Mỗi bo mạch lại có điện áp khác nhau, số lõi CPU khác nhau và hệ sinh thái lập trình khác nhau. Chọn sai vi điều khiển không chỉ làm bạn tốn tiền mua lại — nó còn khiến bạn kẹt cứng khi cần nối Wi-Fi truyền dữ liệu telemetry, đọc đồng thời hai encoder tốc độ cao hay giao tiếp với cảm biến 3,3 V!
+
+## Bản đồ kiến thức nền: Ba Trục Kỹ thuật để Chọn Vi điều khiển (MCU) cho Robot
+
+1. **Năng lực Tính toán & Ngoại vi Thời gian thực:** Một xe robot tự hành cần ít nhất 2 kênh PWM độc lập cho động cơ, 4 chân ngắt ngoài (hoặc bộ đếm phần cứng PCNT/PIO) cho 2 encoder, 1 bus I2C cho IMU và 1 cổng UART debug — ESP32 (2 lõi 240 MHz, Wi-Fi/BLE) và Raspberry Pi Pico (2 lõi ARM 133 MHz, bộ máy trạng thái PIO độc đáo) đều vượt xa Arduino Uno 8-bit 16 MHz!
+2. **Mức Logic (3,3 V vs. 5 V) và Biên độ Nhiễu (Noise Margin):** Toàn bộ thế hệ cảm biến hiện đại (IMU MPU6050/ICM-20948, ToF VL53L0X, LiDAR) đều dùng **3,3 V**. Chọn MCU 3,3 V (ESP32 / Pico) giúp nối trực tiếp cảm biến mà không cần dàn mạch chuyển mức cồng kềnh như trên Arduino Uno 5 V.
+3. **Hệ sinh thái Công cụ & Cộng đồng:** ESP32 mạnh về C++/PlatformIO + kết nối không dây; Pico cực thân thiện với MicroPython (chạy thử ngay qua REPL) và C/C++ SDK.
+
+### Ví dụ cầm tay chỉ việc: Kiểm tra tương thích mức logic (Noise Margin) giữa bo 3,3 V và bo 5 V
+
+So sánh ngưỡng nhận diện mức `HIGH` ($$V_{IH}$$) và giới hạn an toàn tối đa từ datasheet của **ESP32 (3,3 V)** và **Arduino Uno (5 V)**:
+
+| Chiều truyền tín hiệu | Điện áp phát ra ($$V_{OH}$$) | Ngưỡng nhận `HIGH` ($$V_{IH}$$) | Trần an toàn ($$V_{\max}$$) | Kết luận tương thích |
+|---|---|---|---|---|
+| **ESP32 (3,3 V) → Arduino Uno (5 V)** | $$\approx 3.0\text{–}3.3\text{ V}$$ | $$0.6 \times 5.0 = \mathbf{3.0\text{ V}}$$ (tối thiểu; nhiều IC 5V cần $$3.5\text{ V}$$) | $$5.5\text{ V}$$ | **Rủi ro biên hẹp** — dễ lỗi khi pin sụt áp nhẹ! |
+| **Arduino Uno (5 V) → ESP32 (3,3 V)** | $$\approx 4.8\text{–}5.0\text{ V}$$ | $$0.75 \times 3.3 = 2.48\text{ V}$$ | **$$3.6\text{ V}$$** | **NGUY HIỂM!** Vượt trần $$1.4\text{ V}$$ → hỏng chân ESP32! |
+| **ESP32 (3,3 V) ↔ Cảm biến IMU (3,3 V)** | $$\approx 3.3\text{ V}$$ | $$2.31\text{ V}$$ | $$3.6\text{ V}$$ | **An toàn & biên nhiễu rộng $$+1.0\text{ V}$$!** |
+
+### Khung giải thích: 4 bước chọn đúng bo mạch MCU ngay từ tuần 1 (nên đọc chậm)
+
+1. **Bước 1 — Ưu tiên chuẩn logic 3,3 V cho robot hiện đại:** ESP32 và Pico giao tiếp trực tiếp với gần như toàn bộ cảm biến số hiện đại (I2C/SPI) mà không lo cháy chân.
+2. **Bước 2 — Đếm đủ số chân ngoại vi *trước* khi chốt bo:** Liệt kê ra giấy: 4 chân driver + 2 chân PWM + 4 chân encoder + 2 chân I2C + 2 chân UART = **14 chân GPIO an toàn** (đã trừ các chân strapping và input-only).
+3. **Bước 3 — Chọn ESP32 nếu cần Wi-Fi/telemetry không dây, chọn Pico nếu thích lập trình tương tác MicroPython:** Cả hai đều đủ mạnh chạy vòng lặp PID 100 Hz dư sức.
+4. **Bước 4 — Chạy bài kiểm tra "khởi chạy trần" (bare-board bring-up):** Cắm bo mới vào USB (chưa nối bất kỳ dây nào), nạp chương trình nhấp LED và đọc dòng chào qua Serial để xác nhận bo sống 100%.
+
+**Kiểm tra nhanh.** Một cảm biến khoảng cách laser VL53L0X dùng nguồn `2.8 V – 3.3 V` và bus I2C 3,3 V. Nếu nối nó với **ESP32** (3,3 V) thì cần mạch chuyển mức logic không? **Không cần!** Cả hai cùng chung miền logic 3,3 V (chỉ cần điện trở kéo lên I2C nối lên 3,3 V).
+
+---
+
 ## Vì sao bài này gắn với Capstone A
 
 Capstone A ở chương 07 là xe vi sai gồm hai bánh dẫn động, một bánh đa hướng và firmware chuyển đổi lệnh điều khiển thành tín hiệu PWM cho mạch cầu H TB6612 ở các bài sau. Luồng lệnh phải có cơ chế an toàn: nếu sau khoảng 300 ms không nhận được lệnh mới, hệ số chu kỳ (duty) của cả hai bánh phải đưa về 0; ở lần đầu cho phép bánh quay, bánh xe phải được nhấc khỏi mặt bàn. Vòng lặp điều khiển đó cần chạy trên một vi điều khiển đã được kiểm chứng. Đến chương 08, bài học về Wi-Fi và MQTT sẽ chuyển việc điều khiển từ xa (teleop) từ cáp USB sang điện thoại hoặc laptop. Vì ESP32 tích hợp sẵn Wi-Fi 2,4 GHz và BLE ngay trên module, đây là lựa chọn mặc định của môn học. Pico không có hậu tố W vẫn chạy tốt firmware chương 07 qua USB và rất tiện để thử nghiệm nhanh, nhưng sẽ không dùng được cho phần kết nối không dây ở chương 08 nếu bạn không đổi sang bản có W hoặc chuyển sang ESP32. Quyết định bạn ghi lại hôm nay sẽ định hình sơ đồ chân, bộ công cụ lập trình (toolchain) và phương án kết nối không dây cho cả học kỳ.

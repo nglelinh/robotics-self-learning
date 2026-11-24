@@ -19,6 +19,39 @@ Sau bài này, bạn có thể viết cùng một chương trình nhịp tim kh�
 
 Bạn cần đã có bo mạch in ra mốc thời gian mili giây tăng đều và nháy được một đèn LED từ bài nhịp tim chương 02 (nhánh ESP32 dùng PlatformIO, nhánh Pico dùng REPL MicroPython). Bạn biết đổi số chân LED khi mã mẫu không khớp với nhãn in trên bo mạch. Bài này chưa dùng PWM, ngắt hay mạch cầu H; thói quen cần bỏ là dùng `delay(500)` hoặc `sleep` kéo dài nửa giây, vốn chỉ phù hợp khi chương trình không phải giám sát thêm tác vụ nào khác.
 
+---
+
+Một câu hỏi kinh điển khiến nhiều kỹ sư robot trẻ tranh luận sôi nổi: *nên viết firmware robot bằng **C++** (Arduino/ESP-IDF) hay **MicroPython**?* Nếu chỉ nói chung chung "C++ nhanh hơn còn Python dễ viết hơn" thì vẫn quá mơ hồ — dưới góc nhìn điều khiển thời gian thực, sự khác biệt sinh tử nằm ở **tính tất định về thời gian (timing determinism)** và **độ trễ dọn rác bộ nhớ (garbage collection pause)**!
+
+## Bản đồ kiến thức nền: Biên dịch Tĩnh (C++) vs. Thông dịch Quản lý Bộ nhớ Tự động (MicroPython)
+
+1. **Tốc độ Thực thi & Chi phí Runtime:** C++ biên dịch trực tiếp ra mã máy gốc (native machine code), chạy phép tính số thực dấu phẩy động trên FPU của ESP32 chỉ mất vài nano-giây; MicroPython chạy qua máy ảo bytecode nên chậm hơn khoảng $$10\text{–}50\times$$ trên các vòng lặp tính toán dày đặc.
+2. **Tính Tất định & Garbage Collector (GC):** C++ cấp phát biến tĩnh trên stack/static RAM nên thời gian chạy vòng lặp PID 100 Hz gần như **bất biến**; MicroPython định kỳ kích hoạt trình dọn rác GC (có thể đóng băng CPU từ **2 đến 10 ms** bất ngờ) nếu bạn cấp phát chuỗi/danh sách liên tục trong vòng lặp!
+3. **Tốc độ Tạo mẫu & Chiến lược Lai:** MicroPython cực mạnh để thử nhanh cảm biến qua REPL và viết kịch bản hành vi cấp cao; C++ là chuẩn vàng cho vòng lặp động cơ tốc độ cao, đọc encoder bằng ngắt và tích hợp micro-ROS.
+
+### Ví dụ cầm tay chỉ việc: So sánh ngân sách thời gian vòng lặp PID 100 Hz ($$T = 10\text{ ms}$$) giữa C++ và MicroPython
+
+Giả sử bạn chạy vòng lặp điều khiển động cơ ở **$$100\text{ Hz}$$** (mỗi chu kỳ tối đa **$$10.0\text{ ms}$$**):
+
+| Giai đoạn trong 1 chu kỳ (10 ms) | Firmware C++ (ESP32, 240 MHz) | Firmware MicroPython (RP2040, 133 MHz) |
+|---|---|---|
+| Đọc 2 encoder + tính PID + xuất PWM | **$$0.08\text{ ms}$$** | **$$0.65\text{ ms}$$** |
+| Độ trễ bất ngờ từ Garbage Collector | **$$0.00\text{ ms}$$** (không dùng heap) | **$$3.50\text{ ms}$$** (nếu cấp phát chuỗi mới mỗi vòng!) |
+| **Thời gian xấu nhất (Worst-Case)** | **$$0.08\text{ ms}$$** (chiếm $$0.8\%$$ chu kỳ) | **$$4.15\text{ ms}$$** (chiếm $$41.5\%$$ — giật mạnh nếu lên 500 Hz!) |
+
+Kết luận bằng con số: ở **50–100 Hz** cho xe vi sai cơ bản, *cả hai* ngôn ngữ đều chạy mượt (miễn là trong MicroPython bạn gọi `gc.collect()` có kiểm soát và tránh tạo list/string mới trong vòng lặp nhanh!). Nhưng nếu làm drone tự cân bằng chạy **1.000 Hz** ($$T = 1.0\text{ ms}$$), chỉ **C++** mới giữ được độ trễ dưới 1 ms không bị GC phá vỡ!
+
+### Khung giải thích: 4 tiêu chí chọn đúng ngôn ngữ cho từng tầng robot (nên đọc chậm)
+
+1. **Bước 1 — Đo chu kỳ thực tế thay vì đoán:** Dùng `micros()` hoặc `ticks_us()` đo trực tiếp thời gian chạy vòng lặp lớn nhất (`max_loop_us`) để biết bạn còn bao nhiêu phần trăm dự phòng.
+2. **Bước 2 — Không cấp phát bộ nhớ động (heap) trong vòng lặp điều khiển nhanh:** Dù viết C++ (tránh lớp `String` gây phân mảnh heap!) hay MicroPython (tránh tạo mảng mới mỗi vòng), hãy dùng mảng tĩnh cấp phát sẵn từ `setup()`.
+3. **Bước 3 — Dùng MicroPython để khám phá, C++ để sản xuất tốc độ cao:** Tận dụng điểm mạnh của mỗi ngôn ngữ thay vì cực đoan chọn một bỏ một.
+4. **Bước 4 — Tách rõ lớp toán điều khiển khỏi lớp truy cập thanh ghi:** Khi viết hàm `pid_step(setpoint, measured, dt)` thuần túy không phụ thuộc phần cứng, bạn có thể dịch chuyển giữa C++ và Python chỉ trong 10 phút!
+
+**Kiểm tra nhanh.** Trong MicroPython, nếu một vòng lặp chạy ở 50 Hz ($$T = 20\text{ ms}$$) mất $$1\text{ ms}$$ tính toán nhưng thỉnh thoảng bị GC pause $$4\text{ ms}$$, tổng thời gian xấu nhất là $$5\text{ ms} < 20\text{ ms}$$ — vòng lặp có bị trễ nhịp không? **Không bị trễ nhịp** (vẫn hoàn thành trước mốc 20 ms), nhưng *độ giật thời điểm lấy mẫu* (jitter) tăng thêm 4 ms, làm thành phần đạo hàm $$D$$ trong PID hơi nhiễu!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Capstone A sử dụng khung xe hai bánh vi sai: các lệnh điều khiển từ xa (teleop) được chuyển thành hai kênh PWM đưa tới mạch cầu H TB6612, và chính firmware phải chủ động đưa cả hai kênh về 0 khi ngừng nhận lệnh. Quy tắc an toàn rất rõ ràng: sau 300 ms không có lệnh mới, cả hai duty phải về 0 (và bánh xe luôn được nhấc khỏi bàn trong lần kiểm chứng đầu tiên). Bất kỳ chương trình nào không thể kiểm tra đồng hồ trong khoảng thời gian đó sẽ giữ nguyên mức PWM cũ sau khi người điều khiển đã thả nút. Cả MicroPython và C++ đều đáp ứng được Capstone A; điều bài học này loại bỏ là những lệnh chờ chặn như 200 ms, đủ dài để vượt quá mốc 300 ms.

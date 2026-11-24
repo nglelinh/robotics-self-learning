@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+In 1969, researchers at Stanford Research Institute built Shakey — the first mobile robot capable of reasoning about its own actions. Shakey stood nearly two meters tall, filled a room with supporting computers, and took minutes just to decide how to push a wooden block across a tiled floor. Today, a microcontroller smaller than a postage stamp executes thousands of control iterations per second on a desk. Yet the intellectual core of robotics has not changed: a robot is a closed loop where **physics, electronics, estimation, and control** negotiate with an imperfect world in real time.
+
+This opening lesson sets your compass for the entire course. Rather than treating robotics as a pile of disconnected tutorials, we frame every upcoming chapter as one link in the *sense → estimate → plan → act* pipeline.r
+
+---
+
 Set aside about ninety minutes. You need a text editor and a calendar. A robot is not required, and neither is Ubuntu. The work is writing a map you will still use when the chassis rolls.
 
 ## Learning objectives
@@ -20,6 +26,17 @@ By the end you can **state** the course spine, from component literacy through C
 ## Prerequisites
 
 You can read a technical page slowly and you can create a folder. You do not need a meter, an iron, or a prior robotics course. Ohm's law waits for Chapter 01, where it is measured. What you do need is a note that records the failure. "Started the course" will not help in week nine.
+
+## Background Knowledge Map: How Mechanics, Electronics, Control, and Software Interlock in Robotics
+
+Before touching a soldering iron or writing a single line of C++, it helps to see how four classical engineering disciplines fuse inside even a small differential-drive robot:
+
+- **Kinematics & Mechanics (Geometry of Motion):** Describes how wheel rotations $$(\omega_L, \omega_R)$$ map to chassis linear velocity $$v$$ and angular velocity $$\omega$$ in the 2D plane $$\mathrm{SE}(2)$$. Without a clean kinematic model, a robot cannot predict where a motor command will take it.
+- **Embedded Electronics & Power Systems:** Governs how energy flows from a battery pack through regulators and H-bridge drivers to DC motors, while keeping noisy inductive loads from browning out the microcontroller.
+- **Feedback Control Theory:** Measures the error $$e(t) = r(t) - y(t)$$ between desired and actual motion and computes corrective commands (PID, state-space) at fixed real-time intervals $$\Delta t$$.
+- **State Estimation & Software Architecture:** Turns noisy encoder ticks, IMU readings, and range measurements into a coherent belief about pose $$(x, y, \theta)$$, orchestrated first in deterministic microcontroller firmware and later in ROS 2 nodes.r
+
+---
 
 ## Why it matters
 
@@ -112,6 +129,35 @@ Place three calendar blocks in the next seven days that add up to 4–6 hours, n
 Hà starts on a Wednesday night with a Windows laptop and no parts. She computes two calendars before she picks one. A compressed plan of 6 hours a week for 12 weeks is $6 \times 12 = 72$ hours, but week 8 is a family trip, so Chapter 07 would land on a week she is not home. A 5-hour week for 14 weeks is 70 hours and still finishes Chapters 00–10 if she keeps the bench sitting. She writes the checkpoints as: weeks 1–3 Chapters 00–01, weeks 4–6 Chapters 02–03, weeks 7–11 Chapters 04–07, weeks 12–14 Chapters 08–10, Chapters 11–12 optional after the robot stops on silence.
 
 She copies the 300 ms stop into the same note, without pretending to flash it. The serial field says `none — no board yet`. The photo field says `none`. What broke: nothing powered. What fixed it: she wrote the week numbers before opening a shop tab. Thursday 20:00–21:30 is Bench, labelled "safety card, still no soldering." That file is a pass. She has not flashed a board.
+
+## Deep-Dive Explanation (Read Slowly): From High-Level Goal to Real-Time Control Budget
+
+Beginners often imagine robotics as "write a `move_forward()` function and you're done." In reality, every physical robot runs on a strict **time-and-geometry budget**. Follow these four steps slowly:
+
+1. **Discretize time:** A microcontroller does not run continuously; it samples sensors and updates motor PWM every $$\Delta t$$ seconds (for example, $$f_s = 100\text{ Hz} \implies \Delta t = 0.01\text{ s}$$).
+2. **Map chassis goals to wheel speeds:** For a differential-drive robot with wheel radius $$R$$ and track width $$L$$, forward speed $$v$$ and yaw rate $$\omega$$ relate to left/right wheel angular speeds by:
+   $$v = \frac{R}{2}(\omega_R + \omega_L), \qquad \omega = \frac{R}{L}(\omega_R - \omega_L).$$
+3. **Check physical actuation limits:** Every motor has a maximum no-load speed $$\omega_{\max}$$ and stall torque; commanding a speed above $$\omega_{\max}$$ saturates the actuator and breaks open-loop predictions.
+4. **Verify timing slack:** If your control loop takes $$t_{\text{exec}}$$ to read sensors, compute PID, and write PWM, you must maintain $$t_{\text{exec}} \ll \Delta t$$ so jitter does not destabilize the loop.
+
+### Concrete Worked Example: Sizing a 100 Hz Differential-Drive Loop by Hand
+
+Suppose your desk robot has wheel radius $$R = 0.0325\text{ m}$$ (65 mm diameter), track width $$L = 0.16\text{ m}$$, and runs a $$100\text{ Hz}$$ control loop ($$\Delta t = 10\text{ ms}$$). You want it to cruise at $$v = 0.30\text{ m/s}$$ while turning left at $$\omega = 0.50\text{ rad/s}$$.
+
+- **Step 1 — Solve for required wheel angular velocities:**
+  $$\omega_R = \frac{v + \frac{L}{2}\omega}{R} = \frac{0.30 + 0.08(0.50)}{0.0325} = \frac{0.34}{0.0325} \approx 10.46\text{ rad/s}.$$
+  $$\omega_L = \frac{v - \frac{L}{2}\omega}{R} = \frac{0.30 - 0.08(0.50)}{0.0325} = \frac{0.26}{0.0325} \approx 8.00\text{ rad/s}.$$
+- **Step 2 — Convert to RPM to check against your motor datasheet:**
+  $$\text{RPM}_R = 10.46 \times \frac{60}{2\pi} \approx 99.9\text{ RPM}, \qquad \text{RPM}_L = 8.00 \times \frac{60}{2\pi} \approx 76.4\text{ RPM}.$$
+  A standard 150 RPM yellow TT gearmotor has ample headroom.
+- **Step 3 — Check distance traveled per control tick:**
+  $$\Delta s = v \cdot \Delta t = 0.30 \times 0.01 = 0.003\text{ m} = 3\text{ mm per tick}.$$
+
+**Common Pitfall:** Assuming that because a 240 MHz microcontroller is "fast," timing does not matter. Blocking calls like `delay(100)` or slow serial prints inside the loop can stretch $$\Delta t$$ unpredictably and turn a stable controller into an oscillator.
+
+**Quick Check:** If you halve the control frequency to $$50\text{ Hz}$$ ($$\Delta t = 20\text{ ms}$$), the robot travels $$6\text{ mm}$$ between updates at $$0.30\text{ m/s}$$ — double the blind distance before any course correction occurs.
+
+---
 
 ## Exercises
 

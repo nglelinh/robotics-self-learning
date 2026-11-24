@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **~75 minutes**. You will read two systems carefully enough to fill a table, and you will leave the other three as names you can return to. No checkpoint is loaded.
 
+Imagine telling a robot in plain English, *"pick up the ripe banana and place it in the blue bowl,"* and watching a single neural model read both the camera pixels and your sentence to emit smooth joint commands—even for a bowl color it never saw during teleoperation. **Vision-Language-Action (VLA) models** graft robot action heads onto pretrained Vision-Language Models (VLMs), importing internet-scale semantic generalization into physical control.
+
 ## Learning objectives
 
 You will define a vision-language-action model as a map from an image plus a text instruction to an action on a particular robot. You will place RT-1, RT-2, Open X-Embodiment, OpenVLA, and pi0 on that map: what each one reads, what it writes, and whether those writes are `Twist` or joint targets for the Capstone. You will state the embodiment gap in one concrete way, and you will keep the motor timeout above any sentence a person types. The lab table's "train at home" cell for RT-2 is an honest no.
@@ -21,6 +23,14 @@ You will define a vision-language-action model as a map from an image plus a tex
 
 You can read a project page. Lessons 12-01 through 12-03 gave you dataset keys, a chunk, and a reason not to average two demonstrations. Chapter 09's `cmd_vel` is still `linear.x` in m/s and `angular.z` in rad/s. Chapter 11's camera, if you have one, is a sensor on your base, not a wrist camera on a parallel gripper. A GPU-less laptop is the expected machine.
 
+
+## Background Knowledge Map: Pretrained VLM Backbones, Action Tokenization, and Hierarchical System 1/2 Control
+
+Understanding modern VLAs (such as RT-2, OpenVLA, and $$\pi_0$$) connects three architectural ideas:
+
+- **Vision-Language Backbone Transfer:** Pretraining on billions of image–text pairs teaches a VLM what "ripe," "blue bowl," and spatial relations ("to the left of") mean. Fine-tuning on robot trajectories aligns those semantic representations directly to physical actions.
+- **Discrete Action Tokenization vs. Continuous Flow/Diffusion Heads:** Early VLAs (OpenVLA/RT-2) quantize each continuous DOF into $$B = 256$$ discrete bins and predict them as language tokens; newer architectures (e.g., $$\pi_0$$) attach a fast continuous flow-matching or diffusion action expert to avoid quantization jaggedness.
+- **Latency & Safety Envelopes (System 2 vs. System 1):** Large 7B-parameter VLAs run at ~2–10 Hz on edge GPUs, so real deployments pair them with a high-rate local safety controller (50–200 Hz PID/impedance + joint-limit clamps) so a slow neural forward pass never destabilizes the motors.
 ## Why this sits on the path
 
 Jazzy, Nav2, and the bridge made it possible to type a goal and watch a diff-drive track a path. The papers in this lesson type a goal in natural language and expect a network to emit the motor command. That is a real research line, and it is easy to misread as "the robot now understands sentences, so the firmware can retire." It cannot. A checkpoint is a function from the cameras and the action vector of the robots that generated its data. RT-1's mobile manipulator, a gripper in Open X-Embodiment, and the Capstone do not share that vector. Language does not repair the mismatch. This lesson is how you read the claim without pointing the claim at your wheels.
@@ -58,6 +68,18 @@ Fill RT-1 yourself before you fill anyone else, using the project page if a cell
 One number makes the embodiment concrete. Your bridge accepts two floats per tick. An RT-1-style action packs arm, base, and gripper into one discretized command for a platform with those joints. Even if two of the discrete bins are "base forward" and "base yaw," the bin edges were chosen for their robot, their camera height, and their wheelbase. Mapping bin 7 onto $$v = 0.2$$ m/s is a new controller you would have to design and test wheels-up. It is not a property of the checkpoint. The checkpoint has never seen your `observation.images.cam` or your 300 ms timeout.
 
 RT-2's laptop cell, so the expected answer is visible before you copy it: training RT-2 at home is no. Co-fine-tuning the vision-language backbones those papers start from is not a classroom machine. Reading [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) is the whole assignment if you pick that column.
+
+### Deep-Dive Explanation (Read Slowly): Hand-Calculating Action-Token Quantization Error in a VLA
+
+Many autoregressive VLAs (like OpenVLA) discretize each continuous action dimension (e.g., end-effector delta $$\Delta x \in [-0.05,\ +0.05]\ \text{m}$$) into $$B = 256$$ uniform bins mapped onto the vocabulary's least-used tokens. Let us check the exact spatial precision and bandwidth:
+
+1. **Bin width (quantization step $$\Delta q$$):**
+   $$\Delta q = \frac{0.05 - (-0.05)}{256 - 1} = \frac{0.10\ \text{m}}{255} = 0.000392\ \text{m} \approx 0.39\ \text{mm}.$$
+   The worst-case rounding error is half a bin: $$\pm 0.20\ \text{mm}$$—plenty accurate for tabletop pick-and-place, though coarse for tight-tolerance peg-in-hole insertion.
+2. **Encode a desired move $$\Delta x = +0.012\ \text{m}$$ into a token bin index $$b \in \{0, \dots, 255\}$$:**
+   $$b = \operatorname{round}\!\left(\frac{0.012 - (-0.05)}{0.10} \times 255\right) = \operatorname{round}(0.62 \times 255) = \operatorname{round}(158.1) = 158.$$
+   Decoding bin 158 back to meters gives $$-0.05 + \frac{158}{255}(0.10) = +0.01196\ \text{m}$$ (error of only $$0.04\ \text{mm}$$).
+3. **Token generation latency check:** For a 7-DOF action ($$\Delta x, \Delta y, \Delta z, \Delta r, \Delta p, \Delta y_{\text{aw}}, \text{gripper}$$), generating 7 tokens autoregressively at $$15\ \text{ms/token}$$ takes $$7 \times 15 = 105\ \text{ms}$$ ($$\approx 9.5\ \text{Hz}$$)—explaining why VLAs rely on action chunking or fast low-level controllers underneath.
 
 ## Lab
 

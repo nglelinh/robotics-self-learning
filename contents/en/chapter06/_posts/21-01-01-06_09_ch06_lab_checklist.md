@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **50–70 minutes** to assemble the notes you already took and to fill the gaps. This is the chapter gate, not a new mechanism.
 
+At the end of Chapter 06, your robot still has no firmware running—and that is intentional. Experienced roboticists never debug mechanical wobble and software bugs at the same time; they close the mechanical gate first so that when the robot drifts in Chapter 07, they know with certainty whether to reach for a wrench or a keyboard.
+
 ## Learning objectives
 
 By the end of this lesson your `lab-notes.md` holds a track width and a rolling radius, an identified screw size, a gear ratio that was predicted and checked, one Grashof or belt or rack calculation, a strain-relief photo or a dated plan, and a list of parts still missing before Chapter 07. You can say, in a sentence, whether you passed on hardware or on a labeled drawing.
@@ -21,6 +23,14 @@ By the end of this lesson your `lab-notes.md` holds a track width and a rolling 
 
 Lessons 01 through 08. If one of those labs is unfinished, this checklist is the index that tells you which one to reopen. You need the same notebook you have been writing millimeters into.
 
+
+## Background Knowledge Map: Mechanical Integration Gates, Tolerance Stacking, and Configuration Management
+
+Closing the mechanical chapter builds three disciplined habits used in every real robotics lab:
+
+- **Fault Isolation (Decoupling Mechanical vs. Software Bugs):** If a robot pulls left under equal PWM, the root cause could be wheel-radius mismatch, axle binding, asymmetric gear friction, or a firmware sign bug. Signing off mechanical symmetry *before* writing teleop code eliminates half the search space immediately.
+- **Tolerance Stacking & Concentricity:** Small errors across motor brackets, shaft couplings, and wheel hubs add up. Checking runout (wobble), caster load sharing, and fastener retention verifies that the physical assembly matches the ideal kinematic model within acceptable bounds.
+- **Single Source of Truth (`lab-notes.md`):** Storing dated, measured values of $$b$$, $$r$$, $$G$$, mass, and CoM location in one versioned note guarantees that Chapter 07 firmware, Chapter 08 kinematics, and Chapter 09 URDF files all share the exact same physical constants.
 ## Why this matters for Capstone A and the ROS path
 
 Chapter 07 applies voltage to this chassis. Chapter 08 writes the kinematic equations in code. The ROS `diff_drive_controller` and the URDF will copy $$b$$, $$r$$, and $$i$$ from somewhere; the somewhere should be this page, dated, with the method beside the number. A missing caster or a missing nyloc is a shopping line, not a surprise during bring-up. The pass condition is evidence in the notes. A memory of having “basically measured it” does not open Chapter 07.
@@ -60,6 +70,18 @@ $$
 $$
 
 which is about 2 percent high, inside the band. Their Grashof line is the Lesson 04 pair $$s + l = 120$$ mm, $$p + q = 125$$ mm. The strain-relief photo shows a zip tie and a loop. Missing parts: one nyloc bag. That page is a pass on hardware, with a shopping line that does not block a wheels-up spin if two nylocs are already on the motor mounts. It would block a claim that every fastener is done.
+
+### Deep-Dive Explanation (Read Slowly): Quantifying Straight-Line Drift from a 1 mm Wheel-Radius Mismatch
+
+Why does the Chapter 06 gate insist that left and right rolling radii $$r_L, r_R$$ agree within ~1 mm? Let us calculate the open-loop path curvature caused by a tiny radius mismatch.
+
+1. **Setup:** Suppose both wheels spin at the exact same angular rate $$\dot\phi_L = \dot\phi_R = 10\ \text{rad/s}$$, track width is $$b = 0.150\ \text{m}$$, left radius is $$r_L = 0.0310\ \text{m}$$, and right radius is $$r_R = 0.0320\ \text{m}$$ (just a 1.0 mm difference!).
+2. **Resulting wheel linear speeds:**
+   $$v_L = 10 \times 0.0310 = 0.310\ \text{m/s}, \qquad v_R = 10 \times 0.0320 = 0.320\ \text{m/s}.$$
+3. **Induced yaw rate and turning radius:**
+   $$v = \frac{0.320 + 0.310}{2} = 0.315\ \text{m/s}, \qquad \omega = \frac{0.320 - 0.310}{0.150} = 0.0667\ \text{rad/s},$$
+   $$R = \frac{v}{\omega} = \frac{0.315}{0.0667} = 4.725\ \text{m}.$$
+4. **Lateral drift over a 2-meter hallway test:** For small angles, lateral deviation is $$\Delta y \approx \frac{L^2}{2R} = \frac{2.0^2}{2 \times 4.725} = 0.42\ \text{m}$$! Even a 1 mm tire seating error makes an open-loop robot drift 42 cm off centerline in just 2 meters—proving why mechanical verification must precede firmware.
 
 ## Lab: fill the gate from evidence you have
 

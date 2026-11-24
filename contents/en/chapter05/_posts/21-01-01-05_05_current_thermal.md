@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+A DC motor does not fail because it spun too fast — it fails because its copper windings got too hot and melted their thin enamel insulation. When a robot wheel jams against a chair leg, speed drops to zero, back-EMF vanishes, and electrical input power turns **100% into heat** inside both the motor coil and the H-bridge MOSFETs. Within ten seconds, a tiny plastic gearmotor can smell like burnt varnish.
+
+This lesson turns thermal safety into concrete engineering numbers: stall-current budgets, software stall detection via encoder velocity, and thermal time constants.r
+
+---
+
 A motor datasheet has two currents that matter on a small robot, and they are not close to each other. No-load current is what you measure with the wheels in the air. Stall current is what the copper will draw when the shaft stops and the back-EMF collapses. This lesson turns that stall number into watts, into a driver heatsink, into a fuse in the battery lead, and into the brownout that makes a robot run away.
 
 ## Learning objectives
@@ -23,6 +29,18 @@ A motor datasheet has two currents that matter on a small robot, and they are no
 ## Prerequisites
 
 Ohm's law and $$P = I^2 R$$ are the whole mathematical toolkit. Lesson 05-01's back-EMF story is the reason stall current is large. Lesson 05-02's driver identification tells you whether your heat is landing in a Darlington with a bolted heatsink or in a MOSFET bridge. You need a bench supply with a current knob, or a series ammeter, if you will measure a real motor. The arithmetic path is available if you cannot stall safely.
+
+## Background Knowledge Map: Stall-Current Physics, Thermal Time Constants, and Software Current/Stall Guards
+
+Three physical and firmware safeguards protect actuators from burning out:
+
+- **Joule Heating Scales as $$I^2 R$$:** At stall, current jumps 4×–8× above cruise current, which means copper heating rate jumps **16× to 64×**! Even if a motor runs cool forever at 0.3 A cruise, 1.5 A stall raises winding temperature rapidly.
+- **First-Order Thermal RC Model:** A motor or driver heats exponentially toward steady-state temperature $$T_{\infty} = T_{\text{amb}} + P_{\text{heat}} R_{\theta}$$ with thermal time constant $$\tau_{\text{th}} = R_{\theta} C_{\text{th}}$$:
+  $$T(t) = T_{\text{amb}} + P_{\text{heat}} R_{\theta}\bigl(1 - e^{-t/\tau_{\text{th}}}\bigr).$$
+  Brief 0.3-second acceleration surges are harmless because thermal mass $$C_{\text{th}}$$ absorbs them; sustained 10-second stalls are lethal.
+- **Firmware Stall Detection (Free Safety Sensor!):** Even without a hardware INA219 current sensor, if your firmware commands `|PWM| > 60%` for more than `500 ms` while encoder velocity stays `|v| < 0.02 m/s`, the wheel is unmistakably stalled — immediately cut PWM and enter `FAULT`!r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -123,6 +141,33 @@ Two numbers in `lab-notes.md`: a measured no-load current, and either a measured
 | L298N heatsink is too hot to touch after a short run | Drop times current is a couple of watts. Shorter stall, more air, or a TB6612. |
 | Polyfuse opens and stays open for minutes | It is doing its job. Let it cool. Do not raise the trip point until the short is gone. |
 | Robot lurches after a reset | `setup` is not forcing PWM to 0 and a known direction before anything else. |
+
+## Deep-Dive Explanation (Read Slowly): Computing Thermal Rise During a Jammed Wheel & Sizing a Stall Watchdog
+
+Let's model how fast a stalled motor heats up and verify how quickly a firmware stall guard saves it:
+
+1. **Compute stall power:** $$P_{\text{stall}} = I_{\text{stall}}^2 R_a = V \cdot I_{\text{stall}}$$ (at zero speed, 100% of electrical power becomes heat!).
+2. **Check steady-state stalled temperature:** $$T_\infty = T_{\text{amb}} + P_{\text{stall}} R_\theta$$. If $$T_\infty > 110^\circ\text{C}$$, the motor *cannot* survive continuous stall.
+3. **Evaluate temperature after $$t$$ seconds:** $$T(t) = T_{\text{amb}} + (T_\infty - T_{\text{amb}})(1 - e^{-t/\tau_{\text{th}}})$$.
+4. **Set a software stall cutoff $$t_{\text{cut}} \ll \tau_{\text{th}}$$** (typically `0.5–1.0 s`) so temperature barely budges before power is cut.
+
+### Concrete Worked Example: Small 6 V Gearmotor Stalled Against a Wall
+
+Specs: $$V = 6.0\text{ V}$$, $$R_a = 3.0\,\Omega$$ (so $$I_{\text{stall}} = 2.0\text{ A}$$), thermal resistance $$R_\theta = 15^\circ\text{C/W}$$, thermal time constant $$\tau_{\text{th}} = 20\text{ s}$$, ambient $$T_{\text{amb}} = 30^\circ\text{C}$$, insulation limit $$T_{\max} = 110^\circ\text{C}$$:
+
+- **Step 1 — Stall heat power and steady-state temperature:**
+  $$P_{\text{stall}} = 6.0 \times 2.0 = 12.0\text{ W}.$$
+  $$T_\infty = 30 + 12.0 \times 15 = 30 + 180 = 210^\circ\text{C} \gg 110^\circ\text{C}\;\; (\text{guaranteed burnout if left stalled!}).$$
+- **Step 2 — Temperature after 12 seconds without protection:**
+  $$T(12) = 30 + 180(1 - e^{-12/20}) = 30 + 180(1 - 0.549) = 30 + 81.2 = 111.2^\circ\text{C}$$ — insulation limit breached in just 12 seconds!
+- **Step 3 — Temperature with a `1.0 s` firmware stall watchdog:**
+  $$T(1) = 30 + 180(1 - e^{-1/20}) = 30 + 180(0.0488) = 38.8^\circ\text{C}$$ — rises less than $$9^\circ\text{C}$$ before the robot safely shuts down!
+
+**Common Pitfall:** Setting the software stall timeout too short (e.g., `50 ms`) — a heavy robot starting from dead stop takes ~100–200 ms to overcome static friction and register its first encoder counts, causing false stall trips on every launch. Use `400–800 ms`.
+
+**Quick Check:** If you measure `0.25 V` across a `0.1 Ω` current-sense shunt resistor, the motor is drawing $$I = 0.25 / 0.1 = 2.5\text{ A}$$ and the shunt itself dissipates $$P = 2.5^2 \times 0.1 = 0.625\text{ W}$$ (so use a `1 W` or `2 W` shunt resistor, never a `0.25 W` part!).
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

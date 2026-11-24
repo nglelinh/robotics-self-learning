@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+A single camera frame carries more raw information than a thousand ultrasonic pings — color, lanes, AprilTags, doorways, and obstacles — yet that richness comes with a steep engineering tax: **data bandwidth, latency, and projection geometry**. Plug a 1080p USB webcam into a robot without doing the throughput math, and your CPU spends 95% of its cycles just copying pixels before a single vision algorithm runs.
+
+This lesson bridges hardware camera interfaces (USB vs. CSI), bandwidth budgeting, and the pinhole camera projection matrix that turns 2D pixels $$(u, v)$$ into 3D robot geometry.r
+
+---
+
 Estimated time: **60–75 minutes**. The required work is a bandwidth budget. A camera on the desk is optional, and Chapter 07 does not wait for one.
 
 ## Learning objectives
@@ -20,6 +26,17 @@ You will compute uncompressed and MJPEG bandwidth for a stated width, height, an
 ## Prerequisites
 
 Lesson 04-02’s identification sheet already has a row for “USB plug versus flex cable versus two metal cans.” Chapter 02 is the ESP32 and the Pico, so you know which board is allowed to be the robot’s computer. You can multiply. You do not need OpenCV, a GPU, or a ROS image pipeline. If those words are new, leave them new until Chapter 11.
+
+## Background Knowledge Map: Image Bandwidth, Pinhole Projection Geometry, and Vision Latency
+
+Three computer-vision and systems pillars govern cameras on mobile robots:
+
+- **Interface Bandwidth (USB 2.0 vs. MIPI CSI-2):** Raw uncompressed video scales as $$\text{Width} \times \text{Height} \times \text{Bytes/pixel} \times \text{FPS}$$. USB 2.0 tops out around ~35 MB/s real payload (requiring MJPEG compression at high resolution), whereas MIPI CSI-2 streams directly into an SBC's Image Signal Processor (ISP) via DMA with lower CPU load and latency.
+- **Pinhole Camera Intrinsic Matrix $$\mathbf{K}$$:** Projects a 3D point $$(X, Y, Z)$$ in the camera frame onto pixel coordinates $$(u, v)$$ via focal lengths $$(f_x, f_y)$$ and optical center $$(c_x, c_y)$$:
+  $$u = f_x \frac{X}{Z} + c_x, \qquad v = f_y \frac{Y}{Z} + c_y.$$
+- **Exposure, Rolling Shutter, and Motion Blur:** Fast robot turns smear frames unless shutter exposure time $$t_{\text{exp}}$$ is short enough that scene features move $$< 1\text{ pixel}$$ during exposure.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -107,6 +124,31 @@ The three numbers (18,432,000 bytes/s, 147 Mbit/s, ~15 Mbit/s MJPEG) and the def
 | Torn frames once the serial adapter is on the same hub | The practical budget was already tight |
 | Pi camera and an ESP32, nothing on `/dev/video` | CSI does not plug into that devkit |
 | Chapter 07 blocked on a camera shipment | This lesson’s decision was ignored |
+
+## Deep-Dive Explanation (Read Slowly): Computing Raw Video Bandwidth and Estimating Target Depth from Pixels
+
+Before choosing a resolution and frame rate for your ROS 2 robot camera, run this 4-step bandwidth and geometry check:
+
+1. **Calculate raw RGB24 bandwidth (3 bytes/pixel):** $$\text{BW} = W \times H \times 3 \times \text{FPS}$$.
+2. **Verify against bus and Wi-Fi limits:** Never stream uncompressed `1280×720` video over Wi-Fi; process on-board at `320×240` or `640×480` (often grayscale = 1 byte/pixel!) and send only compressed overlays or compact detections.
+3. **Apply pinhole projection to estimate range $$Z$$ from a known-size landmark** (e.g., an AprilTag of width $$W_{\text{real}}$$ spanning $$\Delta u$$ pixels):
+   $$Z = \frac{f_x \cdot W_{\text{real}}}{\Delta u}.$$
+4. **Check vision-to-wheel latency:** If detection takes $$50\text{ ms}$$ on a robot moving at $$0.6\text{ m/s}$$, the target is already $$3\text{ cm}$$ closer by the time the command arrives!
+
+### Concrete Worked Example: Bandwidth Comparison & AprilTag Range Estimation by Hand
+
+- **Part A — Raw RGB24 bandwidth at 30 FPS:**
+  - **`640×480` RGB24 @ 30 FPS:** $$640 \times 480 \times 3 \times 30 = 27\,648\,000\text{ B/s} \approx 26.4\text{ MB/s}$$ (near USB 2.0's ceiling!).
+  - **`320×240` Grayscale (1 B/px) @ 30 FPS:** $$320 \times 240 \times 1 \times 30 = 2\,304\,000\text{ B/s} \approx 2.20\text{ MB/s}$$ — **12× lighter**, leaving ample CPU for OpenCV and AprilTag detection!
+- **Part B — Estimating distance to a $$10\text{ cm}$$ ($$0.10\text{ m}$$) AprilTag:**
+  Your calibrated `640×480` camera has horizontal focal length $$f_x = 500\text{ px}$$. The tag spans $$\Delta u = 80\text{ px}$$ horizontally in the image:
+  $$Z = \frac{500\text{ px} \times 0.10\text{ m}}{80\text{ px}} = \frac{50}{80} = 0.625\text{ m} = 62.5\text{ cm}.$$
+
+**Common Pitfall:** Using a 1080p camera on a robot when line-following or tag detection works faster and cleaner at `320×240` — 4× more pixels along each axis means **16×** more compute per frame with zero navigation benefit.
+
+**Quick Check:** If the same $$10\text{ cm}$$ AprilTag moves twice as far away ($$Z = 1.25\text{ m}$$), its apparent width halves to $$\Delta u = 40\text{ px}$$ — proving that stereo/monocular depth precision degrades quadratically with distance!
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

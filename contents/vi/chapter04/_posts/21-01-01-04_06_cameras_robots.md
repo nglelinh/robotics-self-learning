@@ -13,6 +13,31 @@ draft: false
 
 Thời lượng: **60–75 phút**. Yêu cầu bắt buộc của bài là bản dự toán băng thông; việc có sẵn camera trên bàn chỉ là tùy chọn và Chương 07 không yêu cầu bạn mua camera.
 
+Nếu encoder và siêu âm chỉ cho robot vài con số rời rạc mỗi giây, thì một chiếc **camera** lại đổ vào bộ não robot một dòng thác hàng chục triệu byte dữ liệu mỗi giây. Chính vì giàu thông tin đến vậy, rất nhiều đội sinh viên mới làm robot rơi vào cùng một cái bẫy: cắm một chiếc webcam 1080p vào cổng USB 2.0 của Raspberry Pi, bật OpenCV ở 30 khung hình/giây rồi ngạc nhiên khi hệ thống giật cứng, CPU nhảy lên 100% và độ trễ điều khiển vọt lên nửa giây. Hiểu về camera cho robot không chỉ là gọi `cv2.VideoCapture(0)`, mà là hiểu **băng thông bus (USB vs. CSI), định dạng điểm ảnh và ngân sách độ trễ**.
+
+## Bản đồ kiến thức nền: Giao diện truyền ảnh, không gian màu và giới hạn băng thông
+
+### 1. USB (UVC) vs. MIPI CSI-2 — đường ống dữ liệu khác nhau ra sao?
+Webcam **USB** tiện lợi kiểu cắm-là-chạy, nhưng mọi khung hình phải đóng gói qua lớp giao thức USB, đi qua bộ điều khiển host và tiêu tốn chu kỳ CPU/DMA để giải mã. Ngược lại, **MIPI CSI-2** (cáp dẹt trên Raspberry Pi, Jetson) đổ dữ liệu cảm biến trực tiếp vào bộ xử lý ảnh phần cứng (ISP) và RAM qua DMA với độ trễ cực thấp và gần như không tốn CPU.
+
+### 2. Ảnh thô (RAW / RGB / YUYV) vs. Ảnh nén (MJPEG / H.264)
+Mỗi điểm ảnh màu RGB888 tốn **3 byte** (24 bit), YUYV (4:2:2) tốn **2 byte** (16 bit), còn ảnh xám (Grayscale — quá đủ cho tìm vạch kẻ đường hay AprilTag!) chỉ tốn **1 byte**. Khi băng thông USB 2.0 bị quá tải, camera tự chuyển sang nén **MJPEG** để gửi vừa đường ống, đổi lại CPU robot phải giải nén lại từng khung hình.
+
+### 3. Rolling Shutter vs. Global Shutter và hiện tượng méo khi robot quay nhanh
+Camera giá rẻ dùng **rolling shutter** (quét từng dòng từ trên xuống dưới trong 10–30 ms). Khi robot xoay nhanh hoặc rung mạnh, các đường thẳng đứng bị nghiêng méo (hiệu ứng "thạch rau câu"), làm sai lệch thuật toán Visual Odometry/SLAM — lý do các camera chuyên dụng cho robotics thường chọn **global shutter** (chụp toàn bộ cảm biến cùng một khoảnh khắc).
+
+### Khung giải thích: Cầm tay tính băng thông luồng ảnh để tránh làm nghẽn cổ chai USB 2.0 (nên đọc chậm)
+
+Biết rằng chuẩn **USB 2.0** có tốc độ lý thuyết $$480\text{ Mbps}$$, nhưng băng thông hữu dụng thực tế cho truyền ảnh liên tục chỉ khoảng **$$280\text{–}320\text{ Mbps}$$**. Hãy tính lưu lượng ảnh thô **RGB888 (3 byte/pixel = 24 bit/pixel)** ở **30 FPS** cho 3 độ phân giải phổ biến:
+
+| Cấu hình ảnh (30 FPS) | Số byte mỗi khung | Lưu lượng (MB/s) | Băng thông (Mbps) | Khả năng chạy trên USB 2.0 (thô) |
+| :--- | :---: | :---: | :---: | :--- |
+| **640×480 Grayscale (1 B/px)** | $$307\,200\text{ B}$$ | $$9{,}22\text{ MB/s}$$ | $$73{,}7\text{ Mbps}$$ | Rất thoáng (dùng ~25% bus) |
+| **640×480 RGB888 (3 B/px)** | $$921\,600\text{ B}$$ | $$27{,}65\text{ MB/s}$$ | $$221{,}2\text{ Mbps}$$ | Vừa khít (chỉ cắm được 1 camera!) |
+| **1920×1080 RGB888 (3 B/px)** | $$6\,220\,800\text{ B}$$ | $$186{,}6\text{ MB/s}$$ | $$1\,493\text{ Mbps}$$ | **Quá tải gần 5×!** Bắt buộc nén MJPEG hoặc dùng USB 3.0 / CSI |
+
+Kiểm tra nhanh dòng thứ ba: $$1\,920 \times 1\,080 \times 3 \times 30 \times 8 = 1\,492\,992\,000\text{ bit/s} \approx 1{,}493\text{ Gbps}$$. Nhìn bảng này, bạn hiểu ngay vì sao robot dò đường hay bám tag chỉ cần `640×480` hoặc `320×240` ảnh xám là vừa đạt 30–60 FPS siêu mượt, vừa tiết kiệm gấp **20 lần** băng thông và bộ nhớ!
+
 ## Mục tiêu học
 
 Sau bài này, bạn tính được băng thông video không nén và MJPEG theo độ phân giải và tốc độ khung hình, rồi đối chiếu với thông lượng thực tế của bus USB 2.0 khi chia sẻ cùng các thiết bị khác. Bạn phân biệt được ba phương án: webcam chuẩn UVC (USB, máy tính làm host), camera CSI (cáp dẹt không đi qua bộ điều khiển USB) và ESP32-CAM (xuất JPEG nhưng không phù hợp làm bộ điều khiển chính của Capstone A). Cuối bài, bạn viết câu quyết định hoãn camera đến phần nhận thức kèm con số 147 Mbit/s cho checklist chương 04.

@@ -13,6 +13,8 @@ draft: false
 
 Estimated time: **70–90 minutes**. If the robot already rolls, ten of those minutes are a hand rotation about the axle midpoint. If it does not, they are a velocity-arrow sketch.
 
+Push a shopping cart forward and its front wheels immediately swing neatly behind their pivots; push it backward and they momentarily shudder sideways before flipping around. That tiny offset between the swivel pin and the tire contact patch—called **caster trail**—is the difference between a mobile robot that glides predictably and one that scrubs sideways and corrupts its own odometry.
+
 ## Learning objectives
 
 By the end of this lesson you can draw the wheel-speed arrows for straight motion, a gentle turn, and a spin in place, and you can compute the spin-in-place yaw rate $$\omega = 2 v_r / b$$. You can explain caster trail, why a reversed caster shimmies, and why four fixed wheels waste the stall current you sized in Chapter 05. You can point at the axle midpoint as the pivot and connect `cmd_vel` linear.x and angular.z to the two motors.
@@ -27,6 +29,14 @@ $$
 
 You know a bad $$b$$ draws a circle on a straight command. Gears (Lesson 03) already set how motor radians become wheel radians.
 
+
+## Background Knowledge Map: Instantaneous Center of Curvature, Caster Trail, and Rolling Constraints
+
+Wheeled mobility rests on three geometric ideas that bridge mechanism diagrams and mobile-robot kinematics:
+
+- **Instantaneous Center of Curvature (ICC):** For any rigid body moving in a plane without lateral tire slip, the wheel axes of all fixed-axis wheels must intersect at a single point called the ICC. For a differential-drive robot, both driven wheels share one axle line, so the ICC can lie anywhere along that axle at signed distance $$R = v/\omega$$ from the chassis midpoint.
+- **Caster Trail & Self-Alignment:** A swivel caster offsets its wheel contact patch behind the vertical swivel axis by trail distance $$d_{\text{trail}} > 0$$. Floor friction acting at the contact patch creates a restoring torque $$\tau = F_{\text{lat}} d_{\text{trail}}$$ that aligns the caster wheel with the local velocity vector—just like a weathervane.
+- **Wheel Scrub & Skid-Steer Trade-offs:** Whenever two fixed-axis wheels are placed on *parallel, non-collinear* axles (as in a 4WD skid-steer robot), their axes never intersect at a finite ICC during a turn. Turning therefore requires deliberate lateral tire scrub, increasing torque demand and degrading pure wheel-encoder odometry.
 ## Why this matters for Capstone A and the ROS path
 
 Capstone A is two driven wheels plus one caster. ROS will send `geometry_msgs/Twist` with linear.x as $$v$$ and angular.z as $$\omega$$. `diff_drive_controller` inverts the two equations and commands a left motor and a right motor. A sign error on one motor is a mechanical fact the controller cannot see: both wheels “forward” in software, one wheel backward on the floor, and the path is a circle about the slower side. You will find that sign in Chapter 07 with the wheels in the air, then confirm it on the floor, where the caster and the rubber finally matter. The arrows you draw today are the picture you will debug against.
@@ -78,6 +88,20 @@ $$
 $$
 
 opposite signs on the two motors. If one motor lead is flipped, the command $$v = 0.20$$, $$\omega = 0$$ (both software speeds “positive”) becomes $$v_l = 0.20$$ and $$v_r = -0.20$$ on the floor. That is this spin, not a straight line. Wheels-up in Chapter 07: positive command, both tires forward. Floor test: the axle midpoint stays put only when you asked for a spin.
+
+### Deep-Dive Explanation (Read Slowly): Computing ICC Distance, Wheel Speeds, and Caster Heading
+
+Let us trace the velocity vector of every contact patch on a 2WD robot with track width $$b = 0.16\ \text{m}$$ and a rear swivel caster mounted $$d_c = 0.10\ \text{m}$$ directly behind the axle midpoint.
+
+1. **Locate the ICC:** Command $$v = 0.24\ \text{m/s}$$ and $$\omega = 0.60\ \text{rad/s}$$ (left turn). The ICC lies to the left of the axle midpoint at distance:
+   $$R = \frac{v}{\omega} = \frac{0.24}{0.60} = 0.40\ \text{m}.$$
+2. **Verify the two driven-wheel speeds from the ICC:**
+   - Inner (left) wheel is at radius $$R_L = R - b/2 = 0.40 - 0.08 = 0.32\ \text{m} \implies v_L = \omega R_L = 0.60 \times 0.32 = 0.192\ \text{m/s}$$.
+   - Outer (right) wheel is at radius $$R_R = R + b/2 = 0.40 + 0.08 = 0.48\ \text{m} \implies v_R = \omega R_R = 0.60 \times 0.48 = 0.288\ \text{m/s}$$.
+   - Check: $$(v_R + v_L)/2 = 0.24\ \text{m/s}$$ and $$(v_R - v_L)/b = 0.096 / 0.16 = 0.60\ \text{rad/s}$$.
+3. **Find the steady-state caster swivel angle:** The caster pivot sits at $$(x, y) = (-0.10,\ 0)$$ in the body frame, while the ICC is at $$(0,\ +0.40)$$. The vector from the ICC to the caster pivot is $$(-0.10,\ -0.40)$$, so its perpendicular velocity vector points along $$(+0.40,\ -0.10)$$. The caster therefore swings outward by angle:
+   $$\psi = \arctan\!\left(\frac{d_c}{R}\right) = \arctan\!\left(\frac{0.10}{0.40}\right) = \arctan(0.25) \approx 14.0^\circ.$$
+   If the caster were fixed straight ahead instead of swiveling, it would scrub sideways at $$14^\circ$$ throughout the entire turn.
 
 ## Lab: find the pivot, or draw the arrows
 

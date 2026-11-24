@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng ước tính: **~60 phút**. Đây là bài tổng kết nghiệm thu (cổng qua chương), không giới thiệu giao thức mới. Bạn chỉ nên chuyển sang Chương 09 khi cả năm hạng mục dưới đây đều có bằng chứng cụ thể, hoặc đã chỉ rõ lỗi cần khắc phục mà không bỏ qua.
 
+Trong kỹ thuật robot, sự khác biệt giữa "chạy thử trên bàn thấy quay" và "nền tảng sẵn sàng cho ROS 2" nằm ở **kiểm thử có định lượng**. Trước khi bàn giao khung xe cấp thấp lên tầng phần mềm ROS 2 ở Chương 09, bạn cần một danh sách kiểm tra nghiêm ngặt xác nhận từng mắt xích: giao tiếp serial, encoder, PID, động học vi sai và cơ chế watchdog.
+
+## Bản đồ kiến thức nền: Ba trụ cột nghiệm thu Nền tảng Cấp thấp (Chương 08)
+
+1. **Hợp đồng giao tiếp & An toàn phần cứng**:
+   Mọi gói tin vận tốc giữa MCU và máy tính chủ phải có định dạng rõ ràng, kiểm tra checksum/biên giá trị và kích hoạt Watchdog dừng động cơ khi mất tín hiệu.
+2. **Hiệu chuẩn Động học & Độ lặp lại**:
+   Đo sai số thực tế trên quãng đường thẳng (ví dụ chạy 1,00 m) và góc quay tại chỗ (quay 360°) để tinh chỉnh bán kính bánh $$r$$ và khổ vết $$L$$ trước khi dùng odometry cho SLAM.
+3. **Sổ nhật ký kỹ thuật tái lập được (Reproducible Lab Log)**:
+   Ghi lại hệ số PID, tần số vòng lặp, jitter p99 và các ngưỡng giới hạn tốc độ để mọi thành viên trong nhóm đều tái hiện được đúng hành vi xe.
+
 ## Mục tiêu
 
 Bạn tự đánh giá sổ tay Chương 08 theo năm tiêu chí: toán biến đổi TF chạy kiểm chứng thành công, khung truyền serial có timeout an toàn, vòng PID có tệp log CSV, động học vi sai có khổ vết đo thực tế, và vòng điều khiển có số đo chu kỳ định thời. Mỗi tiêu chí chỉ chấm đạt hoặc trượt — mọi ô để trống đều tính là trượt.
@@ -46,6 +57,15 @@ Quaternion: z = 1 cho góc vuông, cho dễ nhớ.
 ```
 
 Cả ba dòng trên đều trượt: “quay ổn” không phải bằng chứng đo đạc; nhập $16$ vào công thức đơn vị mét tương đương khổ vết $16$ m; và $z = 1$ (với $w = 0$) là góc quay $180^\circ$ chứ không phải $90^\circ$.
+
+### Khung giải thích (nên đọc chậm): Bài kiểm tra hiệu chuẩn $$r$$ và $$L$$ bằng đúng 2 phép đo thước dây
+
+1. **Hiệu chuẩn bán kính bánh $$r$$ (chạy thẳng 1,00 m):** Ra lệnh xe chạy thẳng đúng `1,000 m` theo odometry, rồi dùng thước đo quãng đường thực tế trên sàn. Nếu xe thực đi được `0,960 m` (hụt 4%), ta chỉnh bán kính hiệu dụng:
+   $$r_{\text{mới}} = r_{\text{cũ}} \times \frac{0{,}960}{1{,}000} = 0{,}96 \cdot r_{\text{cũ}}.$$
+2. **Hiệu chuẩn khổ vết $$L$$ (xoay tại chỗ đúng 1 vòng $$360^\circ$$):** Ra lệnh xoay tại chỗ $$2\pi$$ rad, quan sát góc thực tế xe xoay được. Nếu xe chỉ xoay được $$342^\circ$$ (hụt 5%), nghĩa là $$L$$ thực tế đang lớn hơn $$L$$ nhập trong mã:
+   $$L_{\text{mới}} = L_{\text{cũ}} \times \frac{360^\circ}{342^\circ} \approx 1{,}053 \cdot L_{\text{cũ}}.$$
+
+Chỉ cần 5 phút đo thước dây và chỉnh hai hệ số này, sai số odometry vòng hở thường giảm từ ~10% xuống dưới 1–2%!
 
 ## Lab
 

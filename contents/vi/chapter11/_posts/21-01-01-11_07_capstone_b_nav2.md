@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~120 phút** cho phần mô phỏng, thêm một buổi trên sàn nếu SLAM thật đã dựng được bản đồ không bị cong.
 
+Tấm bản đồ `lab_map.yaml` bạn vừa lưu giờ trở thành trí nhớ dài hạn cho robot. Trong bài Capstone B phần 2 này, bạn nạp bản đồ vào **Nav2**, cung cấp tư thế khởi đầu cho **AMCL**, rồi chỉ bằng một cú nhấp chuột đặt mũi tên `2D Goal Pose` trên RViz2 — chiếc xe tự tính đường đi, né vật cản phát sinh và tiến gọn vào vị trí đích.
+
+## Bản đồ kiến thức nền: Ba trụ cột Triển khai Điều hướng Tự hành Nav2 (Capstone B)
+
+1. **Tải Bản đồ & Khởi tạo AMCL (`map_server` + `amcl`)**:
+   Đặt `2D Pose Estimate` gần đúng vị trí xe, sau đó lái nhích nhẹ để đám mây hạt AMCL co cụm chặt quanh đúng vị trí và hướng mũi xe trên bản đồ.
+2. **Tinh chỉnh Bộ tham số `nav2_params.yaml` cho đúng Khung xe Capstone**:
+   Cập nhật chính xác `robot_radius` / `footprint`, giới hạn `max_vel_x`, `max_vel_theta`, `acc_lim_x`, và `inflation_radius` theo đúng đặc tính cơ khí xe thật (không để nguyên tham số mặc định của TurtleBot3 nếu xe bạn kích thước khác!).
+3. **Giám sát An toàn & Đánh giá Chỉ số Chạy tự hành**:
+   Theo dõi liên tục Local Costmap trên RViz2, giữ tay sẵn sàng trên nút dừng khẩn cấp / teleop ghi đè, và đo tỷ lệ hoàn thành mục tiêu, độ lệch vị trí cuối và số lần kích hoạt recovery.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ gửi được một mục tiêu điều hướng (goal) trong mô phỏng đang bật SLAM, quan sát `/cmd_vel` chuyển sang giá trị khác 0 và dừng hẳn khi hủy goal. Trên xe thật, bạn thực hiện tương tự với `navigation_launch.py` trong khi SLAM giữ cạnh `map → odom` (nhấc bánh khỏi mặt sàn ở lần thử đầu tiên) và lưu bản đồ bằng `map_saver_cli`. Trọng tâm là kiểm chứng toàn chuỗi hoạt động thay vì sa đà tinh chỉnh tham số MPPI khi lần gửi goal đầu gặp trục trặc.
@@ -55,6 +66,16 @@ ros2 run nav2_map_server map_saver_cli -f ~/map
 Tệp `.yaml` sinh ra sẽ trỏ tới ảnh `.pgm` tương ứng; trường `resolution` trong `.yaml` biểu thị kích thước mỗi ô lưới tính bằng mét (không tùy ý sửa giá trị này nếu chưa đo đạc đối chiếu thực tế).
 
 Lưu ý rằng footprint mặc định của Nav2 không khớp chính xác kích thước khung xe Capstone, nên các mục tiêu sát cửa hẹp có thể bị từ chối. Chỉ nên tinh chỉnh tệp tham số sau khi đã chạy thành công một mục tiêu cơ bản ở khu vực trống.
+
+### Khung giải thích (nên đọc chậm): Tính nhanh khoảng cách phanh tối thiểu để đặt ngưỡng an toàn trong `nav2_params.yaml`
+
+Giả sử trong `nav2_params.yaml`, bạn đặt vận tốc tối đa $$v_{\max} = 0{,}40\text{ m/s}$$ và gia tốc hãm tối đa $$a_{\text{decel}} = 0{,}50\text{ m/s}^2$$, với độ trễ vòng điều khiển tổng $$t_{\text{trễ}} = 0{,}10\text{ s}$$:
+- Quãng đường xe đi thêm trong lúc chờ phản ứng trễ: $$s_{\text{trễ}} = v_{\max} \cdot t_{\text{trễ}} = 0{,}40 \times 0{,}10 = \mathbf{0{,}04\text{ m}}.$$
+- Quãng đường phanh vật lý từ $$0{,}40\text{ m/s}$$ về `0`:
+  $$s_{\text{phanh}} = \frac{v_{\max}^2}{2 a_{\text{decel}}} = \frac{0{,}40^2}{2 \times 0{,}50} = \frac{0{,}16}{1{,}00} = \mathbf{0{,}16\text{ m}}.$$
+- **Tổng khoảng cách dừng an toàn:** $$s_{\text{dừng}} = 0{,}04 + 0{,}16 = \mathbf{0{,}20\text{ m}}$$ (20 cm).
+
+Suy ra vùng đệm `inflation_radius` và khoảng nhìn trước của Local Costmap phải rộng hơn $$R_{\text{robot}} + 0{,}20\text{ m}$$ để khi một sinh viên bất ngờ bước ngang qua, robot có đủ quãng đường phanh êm mà không va chạm!
 
 ## Lab
 

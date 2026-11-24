@@ -21,6 +21,39 @@ Sau bài này, bạn nhận diện được đúng loại cảm biến dựa tr�
 
 Bạn đã hoàn thành bài 04-01 (I2C, SPI, UART), nắm thói quen đọc sơ đồ chân từ Chương 01 và có sẵn đồng hồ vạn năng. Không bắt buộc phải có đầy đủ mọi loại cảm biến ngay trên bàn.
 
+---
+
+Trên bàn linh kiện robot, năm loại cảm biến phổ biến nhất — **siêu âm HC-SR04**, **laser ToF (VL53L0X)**, **IMU (MPU6050)**, **cảm biến hồng ngoại dò line (IR)** và **encoder bánh xe** — đều có kích thước chỉ bằng đồng xu, nhưng nguyên lý vật lý, điện áp làm việc và điểm mù của chúng lại khác nhau một trời một vực! Nhận diện đúng từng module bằng mắt thường và hiểu rõ giới hạn vật lý của nó giúp bạn chọn đúng "đôi mắt" cho từng nhiệm vụ.
+
+## Bản đồ kiến thức nền: Năm Giác quan Cốt lõi của Robot Di động
+
+1. **Đo Khoảng cách (Siêu âm HC-SR04 vs. Laser ToF VL53L0X):** HC-SR04 phát sóng âm 40 kHz hình nón rộng (~$$15^\circ$$), hoạt động tốt với kính trong suốt nhưng dễ bị hấp thụ bởi rèm vải mềm và dùng logic **5 V**; VL53L0X đo thời gian bay của tia laser hồng ngoại chùm hẹp ($$t \sim$$ nano-giây), dùng **3,3 V I2C** và cực chính xác ở cự ly gần (< 1,2 m) nhưng kém hơn dưới ánh nắng gắt.
+2. **Đo Chuyển động Nội tại (IMU 6 bậc tự do & Encoder):** IMU đo gia tốc tuyến tính ($$a_x, a_y, a_z$$) và vận tốc góc ($$\omega_x, \omega_y, \omega_z$$) trực tiếp trên thân xe; Encoder đếm số vòng quay từng bánh xe để tính quãng đường (odometry) nhưng bị sai khi bánh xe trượt trên sàn trơn!
+3. **Cảm biến Gần / Dò vạch (Hồng ngoại phản xạ IR):** Phát tia hồng ngoại và đo cường độ phản xạ từ mặt sàn (màu trắng phản xạ mạnh, vạch đen hấp thụ) — rất nhạy với khoảng cách gầm xe và ánh sáng mặt trời.
+
+### Ví dụ cầm tay chỉ việc: Tính khoảng cách từ xung Echo của HC-SR04 và kiểm tra mạch hạ áp 5 V → 3,3 V
+
+Cảm biến siêu âm HC-SR04 phát xung âm thanh với tốc độ trong không khí ở $$20^\circ\text{C}$$ là $$c = 343\text{ m/s} = \mathbf{0.0343\text{ cm}/\mu\text{s}}$$. Giả sử vi điều khiển đo được độ rộng xung `HIGH` trên chân Echo là **$$t = 1{,}166\ \mu\text{s}$$**:
+1. Vì sóng âm phải bay từ cảm biến đến vật cản rồi **phản xạ quay ngược lại** (tổng quãng đường $$2d$$):
+   $$
+   d = \frac{c \cdot t}{2} = \frac{0.0343\text{ cm}/\mu\text{s} \times 1{,}166\ \mu\text{s}}{2} \approx \mathbf{20.0\text{ cm}}!
+   $$
+2. **Kiểm tra an toàn điện áp chân Echo cho ESP32/Pico (3,3 V):** HC-SR04 bản chuẩn cấp nguồn 5 V sẽ đẩy chân Echo lên **5,0 V**. Dùng cặp điện trở phân áp $$R_1 = 1\text{ k}\Omega$$ (nối từ Echo) và $$R_2 = 2\text{ k}\Omega$$ (nối xuống GND):
+   $$
+   V_{\text{GPIO}} = 5.0 \times \frac{2}{1 + 2} = \mathbf{3.33\text{ V}} \quad (\text{an toàn tuyệt đối!}).
+   $$
+
+### Khung giải thích: 4 bước nhận diện nhanh một module cảm biến mới trước khi cắm dây (nên đọc chậm)
+
+1. **Bước 1 — Đọc kỹ chữ in lụa (silkscreen) quanh hàng chân:** Kiểm tra ngay ghi chú điện áp (`3V3` hay `5V` hay `VIN 3-5V`), tên bus (`SDA/SCL` = I2C, `TRIG/ECHO` = siêu âm, `A0/D0` = cảm biến IR/analog).
+2. **Bước 2 — Soi chiều trục tọa độ in trên bo IMU:** Các module MPU6050/ICM-20948 đều in mũi tên trục $$+X, +Y$$ ngay trên mặt PCB — gắn lệch $$90^\circ$$ mà không đổi dấu trong code sẽ làm xe quay ngược chiều!
+3. **Bước 3 — Kiểm tra xem trên module đã có sẵn IC ổn áp và điện trở kéo lên chưa:** Nhiều module GY-521 (MPU6050) đã hàn sẵn LDO 3,3 V và pull-up I2C, trong khi cảm biến trần cần cấp đúng 3,3 V sạch.
+4. **Bước 4 — Kết hợp đa cảm biến (Sensor Fusion) để bù điểm mù cho nhau:** Siêu âm + ToF bù nhau trước kính và vải; Encoder + IMU (con quay hồi chuyển) bù nhau chống trượt bánh và trôi góc!
+
+**Kiểm tra nhanh.** Nếu đặt vật cản cách cảm biến HC-SR04 đúng **1,00 mét** ($$100\text{ cm}$$), xung Echo sẽ kéo dài khoảng bao nhiêu mili-giây? Ta có $$t = \dfrac{2 \times 100}{0.0343} \approx \mathbf{5{,}831\ \mu\text{s} \approx 5.83\text{ ms}}$$ — và nếu vật cản ở quá xa (4 m), chờ `pulseIn()` không đặt `timeout` có thể làm kẹt vòng lặp chính tới hàng chục mili-giây!
+
+---
+
 ## Vì sao bài này quan trọng với Capstone A và ROS
 
 Capstone A cần một cảm biến phát hiện vật cản phía trước và (nếu muốn kiểm chứng định lượng tốt hơn) encoder đếm vòng quay bánh xe. Cảm biến siêu âm HC-SR04 hoặc laser ToF VL53L0X đảm nhiệm việc đo khoảng cách; động cơ giảm tốc có encoder từ tính đảm nhiệm việc đếm xung. IMU chưa bắt buộc cho lần chạy teleop đầu tiên và sẽ được dùng sau cho `sensor_msgs/Imu`. Riêng camera thuộc phạm vi Chương 11 vì đòi hỏi băng thông USB và năng lực xử lý vượt quá khả năng của ESP32 thuần; mua camera quá sớm khi robot chưa dừng an toàn được chỉ gây lãng phí ngân sách.

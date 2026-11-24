@@ -19,6 +19,33 @@ Bài kiểm tra này chốt lại chương 03 bằng các bằng chứng thực 
 
 Danh sách này kiểm chứng kết quả từ bài 1 đến bài 5: vòng lặp không chặn (thay thế [nhịp tim chương 02]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %})), nút nhấn kéo lên, PWM bằng LEDC hoặc `duty_u16`, ISR ngắn gọn và máy trạng thái `IDLE` / `TELEOP` / `FAULT`. Nếu chưa có phần cứng, bạn chưa được tính đạt chương; chỉ được kiểm tra sơ bộ trên mã nguồn đã viết hoàn chỉnh khi trích dẫn được đúng dòng kiểm tra timeout và dòng ép duty về 0.
 
+---
+
+Chương 03 là bước ngoặt biến bo mạch thụ động thành một "bộ não nhúng" thực thụ biết đọc nút nhấn chống dội, phát xung PWM không rít, đếm xung ngắt tốc độ cao và chuyển trạng thái có kỷ luật. **Checklist Chương 03** giúp bạn kiểm chứng độ mượt thời gian thực (*jitter*, tốc độ đáp ứng) của toàn bộ tầng firmware trước khi nối các cảm biến bus số I2C/SPI/UART ở Chương 04.
+
+## Bản đồ kiến thức nền: Kiểm chứng Tính Thời gian thực của Firmware (Firmware Verification)
+
+1. **Đo Độ giật Chu kỳ (Loop Jitter):** Một vòng lặp thiết kế ở 50 Hz ($$20\text{ ms}$$) chỉ đạt chuẩn khi khoảng cách giữa các lần thực thi thực tế tập trung chặt quanh $$20\text{ ms}$$ (sai lệch $$< 5\text{–}10\%$$) mà không có gai vọt bất thường.
+2. **Kiểm chứng Xung & Ngắt Bằng Con số:** Kiểm tra tỷ lệ mất xung encoder khi quay tay đúng 1 vòng bánh xe (so sánh số xung đếm được với số khe đĩa lý thuyết).
+3. **Kiểm thử Chuyển Trạng thái & Dừng Khẩn cấp (E-Stop):** Xác minh mọi mũi tên trong bảng FSM hoạt động đúng như thiết kế và trạng thái `ESTOP` luôn thắng mọi trạng thái khác.
+
+### Ví dụ cầm tay chỉ việc: Soi nhật ký Serial để phát hiện lỗi độ giật (Jitter) trong vòng lặp 50 Hz
+
+Xét hai đoạn nhật ký dấu thời gian `t_ms` in ra từ hai bản firmware cùng đặt chu kỳ mục tiêu $$20\text{ ms}$$:
+- **Firmware ĐẠT:** `t_ms = [1000, 1020, 1041, 1060, 1080]` → các khoảng chu kỳ $$\Delta t = [20,\ 21,\ 19,\ 20]\text{ ms}$$. Trung bình $$20.0\text{ ms}$$, độ giật cực đại chỉ **$$\pm 1\text{ ms}$$ (5%)**!
+- **Firmware CHƯA ĐẠT:** `t_ms = [1000, 1020, 1185, 1205, 1225]` → xuất hiện một gai **$$\Delta t = 165\text{ ms}$$** (vọt gấp **8,25 lần** chu kỳ chuẩn!). Nguyên nhân thường là một hàm đọc cảm biến bị treo chờ timeout, một lần in Serial dài làm đầy bộ đệm, hoặc một câu lệnh `delay()` bị bỏ quên trong nhánh phụ!
+
+### Khung giải thích: 4 bước nghiệm thu sạch tầng Firmware Chương 03 (nên đọc chậm)
+
+1. **Bước 1 — Chạy kiểm thử xoay bánh xe 1 vòng thủ công:** Đánh dấu 1 vạch bút trắng trên bánh xe, xoay tay đúng 1 vòng $$360^\circ$$ và kiểm tra biến `ticks` khớp số xung lý thuyết (ví dụ 20 hoặc 80 xung) với sai số $$\le 1$$ xung.
+2. **Bước 2 — Kiểm tra chống dội bằng 10 lần bấm nhanh liên tiếp:** Đếm trên Serial phải tăng đúng từ 0 lên 10, không nhảy cóc thành 13 hay 17.
+3. **Bước 3 — Kiểm tra PWM bằng LED hoặc động cơ ở 3 mức (0%, 50%, 100%):** Xác minh tần số 20 kHz không rít và mức 0% tắt hẳn hoàn toàn.
+4. **Bước 4 — Thử bấm `ESTOP` ngay giữa trạng thái `RUN` và `AVOID`:** Đảm bảo log in chuyển về `ESTOP` tức thì và bánh xe cắt điện ngay lập tức.
+
+**Kiểm tra nhanh.** Khi xoay tay bánh xe đúng **5 vòng**, encoder có 20 khe (đọc 1 cạnh) lý thuyết phải đếm được $$5 \times 20 = 100$$ xung, nhưng firmware chỉ đếm được `92` xung (mất 8%). Bạn nên kiểm tra gì đầu tiên? Kiểm tra xem có vô tình đặt hàm `debounce` quá lớn lên chân encoder, hoặc có đặt `Serial.print()` trong ISR làm trễ mất xung hay không!
+
+---
+
 ## Vì sao bài này quan trọng
 
 Các chương tiếp theo mặc định rằng firmware vi sai của bạn đã nhận lệnh teleop và tự động ngắt cả hai kênh PWM khi mất lệnh 300 ms. Hệ thống ROS ở tầng trên sẽ gửi lệnh vận tốc dựa trên giả định đó và không thể phát hiện ra việc nút nhấn bị nhiễu, duty chỉ ghi một lần khi khởi động, hay trạng thái `FAULT` quên ghi 0 ra chân PWM. Quy tắc nhấc bánh khỏi bàn vẫn được duy trì cho đến khi toàn bộ các mục kiểm chứng này được ghi nhận đầy đủ trong sổ thực hành.

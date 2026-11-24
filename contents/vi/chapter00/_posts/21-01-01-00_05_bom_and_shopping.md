@@ -21,6 +21,47 @@ Sau bài học này, bạn sẽ lập được bảng vật tư (BOM) cho xe vi 
 
 Bạn chỉ cần chuẩn bị sẵn công cụ ghi chép và quyết định chọn Lộ trình A hay Lộ trình B từ bài 00-02 để biết có cần Wi-Fi trên vi điều khiển ngay từ đầu hay không. Hiện tại chưa cần thuộc định luật Ohm; phần mạch lái và pin trong bài cung cấp đúng hai thông số quan trọng nhất để bạn không mua nhầm. Khi chưa có đồng hồ vạn năng, điện thoại để quay chụp kiện hàng cũng là một công cụ kiểm tra hữu ích.
 
+---
+
+Đi mua linh kiện robot lần đầu mà không có bảng vật tư (**BOM — Bill of Materials**) rất giống việc đi siêu thị khi đang đói mà không có danh sách: bạn mang về một túi đầy bo mạch và cảm biến lẻ tẻ, nhưng khi ngồi lắp mới phát hiện mạch lái động cơ làm tụt mất 2 volt của pin, còn đầu nối pin lại không khớp với công tắc! Đọc hiểu BOM bằng con mắt kỹ sư giúp bạn chọn đúng từng cụm linh kiện tương thích điện áp, dòng điện và cơ khí ngay từ đầu.
+
+## Bản đồ kiến thức nền: Tư duy Hệ thống đằng sau một Bảng BOM Robot
+
+1. **Chuỗi Năng lượng (Pin → Cầu chì → Công tắc → Buck 5 V → Vi điều khiển & Driver):** Mọi linh kiện trên xe phải cùng nằm trong một "ngân sách điện áp và dòng điện" khép kín — điện áp pin phải lớn hơn điện áp định mức động cơ cộng sụt áp driver, nhưng nhỏ hơn giới hạn tối đa của mạch hạ áp.
+2. **Hiệu suất Mạch lái Động cơ (BJT L298N vs. MOSFET TB6612FNG):** Không phải cầu H nào cũng giống nhau! Mạch dùng transistor lưỡng cực cũ (L298N) sụt áp tới $$2\text{ V}$$ và tỏa nhiệt dữ dội, trong khi mạch dùng MOSFET hiện đại (TB6612FNG / DRV8833) có điện trở mở $$R_{\text{DS(on)}}$$ cực nhỏ, giữ pin bền hơn và xe khỏe hơn hẳn.
+3. **Quản lý Rủi ro Mua sắm theo Đợt:** Tách BOM thành các đợt tương ứng với từng chương học giúp bạn kiểm chứng từng khối hoạt động trước khi chi tiền nâng cấp lên SBC và LiDAR.
+
+### Ví dụ cầm tay chỉ việc: So sánh tổn hao nhiệt L298N vs. TB6612FNG và Tính thời lượng pin 2S
+
+**Phần A — Tổn hao công suất trên mạch lái khi kéo dòng $$I = 1.0\text{ A}$$ (2 động cơ chạy cùng lúc):**
+- **L298N (cầu H BJT, sụt áp $$V_{\text{drop}} \approx 2.0\text{ V}$$):**
+  $$
+  P_{\text{nhiệt, L298N}} = V_{\text{drop}} \times I = 2.0\text{ V} \times 1.0\text{ A} = \mathbf{2.0\text{ W}}!
+  $$
+  Nếu pin 2S chỉ có $$7.4\text{ V}$$, động cơ chỉ còn nhận được $$7.4 - 2.0 = \mathbf{5.4\text{ V}}$$ (mất tới 27% điện áp thành nhiệt đốt tản nhiệt!).
+- **TB6612FNG (cầu H MOSFET, tổng $$R_{\text{on}} \approx 0.5\ \Omega$$):**
+  $$
+  P_{\text{nhiệt, TB6612}} = I^2 \cdot R_{\text{on}} = (1.0)^2 \times 0.5 = \mathbf{0.5\text{ W}} \quad (\text{mát hơn }\mathbf{4\times}\text{!})
+  $$
+  Điện áp sụt chỉ $$1.0 \times 0.5 = 0.5\text{ V}$$, động cơ nhận đủ $$6.9\text{ V}$$ mạnh mẽ hơn hẳn!
+
+**Phần B — Thời lượng chạy của bộ pin 2S 18650 (2.200 mAh, 7.4 V):** năng lượng định mức $$E = 7.4 \times 2.2 = \mathbf{16.28\text{ Wh}}$$. Với dòng xả trung bình toàn xe $$0.8\text{ A}$$ và giữ lại $$15\%$$ dung lượng chống xả cạn:
+
+$$
+t_{\text{chạy}} = \frac{2.2\text{ Ah} \times 0.85}{0.8\text{ A}} \approx \mathbf{2.34\text{ giờ}}.
+$$
+
+### Khung giải thích: 4 bước rà soát bảng BOM trước khi nhấn nút đặt hàng (nên đọc chậm)
+
+1. **Bước 1 — Khớp mức logic giữa MCU và ngoại vi:** ESP32/Pico dùng logic **3,3 V**; nếu mua cảm biến xuất 5 V (như HC-SR04 bản cũ), bắt buộc phải có sẵn điện trở chia áp hoặc mạch chuyển mức trong BOM.
+2. **Bước 2 — Kiểm tra dòng hãm trục (stall current) của động cơ:** Driver động cơ và cầu chì phải chịu được dòng khởi động/kẹt bánh, không chỉ dòng không tải.
+3. **Bước 3 — Mua dư linh kiện tiêu hao giá rẻ:** Điện trở, LED, tụ 100 µF, dây jumper và đầu nối nên mua dư 20–30% để không bị đứt mạch thực hành chỉ vì cháy 1 linh kiện giá 1.000 đồng.
+4. **Bước 4 — Đồng bộ chuẩn giắc cắm (JST / XT30 / DC barrel):** Tránh cảnh pin một kiểu giắc, sạc một kiểu giắc và mạch công tắc lại là dây trần phải xoắn tay!
+
+**Kiểm tra nhanh.** Nếu bạn dùng động cơ vàng TT (điện áp định mức 6 V) với pin 2S (7.4 V) qua TB6612FNG (sụt áp 0.5 V), điện áp tối đa đặt lên động cơ là $$6.9\text{ V}$$. Làm sao tránh quá áp? Giới hạn hệ số xung PWM tối đa ở khoảng $$6.0 / 6.9 \approx \mathbf{87\%}$$ trong firmware!
+
+---
+
 ## Vì sao bài này quyết định Capstone
 
 Bài teleop ở Chương 07 thường hỏng bởi những nguyên nhân phần cứng rất dễ tránh: mạch lái gây sụt khoảng 2 V, cổng USB phải gánh dòng kéo bánh xe, chân echo 5 V cắm thẳng vào chân GPIO 3,3 V, hoặc mạch sạc một cell 4,2 V bị kẹp lên bộ pin 8,4 V. ROS 2 không thể khắc phục các lỗi phần cứng này. Bảng BOM giúp đảm bảo phần cứng khớp hoàn toàn với firmware; mua đúng thông số là điều kiện đầu tiên để robot chạy ổn định.

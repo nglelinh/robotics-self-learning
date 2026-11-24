@@ -13,6 +13,19 @@ draft: false
 
 Thời lượng: **~60 phút** (10 phút xem sơ đồ định hướng, 20 phút chọn một hướng duy nhất và 30 phút lập kế hoạch thực hành một tháng mà chưa cần mua sắm thêm).
 
+Hoàn thành hành trình 12 chương từ mạch điện cầu H, PID, ROS 2 Jazzy, Gazebo, SLAM/Nav2 đến LeRobot và VLA, bạn đã sở hữu bức tranh toàn cảnh hiếm có: hiểu robot từ dòng điện chạy qua cuộn dây động cơ cho tới mô hình AI nền tảng. Bài học này đóng vai trò la bàn chỉ hướng cho chặng đường tiếp theo — dù bạn muốn đi sâu vào kỹ thuật điều khiển, SLAM thị giác, thao tác tay máy hay nghiên cứu Robot Learning.
+
+## Bản đồ kiến thức nền: Bốn nhánh Chuyên sâu sau Khóa học Robotics
+
+1. **Kỹ thuật Phần mềm Robot & Hệ thống Tự hành (ROS 2 / Nav2 / C++ Real-Time)**:
+   Đi sâu vào `ros2_control`, hệ điều hành thời gian thực (PREEMPT_RT), tối ưu hóa hiệu năng C++ và triển khai đội xe (fleet management).
+2. **Nhận thức & SLAM 3D (Visual-Inertial Odometry, LiDAR-Inertial SLAM, 3D Gaussian Splatting)**:
+   Vượt ra khỏi mặt phẳng 2D sang bản đồ 3D dày đặc, tối ưu hóa đồ thị phi tuyến (GTSAM / Ceres) và kết hợp cảm biến đa thể thức.
+3. **Điều khiển Nâng cao & Tối ưu Quỹ đạo (LQR, MPC, Whole-Body Control)**:
+   Dùng mô hình động lực học đầy đủ (phương trình Euler–Lagrange) và tối ưu hóa lồi thời gian thực cho robot bốn chân (quadruped) và robot hình người (humanoid).
+4. **Robot Learning & Embodied AI (Sim-to-Real RL, Isaac Lab, VLA)**:
+   Huấn luyện hàng nghìn robot song song trên GPU bằng Học tăng cường (PPO trong Isaac Lab/MuJoCo) và mở rộng chính sách đa nhiệm VLA.
+
 ## Mục tiêu
 
 Sau bài học này, bạn sẽ chọn **duy nhất một** hướng phát triển cho tháng tới thay vì dàn trải cả ba: **Hướng A** phát triển tiếp khung xe hiện có (Nav2, lidar khi sẵn sàng, tham khảo `linorobot2` nhưng vẫn giữ nguyên cầu nối động cơ của mình); **Hướng B** tìm hiểu cánh tay robot và tập dữ liệu LeRobot (chỉ đầu tư phần cứng khi bạn chủ động quyết định về sau); hoặc **Hướng C** đào sâu lý thuyết với sách miễn phí *Modern Robotics* và khóa học *Manipulation* của MIT. Bạn sẽ viết ra một kế hoạch cụ thể gắn với chiếc Capstone sẵn có kèm cam kết duy trì các thói quen an toàn, đồng thời sử dụng danh mục tài liệu cuối bài như bản đồ tra cứu dài hạn.
@@ -76,6 +89,14 @@ reference I will read and not flash over my firmware: https://github.com/linorob
 Bản kế hoạch thứ hai chốt duy nhất một hướng, chỉ rõ phần cứng sẵn có, nêu thói quen an toàn bằng con số cụ thể (300 ms thay vì nói chung "cẩn thận") và xác định rõ `linorobot2` chỉ để tham khảo kiến trúc.
 
 Khung giá tham khảo để cân nhắc cho Hướng A (chỉ mua khi xe hiện tại đã vận hành ổn định, không mua dồn trong ngày đầu): lidar 360° nhỏ khoảng 1,5–3,5 triệu đồng; Raspberry Pi 5 (nếu cần tách khỏi laptop) khởi điểm gần 2,4 triệu đồng cho bản RAM thấp tại [listing Pi 5 lắp ráp tại Anh trên Hshop](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk) (kiểm tra lại giá biến thể thực tế); cánh tay là nhánh đắt tiền nên không ghép chung giỏ hàng với Hướng A.
+
+### Khung giải thích (nên đọc chậm): Lập kế hoạch chọn 1 dự án mở rộng 8 tuần phù hợp đúng năng lực hiện có
+
+| Hướng bạn thấy hứng thú nhất | Dự án 8 tuần khả thi ngay sau khóa này | Bộ công cụ lõi cần đầu tư thêm |
+| :--- | :--- | :--- |
+| Tự hành ngoài trời / trong tòa nhà | Nâng cấp Capstone B lên **3D LiDAR / RGB-D SLAM + Nav2 Keepout Zones** | `RTAB-Map`, `robot_localization` (EKF), C++ plugin Nav2 |
+| Tay máy & Thao tác tinh vi | Thu thập 100 lượt trên **SO-101**, so sánh trực tiếp **ACT vs. Diffusion Policy** | `LeRobot`, PyTorch, hiệu chuẩn camera–tay máy |
+| Robot đi bộ & Học tăng cường | Huấn luyện robot 4 chân đi bộ vượt dốc bằng **PPO trong MuJoCo / Isaac Lab** | `MuJoCo`, `Isaac Lab`, học tăng cường (RL) |
 
 ## Lab
 

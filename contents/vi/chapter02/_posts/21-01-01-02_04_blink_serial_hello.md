@@ -18,6 +18,37 @@ Bài thực hành này xác nhận bộ công cụ (toolchain) đã cài ở bà
 
 Nếu dùng ESP32, bạn cần đã nạp thành công chương trình từ bài PlatformIO hoặc Arduino IDE, xác định được tên cổng và đặt tốc độ 115200 baud ở cả hai phía. Nếu dùng Pico, bo mạch cần đã cài MicroPython, Thonny hoặc `mpremote` kết nối đúng cổng và đèn LED đã hoạt động với `Pin("LED")` hoặc GPIO 25. Chỉ cần chuẩn bị một trong hai hệ thống; chưa dùng mạch cầu H, pin hay khung xe. Nếu cáp USB có chất lượng kém, bài thực hành này sẽ làm lộ rõ vấn đề.
 
+---
+
+Chương trình đầu tiên của mọi kỹ sư nhúng luôn là nhấp nháy đèn LED — nhưng ở cấp độ kỹ thuật robot, đèn LED không phải để "cho vui", mà là **nhịp tim chẩn đoán (heartbeat)** báo cho bạn biết vi điều khiển vẫn đang sống và vòng lặp chính không bị treo! Bí mật tách biệt code đồ chơi với firmware robot thật nằm ở đúng một khái niệm: **xóa sổ hàm `delay()` chặn CPU** và thay bằng **bộ định thời không chặn (non-blocking scheduler)**.
+
+## Bản đồ kiến thức nền: Lập lịch Không chặn và Truyền thông Serial Chẩn đoán
+
+1. **Blocking (`delay()`) vs. Non-Blocking (`millis()` / `ticks_ms()`):** Khi gọi `delay(500)`, CPU đứng yên hoàn toàn suốt 500 ms — bỏ lỡ mọi nút nhấn khẩn cấp, xung encoder và gói tin cảm biến! Lập lịch không chặn kiểm tra `now - last_time >= interval` trong vòng lặp chính, cho phép chạy song song nhiều tác vụ ở nhiều tần số khác nhau trên cùng 1 lõi CPU.
+2. **Nhịp tim (Heartbeat LED) & Log có Cấu trúc (Structured Serial Log):** Thay vì in chữ rời rạc kiểu `ok`, `123`, hãy in định dạng bảng CSV/key-value kèm dấu thời gian (`t_ms,state,v_batt,rpm_l,rpm_r`) để có thể vẽ đồ thị và phân tích ngay bằng Python!
+3. **Ngân sách Băng thông Serial (Đừng để `Serial.print` bóp nghẹt vòng lặp):** In một dòng log dài 100 byte ở tốc độ 9.600 bps tốn tới **104 ms** — đủ làm sập hoàn toàn vòng lặp điều khiển 50 Hz (20 ms)!
+
+### Ví dụ cầm tay chỉ việc: So sánh `delay(500)` với `millis()` và Tính chi phí thời gian của một dòng `Serial.print`
+
+**Phần A — Mất mẫu cảm biến khi dùng `delay(500)`:** Giả sử robot cần nhấp LED nhịp tim mỗi **500 ms** (2 Hz) *đồng thời* đọc cảm biến khoảng cách mỗi **20 ms** (50 Hz):
+- Nếu viết `delay(500)` sau lệnh đảo LED: trong 500 ms đó lẽ ra phải đọc $$500 / 20 = 25$$ mẫu cảm biến, nhưng CPU ngủ cứng suốt 500 ms → **bỏ lỡ 24 trên 25 mẫu (mất 96% dữ liệu!)**.
+- Dùng hai bộ định thời độc lập `last_led` (500 ms) và `last_sensor` (20 ms): cả hai chạy mượt mà với **0% mẫu bị mất**!
+
+**Phần B — Thời gian truyền 1 dòng log 80 byte qua UART (`8N1` = 10 bit/byte):**
+- Ở baud rate **9.600 bps** ($$960\text{ byte/s}$$): $$\dfrac{80}{960} = \mathbf{83.3\text{ ms}}$$ (lớn gấp **4 lần** chu kỳ điều khiển 20 ms → làm treo vòng lặp ngay khi đầy buffer TX!).
+- Ở baud rate **115.200 bps** ($$11{,}520\text{ byte/s}$$): $$\dfrac{80}{11{,}520} \approx \mathbf{6.94\text{ ms}}$$ — và nếu chỉ in log ở tần số 10 Hz (mỗi 100 ms), băng thông chiếm chưa tới $$7\%$$!
+
+### Khung giải thích: 4 quy tắc viết vòng lặp nền tảng cho mọi firmware robot (nên đọc chậm)
+
+1. **Bước 1 — Tuyệt đối cấm `delay()` bên trong `loop()` chính:** Mọi chu kỳ thời gian đều dùng phép so sánh `now - last >= period` (kiểu `uint32_t` trên C++ để tự an toàn khi tràn sau 49,7 ngày!).
+2. **Bước 2 — Tách tần số điều khiển khỏi tần số in log:** Chạy PID/đọc cảm biến ở 50–100 Hz, nhưng chỉ in log ra Serial ở 5–10 Hz để không làm nghẽn bộ đệm UART.
+3. **Bước 3 — Luôn in dấu thời gian `t_ms` ở cột đầu tiên:** Nhìn vào hiệu hai dòng `t_ms` liên tiếp, bạn lập tức đo được chu kỳ thực tế và phát hiện ngay hiện tượng giật (jitter).
+4. **Bước 4 — Dùng LED nhịp tim để chẩn đoán không cần dây USB:** Nhấp đều 1 Hz = chạy bình thường; nhấp nhanh 5 Hz = cảnh báo pin yếu; sáng đứng hoặc tắt hẳn = firmware bị treo!
+
+**Kiểm tra nhanh.** Nếu bạn chạy vòng lặp điều khiển 100 Hz (chu kỳ 10 ms) và in một dòng log dài 60 byte ở *mọi* chu kỳ (tức 100 dòng/giây = 6.000 byte/giây), tốc độ baud tối thiểu cần chọn (với khung 10 bit/byte) là bao nhiêu? $$6{,}000 \times 10 = \mathbf{60{,}000\text{ bps}}$$ — nên chọn chuẩn **115.200 bps** để có biên an toàn gần gấp đôi!
+
+---
+
 ## Vì sao bài này gắn với Capstone A
 
 Vòng lặp điều khiển từ xa (teleop) ở chương 07 có cấu trúc tương tự vòng nhịp tim này, chỉ thay việc bật tắt LED bằng việc cập nhật hệ số chu kỳ (duty) cho bánh trái và bánh phải qua TB6612. Mốc thời gian giúp bạn kiểm chứng vòng lặp đang chạy đúng chu kỳ thiết kế. Đồng thời, vòng lặp đó phải phát hiện được khoảng 300 ms không có lệnh mới để đưa cả hai duty về 0, và ở lần đầu cho phép duty khác 0, bánh xe phải được nhấc khỏi bàn. Nếu chương trình bị chặn bên trong `delay(1000)`, vi điều khiển không thể kiểm tra tình trạng mất lệnh cho đến khi `delay` kết thúc, khiến bánh xe tiếp tục quay theo mức PWM cũ thêm tới một giây sau khi người điều khiển đã thả nút. Đến chương 08, khi truyền lệnh qua Wi-Fi, cơ chế kiểm tra quá thời gian (timeout) vẫn dựa trên phép so sánh thời gian không chặn như bài này.

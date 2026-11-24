@@ -11,6 +11,12 @@ lesson_type: required
 draft: false
 ---
 
+Robots do not perceive "walls" or "speed" — they perceive physical transduction phenomena: ultrasonic pressure echoes, infrared photons timed to picoseconds, Coriolis forces on microscopic silicon springs, and magnetic flux reversals across spinning poles. Every sensor has a sweet spot and a blind spot: ultrasonic fails on soft curtains, optical ToF struggles in direct sunlight, and wheel encoders lie the instant a tire slips on tile.
+
+This lesson builds your mental catalog of robot sensors so you choose complementary modalities (sensor fusion) rather than expecting one cheap module to do everything.r
+
+---
+
 Estimated time: **60–80 minutes**. This is a bench identification lesson. You can finish it with photos of modules you already own, plus one datasheet tab per module you still need to buy.
 
 ## Learning objectives
@@ -20,6 +26,16 @@ You will name a module from its shape and pin labels before you wire it, state i
 ## Prerequisites
 
 Lesson 04-01 (I2C, SPI, UART) and the habit of reading a pinout from Chapter 01. A multimeter. You do not need every module on the desk at once.
+
+## Background Knowledge Map: Proprioception vs. Exteroception, Noise Models, and Complementary Fusion
+
+Three estimation-theory concepts organize every sensor on Capstone A and ROS 2 robots:
+
+- **Proprioceptive vs. Exteroceptive Sensors:** *Proprioceptive* sensors measure the robot's internal state (wheel encoders, IMU, battery voltage); *exteroceptive* sensors measure the external environment (ultrasonic, ToF laser, IR line sensors, cameras, LiDAR). Robust navigation always fuses both.
+- **Systematic Bias vs. Zero-Mean Noise:** Every sensor reading follows $$z = h(x) + b + \epsilon$$, where $$b$$ is calibratable bias (e.g., gyro drift, wheel diameter error) and $$\epsilon \sim \mathcal{N}(0, \sigma^2)$$ is random noise. Averaging reduces $$\epsilon$$ by $$1/\sqrt{N}$$, but **never** removes bias $$b$$!
+- **Field of View (FoV) & Specular Failure Modes:** An HC-SR04 emits a wide $$15^\circ\text{–}30^\circ$$ acoustic cone (prone to glancing specular reflections off angled walls), whereas a VL53L0X laser projects a tighter infrared cone (~$$25^\circ$$) with faster update rates and millimeter repeatability.r
+
+---
 
 ## Why this matters for Capstone A and the ROS path
 
@@ -89,6 +105,34 @@ At least two modules with corrected voltage and bus. A written note that HC-SR04
 | Two VL53 boards, no XSHUT plan | Scan shows one address or none |
 | Encoder with one channel | You cannot tell forward from back |
 | Buying ESP32-CAM as the Capstone brain | Motor pins and brownouts fight the camera |
+
+## Deep-Dive Explanation (Read Slowly): Computing Optimal Inverse-Variance Fusion of Two Range Sensors
+
+Suppose your robot has both an ultrasonic sensor (standard deviation $$\sigma_1 = 2.0\text{ cm}$$) and a Time-of-Flight laser sensor ($$\sigma_2 = 0.5\text{ cm}$$) measuring the same wall. How should you combine their readings $$z_1$$ and $$z_2$$ instead of taking a naive 50/50 average? Follow the 4-step **Minimum-Variance (Kalman/Bayesian) Fusion** rule:
+
+1. **Compute each sensor's precision (inverse variance):** $$w_1 = 1/\sigma_1^2$$ and $$w_2 = 1/\sigma_2^2$$.
+2. **Form the precision-weighted average:**
+   $$\hat{z} = \frac{w_1 z_1 + w_2 z_2}{w_1 + w_2} = \frac{\sigma_2^2 z_1 + \sigma_1^2 z_2}{\sigma_1^2 + \sigma_2^2}.$$
+3. **Compute the fused variance:** $$\sigma_{\text{fused}}^2 = \frac{1}{w_1 + w_2} = \frac{\sigma_1^2 \sigma_2^2}{\sigma_1^2 + \sigma_2^2}$$.
+4. **Verify improvement:** $$\sigma_{\text{fused}}$$ is *strictly smaller* than even the best individual sensor!
+
+### Concrete Worked Example: Fusing Ultrasonic ($$z_1 = 42.0\text{ cm}$$) and ToF ($$z_2 = 40.3\text{ cm}$$)
+
+Given $$\sigma_1 = 2.0\text{ cm}$$ ($$\sigma_1^2 = 4.0$$) and $$\sigma_2 = 0.5\text{ cm}$$ ($$\sigma_2^2 = 0.25$$):
+
+- **Step 1 — Sensor precisions:**
+  $$w_1 = \frac{1}{4.0} = 0.25\text{ cm}^{-2}, \qquad w_2 = \frac{1}{0.25} = 4.00\text{ cm}^{-2}.$$
+  Notice the ToF sensor earns **16×** more weight than the ultrasonic sensor!
+- **Step 2 — Fused distance estimate:**
+  $$\hat{z} = \frac{0.25(42.0) + 4.00(40.3)}{0.25 + 4.00} = \frac{10.50 + 161.20}{4.25} = \frac{171.70}{4.25} = 40.40\text{ cm}.$$
+- **Step 3 — Fused uncertainty:**
+  $$\sigma_{\text{fused}} = \sqrt{\frac{1}{4.25}} \approx 0.485\text{ cm} < 0.50\text{ cm}.$$
+
+**Common Pitfall:** Blindly fusing an outlier (e.g., ultrasonic glancing off an angled wall and returning `350 cm` while ToF reads `40 cm`). Always run a **gating check** (reject a reading if $$\lvert z_1 - z_2 \rvert > 3\sqrt{\sigma_1^2 + \sigma_2^2}$$) before fusing!
+
+**Quick Check:** If both sensors have equal noise ($$\sigma_1 = \sigma_2 = \sigma$$), the fused formula reduces to the plain average $$\hat{z} = (z_1 + z_2)/2$$ with reduced noise $$\sigma_{\text{fused}} = \sigma/\sqrt{2} \approx 0.707\,\sigma$$.
+
+---
 
 ## Mua ở Việt Nam / Where to buy in Vietnam
 

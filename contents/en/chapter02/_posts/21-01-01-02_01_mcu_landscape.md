@@ -10,6 +10,12 @@ lesson_type: required
 draft: false
 ---
 
+Choosing a microcontroller for a robot is like choosing an engine for a vehicle: peak clock speed tells only half the story. An Arduino Uno runs at 16 MHz with 2 KB of RAM and only two external interrupt pins — enough for a simple line follower, cramped the moment you add two quadrature encoders, an IMU, a PID loop, and telemetry. An ESP32 or Raspberry Pi Pico (RP2040), by contrast, costs roughly the same yet brings dual cores, hardware PWM/PIO timers, and hundreds of kilobytes of RAM.
+
+This lesson compares the modern MCU landscape through the lens of **real-time robotics peripherals** so you select hardware for the right engineering reasons.r
+
+---
+
 ## Objectives
 
 By the end of this lesson you can compare three honest brains for a small diff-drive robot: a classic ESP32 dev board, a Raspberry Pi Pico or Pico 2, and an Arduino Uno-class board. You can say what each one does with logic voltage, radio, and the first language you will actually type. You can choose the ESP32 NodeMCU-32S when phone teleop is coming, and you can say why a bare module and a Pico without Wi-Fi are different purchases. You can write the bring-up order that stops a brownout from looking like a random bug in the sketch. You can also compute a classroom threshold for a 3.3 V logic high and use it to refuse a 5 V signal on a GPIO.
@@ -17,6 +23,16 @@ By the end of this lesson you can compare three honest brains for a small diff-d
 ## Prerequisites
 
 You can set a meter to DC volts, and you know a GPIO is a pin the chip can drive or read. A series resistor in front of an LED, from Chapter 01, is enough. You do not need to have flashed firmware. The full cart stays in the Chapter 00 shopping lesson ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). This page only chooses the brain and the cable.
+
+## Background Knowledge Map: CPU Architecture, Hardware Peripherals, and Real-Time Determinism
+
+Evaluating an MCU for Capstone A rests on three technical pillars:
+
+- **Core Architecture & Floating-Point Support:** 8-bit AVR chips (ATmega328P) emulate 32-bit floats slowly in software, whereas 32-bit Xtensa (ESP32) and ARM Cortex-M0+/M4 (RP2040, STM32F4) execute 32-bit math natively — with hardware FPU on ESP32 and STM32F4 cutting PID and trigonometry cycle counts by 10×.
+- **Dedicated Robotics Peripherals:** Hardware timers for glitch-free PWM, hardware quadrature decoder / PIO state machines for zero-CPU-overhead encoder counting, and DMA-backed I2C/SPI/UART buses free the CPU for control and estimation.
+- **Connectivity vs. Determinism:** ESP32 integrates Wi-Fi and Bluetooth (great for wireless telemetry and micro-ROS), though Wi-Fi interrupts run on Core 0 — which is why pinning your real-time control loop to Core 1 is a standard robotics pattern.r
+
+---
 
 ## Why it matters for Capstone A
 
@@ -90,6 +106,35 @@ You should observe a note that a classmate can audit. A pass names one primary M
 A listing photo of a metal can with no USB socket is a module. A charge-only phone lead lights a power LED and never creates a port. Fix the listing before you fix a driver.
 
 Safety: do not connect a battery, a motor, or a 5 V sensor while you are still choosing the board. The only electrical act today is reading a label.
+
+## Deep-Dive Explanation (Read Slowly): Budgeting CPU Cycles and Encoder Interrupt Load Across MCUs
+
+Why do two high-resolution wheel encoders overwhelm a slow 8-bit MCU while barely registering on an ESP32 or RP2040? Let's calculate the exact interrupt load step by step:
+
+1. **Compute encoder pulse rate per wheel:** If a motor spins at $$\text{RPM}_{\text{motor}}$$ (before gearbox!) with $$P_{\text{rev}}$$ pulses per revolution in 4× quadrature decoding, edge rate is:
+   $$f_{\text{edge}} = \frac{\text{RPM}_{\text{motor}}}{60} \times 4 P_{\text{rev}}.$$
+2. **Multiply by 2 wheels** for a differential-drive robot: $$f_{\text{total}} = 2 f_{\text{edge}}$$.
+3. **Multiply by ISR execution time $$t_{\text{ISR}}$$** to find CPU utilization: $$U = f_{\text{total}} \cdot t_{\text{ISR}}$$.
+4. **Verify margin:** Keep interrupt CPU load $$U < 10\%$$ so PID control and I2C IMU reads never starve.
+
+### Concrete Worked Example: Comparing 16 MHz AVR vs. 240 MHz ESP32 on Dual Encoders
+
+Suppose each gearmotor has a 1:48 gearbox and a magnetic encoder on the motor shaft with $$P_{\text{rev}} = 11\text{ PPR}$$. At wheel speed $$150\text{ RPM}$$, the motor shaft spins at $$150 \times 48 = 7\,200\text{ RPM}$$:
+
+- **Step 1 — Quadrature edge rate (4× decoding) for two wheels:**
+  - One wheel: $$f_{\text{edge}} = \frac{7\,200}{60} \times (4 \times 11) = 120 \times 44 = 5\,280\text{ edges/s}$$.
+  - Two wheels: $$f_{\text{total}} = 2 \times 5\,280 = 10\,560\text{ interrupts/s}$$.
+- **Step 2 — CPU utilization comparison:**
+  - **16 MHz Arduino Uno** (typical Arduino `attachInterrupt` ISR $$\approx 5\,\mu\text{s}$$):
+    $$U_{\text{Uno}} = 10\,560 \times 5 \times 10^{-6} = 5.28\%$$ — and Uno only has 2 hardware `INT` pins total, so 4× quadrature on 2 wheels requires pin-change interrupts!
+  - **240 MHz ESP32** (hardware `PCNT` pulse counter peripheral):
+    $$U_{\text{ESP32}} = 0.0\%\text{ CPU!}$$ The hardware counter accumulates all 10,560 edges/s autonomously while the CPU sleeps or runs Kalman filtering.
+
+**Common Pitfall:** Picking an MCU solely by MHz while ignoring ADC linearity, 3.3 V logic tolerance, or whether it has enough free PWM/encoder pins after reserving SPI/I2C/UART.
+
+**Quick Check:** With 11 PPR × 4× × 48 gear ratio, one full wheel revolution produces $$11 \times 4 \times 48 = 2\,112$$ counts; on a 65 mm diameter wheel (circumference $$\pi \times 65 \approx 204.2\text{ mm}$$), each count resolves $$204.2 / 2112 \approx 0.097\text{ mm}$$!
+
+---
 
 ## Exercises
 

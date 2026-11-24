@@ -13,6 +13,17 @@ draft: false
 
 Thời lượng: **~50 phút**. Sau hai bài lab Capstone B, mục kiểm tra này yêu cầu minh chứng thực tế cho các kết quả đã chạy, không lặp lại định nghĩa lý thuyết SLAM.
 
+Chương 11 là cột mốc lớn đánh dấu chiếc robot của bạn đã chính thức đạt năng lực **tự hành hoàn chỉnh**: tự lập bản đồ bằng SLAM, tự định vị trên bản đồ bằng AMCL và tự hoạch định lộ trình tránh vật cản bằng Nav2. Danh sách kiểm tra này tổng hợp các tiêu chí định lượng để nghiệm thu Capstone B trước khi bước sang kỷ nguyên học robot hiện đại ở Chương 12.
+
+## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Hệ thống Tự hành (Chương 11)
+
+1. **Chất lượng Bản đồ SLAM**:
+   Bản đồ lưu ra có tường sắc nét, không bị nhân đôi (double walls), đóng vòng lặp chuẩn và sai số đo kích thước dưới 3–5%.
+2. **Độ tin cậy của Định vị AMCL & Điều hướng Nav2**:
+   Đám mây hạt hội tụ nhanh sau khi di chuyển ngắn; robot hoàn thành chuỗi điểm đến (multi-waypoint) mà không đâm vật cản tĩnh hay vật cản mới đặt thêm giữa đường.
+3. **Khả năng Chẩn đoán & Tái lập bằng `rosbag`**:
+   Ghi lại nhật ký chạy tự hành (`/scan`, `/odom`, `/tf`, `/cmd_vel`, `/plan`) để chứng minh kết quả khách quan và phân tích mọi tình huống kích hoạt recovery.
+
 ## Mục tiêu
 
 Bạn cần xác nhận đủ các hạng mục: câu tóm tắt chuỗi TF từ phần khái niệm, ảnh bản đồ hoặc log `/map` từ lab SLAM, một lượt gửi goal sinh `Twist` từ lab Nav2, và sự tách bạch rõ ràng giữa phần mô phỏng với phần xe thật. Việc chưa có lidar thật không làm trượt phần mô phỏng, nhưng bỏ trống không ghi chú kế hoạch hoãn cho phần xe thật thì chưa đạt.
@@ -36,6 +47,14 @@ Chương 12 sẽ chuyển sang các chính sách học máy (policy), nhưng pol
 **Nav2.** Một mục tiêu gửi trong mô phỏng tạo ra `/cmd_vel` khác 0 rồi dừng khi hủy goal hoặc gửi lệnh 0. Trên sàn thực tế: thực hiện tương tự với bước nhấc bánh ban đầu trước khi hạ xuống sàn (nếu chưa chạy sàn thì ghi chú hoãn).
 
 **An toàn.** Ghi nhận rõ có người túc trực ở công tắc nguồn pin trong lần đầu hạ bánh chạy tự hành; nếu đã hạ bánh mà thiếu xác nhận này thì tiêu chí Nav2 thực tế chưa đạt.
+
+### Khung giải thích (nên đọc chậm): Phiếu chấm điểm định lượng cho 3 vòng chạy tự hành Capstone B
+
+| Chỉ tiêu kiểm chứng | Ngưỡng ĐẠT | Cách đo trực tiếp |
+| :--- | :---: | :--- |
+| Sai số vị trí khi dừng tại mục tiêu | $$\le 10\text{ cm}$$ và góc $$\le 10^\circ$$ | Đối chiếu tâm xe thực/mô phỏng với mũi tên `Goal Pose` |
+| Số lần va chạm vật cản tĩnh & động | **0 lần** | Đặt thêm 1 thùng các-tông giữa đường sau khi đã lưu bản đồ |
+| Độ ổn định tỉ lệ thành công | **3/3 lần** liên tiếp đi qua 2 điểm đích | Chạy liên tục không chỉnh sửa tham số giữa các lượt |
 
 ## Lab
 

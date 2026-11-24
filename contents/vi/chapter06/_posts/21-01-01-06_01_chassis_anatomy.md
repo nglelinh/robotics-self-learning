@@ -13,6 +13,35 @@ draft: false
 
 Thời lượng ước tính: **70–90 phút**, bao gồm thời gian đo trực tiếp trên khung xe 2WD thực tế hoặc đo trên bản vẽ đúng tỉ lệ nếu bộ kit chưa về tới xưởng.
 
+Nhìn thoáng qua, khung xe robot vi sai hai bánh trông chỉ như một tấm nhựa phẳng gắn hai động cơ và một bánh đa hướng (caster). Nhưng chỉ cần bạn đặt cục pin nặng lệch về phía sau vài centimet, robot bỗng mất bám đường, bánh chủ động quay tít tại chỗ khi tăng tốc, hoặc chúi mũi xuống sàn mỗi khi phanh gấp! **Giải phẫu khung robot** chính là bài toán cân bằng cơ học giữa vị trí trọng tâm (CoM), khoảng sáng gầm, độ cứng vững và cách bố trí không gian cho điện tử – cảm biến.
+
+## Bản đồ kiến thức nền: Trọng tâm, Phân bổ tải trọng và Hình học khung vi sai
+
+### 1. Phân bổ trọng lượng giữa trục bánh chủ động và bánh caster
+Trên khung 3 điểm tựa (2 bánh chủ động + 1 bánh caster), tải trọng đè lên trục chủ động quyết định trực tiếp **lực ma sát bám tối đa** $$F_{\max} = \mu N_{\text{drive}}$$. Nếu đặt trọng tâm quá gần bánh caster, bánh chủ động bị nhẹ hẫng và trượt quay; ngược lại nếu đặt quá sát (hoặc vượt qua) trục bánh chủ động, robot dễ bị bốc đầu/chúi mũi khi tăng giảm tốc đột ngột. Vị trí lý tưởng thường đặt trọng tâm nằm trong vùng **60%–75% tải trọng dồn lên trục chủ động**.
+
+### 2. Phân tầng cơ – điện tử (Multi-Deck Architecture)
+Khung robot tốt chia rõ các tầng chức năng: tầng đáy nặng nhất chứa **pin và động cơ** để hạ thấp trọng tâm chống lật; tầng giữa chứa **mạch nguồn, cầu chì và vi điều khiển** để dây công suất ngắn gọn; tầng trên cùng thoáng đãng dành cho **LiDAR, camera và nút dừng khẩn cấp (E-Stop)** không bị che khuất tầm nhìn.
+
+### 3. Trụ đồng (Standoff), độ đồng phẳng và khoảng sáng gầm
+Khung bị vặn xoắn dù chỉ $$2\text{ mm}$$ sẽ làm một bánh chủ động nhấc nhẹ khỏi sàn khi qua gờ gạch, phá hỏng hoàn toàn odometry. Giữ trục hai bánh đồng trục, chọn khoảng sáng gầm phù hợp mặt sàn (thường $$10\text{–}20\text{ mm}$$ trong nhà) và dùng trụ đồng liên kết cứng là tiêu chuẩn cơ khí cơ bản.
+
+### Khung giải thích: Cầm tay tính phân bổ tải trọng bánh chủ động và gia tốc tối đa trước khi trượt bánh (nên đọc chậm)
+
+Xét khung robot vi sai nặng **$$M = 2{,}0\text{ kg}$$** (trọng lượng $$W = 2{,}0 \times 9{,}81 = 19{,}62\text{ N}$$), khoảng cách từ trục bánh chủ động phía trước tới bánh caster phía sau là **$$L = 16\text{ cm}$$**. Bạn bố trí pin sao cho trọng tâm (CoM) nằm cách trục bánh chủ động **$$a = 4\text{ cm}$$** về phía caster (cách caster $$b = 12\text{ cm}$$):
+
+1. **Cân bằng mô-men để tìm lực pháp tuyến đè lên trục chủ động ($$N_{\text{drive}}$$) và bánh caster ($$N_{\text{caster}}$$):**
+   - Tỷ lệ tải dồn lên trục chủ động:
+     $$\frac{b}{L} = \frac{12}{16} = 75\% \implies N_{\text{drive}} = 0{,}75 \times 19{,}62 = 14{,}72\text{ N}\;(\text{tương đương } 1{,}5\text{ kg}).$$
+   - Tỷ lệ tải dồn lên bánh caster:
+     $$\frac{a}{L} = \frac{4}{16} = 25\% \implies N_{\text{caster}} = 0{,}25 \times 19{,}62 = 4{,}91\text{ N}\;(\text{tương đương } 0{,}5\text{ kg}).$$
+
+2. **Tính lực kéo cực đại và gia tốc cực đại trước khi trượt bánh:**
+   Với hệ số ma sát lốp cao su trên sàn gạch $$\mu = 0{,}60$$:
+   $$F_{\max} = \mu\,N_{\text{drive}} = 0{,}60 \times 14{,}72 = 8{,}83\text{ N} \implies a_{\max} = \frac{F_{\max}}{M} = \frac{8{,}83}{2{,}0} \approx 4{,}41\text{ m/s}^2.$$
+
+Thử đảo ngược: nếu bạn đặt nhầm cục pin nặng tuốt ra đuôi xe sao cho $$a = 12\text{ cm}$$ (chỉ còn 25% tải lên bánh chủ động), $$a_{\max}$$ tụt thê thảm xuống chỉ còn $$1{,}47\text{ m/s}^2$$ và robot liên tục trượt bánh mỗi khi đề-pa!
+
 ## Mục tiêu học
 
 Sau bài này, các bạn xác định được hai kích thước hình học mà robot vi sai thực sự sử dụng khi di chuyển: khổ vết (track width) $$b$$ đo giữa hai tâm vết tiếp xúc của lốp (không phải giữa hai vỏ động cơ) và bán kính lăn $$r$$ tính từ phép lăn đúng một vòng khi lốp đã chịu tải. Từ một cặp vận tốc bánh xe, các bạn tính được vận tốc tịnh tiến và vận tốc góc quay của thân robot, biết cách bố trí pin sao cho bánh caster luôn bám sàn, và ghi lại $$b$$, $$r$$ theo đơn vị milimét để bài lắp ráp ở Chương 07 cũng như `diff_drive_controller` trong ROS sử dụng thống nhất.
