@@ -24,7 +24,7 @@ You will bring the Chapter 09 xacro into a running Harmonic world in a fixed ord
 Lesson 10-01’s empty world launches and `gz topic -l` shows `/clock`. Lesson 09-06’s xacro exists, with a box body, cylindrical wheels, `continuous` wheel joints, and inertial tags. Lesson 08-04’s inverse kinematics is the meaning of `cmd_vel`: $$v$$ forward and $$\omega$$ about $$+z$$. You can source Jazzy in every new terminal. RViz is optional tonight; the pass condition is motion in the simulator.
 
 
-## Background Knowledge Map: Multibody Contact Friction, Joint Actuation Plugins, and State Publishers
+## Key ideas: Multibody Contact Friction, Joint Actuation Plugins, and State Publishers
 
 Simulation bring-up unites three distinct subsystems of a digital twin:
 
@@ -170,7 +170,7 @@ ros2 topic pub --times 20 /cmd_vel geometry_msgs/msg/Twist \
 
 Twenty messages is a short roll, not a drive across the room. In the Gazebo window the base moves along its $$+x$$ and both wheels spin. When the publisher ends, the model must stop being driven. `linear.y` stays 0 because a diff-drive cannot sideslip. With $$L/2 = 0.08$$, $$v = 0.2$$ and $$\omega = 0$$ ask both treads for 0.2 m/s. You need to see both wheels turn the same way.
 
-### Deep-Dive Explanation (Read Slowly): Checking Wheel Slip Margin and Torque Limit in Gazebo
+### Explanation: Checking Wheel Slip Margin and Torque Limit in Gazebo
 
 Suppose your simulated robot has total mass $$m = 1.20\ \text{kg}$$ with $$70\%$$ of weight resting evenly on the two drive wheels ($$0.42\ \text{kg}$$ per wheel, normal force $$N = 0.42 \times 9.81 = 4.12\ \text{N}$$), wheel radius $$r = 0.032\ \text{m}$$, and tire–floor friction coefficient $$\mu = 0.80$$.
 

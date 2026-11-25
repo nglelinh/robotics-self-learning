@@ -25,13 +25,13 @@ Các hiện vật cần kiểm tra được tạo ra từ bài 01 (phép tính L
 
 Kết thúc Chương 01 là một cột mốc quan trọng: bạn đã đi từ định luật Ohm trên giấy tới việc tự tay nhận diện linh kiện, đo kiểm an toàn bằng đồng hồ vạn năng, hàn dây chắc chắn và bảo vệ mạch khỏi ngược cực hay sụt áp. **Checklist Chương 01** đóng vai trò bộ lọc kỹ thuật giúp bạn chắc chắn tầng điện–nguồn đã "sạch bóng lỗi" trước khi cắm bo vi điều khiển ESP32 hoặc Pico vào ở Chương 02.
 
-## Bản đồ kiến thức nền: Bảy Cổng Kiểm soát Chất lượng Tầng Điện tử
+## Kiến thức cần nhớ: Bảy Cổng Kiểm soát Chất lượng Tầng Điện tử
 
 1. **Cổng Nguồn & Thông mạch:** Không có chạm chập `VCC–GND`, điện áp các đường nguồn (pin, 5 V Buck, 3,3 V) nằm đúng dung sai $$\pm 5\%$$ cả lúc không tải lẫn lúc đóng tải giả.
 2. **Cổng Linh kiện & Phân cực:** Đọc đúng điện trở (màu & SMD), xác định chính xác cực tính LED, diode và tụ hóa, kiểm chứng được mạch phân áp 5 V → 3,3 V bằng đồng hồ.
 3. **Cổng Cơ–Điện & An toàn:** Mối hàn bóng chắc, có ống co nhiệt chống chập, cầu chì gắn đúng cực dương pin và dây nguồn động cơ tách riêng khỏi nhánh logic.
 
-### Ví dụ cầm tay chỉ việc: Bảng nghiệm thu định lượng cho hệ nguồn trước khi cắm ESP32
+### Ví dụ làm từng bước: Bảng nghiệm thu định lượng cho hệ nguồn trước khi cắm ESP32
 
 Thay vì đánh dấu tick cảm tính, hãy điền và kiểm chứng đúng 4 con số đo thật sau trên bàn lab của bạn:
 
@@ -44,7 +44,7 @@ Thay vì đánh dấu tick cảm tính, hãy điền và kiểm chứng đúng 4
 
 Chỉ cần **một** trong 4 chỉ số trên trượt ngưỡng (ví dụ Buck ra $$6.8\text{ V}$$ do chưa vặn biến trở chỉnh áp!), bạn đã tự cứu sống bo ESP32 trị giá hàng trăm nghìn đồng trước khi cắm nó vào!
 
-### Khung giải thích: 4 bước vượt qua cổng kiểm tra Chương 01 trung thực (nên đọc chậm)
+### Giải thích: 4 bước vượt qua cổng kiểm tra Chương 01 trung thực
 
 1. **Bước 1 — Không bao giờ "tick hình thức":** Mọi hạng mục chưa có số đo ghi trong sổ lab đều coi là *chưa đạt*.
 2. **Bước 2 — Kiểm tra lặp lại sau khi rung lắc nhẹ cụm dây:** Cầm nhẹ cụm dây nguồn lắc qua lại trong khi đồng hồ vẫn kẹp đo điện áp — nếu số đo nhảy loạn xạ, mối hàn hoặc đầu nối đang lỏng.

@@ -27,7 +27,7 @@ Capstone A is the milestone where separate components—acrylic plate, gearmotor
 Lessons 07-01 through 07-05 are the evidence: assembly, wheels-up sign map, `V` and `S`, timeout and slew, floor log. Chapter 05 is the H-bridge, STBY, the 7805 jumper, and the stall current behind the 2–3 A fuse. Chapter 06 is $$b$$ and $$r$$ (examples $$0.15~\mathrm{m}$$ or your $$148~\mathrm{mm}$$, and $$31.2~\mathrm{mm}$$). Chapter 08 is PID. Chapter 09 replaces the text line with a `geometry_msgs/Twist` (`linear.x`, `angular.z`). Neither chapter repairs a missing timeout or a reversed tire. This checklist does not implement ROS.
 
 
-## Background Knowledge Map: Interface Contracts, Hardware-in-the-Loop Readiness, and Regression Baselines
+## Key ideas: Interface Contracts, Hardware-in-the-Loop Readiness, and Regression Baselines
 
 A capstone readiness checklist operationalizes three systems-engineering disciplines:
 
@@ -83,7 +83,7 @@ Chapter 09 may assume the base stops when the stream stops. Twist will carry `li
 
 If the log cannot point at that STOP box with a measurement, the checklist is not done.
 
-### Deep-Dive Explanation (Read Slowly): Auditing a Capstone A Acceptance Log by Hand
+### Explanation: Auditing a Capstone A Acceptance Log by Hand
 
 Before signing off Chapter 07, walk through a sample three-metric audit to verify whether a robot is truly ready for Chapter 08:
 

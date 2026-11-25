@@ -15,7 +15,7 @@ Thời lượng: **~70 phút**, tập trung đọc kỹ phần tóm tắt (abstr
 
 Nếu bạn huấn luyện một mạng nơ-ron đơn giản kiểu Hành vi Nhân bản (Behavioral Cloning) dự đoán **từng bước hành động một** ($$o_t \mapsto a_t$$), một căn bệnh chết người lập tức xuất hiện: **sai số cộng dồn (compounding errors)**. Chỉ cần tay máy lệch 2 mm ở giây thứ 3, nó rơi vào trạng thái chưa từng thấy trong dữ liệu mẫu, rồi lệch thành 1 cm ở giây thứ 4 và gắp trượt hoàn toàn! Kiến trúc **ACT (Action Chunking with Transformers)** giải quyết căn bệnh đó bằng một ý tưởng cực kỳ thông minh: thay vì dự đoán 1 bước, hãy dự đoán hẳn **một khối $$k$$ bước hành động liên tiếp** và làm mượt bằng tổ hợp thời gian.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Chính sách ACT (Action Chunking with Transformers)
+## Kiến thức cần nhớ: Ba trụ cột của Chính sách ACT (Action Chunking with Transformers)
 
 1. **Phân khối Hành động (Action Chunking — dự đoán $$k$$ bước cùng lúc)**:
    Giảm độ dài hiệu dụng của bài toán xuống $$k$$ lần (ví dụ với $$k = 100$$ bước ở 50 Hz = 2 giây), cắt mạnh sai số tích lũy và xử lý mượt các đoạn dừng tạm tự nhiên của người trình diễn.
@@ -95,7 +95,7 @@ cửa sổ hở vòng lên tới 2 giây nếu không lập kế hoạch lại s
 
 Xét thêm tác động của temporal ensemble tại một thời điểm chồng lấp: chunk cũ dự đoán $$v = 0.25$$ m/s tại $$t = 0.20$$ s, còn chunk mới (sau khi thấy vật cản) dự đoán $$v = 0.00$$ m/s. Trung bình cộng vẫn cho ra $$0.125$$ m/s; ngay cả khi dùng trung bình có trọng số nghiêng về chunk mới (tỉ lệ 3/4 mới và 1/4 cũ), kết quả vẫn là $$0.0625$$ m/s — xe vẫn tiến lên. Ensemble chỉ làm mượt lệnh chứ không thay thế được lệnh dừng `0`.
 
-### Khung giải thích (nên đọc chậm): Tính tay trọng số Tổ hợp Thời gian (Temporal Ensembling) trong ACT
+### Giải thích: Tính tay trọng số Tổ hợp Thời gian (Temporal Ensembling) trong ACT
 
 Giả sử tại bước thời gian $$t = 10$$, ta đang có **3 dự đoán** cho góc khớp vai $$q_1(10)$$ đến từ 3 lần suy luận gần nhất (với hệ số suy giảm $$m = 0{,}5$$):
 - Dự đoán từ bước $$t = 10$$ (mới nhất, tuổi $$i = 0$$): $$\hat{a}^{(0)} = 42{,}0^\circ$$, trọng số $$w_0 = e^{-0{,}5 \times 0} = \mathbf{1{,}000}$$.

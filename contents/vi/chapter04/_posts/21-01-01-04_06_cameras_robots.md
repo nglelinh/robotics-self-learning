@@ -15,7 +15,7 @@ Thời lượng: **60–75 phút**. Yêu cầu bắt buộc của bài là bản
 
 Nếu encoder và siêu âm chỉ cho robot vài con số rời rạc mỗi giây, thì một chiếc **camera** lại đổ vào bộ não robot một dòng thác hàng chục triệu byte dữ liệu mỗi giây. Chính vì giàu thông tin đến vậy, rất nhiều đội sinh viên mới làm robot rơi vào cùng một cái bẫy: cắm một chiếc webcam 1080p vào cổng USB 2.0 của Raspberry Pi, bật OpenCV ở 30 khung hình/giây rồi ngạc nhiên khi hệ thống giật cứng, CPU nhảy lên 100% và độ trễ điều khiển vọt lên nửa giây. Hiểu về camera cho robot không chỉ là gọi `cv2.VideoCapture(0)`, mà là hiểu **băng thông bus (USB vs. CSI), định dạng điểm ảnh và ngân sách độ trễ**.
 
-## Bản đồ kiến thức nền: Giao diện truyền ảnh, không gian màu và giới hạn băng thông
+## Kiến thức cần nhớ: Giao diện truyền ảnh, không gian màu và giới hạn băng thông
 
 ### 1. USB (UVC) vs. MIPI CSI-2 — đường ống dữ liệu khác nhau ra sao?
 Webcam **USB** tiện lợi kiểu cắm-là-chạy, nhưng mọi khung hình phải đóng gói qua lớp giao thức USB, đi qua bộ điều khiển host và tiêu tốn chu kỳ CPU/DMA để giải mã. Ngược lại, **MIPI CSI-2** (cáp dẹt trên Raspberry Pi, Jetson) đổ dữ liệu cảm biến trực tiếp vào bộ xử lý ảnh phần cứng (ISP) và RAM qua DMA với độ trễ cực thấp và gần như không tốn CPU.
@@ -26,7 +26,7 @@ Mỗi điểm ảnh màu RGB888 tốn **3 byte** (24 bit), YUYV (4:2:2) tốn **
 ### 3. Rolling Shutter vs. Global Shutter và hiện tượng méo khi robot quay nhanh
 Camera giá rẻ dùng **rolling shutter** (quét từng dòng từ trên xuống dưới trong 10–30 ms). Khi robot xoay nhanh hoặc rung mạnh, các đường thẳng đứng bị nghiêng méo (hiệu ứng "thạch rau câu"), làm sai lệch thuật toán Visual Odometry/SLAM — lý do các camera chuyên dụng cho robotics thường chọn **global shutter** (chụp toàn bộ cảm biến cùng một khoảnh khắc).
 
-### Khung giải thích: Cầm tay tính băng thông luồng ảnh để tránh làm nghẽn cổ chai USB 2.0 (nên đọc chậm)
+### Giải thích: Cầm tay tính băng thông luồng ảnh để tránh làm nghẽn cổ chai USB 2.0
 
 Biết rằng chuẩn **USB 2.0** có tốc độ lý thuyết $$480\text{ Mbps}$$, nhưng băng thông hữu dụng thực tế cho truyền ảnh liên tục chỉ khoảng **$$280\text{–}320\text{ Mbps}$$**. Hãy tính lưu lượng ảnh thô **RGB888 (3 byte/pixel = 24 bit/pixel)** ở **30 FPS** cho 3 độ phân giải phổ biến:
 

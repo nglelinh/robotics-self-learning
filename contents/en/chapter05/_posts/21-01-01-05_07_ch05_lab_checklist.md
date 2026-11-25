@@ -27,7 +27,7 @@ Before any spacecraft leaves a cleanroom, engineers run a formal readiness gate:
 Lessons 05-01 through 05-06 are the source of every row. You need `lab-notes.md` open, the multimeter, and the photo you took when the wires were actually on the driver. If a hardware row was impossible, the row still needs the written calculation this checklist names. "I will do it later" is not a pass.
 
 
-## Background Knowledge Map: Electromechanical Verification, Power Budgets, and Gate Discipline
+## Key ideas: Electromechanical Verification, Power Budgets, and Gate Discipline
 
 A checklist is not bureaucracy; it compresses three pillars of robotics engineering into a single auditable table:
 
@@ -86,7 +86,7 @@ Use these three as the pictures you should be able to narrate while you sign the
 
 ![Sense, compute, act, including the stop that a failed read must take]({{ site.imgurl }}/generated/sense_compute_act.png)
 
-### Deep-Dive Explanation (Read Slowly): Hand-Verifying a Driver Thermal & Current Margin Gate
+### Explanation: Hand-Verifying a Driver Thermal & Current Margin Gate
 
 Suppose your checklist records a 6 V battery rail driving two identical brushed DC gearmotors through a dual H-bridge whose on-resistance per channel is $$R_{\text{DS(on)}} = 0.5\ \Omega$$ (high-side plus low-side combined) and continuous current limit is $$1.2\ \text{A}$$.
 

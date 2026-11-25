@@ -24,7 +24,7 @@ By the end of this lesson your `lab-notes.md` holds a track width and a rolling 
 Lessons 01 through 08. If one of those labs is unfinished, this checklist is the index that tells you which one to reopen. You need the same notebook you have been writing millimeters into.
 
 
-## Background Knowledge Map: Mechanical Integration Gates, Tolerance Stacking, and Configuration Management
+## Key ideas: Mechanical Integration Gates, Tolerance Stacking, and Configuration Management
 
 Closing the mechanical chapter builds three disciplined habits used in every real robotics lab:
 
@@ -71,7 +71,7 @@ $$
 
 which is about 2 percent high, inside the band. Their Grashof line is the Lesson 04 pair $$s + l = 120$$ mm, $$p + q = 125$$ mm. The strain-relief photo shows a zip tie and a loop. Missing parts: one nyloc bag. That page is a pass on hardware, with a shopping line that does not block a wheels-up spin if two nylocs are already on the motor mounts. It would block a claim that every fastener is done.
 
-### Deep-Dive Explanation (Read Slowly): Quantifying Straight-Line Drift from a 1 mm Wheel-Radius Mismatch
+### Explanation: Quantifying Straight-Line Drift from a 1 mm Wheel-Radius Mismatch
 
 Why does the Chapter 06 gate insist that left and right rolling radii $$r_L, r_R$$ agree within ~1 mm? Let us calculate the open-loop path curvature caused by a tiny radius mismatch.
 

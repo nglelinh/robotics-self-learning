@@ -24,7 +24,7 @@ You will start two nodes from one Python launch file, override a parameter from 
 Lessons 09-01 and 09-02: Jazzy is sourced, and you have already echoed `/chatter` from `demo_nodes_cpp`. You can create a file under `~/ros2_ws/src`. You do not need the robot. A parameter, for this lesson, is a named value that belongs to a node (`use_sim_time`, a serial port, a track width), not a command-line flag of `apt`.
 
 
-## Background Knowledge Map: Declarative Orchestration, Parameterization, and DDS QoS Compatibility
+## Key ideas: Declarative Orchestration, Parameterization, and DDS QoS Compatibility
 
 Production ROS 2 systems separate code from configuration using three mechanisms:
 
@@ -152,7 +152,7 @@ ros2 topic echo /chatter --qos-reliability best_effort
 
 **Expected:** `data: hi` starts appearing. Put that pair of commands in `lab-notes.md`. It is the template for “RViz shows no scan.”
 
-### Deep-Dive Explanation (Read Slowly): Checking the DDS QoS Compatibility Matrix by Hand
+### Explanation: Checking the DDS QoS Compatibility Matrix by Hand
 
 The most common "my topic is publishing, why is `ros2 topic echo` empty?" mystery in ROS 2 is a QoS mismatch. Check the compatibility table below (note `ert` is avoided; pure text cells):
 

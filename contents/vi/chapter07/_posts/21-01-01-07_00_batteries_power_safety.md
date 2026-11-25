@@ -15,7 +15,7 @@ Thời lượng ước tính: **~100 phút**. Trong bài này, bánh xe chưa đ
 
 Nếu vi điều khiển là bộ não và động cơ là cơ bắp, thì **khối pin LiPo / Li-Ion** chính là trái tim bơm năng lượng cho toàn bộ robot — đồng thời cũng là thành phần nguy hiểm nhất trong phòng lab nếu bị đối xử bất cẩn. Một viên pin LiPo 3S cỡ bằng nắm tay có thể xả tức thời hàng chục ampe, đủ làm nóng đỏ sợi dây đồng và bùng cháy trong vài giây nếu bị chập mạch hoặc xả quá sâu. Nắm vững hóa học pin, thông số `S`, `mAh`, `C-rating`, cầu chì và mạch hạ áp là điều kiện tiên quyết *trước khi* bạn chạm tay vào việc lắp Capstone.
 
-## Bản đồ kiến thức nền: Hóa học pin Lithium, Ngưỡng điện áp an toàn và Kiến trúc phân phối nguồn
+## Kiến thức cần nhớ: Hóa học pin Lithium, Ngưỡng điện áp an toàn và Kiến trúc phân phối nguồn
 
 ### 1. Giải mã thông số `3S 2200mAh 20C`
 - **`3S` (3 Series):** 3 cell pin Lithium mắc nối tiếp. Mỗi cell có điện áp đầy **$$4{,}2\text{ V}$$**, danh định **$$3{,}7\text{ V}$$**, mức cảnh báo hạ cánh/dừng an toàn **$$3{,}5\text{ V}$$**, và ngưỡng phá hủy hóa học tuyệt đối **$$3{,}0\text{ V}$$**.
@@ -28,11 +28,11 @@ Nếu vi điều khiển là bộ não và động cơ là cơ bắp, thì **kh�
 ### 3. Quy tắc an toàn phòng lab bắt buộc với pin Lithium
 Luôn sạc bằng bộ sạc cân bằng (balance charger) đúng chế độ LiPo, lưu trữ pin ở điện áp bảo quản **$$3{,}8\text{ V/cell}$$** trong túi chống cháy nếu không dùng quá vài ngày, và **ngưng sử dụng ngay lập tức** nếu thấy vỏ pin phồng rộp hoặc có mùi ngọt hắc của dung môi điện phân.
 
-### Khung giải thích: Cầm tay tính điện áp ngưỡng, dòng xả cực đại và thời gian chạy thực tế của pin LiPo 3S (nên đọc chậm)
+### Giải thích: Cầm tay tính điện áp ngưỡng, dòng xả cực đại và thời gian chạy thực tế của pin LiPo 3S
 
 Xét viên pin LiPo **3S – 2200 mAh – 20C** cấp nguồn cho robot Capstone tiêu thụ dòng trung bình **$$I_{\text{tb}} = 2{,}75\text{ A}$$**:
 
-1. **Ba mốc điện áp sống còn của cả khối 3S:**
+1. **Ba mốc điện áp quan trọng của cả khối 3S:**
    - Sạc đầy 100%: $$3 \times 4{,}2 = 12{,}6\text{ V}$$.
    - Điện áp danh định: $$3 \times 3{,}7 = 11{,}1\text{ V}$$.
    - Ngưỡng dừng chạy để sạc ($$3{,}5\text{ V/cell}$$): $$3 \times 3{,}5 = 10{,}5\text{ V}$$ *(tuyệt đối không xả dưới $$9{,}0\text{ V}$$!)*.

@@ -15,7 +15,7 @@ Thời lượng: **~70 phút**.
 
 Nếu mỗi lần sửa một dòng thuật toán tránh vật cản bạn lại phải nạp firmware, sạc pin, đặt robot xuống sàn và chạy theo đỡ khi xe lao vào chân bàn, tốc độ nghiên cứu sẽ chậm đi hàng chục lần. **Gazebo Harmonic** là phòng thí nghiệm vật lý số giúp bạn kiểm thử hàng trăm kịch bản va chạm, trơn trượt và cảm biến giả lập ngay trên máy tính trước khi chạm vào phần cứng thật.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Mô phỏng Vật lý Gazebo Harmonic
+## Kiến thức cần nhớ: Ba trụ cột của Mô phỏng Vật lý Gazebo Harmonic
 
 1. **Động cơ vật lý (Physics Engine — DART) & Bước thời gian mô phỏng**:
    Tính toán trọng lực, ma sát lốp–sàn, mô-men động cơ và va chạm ở từng bước rời rạc (thường `max_step_size = 0.001 s`, tức 1000 Hz) rồi xuất thời gian mô phỏng lên topic `/clock`.
@@ -122,7 +122,7 @@ gz topic -l
 
 Kiểm tra sự xuất hiện của `/clock`. Lúc này `ros2 topic list` vẫn gần như trống vì chưa có cầu nối giữa hai đồ thị; Gazebo đang xuất bản trên hệ thống nội bộ của riêng nó. Nếu bạn nhấn Ctrl-C ở terminal đầu tiên, server tắt và danh sách topic Gazebo cũng biến mất.
 
-### Khung giải thích (nên đọc chậm): Tính tay ảnh hưởng của `RTF = 0,4` và lỗi quên `use_sim_time`
+### Giải thích: Tính tay ảnh hưởng của `RTF = 0,4` và lỗi quên `use_sim_time`
 
 Giả sử bạn chạy mô phỏng một thế giới phức tạp trên laptop không có GPU rời nên **RTF tụt xuống `0,4`** (mất 2,5 giây ngoài đời mới mô phỏng xong 1 giây trong Gazebo):
 - Nếu bạn ra lệnh cho xe chạy với $$v = 0{,}5\text{ m/s}$$ trong đúng **4 giây thời gian mô phỏng**, xe đi đúng `2,0 m` trong thế giới ảo (nhưng ngoài đời bạn phải ngồi nhìn màn hình mất $$4 / 0{,}4 = \mathbf{10\text{ giây}}$$).

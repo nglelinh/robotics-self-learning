@@ -23,7 +23,7 @@ By the end of this lesson you can close Chapter 03 with evidence rather than wit
 
 Lessons 1 through 5 are the work this page gates. You need the non-blocking heartbeat that replaced the [Chapter 02 blink]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}), the pull-up button, the LEDC or `duty_u16` breathe, the short ISR, and the IDLE / TELEOP / FAULT machine. Hardware that has not arrived yet does not earn a pass: a dry reading of your own source is allowed only if the files exist and you can quote the timeout and the duty-zero lines from them. "I will add the timeout when the chassis shows up" is a fail.
 
-## Background Knowledge Map: Firmware Verification, Real-Time Profiling, and Fault Injection
+## Key ideas: Firmware Verification, Real-Time Profiling, and Fault Injection
 
 Three verification practices close out embedded firmware bring-up:
 
@@ -104,7 +104,7 @@ Work down this list in your lab notes. An item without its artifact stays open.
 
 A missing board is not item 6. If the hardware is late, items 1–3 stay open. Items 4 and 5 can be drafted from source you have actually compiled or syntax-checked, and they stay marked "source only" until the LED has performed them.
 
-## Deep-Dive Explanation (Read Slowly): Profiling Loop Headroom and Verifying Watchdog Cutoff Time
+## Explanation: Profiling Loop Headroom and Verifying Watchdog Cutoff Time
 
 Before signing off Chapter 03, run a quick 4-step quantitative firmware audit:
 

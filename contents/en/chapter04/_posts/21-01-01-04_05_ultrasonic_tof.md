@@ -27,7 +27,7 @@ You will compute distance from an echo pulse width with $$d = vt/2$$ at $$343~\m
 
 Lesson 04-02 identified the two cans and the tiny black window, including the voltage and the bus. Lesson 04-01 is the I2C scan you will need if a VL53L0X is on the bench. Chapter 03 can time a pulse or at least print a number from a library you have read. Chapter 01 is the multimeter on the echo pin. You do not need the motor chapter, and you should not be holding a wheel.
 
-## Background Knowledge Map: Wave Propagation Physics, Acoustic vs. Optical Constraints, and Robust Filtering
+## Key ideas: Wave Propagation Physics, Acoustic vs. Optical Constraints, and Robust Filtering
 
 Three physical principles separate reliable range sensing from jittery obstacle avoidance:
 
@@ -137,7 +137,7 @@ On flat cardboard, a healthy HC-SR04 is often within a few centimeters at 40 cm 
 | Two VL53 boards, one address | Both still at `0x29`; use XSHUT |
 | Always 0 indoors, open space | Timeout, not a crash. Do not drive on that 0 |
 
-## Deep-Dive Explanation (Read Slowly): Computing Ultrasonic Pulse Timing, Timeout Caps, and Median Filtering
+## Explanation: Computing Ultrasonic Pulse Timing, Timeout Caps, and Median Filtering
 
 Why does `pulseIn(ECHO, HIGH)` without a timeout freeze your robot's entire control loop when facing an open room? Trace the exact 4-step timing calculation:
 

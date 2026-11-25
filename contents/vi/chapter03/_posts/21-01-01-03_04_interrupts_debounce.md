@@ -23,13 +23,13 @@ Sau bài này, bạn phân biệt được hiện tượng dội cơ khí (bounc
 
 Khi bạn nhấn một chiếc nút cơ khí, mắt thường thấy nó đóng "tách" một cái dứt khoát — nhưng dưới con mắt tốc độ MHz của vi điều khiển, hai lá đồng bên trong bật nảy lên xuống tới **5–15 lần trong vòng 10 mili-giây** (**hiện tượng dội tiếp điểm — switch bounce**)! Cùng lúc đó, hai đĩa mã hóa vòng quay (encoder) trên trục bánh xe phát ra hàng trăm xung mỗi giây mà vòng lặp chính không thể lúc nào cũng đứng chờ để kiểm tra. **Ngắt phần cứng (Interrupt / ISR)** kết hợp **chống dội (debounce)** chính là đôi tai nhạy bén giúp robot không bao giờ bỏ lỡ sự kiện tốc độ cao.
 
-## Bản đồ kiến thức nền: Ngắt Phần cứng (ISR), Chống dội và Đồng bộ Dữ liệu
+## Kiến thức cần nhớ: Ngắt Phần cứng (ISR), Chống dội và Đồng bộ Dữ liệu
 
 1. **Thăm dò (Polling) vs. Ngắt Phần cứng (Interrupt):** *Polling* liên tục hỏi trong vòng lặp chính (dễ bỏ lỡ xung ngắn khi CPU đang bận); *Interrupt* buộc phần cứng tạm dừng chương trình chính ngay khi có cạnh lên/xuống trên chân GPIO, nhảy vào **Hàm phục vụ ngắt (ISR)** rồi quay lại đúng chỗ cũ trong vài micro-giây!
 2. **Quy tắc Vàng cho ISR ("Ngắn — Nhanh — Không chặn"):** Trong ISR tuyệt đối *không* gọi `Serial.print()`, `delay()`, I2C hay cấp phát bộ nhớ! ISR chỉ nên tăng một biến đếm hoặc bật một cờ báo khai báo với từ khóa **`volatile`** (và gắn `IRAM_ATTR` trên ESP32) để vòng lặp chính xử lý sau.
 3. **Chống dội Tiếp điểm (Debouncing):** Với nút nhấn cơ khí (dội trong 5–20 ms), ta lọc nhiễu bằng cách chỉ chấp nhận thay đổi trạng thái sau khi tín hiệu giữ ổn định qua một khoảng thời gian `debounce_ms` (thường 25–50 ms).
 
-### Ví dụ cầm tay chỉ việc: Tính tần số ngắt Encoder và chứng minh vì sao cấm `Serial.print()` trong ISR
+### Ví dụ làm từng bước: Tính tần số ngắt Encoder và chứng minh vì sao cấm `Serial.print()` trong ISR
 
 Giả sử bánh xe robot quay ở tốc độ **300 vòng/phút** ($$5\text{ vòng/giây}$$) với đĩa encoder **20 khe** đọc đầy đủ 4 cạnh pha A/B (quadrature 4× → **80 xung/vòng**):
 1. **Tần số xung ngắt trên 1 bánh xe:**
@@ -42,7 +42,7 @@ Giả sử bánh xe robot quay ở tốc độ **300 vòng/phút** ($$5\text{ v�
    $$
 3. **Thảm họa nếu lỡ viết `Serial.println(ticks)` (tốn ~$$5\text{ ms}$$) bên trong ISR:** mỗi lần gọi ISR dài gấp đôi khoảng cách giữa 2 xung ($$5\text{ ms} > 2.5\text{ ms}$$), làm chồng chéo ngắt, mất sạch xung đếm và khiến bộ giám sát **Watchdog Timer** của ESP32 lập tức reset bo mạch!
 
-### Khung giải thích: 4 bước thiết kế Ngắt và Chống dội an toàn tuyệt đối (nên đọc chậm)
+### Giải thích: 4 bước thiết kế Ngắt và Chống dội an toàn tuyệt đối
 
 1. **Bước 1 — Khai báo mọi biến chia sẻ giữa ISR và `loop()` là `volatile`:** Nếu thiếu `volatile`, trình biên dịch C++ có thể tối ưu hóa bằng cách lưu biến trong thanh ghi CPU và không bao giờ thấy giá trị mới mà ISR vừa cập nhật!
 2. **Bước 2 — Đọc biến đa byte (như `int32_t` / `int64_t`) trong vùng cấm ngắt ngắn (Critical Section):** Tắt ngắt 1 micro-giây để sao chép `ticks` ra biến cục bộ rồi bật ngắt lại ngay, tránh đọc phải giá trị bị xé đôi (*torn read*) khi ISR nhảy vào giữa chừng.

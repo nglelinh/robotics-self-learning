@@ -23,13 +23,13 @@ Bạn đã nắm được khái niệm vôn, ampe và lý do đèn LED báo tr�
 
 Hàng trăm sinh viên điện tử đã từng dành trọn một buổi chiều kiểm tra lại từng dòng code chỉ vì một lỗi cực kỳ ngớ ngẩn trên **breadboard**: đường thanh nguồn dài bên mép breadboard bị ngắt đôi ở chính giữa (chỗ vạch đỏ/xanh bị đứt quãng) mà mắt thường không để ý! Biết cách hình dung mạng lưới lá đồng ẩn dưới lớp nhựa breadboard và sử dụng **đồng hồ vạn năng** đúng thang đo là kỹ năng cứu bạn khỏi 90% nỗi đau gỡ lỗi phần cứng.
 
-## Bản đồ kiến thức nền: Kết nối Breadboard và Nguyên lý Đồng hồ Vạn năng
+## Kiến thức cần nhớ: Kết nối Breadboard và Nguyên lý Đồng hồ Vạn năng
 
 1. **Bản đồ Lá đồng Ẩn của Breadboard:** Mỗi hàng 5 lỗ ở khu vực giữa nối thông ngang với nhau (bị tách đôi bởi rãnh giữa dành cho IC); hai dải nguồn dọc hai bên nối thông theo chiều dọc (nhưng nhiều breadboard cỡ lớn tách làm hai nửa trên–dưới!).
 2. **Đo Song song (Vôn kế — Trở kháng cực lớn) vs. Đo Nối tiếp (Ampe kế — Trở kháng cực nhỏ):** Vôn kế có nội trở ~$$10\text{ M}\Omega$$ nên kẹp *song song* vào mạch mà không làm nhiễu dòng; ngược lại Ampe kế có điện trở shunt chỉ ~$$0.1\ \Omega$$ nên **bắt buộc phải cắt mạch mắc nối tiếp**!
 3. **Đo Thông mạch & Điện trở (Chỉ đo khi TẮT nguồn):** Thang thông mạch phát ra một dòng thử cực nhỏ từ pin bên trong đồng hồ để kiểm tra xem hai điểm có thông nhau không; đo khi mạch đang có điện sẽ cho kết quả sai hoặc hỏng đồng hồ.
 
-### Ví dụ cầm tay chỉ việc: Vì sao đo nhầm thang Ampe song song nguồn lại làm nổ cầu chì đồng hồ?
+### Ví dụ làm từng bước: Vì sao đo nhầm thang Ampe song song nguồn lại làm nổ cầu chì đồng hồ?
 
 Giả sử bạn có một mạch đơn giản gồm nguồn **$$V = 5.0\text{ V}$$** nối với điện trở tải **$$R_{\text{tải}} = 500\ \Omega$$**:
 - **Đo dòng ĐÚNG (cắt dây, mắc Ampe kế nối tiếp tải, nội trở shunt $$R_s = 0.1\ \Omega$$):**
@@ -42,7 +42,7 @@ Giả sử bạn có một mạch đơn giản gồm nguồn **$$V = 5.0\text{ V
   $$
   Dòng vọt lên **50 A** làm **đứt ngay cầu chì bảo vệ 10 A** (hoặc cháy mạch nếu đo trên cổng mA 200 mA)!
 
-### Khung giải thích: 4 bước kiểm tra mạch breadboard bằng đồng hồ vạn năng (nên đọc chậm)
+### Giải thích: 4 bước kiểm tra mạch breadboard bằng đồng hồ vạn năng
 
 1. **Bước 1 — Nối cầu thanh nguồn nếu breadboard bị tách giữa:** Dùng hai sợi dây ngắn nối liền nửa trên và nửa dưới của thanh `+` và `-`, rồi kiểm tra bằng thang thông mạch.
 2. **Bước 2 — Đo thông mạch `VCC–GND` khi chưa cấp điện:** Đảm bảo không có chân linh kiện nào chạm chéo làm ngắn mạch.

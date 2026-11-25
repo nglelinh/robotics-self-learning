@@ -24,7 +24,7 @@ You will put a Pico or Pico 2 into BOOTSEL mode so a drive named `RPI-RP2` appea
 
 You either chose a Pico-family board in the landscape lesson or you are learning the other bench’s toolchain once. You can copy a file onto a USB drive. You do not need PlatformIO for this page; that file belongs to the ESP32 track. A data-capable micro-USB cable is part of the setup. The shopping list for the whole robot is still Chapter 00 ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
-## Background Knowledge Map: Interpreted Bytecode, Garbage Collection Jitter, and RP2040 Hardware
+## Key ideas: Interpreted Bytecode, Garbage Collection Jitter, and RP2040 Hardware
 
 Three systems concepts clarify how MicroPython runs on a bare-metal microcontroller:
 
@@ -125,7 +125,7 @@ Faults. BOOTSEL was released before the plug went in, so no drive appears and th
 
 Safety: 3.3 V only on every GP pin. Do not connect a battery, a motor, or a 5 V sensor in this lab. `3V3` is an output. `VSYS` is not a place for a 2S pack.
 
-## Deep-Dive Explanation (Read Slowly): Mapping 16-Bit Pico PWM Duty Cycles and Bounding Loop Jitter
+## Explanation: Mapping 16-Bit Pico PWM Duty Cycles and Bounding Loop Jitter
 
 On Raspberry Pi Pico MicroPython, PWM duty cycle uses an unsigned 16-bit integer `duty_u16` spanning $$0$$ to $$65\,535$$ ($$2^{16} - 1$$). Let's trace both the PWM scaling math and the timing budget of a MicroPython control loop:
 

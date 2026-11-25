@@ -25,7 +25,7 @@ By the end of this lab a button wired from a GPIO to ground reads HIGH when rele
 
 The [Chapter 02 heartbeat]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}) already proved that your serial monitor matches the board at 115200 and that you can change an LED pin when GPIO 2 is not the lamp on your silk. Lesson 1 of this chapter replaced `delay(500)` with a non-blocking clock; the sketches below keep that habit. You need a breadboard, a momentary button, one LED, a resistor near 180 Ω, and jumpers. You do not need the TB6612, a battery, or the chassis.
 
-## Background Knowledge Map: High-Impedance CMOS Inputs, Active-Low Logic, and Open-Drain Outputs
+## Key ideas: High-Impedance CMOS Inputs, Active-Low Logic, and Open-Drain Outputs
 
 Three digital-interface patterns appear everywhere in robotics firmware:
 
@@ -173,7 +173,7 @@ Power the board from USB only. Do not connect a battery pack, and do not let any
 
 If the LED is dark while `press` prints, the LED is backwards or on the wrong pin. Trust the serial line first, then turn the LED around. If `press` never prints and the pin measures 3.3 V in both positions, you have built the always-high fault: the switch is on the 3.3 V side.
 
-## Deep-Dive Explanation (Read Slowly): Calculating Pull-Up Current, Active-Low Logic, and LED Sinking vs. Sourcing
+## Explanation: Calculating Pull-Up Current, Active-Low Logic, and LED Sinking vs. Sourcing
 
 Let's verify the exact electrical behavior of a standard `INPUT_PULLUP` bumper switch and an indicator LED in four steps:
 

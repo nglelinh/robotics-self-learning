@@ -22,13 +22,13 @@ Bạn cần đã hoàn thành bài nhịp tim để xác nhận bo mạch kết 
 
 Nhìn vào hai hàng chân kim loại chạy dọc bo mạch ESP32 hay Raspberry Pi Pico, người mới thường thấy tất cả các chân đều giống hệt nhau — nhưng chỉ một sợi dây cắm lệch từ `5V` sang `3V3` hoặc cấp tín hiệu 5 V vào chân GPIO là đủ khiến con chip im lặng vĩnh viễn! Hiểu rõ **kiến trúc các đường nguồn (power rails)** và **phân loại chân GPIO** là bước chuyển từ "cắm theo hình vẽ" sang tự thiết kế sơ đồ đấu dây chính xác.
 
-## Bản đồ kiến thức nền: Đường nguồn (Power Rails) và Phân loại Chân Vi điều khiển
+## Kiến thức cần nhớ: Đường nguồn (Power Rails) và Phân loại Chân Vi điều khiển
 
 1. **Ba Đường Nguồn Độc lập trên Robot:** Đường **Pin động lực** (7,4–8,4 V cấp thẳng cho Driver động cơ), đường **5 V Buck** (cấp vào `VIN`/`VBUS`/`VSYS` và cảm biến 5 V), và đường **3,3 V Logic** (do LDO trên bo MCU tạo ra, giới hạn dòng thường ~$$300\text{–}500\text{ mA}$$, *chỉ* nuôi chip và cảm biến nhỏ!).
 2. **Phân nhóm Chân GPIO trên ESP32 & Pico:** Không phải chân nào cũng đa năng — cần tách riêng nhóm chân *an toàn đa dụng*, nhóm *chỉ đọc vào* (GPIO 34–39 trên ESP32 không có điện trở kéo lên nội bộ!), nhóm *khởi động (Strapping pins)* và nhóm *bus chuyên dụng* (I2C/SPI/UART).
 3. **Nối Chung Mass (`GND`) nhưng Tách Dòng Lớn:** Mọi đường nguồn khác mức áp đều bắt buộc nối chung một điểm `GND` để đồng nhất mốc 0 V cho tín hiệu logic, nhưng dây mass động cơ phải chạy thẳng về cực âm pin để dòng nhiễu không chạy xuyên qua bo MCU.
 
-### Ví dụ cầm tay chỉ việc: Tính tổng dòng trên đường `3V3` của bo ESP32 (giới hạn LDO 500 mA)
+### Ví dụ làm từng bước: Tính tổng dòng trên đường `3V3` của bo ESP32 (giới hạn LDO 500 mA)
 
 Giả sử bạn dùng chân `3V3` xuất ra từ bo ESP32 để cấp nguồn cho các module nhỏ trên xe:
 - Bản thân chip ESP32 (Wi-Fi bật nhẹ): **$$160\text{ mA}$$**.
@@ -37,7 +37,7 @@ Giả sử bạn dùng chân `3V3` xuất ra từ bo ESP32 để cấp nguồn c
 - **Tổng dòng đường `3V3`:** $$160 + 5 + 45 = \mathbf{210\text{ mA}} \ll 500\text{ mA}$$ → **an toàn, LDO mát!**
 - Nhưng nếu bạn cắm thêm **1 động cơ servo SG90** (dòng đỉnh **$$600\text{ mA}$$**) vào đường `3V3` hoặc `5V` từ USB: tổng dòng vọt lên **$$810\text{ mA}$$** → vượt trần LDO/USB, gây sụt áp tức thì và reset ESP32! Servo *bắt buộc* phải ăn nguồn từ nhánh Buck 5 V riêng!
 
-### Khung giải thích: 4 nguyên tắc khóa bản đồ chân (Pinmap) trước khi cắm dây (nên đọc chậm)
+### Giải thích: 4 nguyên tắc khóa bản đồ chân (Pinmap) trước khi cắm dây
 
 1. **Bước 1 — Lập bảng Pinmap ra giấy/file `pinmap.md` trước khi viết code:** Ghi rõ số chân, chức năng, mức điện áp (3,3 V hay 5 V) và màu dây cho từng kết nối.
 2. **Bước 2 — Tránh xa các chân Strapping khi còn chân rảnh:** Trên ESP32, kéo nhầm `GPIO 12` lên `HIGH` lúc bật nguồn làm sai điện áp Flash khiến bo không khởi động được!

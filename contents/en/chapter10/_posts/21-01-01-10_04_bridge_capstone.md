@@ -24,7 +24,7 @@ You will run an `rclpy` node that subscribes to `/cmd_vel`, converts `linear.x` 
 Lesson 08-01’s frame and 300 ms firmware timeout, lesson 08-04’s inverse kinematics, and a Jazzy shell with `rclpy`. Python package `pyserial` comes from apt as `python3-serial`, so it stays on the same interpreter as ROS. `socat` provides the fake serial port. You do not need Gazebo running, and you should not have the micro-ROS serial agent holding a port. The real Capstone is optional and comes last, wheels up.
 
 
-## Background Knowledge Map: Hardware Abstraction Layers, Sign-Convention Alignment, and Odometry Covariance
+## Key ideas: Hardware Abstraction Layers, Sign-Convention Alignment, and Odometry Covariance
 
 Bridging real firmware to ROS 2 relies on three core integration principles:
 
@@ -254,7 +254,7 @@ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
 
 The parser should print `OK V,40,40` several times, about 20 Hz, and within a second of silence it should print `OK V,0,0`. The bridge log should show the same two strings when the integers change. That pair is the lab.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Tracing One Full Bridge Cycle (`Twist -> Serial -> Ticks -> Odom`)
+### Explanation: Hand-Tracing One Full Bridge Cycle (`Twist -> Serial -> Ticks -> Odom`)
 
 Trace one $$\Delta t = 0.05\ \text{s}$$ (20 Hz) bridge cycle on a robot with $$b = 0.16\ \text{m}$$, $$K = 10\,000\ \text{ticks/m}$$, and open-loop gain $$100\ \text{PWM units} = 0.40\ \text{m/s}$$:
 

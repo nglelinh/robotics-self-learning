@@ -15,7 +15,7 @@ Thời lượng: **~90 phút**.
 
 Mục tiêu tối thượng của một kiến trúc phần mềm robot chuyên nghiệp là **tính trong suốt giữa mô phỏng và phần cứng thật (Sim/Real Parity)**: cùng một lệnh `ros2 topic pub /cmd_vel ...` hay cùng một ngăn xếp Nav2 phía trên phải chạy y hệt nhau mà *không cần biết* bên dưới là Gazebo Harmonic hay chiếc xe Capstone thật đặt trên sàn phòng lab. Bài học này xây dựng hoàn chỉnh tầng cầu nối (`bridge_capstone`) biến điều đó thành hiện thực.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Cầu nối Phần cứng Capstone
+## Kiến thức cần nhớ: Ba trụ cột của Cầu nối Phần cứng Capstone
 
 1. **Hợp đồng Giao diện Đồng nhất (Identical Topic & TF Contract)**:
    Cả `sim_bringup` lẫn `real_bringup` đều nhận đúng `/cmd_vel` (`Twist`), xuất đúng `/odom` (`Odometry`) và phát đúng cây TF `odom → base_link` theo chuẩn REP-103/105.
@@ -259,7 +259,7 @@ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
 
 Parser phải in ra `OK V,40,40` vài lần ở nhịp 20 Hz, sau đó (trong vòng chưa đầy một giây kể từ khi ngừng gửi) tự chuyển sang `OK V,0,0`. Log của node cầu nối cũng hiển thị chính xác hai chuỗi này khi giá trị thay đổi.
 
-### Khung giải thích (nên đọc chậm): Kiểm chứng độ trễ khứ hồi (Round-Trip Latency) trên cầu nối SBC ↔ MCU
+### Giải thích: Kiểm chứng độ trễ khứ hồi (Round-Trip Latency) trên cầu nối SBC ↔ MCU
 
 Để biết cầu nối phần cứng có đủ nhanh cho vòng điều hướng 20 Hz (`50 ms/nhịp`) hay không, ta cộng từng chặng trễ của 1 lệnh `/cmd_vel`:
 

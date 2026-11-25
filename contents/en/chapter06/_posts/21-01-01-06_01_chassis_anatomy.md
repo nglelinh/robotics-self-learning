@@ -24,7 +24,7 @@ By the end of this lesson you can point to the two lengths a differential-drive 
 You can read a millimeter ruler. You know a DC gearmotor turns a wheel (Chapter 05) and that encoder ticks will later stand in for wheel rotation (Chapter 04). You do not need ROS installed, and you do not need the chassis on the bench if you can draw it to scale.
 
 
-## Background Knowledge Map: Planar Rigid-Body Kinematics, Static Stability, and Geometric Calibration
+## Key ideas: Planar Rigid-Body Kinematics, Static Stability, and Geometric Calibration
 
 Understanding differential-drive anatomy connects three classical engineering pillars directly to modern robotics software:
 
@@ -77,7 +77,7 @@ In one second the midpoint of the axle travels 25 cm along the heading and the h
 
 The first figure is the ruler picture: $$b$$ from tread center to tread center, $$r$$ from the compressed tire. The second figure is the velocity picture behind the two equations. Equal forward arrows give $$\omega = 0$$. Unequal arrows yaw the robot about a point that still lies on the axle line. Chapter 08 names that point and the turning radius. Today you only need $$b$$, $$r$$, $$v$$, and $$\omega$$ written down.
 
-### Deep-Dive Explanation (Read Slowly): Propagating a 5% Track-Width Error into a Full-Turn Drift
+### Explanation: Propagating a 5% Track-Width Error into a Full-Turn Drift
 
 Why does measuring across the motor cans instead of the tire contact centers ruin a straight-line or square-path test? Let us compute the exact angular error by hand.
 

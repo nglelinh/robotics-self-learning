@@ -27,7 +27,7 @@ By the end of this lesson you can build a Track A bill of materials for the diff
 
 You only need the habit of writing things down. Lesson 00-02 (which track you are on) helps you decide whether Wi-Fi has to be on the microcontroller now. You do not need Ohm's law yet; the driver and battery sections teach the two numbers you must not get wrong. A phone camera is the inspection tool until the multimeter arrives.
 
-## Background Knowledge Map: Systems Integration, Electrical Compatibility, and BOM Verification
+## Key ideas: Systems Integration, Electrical Compatibility, and BOM Verification
 
 Building a robot from off-the-shelf modules is an exercise in **interface matching** across three pillars:
 
@@ -288,7 +288,7 @@ A sum you can explain to a classmate in one minute, a driver row whose substitut
 
 **Safety.** Lithium cells are the hazard in this lesson, not the spreadsheet. Charge where you can see the cell. Do not short the holder. Do not connect VM to the ESP32 5 V or 3.3 V pin to "test the battery".
 
-## Deep-Dive Explanation (Read Slowly): Auditing a Robot BOM with a Quantitative Compatibility Check
+## Explanation: Auditing a Robot BOM with a Quantitative Compatibility Check
 
 Before purchasing any kit, run a 4-step paper audit on your BOM:
 

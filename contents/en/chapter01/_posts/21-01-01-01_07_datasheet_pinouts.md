@@ -27,7 +27,7 @@ You will open an unfamiliar PDF and walk it in one order every time: absolute ma
 
 You need Ohm's law from lesson 01, the meter habits from lesson 02, and the polarity habit from lesson 04. You do not power a motor today. Bring a notebook page you will still have in Chapter 02.
 
-## Background Knowledge Map: Absolute Maximums, Recommended Operating Conditions, and Logic Thresholds
+## Key ideas: Absolute Maximums, Recommended Operating Conditions, and Logic Thresholds
 
 Reading datasheets efficiently relies on three universal specification categories:
 
@@ -103,7 +103,7 @@ Nothing spins. You file two cards.
 
 Stop if a pin gets hot, or if a hole you were about to call a GPIO measures near 5 V.
 
-## Deep-Dive Explanation (Read Slowly): Computing Digital Noise Margins Between 3.3 V and 5 V Chips
+## Explanation: Computing Digital Noise Margins Between 3.3 V and 5 V Chips
 
 Can a 3.3 V ESP32 GPIO output reliably drive a 5 V motor driver's `IN1` logic input without a level shifter? Don't guess — calculate the noise margins in four steps:
 

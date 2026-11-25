@@ -24,7 +24,7 @@ By the end of this lesson you can design a small wheel-command frame that surviv
 You can blink an LED and print a line from Chapter 02, and you have a Capstone A teleop sketch from Chapter 07, even if it still sends raw text. You know a byte is 8 bits and that `115200 8N1` means 115200 bits per second, 8 data bits, no parity, one stop bit. A laptop with Python 3 is enough for the dry run. An ESP32 or Pico is the hardware version of the same lab.
 
 
-## Background Knowledge Map: Byte-Stream Framing, Error Detection (XOR/CRC), and Finite-State Parsers
+## Key ideas: Byte-Stream Framing, Error Detection (XOR/CRC), and Finite-State Parsers
 
 Robust robot serial links rely on three pillars from computer networking and embedded software:
 
@@ -101,7 +101,7 @@ send(0, 0)
 
 Replace the port with the `socat` PTY from the lab when the robot is not on the bench. Wheels stay off the ground whenever a real motor driver is connected.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Computing a Binary Frame and Its XOR Checksum
+### Explanation: Hand-Computing a Binary Frame and Its XOR Checksum
 
 Suppose our compact binary velocity command has the format `[SYNC=0xAA] [TYPE=0x01] [v_L: int8] [v_R: int8] [CHK]`, where `CHK` is the bitwise XOR of `TYPE`, `v_L`, and `v_R`.
 

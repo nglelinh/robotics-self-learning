@@ -24,7 +24,7 @@ You will install ROS 2 Jazzy Jalisco on Ubuntu 24.04 from the official deb packa
 You can use a terminal: `cd`, `sudo apt`, and a text editor. Ubuntu 24.04 (Noble) is the Tier-1 platform for Jazzy. A virtual machine or a second-hand mini PC is enough. The ESP32 from Chapters 02–08 stays on the robot; it does not run `colcon`. Chapter 08’s serial frame is the thing this computer will speak later. You do not need a lidar or a Pi for this lesson.
 
 
-## Background Knowledge Map: Modular Robotics Middleware, Overlay Workspaces, and Build Systems
+## Key ideas: Modular Robotics Middleware, Overlay Workspaces, and Build Systems
 
 Setting up ROS 2 cleanly relies on three software-engineering concepts that prevent 90% of beginner environment issues:
 
@@ -49,7 +49,7 @@ Locale must be UTF-8 before you add the apt source. The official install fails e
 
 Windows and macOS are not the path this course debugs. If your only machine is Windows, install Ubuntu 24.04 in a virtual machine with at least 4 GB of RAM and 30 GB of disk, or use a spare PC. WSL2 can work and also fails in ways this lesson will not chase (GUI, USB serial, Gazebo). A native Ubuntu install is the lab that matches the docs.
 
-### Deep-Dive Explanation (Read Slowly): Tracing Environment Resolution and DDS Port Mapping by Hand
+### Explanation: Tracing Environment Resolution and DDS Port Mapping by Hand
 
 Understanding how ROS 2 resolves packages and network ports turns mysterious "package not found" or "nodes can't see each other" bugs into two-second checks:
 

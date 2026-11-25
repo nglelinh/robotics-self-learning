@@ -15,7 +15,7 @@ Thời lượng: **~75 phút**.
 
 Topic dạng dòng chảy liên tục rất tuyệt cho cảm biến LiDAR hay vận tốc bánh xe, nhưng lại cực kỳ bất tiện khi bạn muốn hỏi *"Lưu bản đồ này xong chưa?"* hoặc ra lệnh *"Hãy di chuyển tới phòng 302, báo tiến độ mỗi giây và dừng ngay nếu tôi bấm Hủy!"*. Đó là lý do ROS 2 cung cấp thêm hai mẫu giao tiếp bậc cao hơn: **Service** (hỏi–đáp đồng bộ ngắn) và **Action** (tác vụ dài có phản hồi tiến độ và hỗ trợ hủy).
 
-## Bản đồ kiến thức nền: So sánh ba mẫu giao tiếp trong ROS 2
+## Kiến thức cần nhớ: So sánh ba mẫu giao tiếp trong ROS 2
 
 1. **Topic (Luồng một chiều, nhiều–nhiều)**:
    Dành cho dữ liệu liên tục có tần suất (cảm biến, odometry, `cmd_vel`). Không xác nhận đã nhận từng gói.
@@ -75,7 +75,7 @@ ros2 node list
 
 Ghi chú thêm về hệ quả đối với động cơ: hủy `NavigateToPose` chỉ làm action server ngừng gửi feedback mới, chứ không tự động đặt `Twist` cuối về 0 nếu bộ điều khiển hoặc cầu nối không chủ động làm việc đó. Watchdog 300 ms trên firmware (chương 08) đóng vai trò lưới an toàn cuối cùng. Một cầu nối thiết kế tốt sẽ chủ động xuất bản `Twist` bằng 0 cả khi nhận lệnh hủy *lẫn* khi mất luồng dữ liệu, tránh tình trạng xe vẫn tiếp tục trôi sau khi bạn bấm nút dừng trên RViz.
 
-### Khung giải thích (nên đọc chậm): Chọn đúng mẫu giao tiếp cho 4 tình huống thực tế trên robot
+### Giải thích: Chọn đúng mẫu giao tiếp cho 4 tình huống thực tế trên robot
 
 | Yêu cầu trên robot | Chọn mẫu nào? | Lý do kỹ thuật |
 | :--- | :---: | :--- |

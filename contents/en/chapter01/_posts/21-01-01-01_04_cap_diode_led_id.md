@@ -25,7 +25,7 @@ By the end of this lesson you will be able to point at the stripe on an aluminum
 
 You can use $V = IR$ and you can size the series resistor for a red LED on 3.3 V. You know that diode mode belongs on an unpowered part, with the red lead out of the current jack. If the kit has not arrived, the photographs still carry the polarity rules. The lab is a diode test, not a powered experiment.
 
-## Background Knowledge Map: Energy Storage in Electric Fields, Semiconductor Junctions, and Inductive Flyback
+## Key ideas: Energy Storage in Electric Fields, Semiconductor Junctions, and Inductive Flyback
 
 Three physical mechanisms unite capacitors, diodes, and LEDs in robotics:
 
@@ -118,7 +118,7 @@ A reversed aluminum electrolytic on a live rail does not sit there politely. The
 
 Safety: diode mode only, parts out of circuit, USB unplugged, no VM connected. Do not discharge a large capacitor by shorting it with your fingers or with a probe tip you are holding. The 100 µF parts in this kit are small; the habit still matters when a later board is not.
 
-## Deep-Dive Explanation (Read Slowly): RC Time Constants and Sizing a Bulk Decoupling Capacitor by Hand
+## Explanation: RC Time Constants and Sizing a Bulk Decoupling Capacitor by Hand
 
 How large does a bulk capacitor need to be to keep a 5 V logic rail from dipping during a brief motor surge? Walk through the exact 4-step physics calculation:
 

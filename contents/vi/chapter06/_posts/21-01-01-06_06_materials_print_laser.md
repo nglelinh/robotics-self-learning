@@ -15,10 +15,10 @@ Thời lượng ước tính: **70–90 phút**. Bạn có thể hoàn thành b�
 
 Khi bắt đầu chế tạo khung robot trong xưởng lab, hai công cụ chế mẫu nhanh phổ biến nhất nằm ngay trước mắt bạn: **máy in 3D FDM (nhựa PLA/PETG)** và **máy cắt laser (mica Acrylic / gỗ dán MDF/Plywood)**. Chọn sai công cụ không chỉ tốn hàng giờ chờ in mà còn tạo ra một bộ khung mềm oặt hoặc giòn gãy ngay cú va chạm đầu tiên. Bí quyết của người làm cơ khí robot là kết hợp cả hai: dùng cắt laser cho **các tấm khung phẳng chịu lực lớn** và dùng in 3D cho **các gá lắp hình học phức tạp** (giá đỡ động cơ, ngàm cảm biến, ống dẫn dây).
 
-## Bản đồ kiến thức nền: Cơ học vật liệu, Tính dị hướng của in 3D và Độ cứng uốn
+## Kiến thức cần nhớ: Cơ học vật liệu, Tính dị hướng của in 3D và Độ cứng uốn
 
 ### 1. Tính dị hướng (Anisotropy) của in 3D FDM
-Chi tiết in 3D được đắp từng lớp nhựa nóng chảy chồng lên nhau theo trục Z. Vì liên kết giữa các lớp yếu hơn liên kết dọc sợi nhựa, một giá đỡ động cơ chịu lực kéo **vuông góc với mặt lớp in** rất dễ tách lớp (delamination) và gãy đôi! Định hướng chi tiết trên bàn in sao cho phương chịu kéo chính nằm dọc theo mặt phẳng XY là kỹ năng sống còn của người thiết kế CAD cho in 3D.
+Chi tiết in 3D được đắp từng lớp nhựa nóng chảy chồng lên nhau theo trục Z. Vì liên kết giữa các lớp yếu hơn liên kết dọc sợi nhựa, một giá đỡ động cơ chịu lực kéo **vuông góc với mặt lớp in** rất dễ tách lớp (delamination) và gãy đôi! Định hướng chi tiết trên bàn in sao cho phương chịu kéo chính nằm dọc theo mặt phẳng XY là kỹ năng cần có của người thiết kế CAD cho in 3D.
 
 ### 2. Nhựa PLA vs. PETG vs. Tấm cắt Laser (Acrylic / Plywood)
 - **PLA:** cứng, dễ in, độ chính xác cao, nhưng giòn và mềm oặt ngay ở $$55\text{–}60^\circ\text{C}$$ (gắn trực tiếp lên động cơ nóng sẽ bị biến dạng!).
@@ -28,7 +28,7 @@ Chi tiết in 3D được đắp từng lớp nhựa nóng chảy chồng lên n
 ### 3. Quy luật lập phương của độ cứng uốn ($$I = \frac{b h^3}{12}$$)
 Độ chống võng của một tấm khung phẳng tỉ lệ với mô-men quán tính mặt cắt $$I = \frac{b h^3}{12}$$ (với $$h$$ là chiều dày tấm). Tăng độ dày tấm lên gấp đôi khiến khối lượng tăng **2 lần**, nhưng độ cứng chống uốn tăng vọt lên tới **$$2^3 = 8$$ lần**!
 
-### Khung giải thích: Cầm tay so sánh độ cứng uốn và khối lượng giữa tấm khung in 3D và tấm cắt laser (nên đọc chậm)
+### Giải thích: Cầm tay so sánh độ cứng uốn và khối lượng giữa tấm khung in 3D và tấm cắt laser
 
 Xét một tấm sàn khung robot kích thước **$$200\text{ mm} \times 150\text{ mm}$$** (diện tích $$A = 300\text{ cm}^2$$):
 

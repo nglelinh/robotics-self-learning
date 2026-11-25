@@ -27,7 +27,7 @@ By the end you can **state** the course spine, from component literacy through C
 
 You can read a technical page slowly and you can create a folder. You do not need a meter, an iron, or a prior robotics course. Ohm's law waits for Chapter 01, where it is measured. What you do need is a note that records the failure. "Started the course" will not help in week nine.
 
-## Background Knowledge Map: How Mechanics, Electronics, Control, and Software Interlock in Robotics
+## Key ideas: How Mechanics, Electronics, Control, and Software Interlock in Robotics
 
 Before touching a soldering iron or writing a single line of C++, it helps to see how four classical engineering disciplines fuse inside even a small differential-drive robot:
 
@@ -130,7 +130,7 @@ Hà starts on a Wednesday night with a Windows laptop and no parts. She computes
 
 She copies the 300 ms stop into the same note, without pretending to flash it. The serial field says `none — no board yet`. The photo field says `none`. What broke: nothing powered. What fixed it: she wrote the week numbers before opening a shop tab. Thursday 20:00–21:30 is Bench, labelled "safety card, still no soldering." That file is a pass. She has not flashed a board.
 
-## Deep-Dive Explanation (Read Slowly): From High-Level Goal to Real-Time Control Budget
+## Explanation: From High-Level Goal to Real-Time Control Budget
 
 Beginners often imagine robotics as "write a `move_forward()` function and you're done." In reality, every physical robot runs on a strict **time-and-geometry budget**. Follow these four steps slowly:
 

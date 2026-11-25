@@ -24,7 +24,7 @@ You will name, on your own board, the USB 5 V pin and the regulated 3.3 V pin, a
 
 The heartbeat lab has already proved the board enumerates and that you know which LED pin you own. You can set a meter to DC volts and put the black lead on a ground you can name. Chapter 01’s resistor divider is the only circuit math required. No motor supply is connected. The full cart, including the driver and the pack, is the Chapter 00 shopping lesson ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). You are not buying the pack in order to finish this page.
 
-## Background Knowledge Map: Power-Rail Domains, Pin Multiplexing, and Current Sourcing Limits
+## Key ideas: Power-Rail Domains, Pin Multiplexing, and Current Sourcing Limits
 
 Three architectural facts govern safe MCU pin and power-rail design:
 
@@ -104,7 +104,7 @@ Faults. Black lead on the 5V pin and red lead on GND produces a negative number 
 
 Safety: the pack stays in the bag. Do not series the meter in current mode across 5V and GND. That is a short through the meter.
 
-## Deep-Dive Explanation (Read Slowly): Auditing Your `3V3` Onboard Regulator Headroom by Hand
+## Explanation: Auditing Your `3V3` Onboard Regulator Headroom by Hand
 
 Before hanging an IMU, an OLED screen, two encoders, and a ToF sensor off your dev-board's `3V3` pin, add up the current budget in four steps:
 

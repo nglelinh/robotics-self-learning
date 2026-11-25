@@ -25,7 +25,7 @@ By the end of this lesson you can implement three firmware states, IDLE, TELEOP,
 
 You can measure command age with `millis()` or `time.ticks_diff()`, which is the skill Lesson 1 put in place of the blocking heartbeat in the [Chapter 02 blink and serial lab]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}). You can print a button edge, and you can write a duty with `ledcWrite` or `duty_u16` without believing that `analogWrite` is always 0–255 on an ESP32. The LED from the GPIO lab will stand in for "motors enabled." The TB6612 is still not wired. The timeout math you are encoding is the same 300 ms rule whose 200 ms sleep failure you already calculated.
 
-## Background Knowledge Map: Formal Automata, Guard Conditions, and Fail-Safe Transitions
+## Key ideas: Formal Automata, Guard Conditions, and Fail-Safe Transitions
 
 Three software-architecture ideas make FSMs indispensable in robotics firmware:
 
@@ -214,7 +214,7 @@ No motor, no VM, no battery. The LED is "motors enabled." The serial monitor is 
 
 If the LED turns on the moment the sketch boots, `apply` is not gated on TELEOP, or `setup` wrote a duty and the loop never rewrote it. That bug is the subject of the chapter checklist.
 
-## Deep-Dive Explanation (Read Slowly): Designing a 5-State Diff-Drive FSM and Tracing Every Transition
+## Explanation: Designing a 5-State Diff-Drive FSM and Tracing Every Transition
 
 Instead of juggling 4 boolean flags ($$2^4 = 16$$ combinations, most of them illegal!), trace how a clean 5-state FSM handles obstacle avoidance and safety:
 

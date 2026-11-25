@@ -22,13 +22,13 @@ Bạn cần đã chốt bo mạch ESP32 làm vi điều khiển chính từ bài
 
 Arduino IDE rất tuyệt vời để nhấp nháy đèn LED đầu tiên trong 5 phút, nhưng khi dự án robot của bạn lớn lên thành 8 file mã nguồn (`motors.cpp`, `encoders.cpp`, `pid.cpp`, `imu.cpp`...) với 4 thư viện ngoài, việc quản lý thư viện toàn cục trong Arduino IDE rất dễ biến thành cơn ác mộng "hôm qua chạy, hôm nay báo lỗi biên dịch"! **PlatformIO trên VS Code** giải quyết dứt điểm điều đó bằng cấu hình khai báo theo từng dự án (`platformio.ini`), tự động gợi ý mã thông minh và quản lý toolchain ESP32 chuẩn công nghiệp.
 
-## Bản đồ kiến thức nền: Kiến trúc Biên dịch & Nạp Firmware ESP32 với PlatformIO
+## Kiến thức cần nhớ: Kiến trúc Biên dịch & Nạp Firmware ESP32 với PlatformIO
 
 1. **Cấu hình Khai báo (`platformio.ini`):** Một tệp duy nhất khóa chặt bo mạch (`board = esp32dev`), framework (`arduino` hoặc `espidf`), tốc độ nạp (`upload_speed`), tốc độ cổng Serial (`monitor_speed = 115200`) và danh sách thư viện kèm đúng số phiên bản (`lib_deps`).
 2. **Bản đồ Bộ nhớ ESP32 (Flash vs. SRAM):** Mã chương trình nằm trong bộ nhớ **Flash** (thường 4 MB — mất điện không mất dữ liệu); biến toàn cục, ngăn xếp (stack) và bộ đệm chạy nằm trong **SRAM** (520 KB — cực nhanh nhưng giới hạn!).
 3. **Kênh Nạp & Chẩn đoán USB-UART (CP2102 / CH340):** Cầu nối USB-UART biến cổng USB máy tính thành cổng COM ảo; lỗi nạp thường đến từ thiếu driver cầu nối, cáp USB chỉ có dây sạc (không có dây dữ liệu D+/D-), hoặc quên nhấn giữ nút `BOOT` trên một số bo devkit đời cũ.
 
-### Ví dụ cầm tay chỉ việc: Đọc báo cáo bộ nhớ biên dịch PlatformIO của một firmware robot ESP32
+### Ví dụ làm từng bước: Đọc báo cáo bộ nhớ biên dịch PlatformIO của một firmware robot ESP32
 
 Sau khi bấm `Build`, PlatformIO in ra bảng thống kê bộ nhớ tương tự:
 - **RAM (DRAM khả dụng cho ứng dụng = 327.680 byte):** dùng `48.200 byte` → $$\dfrac{48{,}200}{327{,}680} = \mathbf{14.7\%}$$ (còn dư **279 KB** RAM!).
@@ -36,7 +36,7 @@ Sau khi bấm `Build`, PlatformIO in ra bảng thống kê bộ nhớ tương t�
 
 Chỉ bằng 2 phép chia phần trăm này, bạn biết ngay khi nào cần mở rộng phân vùng Flash và đảm bảo không bao giờ để RAM chạm mức nguy hiểm ($$> 80\%$$) gây tràn stack ngẫu nhiên!
 
-### Khung giải thích: 4 bước gỡ lỗi nạp ESP32 nhanh trong 60 giây (nên đọc chậm)
+### Giải thích: 4 bước gỡ lỗi nạp ESP32 nhanh trong 60 giây
 
 1. **Bước 1 — Kiểm tra cáp USB truyền dữ liệu:** Cáp sạc điện thoại giá rẻ thường cắt bỏ 2 dây dữ liệu — nếu cắm vào mà không xuất hiện cổng `COM` / `/dev/ttyUSB0` mới, hãy đổi ngay sang cáp có truyền dữ liệu!
 2. **Bước 2 — Đóng các cửa sổ Serial Monitor khác đang chiếm cổng:** Một cổng COM chỉ cho phép **1 chương trình** mở tại một thời điểm; nếu để mở màn hình Serial ở cửa sổ khác, lệnh `Upload` sẽ báo `Permission denied` hoặc `Port busy`.

@@ -24,7 +24,7 @@ You will start a talker and a listener from the Jazzy demos, name the topic and 
 Lesson 09-01: `printenv ROS_DISTRO` prints `jazzy` in the terminal you are about to use. Chapter 08’s kinematics: `linear.x` will mean $$v$$ and `angular.z` will mean $$\omega$$. No robot is required.
 
 
-## Background Knowledge Map: Computation Graphs, Strongly Typed Messages, and Rate Contracts
+## Key ideas: Computation Graphs, Strongly Typed Messages, and Rate Contracts
 
 ROS 2 topics formalize three architectural ideas that scale from a 2-node rover to a 200-node autonomous car:
 
@@ -80,7 +80,7 @@ ros2 topic hz /cmd_vel
 
 **Expected:** about 5 Hz, and the robot still does not move, because nothing subscribes with a motor. Leave this running for ten seconds and then Ctrl-C. Write down the rate. Chapter 10’s bridge will treat “no message for 300 ms” as stop. At 5 Hz the gap between messages is 200 ms, inside that window. At 1 Hz the gap is 1000 ms and the watchdog will chop the command into pulses. That is a kinematics-and-timing bug you can now predict without the robot on the floor.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Calculating Topic Bandwidth for Telemetry vs. Sensors
+### Explanation: Hand-Calculating Topic Bandwidth for Telemetry vs. Sensors
 
 Before streaming topics over Wi-Fi between an onboard SBC and a laptop, estimate their exact wire throughput:
 

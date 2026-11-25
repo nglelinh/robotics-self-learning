@@ -15,7 +15,7 @@ Thời lượng ước tính: **~70 phút** nếu máy đã cài và nạp sẵn
 
 Hãy tưởng tượng bạn bị bịt mắt thả vào một căn phòng lạ hoàn toàn mới, trong tay chỉ có cây gậy dò khoảng cách. Muốn biết mình đang đứng ở đâu, bạn cần một tấm bản đồ; nhưng muốn vẽ được tấm bản đồ chính xác, bạn lại phải biết mình đang đứng ở đâu! Nghịch lý "con gà và quả trứng" nổi tiếng đó chính là bài toán **SLAM (Simultaneous Localization and Mapping — Định vị và Xây dựng Bản đồ Đồng thời)**, viên gạch nền của mọi robot tự hành hiện đại.
 
-## Bản đồ kiến thức nền: Bốn trụ cột của Bài toán SLAM 2D (`slam_toolbox`)
+## Kiến thức cần nhớ: Bốn trụ cột của Bài toán SLAM 2D (`slam_toolbox`)
 
 1. **Khớp quét (Scan Matching — Front-end)**:
    So khớp hai lát cắt LiDAR liên tiếp (ICP hoặc Correlative Scan Matching) để ước lượng độ dịch chuyển thực tế của xe, sửa sai số trượt bánh của odometry.
@@ -87,7 +87,7 @@ ros2 run tf2_ros tf2_echo odom base_link
 
 Topic `/scan` phải có kiểu `sensor_msgs/msg/LaserScan` với ít nhất một publisher. Topic `/odom` phải có kiểu `nav_msgs/msg/Odometry` với `frame_id` là `odom` và `child_frame_id` là `base_link`; khi đẩy thẳng robot, tọa độ tịnh tiến phải tăng tương ứng, còn khi xoay tại chỗ góc yaw phải thay đổi đúng chiều. Khi các điều kiện này thỏa mãn và SLAM hoạt động bình thường, chính SLAM sẽ tự động xuất bản thêm cạnh `map → odom` (kiểm tra bằng `ros2 run tf2_ros tf2_echo map odom` — đây là đầu ra của SLAM, không phải cạnh bạn tự phát tĩnh).
 
-### Khung giải thích (nên đọc chậm): Tính tay cập nhật xác suất 1 ô lưới Occupancy Grid bằng Log-Odds
+### Giải thích: Tính tay cập nhật xác suất 1 ô lưới Occupancy Grid bằng Log-Odds
 
 Xét 1 ô lưới ban đầu chưa biết trạng thái ($$p_0 = 0{,}5 \implies \ell_0 = \ln\frac{0{,}5}{0{,}5} = \mathbf{0}$$). Giả sử mô hình cảm biến LiDAR cho:
 - Khi tia laser **đập trúng ô** (occupied): cộng $$\ell_{\text{occ}} = +0{,}85$$ (tương ứng $$p \approx 0{,}70$$).

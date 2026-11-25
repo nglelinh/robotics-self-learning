@@ -25,7 +25,7 @@ You will score seven gates against artifacts, not against a feeling of being don
 
 Lessons 07 through 10 produced the artifacts this page inspects, and lesson 01 produced the LED arithmetic. The shopping list, when a row is blocked by a missing object, is Chapter 00 lesson 05. You need your notes and your photos. You still do not need a moving robot. Wheels stay up. No motor is connected to celebrate a pass.
 
-## Background Knowledge Map: Hardware Bring-Up Sequencing and Fault-Tree Isolation
+## Key ideas: Hardware Bring-Up Sequencing and Fault-Tree Isolation
 
 A disciplined Chapter 01 sign-off rests on three hardware-engineering habits:
 
@@ -93,7 +93,7 @@ A note says: "LED resistor done. Breadboard photo attached, no marks. Three resi
 
 Gate 1 fails, or is at best incomplete, because no arithmetic is on the page. "Done" is the weak tick. Gate 2 fails: an unmarked breadboard photo is not a rail map. Gate 3 fails: three measurements are not five, and "looked right" is not a decode plus a meter reading. Gate 4 fails: a guess about an electrolytic stripe is not a diode-mode anode call. Gate 5 fails: "H-bridge" is the forbidden label. Gate 6 is not yet a pass; "next week maybe" becomes a pass of the make-up rule only if a real date replaces "maybe." Gate 7 fails: there is no separate battery, no common ground, no capacitor, and no 300 ms cut. The note does not scrape a pass by being sincere. The next hour is gates 1, 3, and 4 at the bench, plus a rewritten paragraph for gate 7. Gates 2 and 5 need a pencil on a photo. Gate 6 needs a date.
 
-## Deep-Dive Explanation (Read Slowly): Executing a 4-Stage Power-Rail Bring-Up Check
+## Explanation: Executing a 4-Stage Power-Rail Bring-Up Check
 
 Follow this exact sequence before connecting any MCU board in Chapter 02:
 

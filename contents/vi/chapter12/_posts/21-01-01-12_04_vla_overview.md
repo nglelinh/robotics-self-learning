@@ -15,7 +15,7 @@ Thời lượng: **~75 phút**, dành để đọc kỹ hai hệ thống nhằm 
 
 ACT và Diffusion Policy rất giỏi thực hiện **một kỹ năng chuyên biệt** mà chúng được dạy (ví dụ "gắp khối đỏ bỏ vào cốc"), nhưng nếu bạn đổi câu lệnh thành *"hãy đặt quả táo lên chiếc đĩa màu xanh gần nhất"*, bạn phải thu dữ liệu và huấn luyện lại từ đầu. **VLA (Vision–Language–Action)** — như RT-2, OpenVLA, $$\pi_0$$ hay SmolVLA — hợp nhất tri thức ngữ nghĩa khổng lồ của mô hình ngôn ngữ–thị giác (VLM) với đầu ra hành động liên tục của robot để hướng tới chính sách đa nhiệm hiểu ngôn ngữ tự nhiên.
 
-## Bản đồ kiến thức nền: Bốn trụ cột của Mô hình Thị giác–Ngôn ngữ–Hành động (VLA)
+## Kiến thức cần nhớ: Bốn trụ cột của Mô hình Thị giác–Ngôn ngữ–Hành động (VLA)
 
 1. **Nền tảng VLM Tiền huấn luyện (Pretrained Vision–Language Backbone)**:
    Thừa hưởng khả năng nhận diện vật thể, màu sắc, quan hệ không gian ("bên trái", "phía sau") từ hàng tỷ cặp ảnh–văn bản trên Internet.
@@ -82,7 +82,7 @@ Phần thực hành tay máy nằm ở [bài lab tay SO-101]({% multilang_post_u
 | --- | --- | --- | --- | --- |
 | SO-101 của bạn | Ảnh camera (nếu gắn) kèm trạng thái khớp | 6 giá trị theo đúng đơn vị trong tệp dataset | Có, vì đây là phần cứng bạn trực tiếp thu dữ liệu | Đọc tài liệu và hiệu chỉnh (khi có tay trên bàn): có. Huấn luyện không có GPU: không |
 
-### Khung giải thích (nên đọc chậm): Tính tay sai số lượng tử hóa khi mã hóa hành động thành 256 bin rời rạc
+### Giải thích: Tính tay sai số lượng tử hóa khi mã hóa hành động thành 256 bin rời rạc
 
 Giả sử một mô hình VLA rời rạc hóa góc khớp vai $$q_1 \in [-90^\circ, +90^\circ]$$ (dải rộng $$180^\circ$$) thành đúng **256 token hành động** (tương ứng 255 khoảng chia đều):
 - Độ phân giải góc mỗi bước token:

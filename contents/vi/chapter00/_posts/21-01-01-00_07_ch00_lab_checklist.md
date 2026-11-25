@@ -25,13 +25,13 @@ Bạn cần chuẩn bị đầy đủ sổ lab, câu lộ trình, thẻ quy trì
 
 Trước mỗi chuyến bay, phi công dù có 10.000 giờ kinh nghiệm vẫn đọc từng dòng trong bảng kiểm (*pre-flight checklist*) — bởi trí nhớ con người rất dễ bỏ sót một công tắc nhỏ khi đang hào hứng! Trong phòng lab robot cũng vậy: **Checklist Chương 00** là cổng kiểm soát chất lượng cuối cùng để chắc chắn mặt bàn, nguồn điện, đồng hồ đo và thư mục làm việc của bạn đã đạt chuẩn trước khi cắm điện vào mạch thật ở Chương 01.
 
-## Bản đồ kiến thức nền: Tư duy Kiểm chứng bằng Bằng chứng (Evidence-Based Bring-Up)
+## Kiến thức cần nhớ: Tư duy Kiểm chứng bằng Bằng chứng (Evidence-Based Bring-Up)
 
 1. **Tiêu chuẩn "Đạt" phải đo được (Measurable Acceptance Criteria):** Trong kỹ thuật phần cứng, "đã xem qua" không phải bằng chứng; bằng chứng là một con số đo từ đồng hồ vạn năng, một ảnh chụp bàn lab gọn gàng, hoặc một dòng log biên dịch thành công.
 2. **Phân tách Miền Công suất (USB 500 mA vs. Pin Động cơ):** Cổng USB máy tính chỉ cung cấp an toàn tối đa $$500\text{ mA}$$ ở $$5\text{ V}$$ ($$2.5\text{ W}$$) — đủ cho mạch logic và cảm biến, nhưng hoàn toàn không đủ cho động cơ DC.
 3. **Kỷ luật Rà soát Trước khi Nâng tầng:** Hoàn thành trọn vẹn một chương nhỏ giúp lỗi ở Chương 00 không bị kéo dài và phóng đại thành lỗi khó tìm ở Chương 03–06.
 
-### Ví dụ cầm tay chỉ việc: Kiểm tra ngân sách dòng cổng USB (500 mA) trước khi cấp nguồn
+### Ví dụ làm từng bước: Kiểm tra ngân sách dòng cổng USB (500 mA) trước khi cấp nguồn
 
 Giả sử bạn đang thử nghiệm cụm logic trên bàn chỉ bằng cáp USB nối máy tính (giới hạn an toàn $$500\text{ mA}$$):
 - Bo mạch ESP32 (Wi-Fi tắt): **$$80\text{ mA}$$** (đỉnh khởi động Wi-Fi có thể lên $$240\text{ mA}$$).
@@ -40,7 +40,7 @@ Giả sử bạn đang thử nghiệm cụm logic trên bàn chỉ bằng cáp U
 - **Tổng dòng logic:** $$80 + 20 + 30 = \mathbf{130\text{ mA}} \le 500\text{ mA}$$ → **hoàn toàn an toàn** khi thử qua USB!
 - Giờ giả sử bạn lỡ nối cả 2 động cơ DC (dòng khởi động **$$600\text{ mA}$$** mỗi chiếc = **$$1{,}200\text{ mA}$$**) vào đường `5V` của USB: tổng dòng vọt lên **$$1{,}330\text{ mA}$$** (gấp **2,66 lần** giới hạn USB!) → máy tính lập tức ngắt cổng USB hoặc làm sập nguồn ESP32!
 
-### Khung giải thích: 4 bước hoàn tất cổng kiểm soát Chương 00 (nên đọc chậm)
+### Giải thích: 4 bước hoàn tất cổng kiểm soát Chương 00
 
 1. **Bước 1 — Xác minh mặt bàn & an toàn điện:** Không còn vụn kim loại, kính bảo hộ ở tầm tay, thẻ quy trình cấp nguồn đã viết rõ ràng.
 2. **Bước 2 — Xác minh bộ dụng cụ Đợt 1:** Đồng hồ vạn năng đo đúng điện áp 1 viên pin AA/18650 và kêu bíp rõ khi chập que đo.

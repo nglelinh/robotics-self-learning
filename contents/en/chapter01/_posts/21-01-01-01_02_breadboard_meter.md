@@ -25,7 +25,7 @@ By the end of this lesson you will be able to point to a five-hole terminal stri
 
 You should know a volt from an ampere, and that a status LED needs a series resistor. This lesson does not derive Ohm's law again. It teaches which holes are one node, and which meter setting reads voltage rather than shorting the source. A multimeter and one solderless breadboard are enough.
 
-## Background Knowledge Map: Node Topology, Continuity Testing, and In-Circuit Measurement Limits
+## Key ideas: Node Topology, Continuity Testing, and In-Circuit Measurement Limits
 
 Three electrical principles explain every breadboard mystery and multimeter quirk:
 
@@ -96,7 +96,7 @@ You should hear a beep through a good jumper and through one row, silence across
 
 Safety: start on a voltage range above what you expect, so a 2S pack near 8 V is not first met on the 200 mV scale. Keep your fingers off the probe tips whenever you measure a pack or a charger; the tip is the only metal that should touch the circuit. Do not measure current on USB in this lesson. Do not land the charger on an ESP32 or Pico GPIO to "see if 5 V is there."
 
-## Deep-Dive Explanation (Read Slowly): Tracing a "Dead" Breadboard Circuit Using Half-Split Probing
+## Explanation: Tracing a "Dead" Breadboard Circuit Using Half-Split Probing
 
 When a breadboard circuit fails to power on, novices randomly pull wires out. Engineers use **binary-search voltage probing** with the black probe anchored permanently to `GND`:
 

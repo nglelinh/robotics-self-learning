@@ -15,7 +15,7 @@ Thời lượng ước tính: **70–90 phút**, bao gồm thời gian phân lo�
 
 Phần mềm điều khiển của bạn có thể tinh vi đến đâu đi nữa, nhưng nếu một con vít chí (set screw) trên khớp nối bánh xe bị tuôn ren sau 10 phút rung lắc, cả con robot lập tức đứng im bất lực. Những chi tiết cơ khí tưởng như "lặt vặt" nhất — **ốc vít hệ mét, vòng bi (bạc đạn), trục D-shaft và khớp nối mềm** — lại chính là nguyên nhân số một gây hỏng vặt trên các dự án robot sinh viên. Nắm vững ngôn ngữ tiêu chuẩn của chúng giúp bạn lắp ráp chắc chắn, đồng tâm và dễ bảo trì.
 
-## Bản đồ kiến thức nền: Tiêu chuẩn ren hệ mét, Ổ lăn và Khớp nối trục
+## Kiến thức cần nhớ: Tiêu chuẩn ren hệ mét, Ổ lăn và Khớp nối trục
 
 ### 1. Quy ước ốc vít hệ mét (M3, M4) và chống tự tháo do rung
 Ký hiệu `M3 × 12` nghĩa là đường kính danh nghĩa **$$3\text{ mm}$$**, chiều dài thân ren **$$12\text{ mm}$$**, bước ren thô tiêu chuẩn **$$0{,}5\text{ mm/vòng}$$**. Trên robot có động cơ rung liên tục, đai ốc thường sẽ tự xoay lỏng rất nhanh — giải pháp chuẩn là dùng **đai ốc chống trượt có vòng nylon (nyloc)**, long-đen vênh, hoặc keo khóa ren tháo được (Loctite xanh 243; *tránh dùng keo đỏ trên ốc nhỏ M3*).
@@ -26,7 +26,7 @@ Trục hộp số động cơ nhỏ không được thiết kế để gánh t�
 ### 3. Trục vát cạnh (D-Shaft) và Khớp nối mềm (Flexible Coupling)
 Bắt vít chí lên trục tròn trơn rất dễ trượt xoay khi gặp mô-men lớn; trục **D-shaft** (vát một mặt phẳng) khóa chặt mô-men xoay cơ học. Khi nối hai trục độc lập (ví dụ trục động cơ nối trục vitme), luôn dùng **khớp nối mềm** (khớp nối lò xo nhôm hoặc khớp nối cao su jaw coupling) để hấp thụ độ lệch tâm nhỏ $$0{,}1\text{–}0{,}3\text{ mm}$$ thay vì ép cứng làm kẹt và nóng động cơ.
 
-### Khung giải thích: Cầm tay kiểm tra chiều dài ăn ren M3 và mô-men uốn trên trục bánh xe (nên đọc chậm)
+### Giải thích: Cầm tay kiểm tra chiều dài ăn ren M3 và mô-men uốn trên trục bánh xe
 
 **Phần A — Chọn đúng chiều dài ốc `M3` (bước ren $$p = 0{,}5\text{ mm/vòng}$$):**
 - Quy tắc bền cơ khí: chiều dài ăn ren tối thiểu trong nhôm/nhựa cứng nên đạt **$$1{,}5\text{–}2{,}0 \times d$$**, tức với ốc M3 cần tối thiểu $$4{,}5\text{–}6{,}0\text{ mm}$$ (tương đương $$6{,}0 / 0{,}5 = 12$$ vòng ren ăn khớp!).

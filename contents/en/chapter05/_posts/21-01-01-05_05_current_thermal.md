@@ -30,7 +30,7 @@ A motor datasheet has two currents that matter on a small robot, and they are no
 
 Ohm's law and $$P = I^2 R$$ are the whole mathematical toolkit. Lesson 05-01's back-EMF story is the reason stall current is large. Lesson 05-02's driver identification tells you whether your heat is landing in a Darlington with a bolted heatsink or in a MOSFET bridge. You need a bench supply with a current knob, or a series ammeter, if you will measure a real motor. The arithmetic path is available if you cannot stall safely.
 
-## Background Knowledge Map: Stall-Current Physics, Thermal Time Constants, and Software Current/Stall Guards
+## Key ideas: Stall-Current Physics, Thermal Time Constants, and Software Current/Stall Guards
 
 Three physical and firmware safeguards protect actuators from burning out:
 
@@ -142,7 +142,7 @@ Two numbers in `lab-notes.md`: a measured no-load current, and either a measured
 | Polyfuse opens and stays open for minutes | It is doing its job. Let it cool. Do not raise the trip point until the short is gone. |
 | Robot lurches after a reset | `setup` is not forcing PWM to 0 and a known direction before anything else. |
 
-## Deep-Dive Explanation (Read Slowly): Computing Thermal Rise During a Jammed Wheel & Sizing a Stall Watchdog
+## Explanation: Computing Thermal Rise During a Jammed Wheel & Sizing a Stall Watchdog
 
 Let's model how fast a stalled motor heats up and verify how quickly a firmware stall guard saves it:
 

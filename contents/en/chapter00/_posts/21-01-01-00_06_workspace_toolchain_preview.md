@@ -27,7 +27,7 @@ You will **create** a workspace with `notes/`, either `firmware/esp32/` or `firm
 
 You can create directories and you can paste text into `notes/lab-notes.md`. Lessons 00-01 through 00-04 gave you the journal fields, the track, the power-up card, and the tool inventory. Lesson 00-05, the bill of materials, should already exist as `bom.csv` or as a dated note; if it does not, write `bom.csv missing` in the install log rather than inventing prices. You do not need to have soldered.
 
-## Background Knowledge Map: Cross-Compilation, Flashing Pipelines, and Telemetry Analysis
+## Key ideas: Cross-Compilation, Flashing Pipelines, and Telemetry Analysis
 
 Three software-engineering pillars separate reliable robotics code from fragile hobby sketches:
 
@@ -134,7 +134,7 @@ Trang is on Windows, Track A, ESP32, ceiling already decided in lesson 00-02. Sh
 
 A classmate on Ubuntu 24.04 may install Jazzy in another hour and paste a real version string. That classmate still owes the same firmware folder. Trang does not copy a version she did not run.
 
-## Deep-Dive Explanation (Read Slowly): Sizing Your Serial Telemetry Bandwidth by Hand
+## Explanation: Sizing Your Serial Telemetry Bandwidth by Hand
 
 A classic beginner mistake is printing verbose debug sentences inside a 100 Hz control loop and accidentally breaking real-time control. Let's calculate the exact serial bandwidth budget step by step:
 

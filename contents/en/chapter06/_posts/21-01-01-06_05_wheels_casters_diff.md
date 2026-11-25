@@ -30,7 +30,7 @@ $$
 You know a bad $$b$$ draws a circle on a straight command. Gears (Lesson 03) already set how motor radians become wheel radians.
 
 
-## Background Knowledge Map: Instantaneous Center of Curvature, Caster Trail, and Rolling Constraints
+## Key ideas: Instantaneous Center of Curvature, Caster Trail, and Rolling Constraints
 
 Wheeled mobility rests on three geometric ideas that bridge mechanism diagrams and mobile-robot kinematics:
 
@@ -89,7 +89,7 @@ $$
 
 opposite signs on the two motors. If one motor lead is flipped, the command $$v = 0.20$$, $$\omega = 0$$ (both software speeds “positive”) becomes $$v_l = 0.20$$ and $$v_r = -0.20$$ on the floor. That is this spin, not a straight line. Wheels-up in Chapter 07: positive command, both tires forward. Floor test: the axle midpoint stays put only when you asked for a spin.
 
-### Deep-Dive Explanation (Read Slowly): Computing ICC Distance, Wheel Speeds, and Caster Heading
+### Explanation: Computing ICC Distance, Wheel Speeds, and Caster Heading
 
 Let us trace the velocity vector of every contact patch on a 2WD robot with track width $$b = 0.16\ \text{m}$$ and a rear swivel caster mounted $$d_c = 0.10\ \text{m}$$ directly behind the axle midpoint.
 

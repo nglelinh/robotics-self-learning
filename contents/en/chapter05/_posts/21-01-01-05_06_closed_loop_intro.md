@@ -30,7 +30,7 @@ Every later controller on this robot is the same three boxes: sense, compute, ac
 
 You need a range reading from the ultrasonic or time-of-flight lesson in Chapter 04, in millimetres or in centimetres you can convert. You need one motor channel whose forward truth table you wrote in lesson 05-01, on a driver you can name from lesson 05-02. Wheels come off the ground before they touch the floor. A cardboard target and a power switch you can hit with your hand are part of the apparatus.
 
-## Background Knowledge Map: Open-Loop vs. Closed-Loop Control, Proportional–Integral Action, and Anti-Windup
+## Key ideas: Open-Loop vs. Closed-Loop Control, Proportional–Integral Action, and Anti-Windup
 
 Four control-theory pillars turn a spinning motor into a precision velocity actuator:
 
@@ -154,7 +154,7 @@ A note with three cases (far → forward, near → stop, timeout or 0 → stop) 
 | Robot never starts | Every read is inside the stop band, the target is too close, or STBY / enable is low. |
 | Floor run does not stop | Wrong units (cm compared with 200), or the sensor is aimed over the cardboard. Cut power. |
 
-## Deep-Dive Explanation (Read Slowly): Hand-Stepping 3 Ticks of a Discrete PI Wheel Velocity Controller
+## Explanation: Hand-Stepping 3 Ticks of a Discrete PI Wheel Velocity Controller
 
 Before tuning gains on your robot, trace three consecutive 100 Hz control ticks ($$\Delta t = 0.01\text{ s}$$) of a discrete **PI velocity controller** by hand:
 

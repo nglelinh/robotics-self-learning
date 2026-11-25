@@ -15,7 +15,7 @@ Thời lượng: **~70 phút** (khoảng 25 phút đọc tài liệu và kho mã
 
 Suốt 11 chương vừa qua, ta lập trình robot theo lối cổ điển: tự viết phương trình động học, tự thiết kế bản đồ và tự chỉnh hàng chục tham số PID/Nav2. Cách tiếp cận đó cực kỳ chính xác với xe chạy trong hành lang, nhưng lại bó tay trước những thao tác tưởng chừng đơn giản với trẻ lên 5: *gấp một chiếc áo sơ mi, nhặt một sợi dây cáp mềm hay múc một thìa cà phê*. Chương 12 mở ra làn sóng **Robot Học (Robot Learning)** với hệ sinh thái mã nguồn mở **LeRobot (Hugging Face)** — nơi robot học kỹ năng trực tiếp từ dữ liệu trình diễn của con người.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Hệ sinh thái LeRobot
+## Kiến thức cần nhớ: Ba trụ cột của Hệ sinh thái LeRobot
 
 1. **Chuẩn Dữ liệu Tập trình diễn (`LeRobotDataset`)**:
    Lưu trữ đồng bộ từng khung hình camera (video nén MP4/AV1), trạng thái góc khớp `observation.state` và hành động mục tiêu `action` theo đúng khung thời gian (ví dụ 30 Hz) dưới dạng Parquet + Video chuẩn hóa, dễ chia sẻ trên Hugging Face Hub.
@@ -91,7 +91,7 @@ $$
 
 Nếu thư mục chỉ có 20 ảnh nhưng card lại ghi nhầm `fps: 30`, thời lượng thực tế sẽ bị bóp méo và các thao tác quay sẽ bị kéo giãn sai tốc độ.
 
-### Khung giải thích (nên đọc chậm): Tính tay kích thước bộ dữ liệu 50 lượt trình diễn (episodes) trên LeRobot
+### Giải thích: Tính tay kích thước bộ dữ liệu 50 lượt trình diễn (episodes) trên LeRobot
 
 Giả sử bạn thu thập **50 lượt trình diễn** gắp một khối lập phương bằng cánh tay **6 khớp (SO-101)** gắn 2 camera (1 camera cổ tay + 1 camera toàn cảnh), mỗi lượt dài **15 giây** ở tần số **30 Hz**:
 - Tổng số bước thời gian (frames) trong toàn bộ dataset:

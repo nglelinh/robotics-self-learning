@@ -23,13 +23,13 @@ Bạn cần đã có bo mạch in ra mốc thời gian mili giây tăng đều v
 
 Một câu hỏi kinh điển khiến nhiều kỹ sư robot trẻ tranh luận sôi nổi: *nên viết firmware robot bằng **C++** (Arduino/ESP-IDF) hay **MicroPython**?* Nếu chỉ nói chung chung "C++ nhanh hơn còn Python dễ viết hơn" thì vẫn quá mơ hồ — dưới góc nhìn điều khiển thời gian thực, sự khác biệt sinh tử nằm ở **tính tất định về thời gian (timing determinism)** và **độ trễ dọn rác bộ nhớ (garbage collection pause)**!
 
-## Bản đồ kiến thức nền: Biên dịch Tĩnh (C++) vs. Thông dịch Quản lý Bộ nhớ Tự động (MicroPython)
+## Kiến thức cần nhớ: Biên dịch Tĩnh (C++) vs. Thông dịch Quản lý Bộ nhớ Tự động (MicroPython)
 
 1. **Tốc độ Thực thi & Chi phí Runtime:** C++ biên dịch trực tiếp ra mã máy gốc (native machine code), chạy phép tính số thực dấu phẩy động trên FPU của ESP32 chỉ mất vài nano-giây; MicroPython chạy qua máy ảo bytecode nên chậm hơn khoảng $$10\text{–}50\times$$ trên các vòng lặp tính toán dày đặc.
 2. **Tính Tất định & Garbage Collector (GC):** C++ cấp phát biến tĩnh trên stack/static RAM nên thời gian chạy vòng lặp PID 100 Hz gần như **bất biến**; MicroPython định kỳ kích hoạt trình dọn rác GC (có thể đóng băng CPU từ **2 đến 10 ms** bất ngờ) nếu bạn cấp phát chuỗi/danh sách liên tục trong vòng lặp!
 3. **Tốc độ Tạo mẫu & Chiến lược Lai:** MicroPython cực mạnh để thử nhanh cảm biến qua REPL và viết kịch bản hành vi cấp cao; C++ là chuẩn vàng cho vòng lặp động cơ tốc độ cao, đọc encoder bằng ngắt và tích hợp micro-ROS.
 
-### Ví dụ cầm tay chỉ việc: So sánh ngân sách thời gian vòng lặp PID 100 Hz ($$T = 10\text{ ms}$$) giữa C++ và MicroPython
+### Ví dụ làm từng bước: So sánh ngân sách thời gian vòng lặp PID 100 Hz ($$T = 10\text{ ms}$$) giữa C++ và MicroPython
 
 Giả sử bạn chạy vòng lặp điều khiển động cơ ở **$$100\text{ Hz}$$** (mỗi chu kỳ tối đa **$$10.0\text{ ms}$$**):
 
@@ -41,7 +41,7 @@ Giả sử bạn chạy vòng lặp điều khiển động cơ ở **$$100\text
 
 Kết luận bằng con số: ở **50–100 Hz** cho xe vi sai cơ bản, *cả hai* ngôn ngữ đều chạy mượt (miễn là trong MicroPython bạn gọi `gc.collect()` có kiểm soát và tránh tạo list/string mới trong vòng lặp nhanh!). Nhưng nếu làm drone tự cân bằng chạy **1.000 Hz** ($$T = 1.0\text{ ms}$$), chỉ **C++** mới giữ được độ trễ dưới 1 ms không bị GC phá vỡ!
 
-### Khung giải thích: 4 tiêu chí chọn đúng ngôn ngữ cho từng tầng robot (nên đọc chậm)
+### Giải thích: 4 tiêu chí chọn đúng ngôn ngữ cho từng tầng robot
 
 1. **Bước 1 — Đo chu kỳ thực tế thay vì đoán:** Dùng `micros()` hoặc `ticks_us()` đo trực tiếp thời gian chạy vòng lặp lớn nhất (`max_loop_us`) để biết bạn còn bao nhiêu phần trăm dự phòng.
 2. **Bước 2 — Không cấp phát bộ nhớ động (heap) trong vòng lặp điều khiển nhanh:** Dù viết C++ (tránh lớp `String` gây phân mảnh heap!) hay MicroPython (tránh tạo mảng mới mỗi vòng), hãy dùng mảng tĩnh cấp phát sẵn từ `setup()`.

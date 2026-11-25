@@ -25,13 +25,13 @@ Bạn đã hoàn thiện thẻ quy trình cấp nguồn từ bài 00-03 (ít nh�
 
 Lập trình trên màn hình máy tính cho phép bạn đặt điểm dừng (breakpoint) để nhìn thấy mọi biến số. Nhưng khi mạch robot trên bàn không chạy, dòng điện vô hình và điện áp không hề phát sáng — **dụng cụ bàn lab** chính là "đôi mắt và đôi tay" giúp bạn nhìn thấy thế giới vật lý! Hiểu đúng chức năng và giới hạn đo của đồng hồ vạn năng, mỏ hàn, kìm tuốt dây và thước kẹp giúp bạn bắt bệnh phần cứng trong 2 phút thay vì đoán mò suốt buổi tối.
 
-## Bản đồ kiến thức nền: Bốn nhóm dụng cụ cốt lõi trên bàn lab Robotics
+## Kiến thức cần nhớ: Bốn nhóm dụng cụ cốt lõi trên bàn lab Robotics
 
 1. **Nhóm Đo lường (Đồng hồ vạn năng, Thước kẹp):** Biến các đại lượng ẩn (điện áp, thông mạch, điện trở, dòng điện, kích thước cơ khí) thành con số định lượng có sai số xác định.
 2. **Nhóm Lắp ráp Điện (Breadboard, Mỏ hàn nhiệt độ ổn định, Dây jumper):** Tạo kết nối điện chắc chắn với điện trở tiếp xúc thấp — tách bạch giai đoạn thử nghiệm nhanh (breadboard) với giai đoạn chịu rung động trên xe chạy thật (hàn/cosse).
 3. **Nhóm Gia công Cơ khí & An toàn (Kìm cắt, Kìm tuốt dây, Kính bảo hộ, Đế gá PCB):** Giữ linh kiện cố định, cắt chân dây không bắn vào mắt và đảm bảo khoảng hở lắp đặt chính xác cho trục bánh xe và cảm biến.
 
-### Ví dụ cầm tay chỉ việc: Kiểm định sai số linh kiện bằng đồng hồ vạn năng
+### Ví dụ làm từng bước: Kiểm định sai số linh kiện bằng đồng hồ vạn năng
 
 Trước khi tin vào dụng cụ hay linh kiện mới mua, hãy kiểm tra dung sai bằng phép tính cụ thể:
 - **Kiểm tra điện trở $$1\text{ k}\Omega$$ dung sai $$\pm 5\%$$ (vạch vàng kim):**
@@ -45,7 +45,7 @@ Trước khi tin vào dụng cụ hay linh kiện mới mua, hãy kiểm tra dun
   $$
   Nếu đo lúc không tải được $$5.02\text{ V}$$ nhưng vừa chạy động cơ tụt xuống $$4.40\text{ V}$$ → nguồn bị sụt áp, cần kiểm tra pin hoặc mạch hạ áp!
 
-### Khung giải thích: Quy tắc 4 bước quản lý dụng cụ giúp giảm 80% lỗi vặt (nên đọc chậm)
+### Giải thích: Quy tắc 4 bước quản lý dụng cụ giúp giảm 80% lỗi vặt
 
 1. **Bước 1 — Luôn kiểm tra que đo đồng hồ trước khi đo:** Chập hai đầu que đo ở thang Ohm; nếu hiển thị $$0.2\text{–}0.5\ \Omega$$ là dây tốt, nếu nhảy số loạn xạ thì chính dây đo đã đứt ngầm.
 2. **Bước 2 — Để đồng hồ ở thang DC V (20 V) sau khi dùng xong:** Không bao giờ bỏ quên que đỏ ở lỗ đo dòng 10 A — lần sau đo điện áp pin sẽ gây ngắn mạch tức thì!

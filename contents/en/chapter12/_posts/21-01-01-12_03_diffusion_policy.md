@@ -24,7 +24,7 @@ You will explain why a diffusion policy generates an action trajectory by iterat
 Lessons 12-01 and 12-02 are done. You can say what a dataset key is, and you can say that an ACT chunk is open-loop for $$k/f$$ seconds. The chair in this lesson is furniture, not a new robot. No GPU, no conda environment, no checkpoint. The project page is public.
 
 
-## Background Knowledge Map: Multimodal Action Distributions, Score Matching, and Iterative Denoising (DDPM/DDIM)
+## Key ideas: Multimodal Action Distributions, Score Matching, and Iterative Denoising (DDPM/DDIM)
 
 Diffusion Policy brings generative modeling directly into visuomotor control through three pillars:
 
@@ -81,7 +81,7 @@ You do not get 2.7 s of warning inside a 0.16 s open-loop prefix. The prefix tha
 
 Hold the sketch next to those numbers. At a late denoising step, $$x_t$$ might be a short sequence whose first action is near $$(0.15, 0.48)$$, a noisy left pass. Then $$f$$, given the image, pulls it toward $$(0.15, 0.50)$$. At an early step, $$x_t$$ is not yet a pass around anything, and sending it as `cmd_vel` is how you drive on pure noise. The index $$t$$ in the sketch is not the 50 Hz tick. Mixing those clocks is how a student executes step "noise" as if it were step "trajectory."
 
-### Deep-Dive Explanation (Read Slowly): Hand-Checking Mode Averaging and 1 Step of DDPM Denoising
+### Explanation: Hand-Checking Mode Averaging and 1 Step of DDPM Denoising
 
 **Part A — Why MSE regression crashes while Diffusion succeeds:**
 Suppose at observation $$o$$, 50% of expert demos command steering $$a = -1.0\ \text{rad}$$ (go left around an obstacle) and 50% command $$a = +1.0\ \text{rad}$$ (go right).

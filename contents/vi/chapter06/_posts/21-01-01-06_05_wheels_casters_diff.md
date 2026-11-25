@@ -15,7 +15,7 @@ Thời lượng ước tính: **70–90 phút**. Nếu robot đã lắp lăn đ�
 
 Tại sao gần như mọi robot hút bụi trong nhà lẫn xe giao hàng trong nhà kho đều chọn cấu hình **vi sai hai bánh chủ động + một bánh đa hướng (caster)** thay vì hệ thống lái kiểu ô tô (Ackermann)? Bí mật nằm ở khả năng **quay tại chỗ với bán kính bằng 0**: chỉ cần cho bánh trái lùi và bánh phải tiến cùng tốc độ, robot xoay gọn ngay giữa hành lang hẹp mà không cần lùi chuồng. Và tuyệt vời hơn nữa, toàn bộ động học của hệ vi sai nằm gọn trong hai phương trình cộng–trừ đơn giản đến bất ngờ!
 
-## Bản đồ kiến thức nền: Động học vi sai, Tâm quay tức thời (ICC) và Bánh Caster
+## Kiến thức cần nhớ: Động học vi sai, Tâm quay tức thời (ICC) và Bánh Caster
 
 ### 1. Hai phương trình vàng của động học thuận vi sai (Forward Kinematics)
 Gọi $$L$$ là khoảng cách giữa tâm hai bánh chủ động (*track width*), $$v_L$$ và $$v_R$$ là vận tốc tiếp tuyến của bánh trái và bánh phải (tính từ $$v = r\omega$$). Khi không trượt ngang, vận tốc tịnh tiến $$v$$ và vận tốc góc $$\omega$$ của tâm robot là:
@@ -29,7 +29,7 @@ Mọi chuyển động của xe vi sai ở một thời điểm đều là một
 ### 3. Cái bẫy của bánh đa hướng (Swivel Caster vs. Ball Caster)
 Bánh bi thép (*ball caster*) quay mọi hướng không bị giật nhưng hay kẹt tóc/bụi và ma sát cao trên thảm. Bánh xoay (*swivel caster*) lăn rất êm nhưng có khoảng lệch trục xoay (*caster offset*) — mỗi khi robot đột ngột đảo chiều từ tiến sang lùi, bánh xoay phải lật $$180^\circ$$, tạo ra một cú hích ngang làm lệch hướng khởi động!
 
-### Khung giải thích: Cầm tay giải cả Động học thuận và Động học ngược cho robot vi sai (nên đọc chậm)
+### Giải thích: Cầm tay giải cả Động học thuận và Động học ngược cho robot vi sai
 
 Xét robot vi sai có khoảng cách hai bánh **$$L = 0{,}20\text{ m}$$** (20 cm) và bán kính bánh **$$r = 0{,}035\text{ m}$$** (đường kính 7 cm):
 

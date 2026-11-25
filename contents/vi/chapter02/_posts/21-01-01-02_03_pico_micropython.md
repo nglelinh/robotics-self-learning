@@ -22,13 +22,13 @@ Bạn cần đã chọn dòng bo mạch Pico ở bài trước, hoặc muốn t�
 
 Nếu C++ giống như tự tay điều khiển hộp số sàn để vắt từng mili-giây hiệu năng, thì **Raspberry Pi Pico + MicroPython** giống như việc mở thẳng cửa sổ trò chuyện trực tiếp với phần cứng! Cắm Pico vào máy tính qua chế độ `BOOTSEL`, kéo thả đúng một tệp `.uf2`, và chỉ 10 giây sau bạn đã có dấu nhắc **REPL (`>>>`)** để bật tắt chân GPIO, đọc cảm biến I2C hay thử nghiệm công thức điều khiển ngay lập tức mà không cần chờ biên dịch lại!
 
-## Bản đồ kiến thức nền: Kiến trúc RP2040 và Thực thi MicroPython trên Pico
+## Kiến thức cần nhớ: Kiến trúc RP2040 và Thực thi MicroPython trên Pico
 
 1. **Bootloader USB Mass Storage (`BOOTSEL`):** Chip RP2040 tích hợp sẵn bootloader trong ROM không bao giờ hỏng: giữ nút `BOOTSEL` khi cắm USB, Pico hiện ra như một ổ USB `RPI-RP2` để kéo thả tệp firmware `.uf2` (phân biệt rõ bản **Pico thường** vs **Pico W** có chip Wi-Fi!).
 2. **Thông dịch tương tác (REPL) & Hệ thống tệp nội bộ:** MicroPython chạy trực tiếp trình thông dịch trên RAM/Flash của RP2040; tệp lưu với tên `main.py` trên Pico sẽ tự động chạy ngay khi cấp nguồn độc lập bằng pin (không cần cắm máy tính).
 3. **Định thời Không tràn số (`ticks_ms` / `ticks_diff`) & Đường nguồn `VSYS`:** Khác với Python trên PC dùng số nguyên độ chính xác vô hạn, MicroPython dùng bộ đếm 30-bit cho `ticks_ms()` để chạy nhanh không cấp phát bộ nhớ; về nguồn điện, chân **`VSYS`** (1,8 V – 5,5 V) là đầu vào chuẩn cho nguồn pin ngoài qua diode chống ngược tích hợp!
 
-### Ví dụ cầm tay chỉ việc: Tránh lỗi tràn bộ đếm 30-bit trên MicroPython bằng `ticks_diff()`
+### Ví dụ làm từng bước: Tránh lỗi tràn bộ đếm 30-bit trên MicroPython bằng `ticks_diff()`
 
 Trên Raspberry Pi Pico, hàm `time.ticks_ms()` đếm từ $$0$$ đến $$2^{30} - 1 = 1{,}073{,}741{,}823\text{ ms}$$ ($$\approx \mathbf{12.43\text{ ngày}}$$) rồi quay về `0` (*wrap-around*).
 - Giả sử ngay trước khi tràn, `t_start = 1_073_741_800`, và $$50\text{ ms}$$ sau bộ đếm quay vòng về `t_now = 26`.
@@ -38,7 +38,7 @@ Trên Raspberry Pi Pico, hàm `time.ticks_ms()` đếm từ $$0$$ đến $$2^{30
   $$
 - Dùng chuẩn `time.ticks_diff(t_now, t_start)`: hàm thực hiện phép trừ modulo $$2^{30}$$ có dấu và trả về chính xác **$$+50\text{ ms}$$**!
 
-### Khung giải thích: 4 bước làm chủ Raspberry Pi Pico và MicroPython trên robot (nên đọc chậm)
+### Giải thích: 4 bước làm chủ Raspberry Pi Pico và MicroPython trên robot
 
 1. **Bước 1 — Chọn đúng tệp `.uf2` theo phần cứng (Pico vs. Pico W):** Trên Pico thường, LED trên bo nối vào `GP25`; trên **Pico W**, LED nối qua chip Wi-Fi nên phải gọi `Pin("LED", Pin.OUT)` — nạp nhầm bản `.uf2` sẽ không điều khiển được LED!
 2. **Bước 2 — Tận dụng REPL để kiểm thử từng linh kiện rời:** Trước khi viết chương trình dài, gõ 3 dòng trực tiếp trong REPL (Thonny) để quét địa chỉ I2C hoặc thử quay từng bánh xe giúp tiết kiệm hàng giờ gỡ lỗi.

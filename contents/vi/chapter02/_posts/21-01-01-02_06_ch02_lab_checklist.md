@@ -22,13 +22,13 @@ Bài này tổng hợp kết quả từ bài 1 đến bài 5: câu quyết đị
 
 Trước khi viết các thuật toán điều khiển phức tạp như PWM động cơ, ngắt encoder hay máy trạng thái ở Chương 03, bạn cần chắc chắn 100% rằng nền móng vi điều khiển ở Chương 02 đã vững như bàn thạch: nạp code ổn định, không rớt cổng Serial, nhịp tim không chặn chạy đều tăm tắp và đường nguồn không bao giờ sụt áp. **Checklist Chương 02** là bài kiểm tra nghiệm thu nhanh giúp bạn bước sang Chương 03 không mang theo bất kỳ "quả bom nổ chậm" nào.
 
-## Bản đồ kiến thức nền: Nghiệm thu Tầng Vi điều khiển (MCU Bring-Up Verification)
+## Kiến thức cần nhớ: Nghiệm thu Tầng Vi điều khiển (MCU Bring-Up Verification)
 
 1. **Tính ổn định Nạp & Giao tiếp:** Cắm rút USB 3 lần liên tiếp đều nhận đúng cổng, nạp firmware thành công ở lần đầu và log Serial hiển thị rõ ràng không rác ký tự.
 2. **Định thời Chính xác & Không chặn:** Bộ đếm thời gian (`millis()` / `ticks_ms()`) giữ chu kỳ nhịp tim ổn định, không dùng `delay()` chặn CPU.
 3. **An toàn Đường nguồn & Mức logic:** Có bảng Pinmap rõ ràng, tách biệt nguồn động lực với nguồn logic 3,3 V và xác minh không xảy ra `Brownout Reset`.
 
-### Ví dụ cầm tay chỉ việc: Bốn con số nghiệm thu đầu ra Chương 02
+### Ví dụ làm từng bước: Bốn con số nghiệm thu đầu ra Chương 02
 
 Hãy đối chiếu 4 chỉ số thực đo từ bo mạch của bạn với ngưỡng chuẩn sau:
 
@@ -39,7 +39,7 @@ Hãy đối chiếu 4 chỉ số thực đo từ bo mạch của bạn với ng�
 | **3. Điện áp đường `3V3` chạy tải logic** | Đo DC V tại chân `3V3–GND` | $$[3.20\text{ V},\ 3.40\text{ V}]$$ | $$3.31\text{ V}$$ |
 | **4. Số lần tự reset trong 5 phút** | Theo dõi dòng `BOOT` trên Serial | **0 lần** | 0 lần reset bất thường |
 
-### Khung giải thích: 4 bước xử lý khi một mục trong Checklist Chương 02 chưa đạt (nên đọc chậm)
+### Giải thích: 4 bước xử lý khi một mục trong Checklist Chương 02 chưa đạt
 
 1. **Bước 1 — Cô lập phần cứng về cấu hình tối thiểu:** Tháo toàn bộ cảm biến/dây nối ngoài, chỉ giữ lại bo MCU trần cắm USB để xác định lỗi thuộc về bo mạch hay thuộc về ngoại vi.
 2. **Bước 2 — Kiểm tra lại tốc độ baud và cáp USB:** 70% lỗi Serial rác hoặc không nạp được đến từ lệch baud rate hoặc cáp USB kém tiếp xúc.

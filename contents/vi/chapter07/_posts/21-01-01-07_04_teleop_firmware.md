@@ -15,7 +15,7 @@ Bài 03 đã chốt đặc tả khung lệnh. Bài này trình bày chương tr�
 
 Viết phần mềm cho robot khác hoàn toàn với viết một ứng dụng web hay bài tập cấu trúc dữ liệu: trên vi điều khiển, **thời gian thực là luật thép**. Nếu bạn đặt một lệnh `delay(500)` trong hàm `loop()` để chờ chớp đèn LED, robot của bạn sẽ "điếc" hoàn toàn trong nửa giây — không đọc encoder, không nhận lệnh dừng khẩn cấp, và lao thẳng vào chân bàn! Bài học về **vòng lặp teleop firmware** giới thiệu kiến trúc chuẩn công nghiệp trên vi điều khiển (trước khi bước sang ROS): vòng lặp không chặn (**non-blocking loop**), máy trạng thái an toàn và cơ chế **chó canh cửa (watchdog timeout)** tự dừng xe khi mất kết nối.
 
-## Bản đồ kiến thức nền: Lập trình thời gian thực không chặn trên vi điều khiển
+## Kiến thức cần nhớ: Lập trình thời gian thực không chặn trên vi điều khiển
 
 ### 1. Vòng lặp không chặn (Non-Blocking Scheduler với `millis()` / `micros()`)
 Thay vì gọi `delay()`, firmware chia công việc theo các chu kỳ cố định dựa trên đồng hồ phần cứng: đọc bộ đệm UART liên tục ở mỗi vòng lặp, chạy vòng điều khiển động cơ ở chu kỳ cứng $$50\text{–}100\text{ Hz}$$ (10–20 ms), và gửi bản tin telemetry ở $$10\text{–}20\text{ Hz}$$ (50–100 ms). Nhờ vậy, không tác vụ nào làm nghẽn phản xạ an toàn của robot.
@@ -26,7 +26,7 @@ Trong điều khiển từ xa (teleop), câu hỏi quan trọng nhất không ph
 ### 3. Giới hạn gia tốc (Slew-Rate Limiter) bảo vệ hộp số và nguồn pin
 Nhảy vọt lệnh từ tiến 100% sang lùi -100% trong 1 mili-giây sẽ tạo dòng xung ngược cực lớn làm reset nguồn và vỡ bánh răng nhựa. Một bộ giới hạn tốc độ thay đổi (*slew-rate limiter*) ép vận tốc tăng/giảm tối đa $$\Delta v_{\max} = a_{\max} \cdot \Delta t$$ mỗi chu kỳ, giúp xe đề-pa và phanh mượt mà.
 
-### Khung giải thích: Cầm tay tính quãng đường dừng khẩn cấp khi mất kết nối theo ngưỡng Watchdog (nên đọc chậm)
+### Giải thích: Cầm tay tính quãng đường dừng khẩn cấp khi mất kết nối theo ngưỡng Watchdog
 
 Giả sử robot Capstone đang chạy thẳng với vận tốc **$$v = 0{,}80\text{ m/s}$$**, máy tính gửi lệnh teleop ở tần số $$20\text{ Hz}$$ (mỗi $$50\text{ ms}$$ một gói), và gia tốc phanh an toàn của xe là **$$a_{\text{phanh}} = 2{,}0\text{ m/s}^2$$**. Đột ngột đường truyền bị đứt hoàn toàn! Hãy so sánh quãng đường xe lao đi với hai cấu hình thời gian Watchdog:
 

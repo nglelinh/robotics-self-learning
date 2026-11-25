@@ -24,7 +24,7 @@ You will call an add-two-ints service and read a single response, then send a Fi
 Lesson 09-02’s talker is comfortable. You can leave a process running in one terminal and type in another. No robot.
 
 
-## Background Knowledge Map: Synchronous RPC vs. Preemptible State Machines in Distributed Robotics
+## Key ideas: Synchronous RPC vs. Preemptible State Machines in Distributed Robotics
 
 Choosing between topics, services, and actions matches the communication pattern to the task's time scale:
 
@@ -74,7 +74,7 @@ ros2 node list
 
 Put the motor consequence in the same note. Cancelling `NavigateToPose` stops the action server from sending new feedback. It does not, by itself, force the last `Twist` to zero unless the controller or your bridge does that. The 300 ms firmware timeout from Chapter 08 is the backstop. An action-aware bridge publishes zeros on cancel *and* on silence. Writing only one of those is how a robot creeps after you pressed stop in RViz.
 
-### Deep-Dive Explanation (Read Slowly): Tracing an Action Goal Lifecycle and Feedback Budget
+### Explanation: Tracing an Action Goal Lifecycle and Feedback Budget
 
 Consider a custom action `DriveDistance` commanded to move $$d_{\text{goal}} = 2.00\ \text{m}$$ at $$v = 0.25\ \text{m/s}$$, publishing feedback at $$5\ \text{Hz}$$ (every $$0.20\ \text{s}$$):
 

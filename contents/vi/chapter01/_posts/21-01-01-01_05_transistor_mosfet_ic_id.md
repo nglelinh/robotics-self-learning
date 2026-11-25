@@ -23,13 +23,13 @@ Bạn đã biết xác định catot của diode bằng vạch sơn và sử d�
 
 Nếu vi điều khiển là "bộ não" thì **transistor, MOSFET và IC ổn áp** chính là "cơ bắp và hệ tuần hoàn" của xe robot. Một chân GPIO chỉ đủ sức thắp một đèn LED nhỏ 10 mA, nhưng nhờ một con MOSFET công suất nhỏ bằng hạt đậu, tín hiệu 3,3 V yếu ớt ấy có thể đóng ngắt dòng điện hàng chục ampe cho động cơ! Ngược lại, chọn nhầm một IC ổn áp tuyến tính để hạ trực tiếp pin 8,4 V xuống 3,3 V sẽ biến bo mạch thành một chiếc lò sưởi mini chỉ sau 10 giây.
 
-## Bản đồ kiến thức nền: Linh kiện Bán dẫn Công suất và Ổn áp trên Robot
+## Kiến thức cần nhớ: Linh kiện Bán dẫn Công suất và Ổn áp trên Robot
 
 1. **Transistor Lưỡng cực (BJT) vs. MOSFET:** BJT điều khiển bằng *dòng điện* cực Base ($$I_C = \beta I_B$$, sụt áp $$V_{CE(\text{sat})} \approx 0.2\text{–}1\text{ V}$$); MOSFET điều khiển bằng *điện áp* cực Gate ($$V_{GS}$$) với dòng kích gần bằng 0 và điện trở mở $$R_{DS(\text{on})}$$ chỉ vài chục mili-ohm — mát hơn và hiệu quả hơn hẳn cho đóng cắt động cơ.
 2. **Cạm bẫy Điện áp Ngưỡng $$V_{GS(\text{th})}$$:** Trong datasheet, $$V_{GS(\text{th})}$$ là mức điện áp MOSFET *mới chớm mở* (dòng chỉ vài trăm $$\mu\text{A}$$), **không phải** mức mở bão hòa hoàn toàn! Với GPIO 3,3 V, phải chọn **Logic-Level MOSFET** có thông số $$R_{DS(\text{on})}$$ được đặc tả ngay tại $$V_{GS} = 2.5\text{–}3.3\text{ V}$$.
 3. **Ổn áp Tuyến tính (LDO như AMS1117) vs. Ổn áp Xung (Buck Converter):** LDO đốt toàn bộ phần điện áp dư $$(V_{\text{in}} - V_{\text{out}}) \cdot I$$ thành nhiệt; Buck đóng ngắt cuộn cảm ở tần số cao đạt hiệu suất $$85\text{–}95\%$$, bắt buộc dùng khi chênh lệch áp lớn hoặc dòng tải cao.
 
-### Ví dụ cầm tay chỉ việc: So sánh tỏa nhiệt giữa LDO tuyến tính và mạch Buck ở dòng 0,4 A
+### Ví dụ làm từng bước: So sánh tỏa nhiệt giữa LDO tuyến tính và mạch Buck ở dòng 0,4 A
 
 Giả sử bạn hạ nguồn pin Li-ion 2S đầy ($$V_{\text{in}} = 8.4\text{ V}$$) xuống $$V_{\text{out}} = 3.3\text{ V}$$ để nuôi ESP32 + cảm biến ăn dòng $$I = 0.4\text{ A}$$ (công suất hữu ích $$P_{\text{out}} = 3.3 \times 0.4 = \mathbf{1.32\text{ W}}$$):
 
@@ -39,7 +39,7 @@ Giả sử bạn hạ nguồn pin Li-ion 2S đầy ($$V_{\text{in}} = 8.4\text{ 
 | **Mạch hạ áp xung Buck ($$\eta = 90\%$$)** | $$1.32 \times \left(\dfrac{1}{0.90} - 1
 ight) = \mathbf{0.147\text{ W}}$$ | **$$90\%$$** | Mát hơn **14 lần** — chạm tay chỉ hơi ấm nhẹ! |
 
-### Khung giải thích: 4 bước chọn đúng linh kiện bán dẫn cho robot (nên đọc chậm)
+### Giải thích: 4 bước chọn đúng linh kiện bán dẫn cho robot
 
 1. **Bước 1 — Đọc kỹ dạng vỏ (TO-92, TO-220, SOT-23, SOT-223):** Dạng vỏ quyết định khả năng thoát nhiệt tối đa — cùng là ổn áp 3,3 V nhưng vỏ TO-220 chịu nhiệt tốt hơn vỏ SOT-23 gấp nhiều lần.
 2. **Bước 2 — Luôn tra $$R_{DS(\text{on})}$$ tại đúng điện áp GPIO (3,3 V):** Nếu datasheet chỉ ghi $$R_{DS(\text{on})}$$ tại $$V_{GS} = 10\text{ V}$$ (như IRF540N cổ điển), cắm vào ESP32 3,3 V sẽ làm MOSFET mở lửng, nóng rực và động cơ quay yếu.

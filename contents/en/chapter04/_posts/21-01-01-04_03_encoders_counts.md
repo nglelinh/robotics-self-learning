@@ -27,7 +27,7 @@ By the end of this lesson you can look at the two square waves from a quadrature
 
 You can count edges on a GPIO and print them (Chapter 03), and you can tell a Hall puck on a yellow TT gearbox from a slotted disk (Lesson 04-02). A raw encoder is not the I2C bus from Lesson 04-01; UART is only how the count will leave the board. Use the Chapter 01 multimeter on the encoder’s high level before that wire touches a GPIO. You do not need ROS, and you do not need the wheels powered.
 
-## Background Knowledge Map: Quadrature Phase Decoding, Differential-Drive Kinematics, and Velocity Quantization
+## Key ideas: Quadrature Phase Decoding, Differential-Drive Kinematics, and Velocity Quantization
 
 Three kinematic and signal-processing pillars underlie encoder odometry:
 
@@ -171,7 +171,7 @@ Fixing it properly is not a one-time PWM fudge. That is closed-loop speed contro
 
 Further watching: a short video by LPPS - 1 Robotics Team, [same power to both wheels, why the car will not drive straight](https://www.facebook.com/reel/1851960802892543).
 
-## Deep-Dive Explanation (Read Slowly): Hand-Computing One Complete Differential-Drive Odometry Step
+## Explanation: Hand-Computing One Complete Differential-Drive Odometry Step
 
 Let's execute one exact 2D pose update from raw encoder counts so you can verify your firmware's odometry math line by line:
 

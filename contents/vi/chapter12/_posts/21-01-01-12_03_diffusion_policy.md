@@ -15,7 +15,7 @@ Thời lượng: **~65 phút**, dành để đọc trang dự án, phân tích p
 
 Trong bài toán đẩy một khối chữ T vào đúng vị trí mục tiêu (Push-T), nếu tay máy gặp góc vuông đối xứng, đi vòng sang trái hay đi vòng sang phải đều hoàn hảo — nhưng đi **chính giữa** (trung bình của trái và phải) thì lại đẩy hỏng! **Diffusion Policy** mang chính ý tưởng khử nhiễu dần từ mô hình sinh ảnh sang không gian hành động robot: thay vì đoán trực tiếp một điểm trung bình mờ nhạt, mạng học trường vector **khử nhiễu từng bước** để kéo một chuỗi hành động ngẫu nhiên về đúng một nhánh quỹ đạo sắc nét hợp lệ.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Diffusion Policy
+## Kiến thức cần nhớ: Ba trụ cột của Diffusion Policy
 
 1. **Biểu diễn Phân phối Đa đỉnh (Multimodal Action Distribution)**:
    Mô hình hóa phân phối xác suất điều kiện $$p(\mathbf{A}_t \mid \mathbf{O}_t)$$ trên cả một khối hành động tương lai (action horizon $$T_p$$), giữ nguyên mọi nhánh rẽ hợp lệ thay vì bị sụp đổ về giá trị trung bình.
@@ -93,7 +93,7 @@ Trên tài liệu imitation learning của LeRobot tại thời điểm đối c
 
 ![Sáu khớp không phải vector của một VLA khác thân]({{ site.imgurl }}/generated/ch12_so101_action.png)
 
-### Khung giải thích (nên đọc chậm): Tính tay ngân sách thời gian suy luận DDIM trên cánh tay robot chạy ở 10 Hz
+### Giải thích: Tính tay ngân sách thời gian suy luận DDIM trên cánh tay robot chạy ở 10 Hz
 
 Giả sử cánh tay robot cập nhật lệnh điều khiển ở **10 Hz** (mỗi nhịp chỉ có đúng `100 ms`), và ta cấu hình Diffusion Policy với $$T_o = 2$$ khung quan sát, $$T_p = 16$$ bước dự đoán và chỉ thực thi $$T_a = 8$$ bước đầu tiên:
 - **Thời gian thực thi 1 khối hành động $$T_a = 8$$ bước:** $$8 \times 100\text{ ms} = \mathbf{800\text{ ms}}$$ (robot có cả 0,8 giây quỹ thời gian trước khi cần khối mới!).

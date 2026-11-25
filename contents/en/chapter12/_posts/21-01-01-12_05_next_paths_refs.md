@@ -24,7 +24,7 @@ You will choose one path for the next month, not three. Path A stays on the fiel
 Chapters 08 through 11 are behind you in the course sequence, even if some labs are still rough. You can say what the 300 ms timeout does, what `cmd_vel` carries, and why a policy from another gripper is not a controller for your wheels. You have the dataset-card habit from lesson 12-01. You do not need a new board, a new sensor, or a clean build of Nav2 to write the plan. The plan comes first so the shopping tab does not write it for you.
 
 
-## Background Knowledge Map: The Full Robotics Stack and Four Specialization Trajectories
+## Key ideas: The Full Robotics Stack and Four Specialization Trajectories
 
 Seeing how every advanced subfield attaches to your existing Capstone foundation keeps your next learning steps focused:
 
@@ -78,7 +78,7 @@ reference I will read and not flash over my firmware: https://github.com/linorob
 
 That plan names one path, the Capstone, and a 300 ms habit. linorobot2 is a reading reference, not a new motor driver. A small 360° lidar is about 1.5–3.5 million VND. A Pi 5, if the laptop is outgrown, starts near 2.4 million VND for a low-RAM board at [Hshop](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk). Recheck the variant. An arm is the expensive optional path and is not priced here. Lidar or Pi, not both on day one, and not beside an arm.
 
-### Deep-Dive Explanation (Read Slowly): Auditing Your Own Stack Readiness with a Concrete Bottleneck Check
+### Explanation: Auditing Your Own Stack Readiness with a Concrete Bottleneck Check
 
 When choosing your next project, avoid picking blindly by hype; instead, run a quick quantitative bottleneck audit on your current robot stack:
 

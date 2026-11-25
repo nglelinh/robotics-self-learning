@@ -25,13 +25,13 @@ Bạn cần ôn lại kiến thức từ bài 02 đến bài 05 về breadboard,
 
 Lý thuyết đọc vạch màu, giải mã SMD hay tra bảng chân linh kiện chỉ thực sự trở thành phản xạ kỹ sư khi bạn tự tay cầm đồng hồ vạn năng đo kiểm từng linh kiện thật trên bàn! Bài thực hành này rèn cho bạn con mắt "bắt bệnh" các **số đo giả** — những tình huống mà đồng hồ hiển thị một con số hoàn toàn hợp lý về mặt vật lý nhưng lại đánh lừa người đo thiếu kinh nghiệm (như chạm hai ngón tay vào đầu que đo hay đo điện trở khi nó vẫn đang hàn song song trên mạch).
 
-## Bản đồ kiến thức nền: Kỹ thuật Đo kiểm Linh kiện và Nguồn gốc Số đo Giả
+## Kiến thức cần nhớ: Kỹ thuật Đo kiểm Linh kiện và Nguồn gốc Số đo Giả
 
 1. **Hiệu ứng Điện trở Cơ thể Người:** Khi đo điện trở trị số lớn ($$> 100\text{ k}\Omega$$), nếu cả hai ngón tay bạn kẹp chặt hai đầu que đo, điện trở da tay (~$$50\text{–}300\text{ k}\Omega$$) mắc **song song** với linh kiện sẽ kéo tụt kết quả đo xuống thấp hơn thực tế rất nhiều!
 2. **Đo Trong mạch (In-Circuit) vs. Đo Ngoài mạch (Out-of-Circuit):** Khi linh kiện vẫn gắn trên PCB hoặc breadboard có nhánh song song khác, dòng đo của đồng hồ chia sang các nhánh phụ — kết quả đo điện trở trong mạch luôn **nhỏ hơn hoặc bằng** giá trị thật của linh kiện.
 3. **Thang đo Diode & Kiểm tra Phân cực:** Thang diode xuất ra điện áp thử ~$$2\text{–}3\text{ V}$$ đủ làm sáng mờ các LED đỏ/xanh lá và hiển thị chính xác điện áp rơi thuận $$V_f$$ của diode, giúp xác định cực tính Anode/Cathode ngay cả khi ký hiệu trên thân đã mờ.
 
-### Ví dụ cầm tay chỉ việc: Tính sai số do chạm tay khi đo điện trở $$1\text{ M}\Omega$$ và đo song song trong mạch
+### Ví dụ làm từng bước: Tính sai số do chạm tay khi đo điện trở $$1\text{ M}\Omega$$ và đo song song trong mạch
 
 **Tình huống 1 — Chạm hai tay vào que đo khi đo điện trở $$R = 1\text{ M}\Omega$$:** giả sử điện trở cơ thể giữa hai tay bạn là $$R_{\text{người}} = 200\text{ k}\Omega = 0.2\text{ M}\Omega$$. Hai điện trở mắc song song cho kết quả đồng hồ hiển thị:
 
@@ -43,7 +43,7 @@ Chỉ vì chạm tay, bạn đọc sai tới **83%** (tưởng nhầm điện tr
 
 **Tình huống 2 — Đo một điện trở $$10\text{ k}\Omega$$ đang mắc song song với một điện trở $$10\text{ k}\Omega$$ khác trên bo mạch:** đồng hồ sẽ đo đúng $$\dfrac{10 \times 10}{10 + 10} = \mathbf{5.0\text{ k}\Omega}$$ — không phải điện trở bị hỏng, mà do nhánh song song chia dòng!
 
-### Khung giải thích: Quy trình 4 bước đo kiểm linh kiện chính xác không mắc bẫy (nên đọc chậm)
+### Giải thích: Quy trình 4 bước đo kiểm linh kiện chính xác không mắc bẫy
 
 1. **Bước 1 — Tách ít nhất một chân khỏi mạch khi đo điện trở hoặc tụ:** Muốn biết trị số thật của linh kiện trên breadboard, hãy nhấc 1 chân ra khỏi hàng lỗ rồi mới chấm que đo.
 2. **Bước 2 — Chỉ kẹp que đo bằng vỏ nhựa cách điện:** Đặc biệt khi đo điện trở từ $$10\text{ k}\Omega$$ trở lên, tuyệt đối không để ngón tay chạm vào cả hai đầu kim loại que đo.

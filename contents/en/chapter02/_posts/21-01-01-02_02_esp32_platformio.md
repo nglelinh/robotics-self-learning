@@ -24,7 +24,7 @@ You will install one ESP32 toolchain and ignore the other until you have a blink
 
 The landscape lesson should already name an ESP32 dev board as your primary microcontroller. If you committed to a Pico, read this page as a map and do the Pico lesson next; installing both toolchains in one afternoon is how the wrong board id gets saved. You need a laptop and a USB cable that has copied files before. The full parts list remains the Chapter 00 shopping lesson ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})).
 
-## Background Knowledge Map: Build Systems, Memory Partitioning, and Flash Upload Mechanics
+## Key ideas: Build Systems, Memory Partitioning, and Flash Upload Mechanics
 
 Three embedded-systems concepts explain everything PlatformIO automates for you:
 
@@ -126,7 +126,7 @@ A pass is a lamp you watched and a log you pasted. A power LED that is on whenev
 
 Safety: USB only. No battery, no motor, no VM connection. The 5 V pin is not a motor supply, and a stall during upload is exactly the brownout this lab is teaching you to remove.
 
-## Deep-Dive Explanation (Read Slowly): Reading a PlatformIO Memory Summary and Sizing Flash Time
+## Explanation: Reading a PlatformIO Memory Summary and Sizing Flash Time
 
 After every PlatformIO build, you see two percentages: `RAM` and `Flash`. Don't ignore them — learn to read them like a firmware engineer in four steps:
 

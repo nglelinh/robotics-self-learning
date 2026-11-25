@@ -27,7 +27,7 @@ The single most dramatic moment in any hardware build is the first time you plug
 Chapter 04 taught you that a sensor and a microcontroller share one ground. Chapter 05 taught the H-bridge: a TB6612 stays asleep while STBY is low, and an L298N's onboard 7805 is not an ESP32 supply. Chapter 06 left two lengths in the notes, track width $$b$$ between the tire contact centers and rolling radius $$r$$ from a one-revolution roll. A typical bench here has $$b = 0.15~\mathrm{m}$$ and $$r = 31.2~\mathrm{mm}$$. Copy them into today's notes. This lesson has no ROS node and no PWM.
 
 
-## Background Knowledge Map: Power-Tree Architecture, Buck Regulation, and Common-Ground Reference
+## Key ideas: Power-Tree Architecture, Buck Regulation, and Common-Ground Reference
 
 Safe mobile-robot wiring stands on three electrical and mechanical pillars:
 
@@ -84,7 +84,7 @@ in a small regulator. At $$12~\mathrm{V}$$ the same current is $$1.75~\mathrm{W}
 
 Lithium stays in a holder or a pack with a BMS. No dangling soldered bare leads. Charge with the matching charger, attended. A TP4056 is 1S only, full near $$4.2~\mathrm{V}$$. One TP4056 on a 2S pack will not make $$8.4~\mathrm{V}$$ and will not balance the cells.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Calculating Power-Tree Current, Efficiency, and Runtime
+### Explanation: Hand-Calculating Power-Tree Current, Efficiency, and Runtime
 
 Before plugging in the battery, verify your power tree with a three-line energy budget:
 

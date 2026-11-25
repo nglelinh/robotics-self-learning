@@ -15,7 +15,7 @@ Thời lượng ước tính: **50–70 phút** để tổng hợp các ghi ché
 
 Hoàn thiện xong phần cơ khí không có nghĩa là "nhìn xe đứng được trên bàn là xong". Một khung xe đạt chuẩn sẵn sàng bước sang Capstone Chương 07 phải vượt qua được các bài kiểm tra định lượng về độ đồng tâm, lực cản lăn, độ vững khi rung lắc và khả năng tiếp cận bảo trì (có tháo thay pin trong 30 giây mà không cần tháo 12 con ốc không?). Checklist Chương 06 giúp bạn khóa chặt chất lượng cơ khí trước khi đóng dây điện tử lên khung.
 
-## Bản đồ kiến thức nền: Tiêu chí nghiệm thu cơ khí cho robot di động
+## Kiến thức cần nhớ: Tiêu chí nghiệm thu cơ khí cho robot di động
 
 ### 1. Lực cản lăn (Rolling Resistance) và chẩn đoán kẹt trục
 Khi ngắt khớp nối động cơ (hoặc để bánh quay tự do), hệ số cản lăn $$C_{rr} = \frac{F_{\text{kéo}}}{M g}$$ phản ánh trực tiếp sức khỏe của bạc đạn, bánh caster và độ đồng phẳng khung xe. Một khung lắp tốt trên sàn nhẵn có $$C_{rr} \approx 0{,}02\text{–}0{,}05$$; nếu $$C_{rr} > 0{,}10$$, năng lượng pin đang bị đốt oan để thắng ma sát kẹt cơ khí!
@@ -26,7 +26,7 @@ Nhấc robot lên khỏi mặt bàn và lắc nhẹ theo 3 trục: không đư�
 ### 3. Khả năng bảo trì (Design for Maintainability)
 Trong giai đoạn tích hợp Chương 07, bạn sẽ cắm cáp USB nạp code, tháo sạc pin và đo áp bằng đồng hồ vạn năng hàng chục lần. Đảm bảo cổng USB, công tắc nguồn tổng, cầu chì và pin đều tiếp cận được trực tiếp mà không phải tháo rã cả khung xe.
 
-### Khung giải thích: Cầm tay kiểm tra hệ số cản lăn $$C_{rr}$$ bằng cân lực kéo đơn giản (nên đọc chậm)
+### Giải thích: Cầm tay kiểm tra hệ số cản lăn $$C_{rr}$$ bằng cân lực kéo đơn giản
 
 Đặt robot đã lắp đủ khung, bánh và pin nặng tổng cộng **$$M = 2{,}5\text{ kg}$$** (trọng lượng $$W = 2{,}5 \times 9{,}81 = 24{,}525\text{ N}$$) lên mặt sàn phẳng (bánh xe ở trạng thái lăn tự do không nối động cơ). Móc một cân lực lò xo nhỏ vào mũi xe và kéo từ từ theo phương ngang:
 

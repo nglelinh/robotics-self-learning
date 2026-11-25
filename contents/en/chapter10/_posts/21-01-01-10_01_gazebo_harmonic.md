@@ -24,7 +24,7 @@ You will start a Gazebo Harmonic world from a ROS 2 Jazzy terminal and tell `gz 
 Lesson 09-01 is done: Ubuntu 24.04, ROS 2 Jazzy debs, and a terminal where `printenv ROS_DISTRO` prints `jazzy`. You can keep two terminals open and you know that Ctrl-C stops the foreground process. No robot, no URDF, and no micro-ROS firmware are required tonight. If `printenv ROS_DISTRO` prints `humble`, fix that before you install anything in this lesson.
 
 
-## Background Knowledge Map: Rigid-Body Physics Engines, Real-Time Factor, and `ros_gz_bridge`
+## Key ideas: Rigid-Body Physics Engines, Real-Time Factor, and `ros_gz_bridge`
 
 Running trustworthy robotics simulations rests on three computational pillars:
 
@@ -121,7 +121,7 @@ gz topic -l
 
 You are looking for `/clock`. `ros2 topic list` may be almost empty, because nothing has bridged the two graphs. Gazebo is publishing on its own graph. Ctrl-C the launch and the Gazebo topic list dies with the server. A picture of a closed window is not a running world.
 
-### Deep-Dive Explanation (Read Slowly): Checking Simulation Step Budget, RTF, and Contact Penetration
+### Explanation: Checking Simulation Step Budget, RTF, and Contact Penetration
 
 Suppose Gazebo Harmonic runs with physics step $$\Delta t_{\text{sim}} = 0.001\ \text{s}$$ (1000 Hz) and your laptop takes an average of $$0.65\ \text{ms}$$ of wall-clock CPU time to solve each step (including a 360-ray 2D LiDAR sensor):
 

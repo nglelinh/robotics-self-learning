@@ -27,7 +27,7 @@ You will heat the pad and the lead together, feed solder into that joint, take t
 
 You can beep continuity from lesson 02, and you know which end of a header is the pin. This lab uses scrap, so lesson 07's card can wait. Read the safety section before you plug an iron in. No chassis and no lithium cell belong on this bench.
 
-## Background Knowledge Map: Thermal Mass, Flux Chemistry, and Strain Relief in Robot Harnesses
+## Key ideas: Thermal Mass, Flux Chemistry, and Strain Relief in Robot Harnesses
 
 Three physical principles govern every reliable solder joint on a mobile robot:
 
@@ -113,7 +113,7 @@ $$
 
 Half a watt in a grain-of-rice blob gets hot. That motor sees half a volt less than its partner, so the diff-drive pulls to one side while both PWM commands match. The repair is to pump the joint clear, tin the strands properly, form a concave fillet, sleeve it, and add a strain-relief loop. Beep again only after the metal has cooled and you are no longer holding it.
 
-## Deep-Dive Explanation (Read Slowly): Sizing Wire Gauge and Checking Voltage Drop in a Robot Harness
+## Explanation: Sizing Wire Gauge and Checking Voltage Drop in a Robot Harness
 
 Before cutting and soldering a battery-to-driver harness, verify the wire gauge using a 4-step resistance calculation:
 

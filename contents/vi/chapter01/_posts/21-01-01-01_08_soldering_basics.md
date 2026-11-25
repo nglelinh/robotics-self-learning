@@ -25,13 +25,13 @@ Bạn đã biết sử dụng thang thông mạch từ bài 02 và phân biệt 
 
 Dây cắm breadboard rất tuyệt để thử nghiệm trong 10 phút, nhưng ngay khi xe robot chạy qua khe gạch trên sàn nhà, rung động cơ học sẽ làm dây tiếp xúc chập chờn và tạo ra những lỗi ma quái không thể tái hiện! **Kỹ năng hàn thiếc (Soldering)** tạo ra liên kết luyện kim bền vững giữa dây đồng và pad mạch in — và bí mật của một mối hàn bóng đẹp nằm ở **truyền nhiệt đúng thứ tự**, chứ không phải bôi thật nhiều thiếc.
 
-## Bản đồ kiến thức nền: Vật lý Luyện kim của Mối hàn Điện tử
+## Kiến thức cần nhớ: Vật lý Luyện kim của Mối hàn Điện tử
 
 1. **Cơ chế Liên kết Luyện kim (Intermetallic Bond):** Thiếc hàn không phải là "keo dán" — khi cả chân linh kiện và pad đồng đạt nhiệt độ nóng chảy (~$$183^\circ\text{C}$$ với thiếc chì 63/37 hoặc ~$$217^\circ\text{C}$$ với thiếc không chì SAC305), hợp kim thiếc hòa tan bề mặt đồng tạo thành lớp nối điện–cơ bền chắc.
 2. **Vai trò của Nhựa thông (Flux):** Bề mặt đồng luôn có lớp oxit ngăn thiếc bám dính. Lõi nhựa thông (flux) bên trong cuộn thiếc bay hơi và khử lớp oxit ngay tại khoảnh khắc nung nóng — giữ mỏ hàn quá lâu làm cháy hết flux sẽ tạo ra **mối hàn nguội** xỉn màu, nứt gãy.
 3. **Giảm lực kéo cơ học (Strain Relief):** Dây đồng nhiều sợi rất dễ gãy ngay sát chân mối hàn cứng khi bị uốn lặp đi lặp lại; ống co nhiệt (heat-shrink) và kẹp cố định dây bảo vệ mối hàn sống sót qua hàng trăm giờ chạy xe.
 
-### Ví dụ cầm tay chỉ việc: Tính sụt áp và tỏa nhiệt trên một mối hàn nguội (Cold Joint)
+### Ví dụ làm từng bước: Tính sụt áp và tỏa nhiệt trên một mối hàn nguội (Cold Joint)
 
 Giả sử dây nguồn cấp cho cặp động cơ robot kéo dòng $$I = 2.0\text{ A}$$ đi qua một mối hàn nối dây:
 - **Mối hàn đạt chuẩn (bóng mượt, hình nón lõm):** điện trở tiếp xúc chỉ $$R_{\text{tốt}} = 0.01\ \Omega$$:
@@ -41,7 +41,7 @@ Giả sử dây nguồn cấp cho cặp động cơ robot kéo dòng $$I = 2.0\t
   - Sụt áp: $$\Delta V = 2.0 \times 0.8 = \mathbf{1.6\text{ V}}$$ (xe đột ngột mất lực hoặc reset!).
   - Công suất nhiệt dồn tại đúng hạt thiếc nhỏ: $$P = 2.0^2 \times 0.8 = \mathbf{3.2\text{ W}}$$ — đủ làm chảy vỏ nhựa và bong mạch đồng!
 
-### Khung giải thích: Quy trình 4 bước tạo mối hàn chuẩn công nghiệp (nên đọc chậm)
+### Giải thích: Quy trình 4 bước tạo mối hàn chuẩn công nghiệp
 
 1. **Bước 1 — Lau sạch mũi hàn và tráng một lớp thiếc mỏng (tinning):** Mũi hàn đen bị oxy hóa không truyền nhiệt được; một giọt thiếc tươi trên đầu mũi giúp truyền nhiệt sang pad nhanh gấp nhiều lần.
 2. **Bước 2 — Chạm mũi hàn vào *cả* pad đồng và chân linh kiện (1–2 giây):** Làm nóng bề mặt cần hàn trước, tuyệt đối không nhỏ thiếc lên đầu mũi hàn rồi quệt sang!

@@ -24,7 +24,7 @@ You will show that the toolchain from the previous lab is still alive, and you w
 
 ESP32 track: a finished upload from the PlatformIO or Arduino IDE lesson, a port you can name, and 115200 agreed on both sides. Pico track: MicroPython on the board, Thonny or `mpremote` aimed at the Pico, and a lamp that already answered to `Pin("LED")` or GPIO 25. You need one of those two setups. No driver, no battery, no chassis. If your cable was marginal, this is the lab that will show it.
 
-## Background Knowledge Map: Non-Blocking Scheduling, Watchdogs, and Monotonic Clocks
+## Key ideas: Non-Blocking Scheduling, Watchdogs, and Monotonic Clocks
 
 Three embedded-firmware concepts transform a simple blink into production robotics infrastructure:
 
@@ -179,7 +179,7 @@ The arithmetic Dũng writes in the margin is the reason `delay(1000)` left the f
 
 Stop there. Do not add Wi-Fi, a driver, or a battery in order to make the log “more real.”
 
-## Deep-Dive Explanation (Read Slowly): Proving Unsigned Wrap-Around Safety & Drift-Free Scheduling
+## Explanation: Proving Unsigned Wrap-Around Safety & Drift-Free Scheduling
 
 Two subtle timing bugs haunt robot firmware: **clock rollover** and **cumulative schedule drift**. Trace both with exact numbers:
 

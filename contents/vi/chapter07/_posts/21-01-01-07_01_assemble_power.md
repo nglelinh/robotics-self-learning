@@ -15,7 +15,7 @@ Bài này chuyển tấm khung rời thành một khung robot hoàn chỉnh, nh�
 
 Khoảnh khắc bạn nối động cơ, mạch nguồn và vi điều khiển lên cùng một bộ khung chính là lúc robot chuyển từ "tập hợp các linh kiện rời" thành một hệ thống cơ điện tử thống nhất. Nhưng đây cũng là giai đoạn dễ mắc lỗi nối dây nhất: nối nhầm mạch ổn áp tuyến tính cho dòng lớn khiến mạch nóng bỏng tay, đi dây mass (GND) nối tiếp vòng vèo tạo nhiễu đất làm reset ESP32 mỗi lần động cơ đề-pa, hay quên đo thông mạch trước khi cắm pin. Làm đúng **kiến trúc phân phối nguồn** ngay từ bước lắp ráp sẽ tiết kiệm hàng ngày trời gỡ lỗi chập chờn về sau.
 
-## Bản đồ kiến thức nền: Mạch hạ áp Buck vs. LDO, Nối đất hình sao và Kiểm tra trước khi cấp nguồn
+## Kiến thức cần nhớ: Mạch hạ áp Buck vs. LDO, Nối đất hình sao và Kiểm tra trước khi cấp nguồn
 
 ### 1. Mạch ổn áp tuyến tính (LDO / 7805) vs. Mạch hạ áp xung (Buck Converter)
 - **LDO (như LM7805, AMS1117):** hoạt động như một điện trở tự điều chỉnh, **đốt toàn bộ phần điện áp chênh lệch thành nhiệt**: $$P_{\text{nhiệt}} = (V_{\text{in}} - V_{\text{out}}) \cdot I$$. Chỉ nên dùng cho dòng rất nhỏ ($$< 200\text{ mA}$$) hoặc chênh áp thấp.
@@ -27,7 +27,7 @@ Dòng xung lớn của động cơ chạy qua dây mass sẽ tạo sụt áp nhi
 ### 3. Quy trình "Đo thông mạch trước – Cấp nguồn không tải sau"
 Trước khi cắm pin LiPo lần đầu, **luôn dùng đồng hồ vạn năng ở thang đo thông mạch (continuity)** chạm hai cực nguồn tổng: nếu đồng hồ kêu "bíp" ngắn mạch thì dừng ngay lập tức! Sau khi xác nhận không chập, cấp nguồn cho mạch Buck *khi chưa cắm vi điều khiển*, chỉnh chiết áp đo đúng $$5{,}00\text{ V}$$ rồi mới kết nối tải logic.
 
-### Khung giải thích: Cầm tay so sánh nhiệt lượng tỏa ra giữa LDO 7805 và Buck Converter khi cấp 5 V / 1 A từ pin 3S (nên đọc chậm)
+### Giải thích: Cầm tay so sánh nhiệt lượng tỏa ra giữa LDO 7805 và Buck Converter khi cấp 5 V / 1 A từ pin 3S
 
 Giả sử bạn cần hạ áp từ pin LiPo 3S danh định **$$V_{\text{in}} = 11{,}1\text{ V}$$** xuống **$$V_{\text{out}} = 5{,}0\text{ V}$$** để cấp dòng **$$I_{\text{out}} = 1{,}0\text{ A}$$** (công suất hữu ích $$P_{\text{out}} = 5{,}0\text{ W}$$) cho mạch điều khiển và cảm biến:
 

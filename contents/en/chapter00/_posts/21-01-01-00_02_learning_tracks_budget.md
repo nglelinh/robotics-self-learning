@@ -27,7 +27,7 @@ You leave this lesson able to **choose** Track A or Track B in a sentence that n
 
 Lesson 00-01: you can state the wheels-up teleop test and the 300 ms PWM stop, and you have a journal with the six fields. You do not need Ubuntu, ROS, or a paid order. If you already own a Raspberry Pi, or a laptop that dual-boots Linux, you still start from the same chassis. Ownership is not a reason to skip the firmware robot.
 
-## Background Knowledge Map: Real-Time Embedded Control vs. High-Level Autonomy Middleware
+## Key ideas: Real-Time Embedded Control vs. High-Level Autonomy Middleware
 
 Understanding the two-track architecture requires connecting three core systems-engineering concepts:
 
@@ -110,7 +110,7 @@ A second student, Lan, already runs Ubuntu 24.04 on her own laptop. She is allow
 
 Minh sketches the Darlington loss so the driver choice is not a brand preference. At 7.4 V with about 2 V dropped, the motor sees 5.4 V. A MOSFET drop of about 0.3 V leaves 7.1 V. He writes "TB6612FNG, not L298N" in the track sentence. Both students end the entry with the LiDAR refusal. Neither opens a second spreadsheet. Lesson 00-05 is the cart.
 
-## Deep-Dive Explanation (Read Slowly): Quantifying the Power and Runtime Budget of Both Tracks
+## Explanation: Quantifying the Power and Runtime Budget of Both Tracks
 
 Why not bolt a Raspberry Pi 4 and LiDAR onto your robot on day one? Let's compute the power and battery runtime of Track A (MCU-only) versus Track B (MCU + SBC) step by step:
 

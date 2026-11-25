@@ -24,7 +24,7 @@ You will measure the track width of your Capstone base, convert a body velocity 
 You can identify which wheel is left when you sit on the robot looking forward. Chapter 07’s open-loop teleop already spins those wheels. A ruler or a tailor’s tape is the only new tool. PID from lesson 08-03 is optional here: kinematics produces speed targets, and open-loop PWM can still demonstrate the shape of a turn with the wheels in the air.
 
 
-## Background Knowledge Map: Nonholonomic Constraints, Jacobian Mapping, and Dead-Reckoning Odometry
+## Key ideas: Nonholonomic Constraints, Jacobian Mapping, and Dead-Reckoning Odometry
 
 Differential-drive kinematics bridges planar geometry and state estimation across three pillars:
 
@@ -128,7 +128,7 @@ assert abs(body_from_wheels(*wheel_speeds(0.2, 0.5, 0.16), 0.16)[1] - 0.5) < 1e-
 
 A pure spin, $$v = 0$$, $$\omega = 1.0$$, $$L = 0.16$$: $$v_R = 0.08$$, $$v_L = -0.08$$. If both numbers come out positive, you added $$\omega L$$ to both wheels instead of splitting the sign.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Integrating One Odometry Step on a Curved Arc
+### Explanation: Hand-Integrating One Odometry Step on a Curved Arc
 
 Using the lesson's worked command $$v = 0.20\ \text{m/s}$$, $$\omega = 0.50\ \text{rad/s}$$ from initial pose $$(x_0, y_0, \theta_0) = (0, 0, 0)$$ over a $$\Delta t = 1.0\ \text{s}$$ arc, compare naive Euler integration against midpoint (Runge–Kutta 2) integration:
 

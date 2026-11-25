@@ -25,13 +25,13 @@ Bạn cần nắm định luật Ohm (bài 01), thói quen đo an toàn bằng �
 
 Khi mới học điện tử, thói quen phổ biến nhất là gõ Google tìm một sơ đồ nối dây vẽ sẵn trên blog rồi cắm theo y hệt — cho đến ngày bo mạch mua về có nhãn chân hơi khác, hoặc một cảm biến bốc khói mà không biết tại sao! **Datasheet** (tài liệu kỹ thuật chính hãng) là bản "hiến pháp" duy nhất đáng tin cậy 100% cho mọi con chip: bạn không cần đọc hết 800 trang, mà chỉ cần biết đúng **6 trang cốt lõi** chứa điện áp trần, sơ đồ chân và bảng sự thật.
 
-## Bản đồ kiến thức nền: Giải phẫu Một Tài liệu Kỹ thuật (Datasheet)
+## Kiến thức cần nhớ: Giải phẫu Một Tài liệu Kỹ thuật (Datasheet)
 
 1. **Absolute Maximum Ratings (Giới hạn Tuyệt đối — Vùng Chết):** Cho biết mức điện áp/dòng/nhiệt độ mà chỉ cần chạm tới là linh kiện có thể hỏng vĩnh viễn — *không bao giờ* thiết kế chạy sát ngưỡng này!
 2. **Recommended Operating Conditions (Vùng Làm việc Khuyến nghị):** Dải điện áp nguồn (`VCC`), mức logic nhận diện `HIGH/LOW` ($$V_{IH}, V_{IL}$$) và dòng tải liên tục an toàn.
 3. **Pinout & Truth Table (Sơ đồ Chân & Bảng Sự thật):** Xác định chính xác chân nào là nguồn, chân nào là chân khởi động nhạy cảm (*strapping pins* trên ESP32 như GPIO 0, 2, 12, 15), và tổ hợp mức logic nào làm động cơ quay thuận, nghịch hay phanh.
 
-### Ví dụ cầm tay chỉ việc: Áp dụng 6 bước đọc Datasheet kiểm tra ngưỡng 3,3 V của ESP32 và mạch phân áp
+### Ví dụ làm từng bước: Áp dụng 6 bước đọc Datasheet kiểm tra ngưỡng 3,3 V của ESP32 và mạch phân áp
 
 Tra mục *Absolute Maximum Ratings* của ESP32: điện áp tối đa trên bất kỳ chân GPIO nào là $$V_{\text{IO,max}} = V_{DD} + 0.3\text{ V} = 3.3 + 0.3 = \mathbf{3.6\text{ V}}$$.
 - Nếu cảm biến siêu âm xuất tín hiệu Echo **$$5.0\text{ V}$$** nối thẳng vào GPIO ESP32: $$5.0\text{ V} > 3.6\text{ V}$$ (vượt trần $$1.4\text{ V}$$) → làm chảy diode kẹp bảo vệ bên trong chân chip!
@@ -44,7 +44,7 @@ Tra mục *Absolute Maximum Ratings* của ESP32: điện áp tối đa trên b�
   2.475\text{ V} < \mathbf{3.24\text{ V}} < 3.6\text{ V} \implies \text{nhận chắc mức HIGH và an toàn tuyệt đối!}
   $$
 
-### Khung giải thích: Quy trình 4 bước tra Datasheet trong 3 phút (nên đọc chậm)
+### Giải thích: Quy trình 4 bước tra Datasheet trong 3 phút
 
 1. **Bước 1 — Kiểm tra đúng mã hậu tố linh kiện:** `TB6612FNG` khác hoàn toàn chân với `DRV8833`; `ESP32-WROOM-32` có chân khác `ESP32-S3` — luôn đối chiếu đúng mã in trên lưng chip.
 2. **Bước 2 — Đọc `Absolute Maximum` trước `Typical`:** Đánh dấu ngay điện áp tối đa cho chân nguồn và chân tín hiệu để dựng rào chắn an toàn.

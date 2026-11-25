@@ -15,7 +15,7 @@ Thời lượng: **~90 phút**.
 
 Có tệp URDF hiển thị đẹp trong RViz2 mới chỉ là một nửa chặng đường: nếu ném thẳng URDF đó vào Gazebo Harmonic, chiếc robot sẽ nằm im bất động như một bức tượng nhựa vì nó chưa có **plugin động cơ vi sai**, chưa có **plugin cảm biến LiDAR/IMU** và chưa được nối qua cầu `ros_gz_bridge`. Bài học này hướng dẫn cách thổi "sự sống vật lý" vào mô hình URDF để tạo nên gói `sim_bringup` hoàn chỉnh.
 
-## Bản đồ kiến thức nền: Ba trụ cột Đưa URDF vào Mô phỏng Gazebo
+## Kiến thức cần nhớ: Ba trụ cột Đưa URDF vào Mô phỏng Gazebo
 
 1. **Thẻ mở rộng `<gazebo>` & Plugin hệ thống (`gz-sim-diff-drive-system`, `gz-sim-sensors-system`)**:
    Gắn bộ truyền động vi sai nhận lệnh `/cmd_vel` tác động lực lên khớp bánh trái/phải và xuất `/odom` + `/tf`, đồng thời gắn cảm biến LiDAR 2D/camera có **nhiễu Gaussian thực tế** thay vì dữ liệu lý tưởng 100%.
@@ -171,7 +171,7 @@ ros2 topic pub --times 20 /cmd_vel geometry_msgs/msg/Twist \
 
 Hai mươi message chỉ đủ cho xe lăn một đoạn ngắn. Trong cửa sổ Gazebo, khung xe sẽ tiến dọc theo $$+x$$ với cả hai bánh quay cùng chiều, và khi publisher kết thúc, xe không còn nhận lực dẫn động nữa. Trường `linear.y` giữ bằng 0 vì xe vi sai không trượt ngang; với $$L/2 = 0.08$$, $$v = 0.2$$ và $$\omega = 0$$, vận tốc dài vành hai bánh đều bằng 0,2 m/s.
 
-### Khung giải thích (nên đọc chậm): Tính nhanh lực kéo tối đa và kiểm tra ma sát bánh caster
+### Giải thích: Tính nhanh lực kéo tối đa và kiểm tra ma sát bánh caster
 
 Giả sử xe Capstone trong Gazebo nặng tổng cộng $$m = 2{,}0\text{ kg}$$ (trọng lực $$P = m g \approx 19{,}6\text{ N}$$), phân bố 70% tải lên 2 bánh chủ động ($$N_{\text{drive}} = 13{,}7\text{ N}$$) và 30% lên bánh đa hướng phía sau ($$N_{\text{caster}} = 5{,}9\text{ N}$$):
 - Nếu đặt hệ số ma sát bánh chủ động $$\mu_{\text{drive}} = 1{,}0$$ và bánh caster $$\mu_{\text{caster}} = 0{,}01$$:

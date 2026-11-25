@@ -22,13 +22,13 @@ Bạn chỉ cần biết chỉnh đồng hồ vạn năng sang thang đo điện
 
 Bước vào thế giới vi điều khiển lần đầu, bạn dễ choáng ngợp trước hàng chục cái tên: Arduino Uno, ESP32, Raspberry Pi Pico, STM32, Teensy... Mỗi bo mạch lại có điện áp khác nhau, số lõi CPU khác nhau và hệ sinh thái lập trình khác nhau. Chọn sai vi điều khiển không chỉ làm bạn tốn tiền mua lại — nó còn khiến bạn kẹt cứng khi cần nối Wi-Fi truyền dữ liệu telemetry, đọc đồng thời hai encoder tốc độ cao hay giao tiếp với cảm biến 3,3 V!
 
-## Bản đồ kiến thức nền: Ba Trục Kỹ thuật để Chọn Vi điều khiển (MCU) cho Robot
+## Kiến thức cần nhớ: Ba Trục Kỹ thuật để Chọn Vi điều khiển (MCU) cho Robot
 
 1. **Năng lực Tính toán & Ngoại vi Thời gian thực:** Một xe robot tự hành cần ít nhất 2 kênh PWM độc lập cho động cơ, 4 chân ngắt ngoài (hoặc bộ đếm phần cứng PCNT/PIO) cho 2 encoder, 1 bus I2C cho IMU và 1 cổng UART debug — ESP32 (2 lõi 240 MHz, Wi-Fi/BLE) và Raspberry Pi Pico (2 lõi ARM 133 MHz, bộ máy trạng thái PIO độc đáo) đều vượt xa Arduino Uno 8-bit 16 MHz!
 2. **Mức Logic (3,3 V vs. 5 V) và Biên độ Nhiễu (Noise Margin):** Toàn bộ thế hệ cảm biến hiện đại (IMU MPU6050/ICM-20948, ToF VL53L0X, LiDAR) đều dùng **3,3 V**. Chọn MCU 3,3 V (ESP32 / Pico) giúp nối trực tiếp cảm biến mà không cần dàn mạch chuyển mức cồng kềnh như trên Arduino Uno 5 V.
 3. **Hệ sinh thái Công cụ & Cộng đồng:** ESP32 mạnh về C++/PlatformIO + kết nối không dây; Pico cực thân thiện với MicroPython (chạy thử ngay qua REPL) và C/C++ SDK.
 
-### Ví dụ cầm tay chỉ việc: Kiểm tra tương thích mức logic (Noise Margin) giữa bo 3,3 V và bo 5 V
+### Ví dụ làm từng bước: Kiểm tra tương thích mức logic (Noise Margin) giữa bo 3,3 V và bo 5 V
 
 So sánh ngưỡng nhận diện mức `HIGH` ($$V_{IH}$$) và giới hạn an toàn tối đa từ datasheet của **ESP32 (3,3 V)** và **Arduino Uno (5 V)**:
 
@@ -38,7 +38,7 @@ So sánh ngưỡng nhận diện mức `HIGH` ($$V_{IH}$$) và giới hạn an t
 | **Arduino Uno (5 V) → ESP32 (3,3 V)** | $$\approx 4.8\text{–}5.0\text{ V}$$ | $$0.75 \times 3.3 = 2.48\text{ V}$$ | **$$3.6\text{ V}$$** | **NGUY HIỂM!** Vượt trần $$1.4\text{ V}$$ → hỏng chân ESP32! |
 | **ESP32 (3,3 V) ↔ Cảm biến IMU (3,3 V)** | $$\approx 3.3\text{ V}$$ | $$2.31\text{ V}$$ | $$3.6\text{ V}$$ | **An toàn & biên nhiễu rộng $$+1.0\text{ V}$$!** |
 
-### Khung giải thích: 4 bước chọn đúng bo mạch MCU ngay từ tuần 1 (nên đọc chậm)
+### Giải thích: 4 bước chọn đúng bo mạch MCU ngay từ tuần 1
 
 1. **Bước 1 — Ưu tiên chuẩn logic 3,3 V cho robot hiện đại:** ESP32 và Pico giao tiếp trực tiếp với gần như toàn bộ cảm biến số hiện đại (I2C/SPI) mà không lo cháy chân.
 2. **Bước 2 — Đếm đủ số chân ngoại vi *trước* khi chốt bo:** Liệt kê ra giấy: 4 chân driver + 2 chân PWM + 4 chân encoder + 2 chân I2C + 2 chân UART = **14 chân GPIO an toàn** (đã trừ các chân strapping và input-only).

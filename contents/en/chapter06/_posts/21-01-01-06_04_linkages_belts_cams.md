@@ -24,7 +24,7 @@ By the end of this lesson you can test a four-bar against Grashof’s condition 
 You can form a gear ratio $$i = N_{\text{out}}/N_{\text{in}}$$ (Lesson 03) and you know track width $$b$$ from Lesson 01. Cardboard, four brads, and a ruler are enough hardware. A GT2 pulley is optional.
 
 
-## Background Knowledge Map: Planar Mechanisms, Mobility Analysis, and Synchronous Transmission
+## Key ideas: Planar Mechanisms, Mobility Analysis, and Synchronous Transmission
 
 Designing non-wheel mechanisms rests on three foundational pillars of kinematics of machinery:
 
@@ -91,7 +91,7 @@ Half a turn is about 18.8 mm. If your drawing’s pinion is the outside diameter
 
 Belt, for the notes: a 20-tooth motor pulley and a 60-tooth wheel pulley give $$i = 3$$, same structure as the 12-into-36 gear pair. Three motor turns, one wheel turn, plus the gearbox that sits in front of the motor pulley.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Checking Grashof's Condition and GT2 Belt Resolution
+### Explanation: Hand-Checking Grashof's Condition and GT2 Belt Resolution
 
 Before cutting brackets or ordering pulleys, verify both mechanism feasibility and linear resolution with five lines of arithmetic:
 

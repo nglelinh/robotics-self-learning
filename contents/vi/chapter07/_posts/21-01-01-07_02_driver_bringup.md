@@ -15,7 +15,7 @@ Mạch buck đã được chỉnh ổn định ở 5,0 V. Đây là lần đầu
 
 Trong kỹ thuật nhúng và robotics, **bring-up** là nghệ thuật đưa một phần cứng mới lắp vào hoạt động từng bước nhỏ có kiểm soát — không bao giờ nạp ngay cả bộ firmware 1.000 dòng rồi cầu nguyện mọi thứ chạy đúng. Ở bài lab bring-up driver, bạn kiểm tra tách biệt từng kênh động cơ, xác nhận cực tính tiến–lùi, đo đối xứng hai bánh và kiểm chứng dấu xung encoder ngay trên bàn kê bánh để mọi tầng điều khiển phía trên đứng trên nền móng 100% tin cậy.
 
-## Bản đồ kiến thức nền: Quy trình Bring-Up từng tầng và Chẩn đoán cực tính
+## Kiến thức cần nhớ: Quy trình Bring-Up từng tầng và Chẩn đoán cực tính
 
 ### 1. Tách lớp kiểm thử: Điện áp tĩnh → Lệnh đơn kênh → Phản hồi encoder
 Thay vì chạy cả hai bánh cùng lúc, hãy chạy từng bánh ở mức PWM thấp (25% → 50%) trong 1–2 giây. Nếu bánh trái quay tiến khi lệnh dương nhưng bánh phải lại quay lùi (rất thường gặp vì hai động cơ gắn đối xứng gương hai bên khung!), bạn sửa ngay bằng cách đảo cặp dây động cơ `OUT3/OUT4` hoặc đảo hằng số cực tính trong phần mềm — đừng để nhầm lẫn dấu lan lên tầng động học!
@@ -26,7 +26,7 @@ Một lỗi siêu nguy hiểm khi sang điều khiển vòng kín PID: lệnh PW
 ### 3. Bất đối xứng hở vòng tự nhiên giữa hai động cơ
 Hai động cơ cùng mã sản xuất vẫn thường chênh nhau $$2\%\text{–}8\%$$ tốc độ ở cùng mức PWM do dung sai chổi than và hộp số. Bring-up ghi nhận mức chênh lệch này để xác nhận động cơ khỏe mạnh (nếu chênh trên 20% thì cần kiểm tra kẹt cơ khí hoặc dây tiếp xúc kém!).
 
-### Khung giải thích: Cầm tay phân tích log bài test Bring-Up 2 giây trên bàn kê bánh (nên đọc chậm)
+### Giải thích: Cầm tay phân tích log bài test Bring-Up 2 giây trên bàn kê bánh
 
 Bạn kê bánh robot lên không, đặt `PWM = 128` (50% của 8-bit `255`) cho cả hai kênh trong đúng **$$2{,}0\text{ giây}$$** và đọc số xung encoder tích lũy được:
 - **Bánh trái:** $$\Delta N_L = +2\,640$$ xung (bánh quay thuận chiều tiến).

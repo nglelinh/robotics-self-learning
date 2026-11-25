@@ -24,7 +24,7 @@ You will describe XRCE-DDS as a client on the microcontroller plus an agent on t
 Lesson 09-02’s picture of nodes and topics, lesson 08-01’s framed serial command, and lesson 10-01’s Jazzy shell. Docker is required for the agent command in the lab. You do not need a working micro-ROS firmware image tonight, and you should not rebuild the Capstone teleop around micro-ROS before lesson 10-04 passes. An ESP32 DevKit is the board this lesson talks about. A Pico may sit in a drawer; it is not the supported path below.
 
 
-## Background Knowledge Map: XRCE-DDS Client–Agent Architecture, Static Memory, and Embedded Executors
+## Key ideas: XRCE-DDS Client–Agent Architecture, Static Memory, and Embedded Executors
 
 Running ROS 2 on a 320 KB RAM microcontroller relies on three architectural adaptations:
 
@@ -108,7 +108,7 @@ ros2 topic list
 
 Stop the container with Ctrl-C so the next run does not find port 8888 already taken. When a real client connects later, the agent log gains a session and `ros2 node list` gains the node you named. Write that prediction in the notes tonight; the next hardware session checks it.
 
-### Deep-Dive Explanation (Read Slowly): Estimating RAM & UART Overhead of a micro-ROS Node
+### Explanation: Estimating RAM & UART Overhead of a micro-ROS Node
 
 Before choosing between micro-ROS and a thin custom serial bridge on an MCU with $$264\ \text{KB}$$ SRAM (such as RP2040) or $$320\ \text{KB}$$ usable DRAM (ESP32), check the exact resource footprint:
 

@@ -24,7 +24,7 @@ You can order the pipeline as light, then camera, then algorithm, and you will n
 You can run a short Python script and you know that an image is an array. You have met `geometry_msgs/msg/Twist` in the Nav2 tour, so you know a velocity command has a linear part and an angular part. You do not need a depth camera, and this lesson never asks for a RealSense.
 
 
-## Background Knowledge Map: Pinhole Camera Geometry, Lens Calibration, and Visual Servoing
+## Key ideas: Pinhole Camera Geometry, Lens Calibration, and Visual Servoing
 
 Robotic computer vision connects projective geometry to real-time control across three pillars:
 
@@ -117,7 +117,7 @@ Your integers will differ. `u` grows as the card moves right. `area` grows as it
 
 A later ROS node decides at 5 or 10 Hz. If `area` is below 500, publish a zero Twist. If `u` is left of center, publish `angular.z` near 0.3. If `u` is right of center, publish `angular.z` near -0.3. Hold that command until the next tick. Enough to twitch the bridge toward a card. Not a navigator.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Projecting a 3D Target to Pixels and Computing Yaw Command
+### Explanation: Hand-Projecting a 3D Target to Pixels and Computing Yaw Command
 
 Suppose your calibrated 640×480 camera has intrinsics $$f_x = f_y = 600\ \text{px}$$ and principal point $$(c_x, c_y) = (320, 240)\ \text{px}$$. A fiducial target sits at $$P_c = (X, Y, Z) = (0.30,\ -0.15,\ 1.50)\ \text{m}$$ in the camera optical frame ($$+X$$ right, $$+Y$$ down, $$+Z$$ forward):
 

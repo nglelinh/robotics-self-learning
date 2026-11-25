@@ -24,7 +24,7 @@ By the end of this lesson you have a gear ratio you both predicted and checked, 
 Lessons 01–07. You need $$b$$, $$r$$, an M3 habit, the ratio definition $$i = N_{\text{out}}/N_{\text{in}} = \omega_{\text{in}}/\omega_{\text{out}}$$, and the strain-relief tug. A cardboard pointer and a protractor, or a paper protractor, are enough instruments.
 
 
-## Background Knowledge Map: Experimental System Identification, Measurement Uncertainty, and Bias vs. Variance
+## Key ideas: Experimental System Identification, Measurement Uncertainty, and Bias vs. Variance
 
 This bench lab introduces experimental identification—the empirical half of robotics engineering:
 
@@ -69,7 +69,7 @@ about 7 percent, inside the 10 percent band for molded teeth and a handmade poin
 
 Direction: one external mesh, or an odd number of them, reverses the wheel relative to the motor. Your firmware sign in Lesson 05 has to agree with this observation, still with power off, by turning the shaft the way the motor will turn.
 
-### Deep-Dive Explanation (Read Slowly): Computing Effective Encoder Ticks per Meter by Hand
+### Explanation: Computing Effective Encoder Ticks per Meter by Hand
 
 Once you measure the true gear ratio $$G$$ and rolling radius $$r$$ in this lab, combine them into the exact conversion constant your firmware and ROS 2 odometry need:
 

@@ -15,7 +15,7 @@ Thông số động cơ có hai mức dòng điện rất khác nhau: dòng khô
 
 Rất nhiều mạch driver và động cơ robot chết không phải vì quá áp, mà vì một kịch bản quen thuộc: bánh xe robot kẹt vào chân bàn, phần mềm vẫn vô tư đẩy PWM 100%, dòng điện vọt lên mức **dòng kẹt (stall current)** cao gấp 5–10 lần dòng chạy bình thường, và chỉ trong vài chục giây lớp sơn cách điện cuộn dây đồng nóng chảy bốc khói! Hiểu về **giới hạn dòng, dòng kẹt và mô hình nhiệt** là tấm khiên bắt buộc để bảo vệ cả phần cứng lẫn an toàn cháy nổ trong phòng lab.
 
-## Bản đồ kiến thức nền: Định luật Joule, Mạch nhiệt tương đương và Cắt dòng bảo vệ
+## Kiến thức cần nhớ: Định luật Joule, Mạch nhiệt tương đương và Cắt dòng bảo vệ
 
 ### 1. Vì sao dòng kẹt (Stall Current) lại nguy hiểm theo hàm bình phương?
 Khi bánh xe bị chặn cứng ($$\omega = 0$$), sức phản điện động $$E = K_e \omega$$ tụt về $$0$$, toàn bộ điện áp pin đặt thẳng lên điện trở cuộn dây nhỏ xíu $$R_a$$: $$I_{\text{stall}} = V / R_a$$. Tệ hơn nữa, công suất tỏa nhiệt tuân theo định luật Joule **$$P_{\text{nhiệt}} = I^2 R_a$$**: dòng tăng lên $$4$$ lần thì nhiệt lượng đốt nóng cuộn dây tăng vọt lên **$$16$$ lần**!
@@ -28,7 +28,7 @@ với $$T_J$$ là nhiệt độ nhân chip (thường giới hạn tối đa $$1
 ### 3. Ba lớp phòng thủ: Cầu chì, Giới hạn dòng phần cứng (Chopper) và Giám sát phần mềm
 Một hệ thống robot chuẩn không bao giờ dựa vào một lớp bảo vệ duy nhất: (1) **Cầu chì / polyfuse** cắt mạch khi ngắn mạch nặng; (2) **Giới hạn dòng chủ động (current limiting / Vref)** trên driver tự băm xung khi dòng chạm ngưỡng; và (3) **Watchdog phát hiện kẹt trong firmware** (thấy PWM cao mà xung encoder bằng 0 trong > 1 giây thì tự ngắt động cơ).
 
-### Khung giải thích: Cầm tay tính công suất đốt nhiệt khi kẹt trục và nhiệt độ nhân chip driver (nên đọc chậm)
+### Giải thích: Cầm tay tính công suất đốt nhiệt khi kẹt trục và nhiệt độ nhân chip driver
 
 **Phần A — Sức nóng khủng khiếp khi kẹt trục (Stall) so với khi có giới hạn dòng:**
 Xét động cơ DC $$12\text{ V}$$ có điện trở cuộn dây $$R_a = 1{,}5\,\Omega$$:

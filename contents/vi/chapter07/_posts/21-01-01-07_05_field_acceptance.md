@@ -15,7 +15,7 @@ draft: false
 
 Trong thế giới phần mềm, bạn viết unit test để biết code đúng hay sai. Trong thế giới robotics, unit test trên laptop không bao giờ đủ — một robot chỉ được coi là hoàn thiện khi vượt qua **bài kiểm tra nghiệm thu thực địa (Field Acceptance Test)** trên mặt sàn thật với các tiêu chí **đạt / không đạt (Pass/Fail) định lượng** rõ ràng và có tệp nhật ký (log) chứng minh! Nếu không có bài test định lượng, bạn sẽ không bao giờ biết lần sửa code mới nhất giúp robot chạy thẳng hơn hay thực ra làm nó tệ đi.
 
-## Bản đồ kiến thức nền: Kiểm thử thực địa, Ghi nhật ký đồng bộ và Tiêu chí nghiệm thu
+## Kiến thức cần nhớ: Kiểm thử thực địa, Ghi nhật ký đồng bộ và Tiêu chí nghiệm thu
 
 ### 1. Bộ 4 bài test thực địa kinh điển cho robot vi sai
 Một quy trình nghiệm thu chuẩn gồm 4 kịch bản lặp lại được: (1) **Chạy thẳng 3–5 m** đo độ lệch ngang (đánh giá cân bằng bánh & odometry); (2) **Quay tại chỗ $$360^\circ$$** đo sai số góc (đánh giá hiệu chuẩn khoảng cách hai bánh $$L$$); (3) **Test ngắt kết nối đột ngột** kiểm tra Watchdog dừng đúng ngưỡng; và (4) **Test chạy bền 10 phút** giám sát nhiệt độ driver và đường cong tụt áp pin.
@@ -26,7 +26,7 @@ Mắt thường rất dễ đánh lừa: bạn thấy xe "hơi giật", nhưng k
 ### 3. Nghiệm thu dựa trên ngưỡng định lượng (Acceptance Criteria)
 Mọi yêu cầu phải chuyển thành con số đo được trước khi chạy test (ví dụ: lệch ngang $$< 5\%$$ quãng đường, sai số quay $$360^\circ$$ nhỏ hơn $$\pm 10^\circ$$, thời gian dừng khẩn cấp $$< 0{,}5\text{ s}$$).
 
-### Khung giải thích: Cầm tay đánh giá kết quả bài test chạy thẳng 5 mét và truy ngược sai số đường kính bánh (nên đọc chậm)
+### Giải thích: Cầm tay đánh giá kết quả bài test chạy thẳng 5 mét và truy ngược sai số đường kính bánh
 
 Bạn dán một đường băng keo thẳng dài **$$D = 5{,}00\text{ m}$$** trên sàn hành lang, đặt robot ngay vạch xuất phát rồi cho chạy thẳng $$5{,}00\text{ m}$$ với tiêu chí nghiệm thu **độ lệch ngang $$\le 5\%$$ ($$\le 25\text{ cm}$$)** và **sai số quãng đường $$\le 3\%$$ ($$\pm 15\text{ cm}$$)**.
 

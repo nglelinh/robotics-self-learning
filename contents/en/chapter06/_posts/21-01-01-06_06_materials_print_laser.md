@@ -24,7 +24,7 @@ By the end of this lesson you can choose a bought acrylic 2WD plate for Capstone
 You know the chassis geometry from Lesson 01 and the M3 fastener habit from Lesson 02. You do not need a CAD license. A pencil sketch with a thickness labeled in millimeters is enough.
 
 
-## Background Knowledge Map: Mechanics of Materials, Print Anisotropy, and Bending Stiffness
+## Key ideas: Mechanics of Materials, Print Anisotropy, and Bending Stiffness
 
 Choosing chassis materials draws on three core principles from solid mechanics and digital fabrication:
 
@@ -71,7 +71,7 @@ $$
 
 and the screw either will not start or will wedge. That wedge is the crack. On the printed battery strap, PLA at 58 °C in a closed cabin is at the softening range. PETG is the material you name for that strap if the robot ever waits in a car. The plate itself stays the acrylic kit.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Comparing Plate Stiffness and Print-Layer Stress
+### Explanation: Hand-Comparing Plate Stiffness and Print-Layer Stress
 
 Let us calculate two numbers that every robot builder should know before sending a file to a laser cutter or 3D printer:
 

@@ -24,7 +24,7 @@ By the end of this lesson you can name the failure when a wheel clicks while the
 Lessons 01 through 06: $$b$$ and $$r$$, set screws on D-flats, gear ratio, caster trail, and a chassis material that can crack. Chapter 05 is where stall current became a number on your motor. This lab never applies that current. Power stays off.
 
 
-## Background Knowledge Map: Mechanical Fatigue, Vibration Loosening, and Strain Relief
+## Key ideas: Mechanical Fatigue, Vibration Loosening, and Strain Relief
 
 Reliability on a rolling robot comes from anticipating three physical failure mechanisms before they strike:
 
@@ -65,7 +65,7 @@ The map gains about 20 cm the tile never gave. Two such slips per meter of comma
 
 A rubbing wheel is the thermal cousin. If the free-rolling motor in Chapter 05 drew a small no-load current and a rub pushes the operating point toward stall, the heat in the winding follows that current. You do not need a new number today. You need the scrape gone before voltage returns.
 
-### Deep-Dive Explanation (Read Slowly): Estimating Impact Force and Wire Strain Margin
+### Explanation: Estimating Impact Force and Wire Strain Margin
 
 Why does a tiny 0.5 kg robot bumping a wall at walking speed snap an unrestrained connector? A quick impulse calculation reveals the hidden forces:
 

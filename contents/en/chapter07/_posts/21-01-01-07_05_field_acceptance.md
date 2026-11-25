@@ -27,7 +27,7 @@ A robot sitting on blocks on a desk can look invincible—wheels spinning crispl
 Lessons 07-01 through 07-04 are the plant: strapped pack, fused positive lead, buck at 5.0 V, sign map, text protocol, slew, and timeout. Chapter 05 is the stall and the hot-driver rule. Chapter 06's $$b$$ and $$r$$ are already in `lab-notes.md` (course examples $$b = 0.15~\mathrm{m}$$ or your $$148~\mathrm{mm}$$, and $$r = 31.2~\mathrm{mm}$$). You still do not publish Twist. You may record distance and time. You may not stamp them onto PWM as a law. Chapter 08 earns m/s.
 
 
-## Background Knowledge Map: Battery Internal Resistance, Acceptance Testing, and Structured Telemetry
+## Key ideas: Battery Internal Resistance, Acceptance Testing, and Structured Telemetry
 
 Field testing sits at the intersection of electrical physics and test engineering:
 
@@ -90,7 +90,7 @@ Do not average a bad row into a pass. If the sender dies and the robot rolls int
 
 Pass means all of these: four directions match the sign map; the timeout stop works; the battery is strapped, with no bare soldered lithium leads; the notes include the wiring photo, a protocol snippet (`V`, `S`, $$200~\mathrm{ms}$$, $$250~\mathrm{ms}$$), the sign map, the voltages, and $$b$$ and $$r$$.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Checking Voltage Sag and Stopping Distance on a Field Run
+### Explanation: Hand-Checking Voltage Sag and Stopping Distance on a Field Run
 
 Suppose your 2S Li-Ion pack reads $$V_{\text{oc}} = 7.40\ \text{V}$$ at rest and has combined pack + wiring resistance $$R_{\text{int}} = 0.45\ \Omega$$. Your 5 V buck regulator requires at least $$V_{\text{in,min}} = 6.20\ \text{V}$$ to maintain clean 5.0 V output.
 

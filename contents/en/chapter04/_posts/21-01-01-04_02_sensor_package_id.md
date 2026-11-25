@@ -27,7 +27,7 @@ You will name a module from its shape and pin labels before you wire it, state i
 
 Lesson 04-01 (I2C, SPI, UART) and the habit of reading a pinout from Chapter 01. A multimeter. You do not need every module on the desk at once.
 
-## Background Knowledge Map: Proprioception vs. Exteroception, Noise Models, and Complementary Fusion
+## Key ideas: Proprioception vs. Exteroception, Noise Models, and Complementary Fusion
 
 Three estimation-theory concepts organize every sensor on Capstone A and ROS 2 robots:
 
@@ -106,7 +106,7 @@ At least two modules with corrected voltage and bus. A written note that HC-SR04
 | Encoder with one channel | You cannot tell forward from back |
 | Buying ESP32-CAM as the Capstone brain | Motor pins and brownouts fight the camera |
 
-## Deep-Dive Explanation (Read Slowly): Computing Optimal Inverse-Variance Fusion of Two Range Sensors
+## Explanation: Computing Optimal Inverse-Variance Fusion of Two Range Sensors
 
 Suppose your robot has both an ultrasonic sensor (standard deviation $$\sigma_1 = 2.0\text{ cm}$$) and a Time-of-Flight laser sensor ($$\sigma_2 = 0.5\text{ cm}$$) measuring the same wall. How should you combine their readings $$z_1$$ and $$z_2$$ instead of taking a naive 50/50 average? Follow the 4-step **Minimum-Variance (Kalman/Bayesian) Fusion** rule:
 

@@ -25,7 +25,7 @@ By the end of this lesson you will be able to refuse a pinout that was guessed f
 
 You can tell a diode's cathode by its band, and you can use diode mode on an unpowered part. You know a GPIO is a 12 mA to 40 mA object and a stalled TT motor is an ampere-class object. This lesson is identification, plus the two ratings that stop a smoked part: pin order, and heat while dropping voltage.
 
-## Background Knowledge Map: Semiconductor Switching, Linear vs. Buck Regulation, and Thermal Resistance
+## Key ideas: Semiconductor Switching, Linear vs. Buck Regulation, and Thermal Resistance
 
 Three pillars tie active semiconductors to reliable robot hardware:
 
@@ -107,7 +107,7 @@ You should end with a labeled list, not with a motor that spins. A successful di
 
 Safety: no motor supply in this lab, no 12 V experiments, diode mode only on loose parts. A TO-220 tab on a regulator can be electrically live and hot on a finished board; do not grab it to see if the robot is working.
 
-## Deep-Dive Explanation (Read Slowly): Computing Junction Temperature for an LDO vs. a MOSFET Switch
+## Explanation: Computing Junction Temperature for an LDO vs. a MOSFET Switch
 
 Before choosing between an LDO and a buck converter — or checking if a MOSFET needs a heatsink — run this 4-step thermal check:
 

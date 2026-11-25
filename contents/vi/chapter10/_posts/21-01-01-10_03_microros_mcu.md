@@ -15,7 +15,7 @@ Thời lượng: **~75 phút**.
 
 Ở Chương 08, ta đã tự viết giao thức serial văn bản nối MCU (ESP32) với máy tính chủ — gọn gàng nhưng mỗi lần thêm một cảm biến mới bạn lại phải tự định nghĩa cú pháp chuỗi, tự parse và tự viết node ROS 2 trung gian. **micro-ROS** mang chính mô hình Node–Topic–Service của ROS 2 xuống tận vi điều khiển có vài trăm kilobyte RAM, biến ESP32 thành một "công dân hạng nhất" ngay trên đồ thị ROS 2.
 
-## Bản đồ kiến thức nền: Ba trụ cột của micro-ROS trên Vi điều khiển (MCU)
+## Kiến thức cần nhớ: Ba trụ cột của micro-ROS trên Vi điều khiển (MCU)
 
 1. **Kiến trúc Client–Agent trên chuẩn XRCE-DDS**:
    Vì DDS đầy đủ quá nặng cho MCU, micro-ROS chạy thư viện nhẹ **XRCE-DDS Client** trên ESP32, nói chuyện qua UART/USB hoặc Wi-Fi UDP với một tiến trình **micro-ROS Agent** trên SBC/laptop — chính Agent làm cầu nối đại diện cho MCU tham gia mạng DDS của ROS 2.
@@ -109,7 +109,7 @@ Kết quả không được chứa `/capstone_mcu` — sự vắng mặt này ch
 
 Nhấn Ctrl-C để dừng container, tránh chiếm giữ cổng 8888 cho các lần chạy sau. Khi kết nối mạch thật ở buổi thực hành phần cứng, log của agent sẽ ghi nhận phiên mới và `ros2 node list` sẽ hiện đúng tên node bạn đã lên kế hoạch.
 
-### Khung giải thích (nên đọc chậm): Kiểm tra băng thông UART `115200 bps` cho cầu nối micro-ROS
+### Giải thích: Kiểm tra băng thông UART `115200 bps` cho cầu nối micro-ROS
 
 Giả sử ESP32 nối với Raspberry Pi qua UART ở tốc độ truyền mặc định **115.200 baud** (chuẩn 8N1 = 10 bit/byte, nên tốc độ tối đa lý thuyết là $$115.200 / 10 = \mathbf{11.520\text{ byte/s}}$$):
 - Nếu ESP32 xuất `/odom` (~120 byte đã tuần tự hóa CDR + header XRCE) ở **50 Hz**: tốn $$120 \times 50 = \mathbf{6.000\text{ byte/s}}$$ (~52% băng thông).

@@ -24,7 +24,7 @@ You will name the three things the LeRobot project keeps on one contract: a data
 You can open a browser and a terminal. The Capstone already takes a forward speed in metres per second and a yaw rate in radians per second, and Chapter 08 still zeros the motors if no fresh frame arrives for 300 ms. Chapter 09's `geometry_msgs/Twist` is the same pair: `linear.x` and `angular.z`. You do not need a graphics card, a leader arm, or a second robot. If `pip` is painful on your network, skip it. The graded artifacts are a quotation and a card.
 
 
-## Background Knowledge Map: Visuomotor Policies, Synchronized Episode Datasets, and Control-Loop Inference
+## Key ideas: Visuomotor Policies, Synchronized Episode Datasets, and Control-Loop Inference
 
 Modern robot learning platforms like LeRobot rest on three engineering pillars:
 
@@ -78,7 +78,7 @@ $$
 
 Twenty images with `fps: 30` on the card are not a 2.0 s episode. Somebody will stretch the turn. Write the count you can verify by listing the folder.
 
-### Deep-Dive Explanation (Read Slowly): Sizing a LeRobot Demonstration Dataset and Control Loop Budget
+### Explanation: Sizing a LeRobot Demonstration Dataset and Control Loop Budget
 
 Suppose you collect $$E = 50$$ teleoperation demonstrations of a 6-DOF desktop arm picking up a cube, each lasting $$T = 12\ \text{s}$$ at $$f_s = 30\ \text{Hz}$$ with one 480×640 RGB wrist camera and 6 joint angles (`float32`):
 

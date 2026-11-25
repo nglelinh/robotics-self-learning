@@ -15,7 +15,7 @@ Thời lượng: **~90 phút** (có thể lâu hơn nếu bạn vừa cài mới
 
 Một lỗi kinh điển của người mới học ROS 2 là gõ `ros2 run ...` rồi nhận thông báo `Package not found` dù vừa biên dịch xong không một lỗi nào. Nguyên nhân gần như luôn nằm ở một khái niệm cốt lõi: **chuỗi chồng lớp không gian làm việc (underlay / overlay workspace)** và cách `colcon` nạp biến môi trường vào shell hiện tại.
 
-## Bản đồ kiến thức nền: Ba trụ cột Cài đặt ROS 2 Jazzy & Workspace `colcon`
+## Kiến thức cần nhớ: Ba trụ cột Cài đặt ROS 2 Jazzy & Workspace `colcon`
 
 1. **Kiến trúc Underlay vs. Overlay**:
    `/opt/ros/jazzy/setup.bash` là lớp nền (*underlay*) chứa các gói chuẩn của hệ thống; `~/ros2_ws/install/setup.bash` là lớp phủ (*overlay*) chứa mã nguồn của riêng bạn. Luôn source underlay trước khi build và source overlay trước khi chạy.
@@ -50,7 +50,7 @@ Hệ thống cần được thiết lập bảng mã UTF-8 trước khi thêm kh
 
 Khóa học này không hỗ trợ gỡ lỗi trên Windows hay macOS. Nếu bạn chỉ có máy tính Windows, hãy cài Ubuntu 24.04 trong máy ảo (tối thiểu 4 GB RAM và 30 GB ổ cứng) hoặc dùng một máy tính phụ. WSL2 có thể chạy được nhưng thường phát sinh nhiều vấn đề ngoài phạm vi bài học (như đồ họa, truyền cổng serial USB, Gazebo). Cài trực tiếp Ubuntu là phương án khớp hoàn toàn với tài liệu thực hành.
 
-### Khung giải thích (nên đọc chậm): Truy vết nhanh 3 biến môi trường khi `ros2 pkg list` không thấy gói của bạn
+### Giải thích: Truy vết nhanh 3 biến môi trường khi `ros2 pkg list` không thấy gói của bạn
 
 Khi gặp lỗi không tìm thấy gói hoặc xung đột giữa hai nhóm trong phòng lab, hãy kiểm tra đúng 3 dòng lệnh theo thứ tự:
 1. `echo $AMENT_PREFIX_PATH` → Nếu chỉ thấy `/opt/ros/jazzy` mà **thiếu** `/home/.../ros2_ws/install/...`, bạn quên chạy `source ~/ros2_ws/install/setup.bash` trong cửa sổ terminal mới mở!

@@ -15,7 +15,7 @@ Mọi bộ điều khiển robot về sau đều tuân theo chung một vòng l�
 
 Nếu bạn đặt hai bánh xe robot cùng một mức PWM 60% và thả chạy thẳng trên hành lang, chuyện gì sẽ xảy ra? Chỉ sau 2 mét, robot sẽ lượn cong sang một bên! Lý do rất đời thường: không có hai động cơ nào giống hệt nhau 100% về ma sát, điện áp pin giảm dần mỗi phút, và mặt sàn chỗ trơn chỗ nhám. **Điều khiển vòng kín (closed-loop control)** biến một cỗ máy "mù" chạy theo lệnh cố định thành một hệ thống biết tự sửa sai liên tục qua chu trình 3 bước kinh điển: **Cảm nhận (Sense) → Tính sai số (Compute) → Tác động (Act)**.
 
-## Bản đồ kiến thức nền: Vòng hở vs. Vòng kín và Tư duy phản hồi âm
+## Kiến thức cần nhớ: Vòng hở vs. Vòng kín và Tư duy phản hồi âm
 
 ### 1. Hạn chế cố hữu của vòng hở (Open-Loop)
 Trong hệ vòng hở, lệnh điều khiển $$u$$ chỉ phụ thuộc vào mục tiêu $$r$$ mà không hề nhìn xem đầu ra thực tế $$y$$ đang ở đâu. Bất kỳ **nhiễu loạn ngoài (disturbance)** nào — như robot leo lên thảm dày, chở thêm tải, hay pin tụt từ 8,4 V xuống 7,2 V — đều truyền thẳng 100% thành sai số đầu ra.
@@ -26,7 +26,7 @@ Hệ vòng kín đo đầu ra thực tế $$y$$ (ví dụ vận tốc bánh từ
 ### 3. Độ trễ lấy mẫu và ranh giới mất ổn định
 Phản hồi âm không thể vặn hệ số $$K_p$$ lớn vô hạn. Vì mọi vòng điều khiển số đều có chu kỳ lấy mẫu $$\Delta t$$ và quán tính cơ khí, tăng $$K_p$$ quá cao sẽ khiến robot liên tục sửa "quá tay" sang trái rồi lại quá tay sang phải — sinh ra **dao động (oscillation)** hoặc mất ổn định. Đây chính là tiền đề dẫn tới bộ điều khiển PID ở Chương 08.
 
-### Khung giải thích: Cầm tay chứng minh phản hồi âm nén sai số nhiễu loạn giảm đi 5 lần (nên đọc chậm)
+### Giải thích: Cầm tay chứng minh phản hồi âm nén sai số nhiễu loạn giảm đi 5 lần
 
 Xét một bánh xe robot có mô hình tĩnh đơn giản: ở trạng thái xác lập, tốc độ bánh bằng lệnh điều khiển cộng với nhiễu tải (ví dụ khi leo lên thảm dày làm hụt tốc độ $$d = -0{,}30\text{ m/s}$$):
 $$v = u + d, \qquad \text{mục tiêu } v^* = 1{,}00\text{ m/s}.$$

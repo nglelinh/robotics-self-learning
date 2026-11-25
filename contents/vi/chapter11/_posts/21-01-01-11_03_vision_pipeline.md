@@ -15,7 +15,7 @@ Thời lượng ước tính: **~75 phút** khi camera USB nhận diện tại `
 
 LiDAR 2D đo khoảng cách tường cực chuẩn nhưng lại hoàn toàn "mù màu" và "mù ngữ nghĩa": nó không phân biệt được đâu là một chiếc hộp các-tông cần nhặt, đâu là biển báo dừng, hay đâu là đôi chân của một người đang bước tới. Đưa **Camera (RGB / RGB-D)** vào đường ống ROS 2 bổ sung đôi mắt ngữ nghĩa cho robot — nhưng cũng đòi hỏi hiểu rõ hình học phép chiếu camera và ngân sách xử lý thời gian thực trên SBC.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Đường ống Thị giác Robot (ROS 2 Vision)
+## Kiến thức cần nhớ: Ba trụ cột của Đường ống Thị giác Robot (ROS 2 Vision)
 
 1. **Mô hình Camera Lỗ kim (Pinhole Camera) & Hiệu chuẩn Nội tại (Intrinsic Matrix $$K$$)**:
    Biến đổi điểm 3D $$(X, Y, Z)$$ trong hệ camera thành tọa độ pixel $$(u, v)$$ qua tiêu cự $$(f_x, f_y)$$, tâm ảnh $$(c_x, c_y)$$ và hệ số méo ống kính (distortion) — phát kèm trên topic `/camera/camera_info`.
@@ -122,7 +122,7 @@ Giá trị cụ thể sẽ khác tùy vị trí: `u` tăng khi thẻ dịch sang
 
 Khi chuyển thành node ROS về sau, timer sẽ quyết định ở tần số 5–10 Hz: nếu `area < 500` thì phát `Twist` bằng 0; nếu `u` nằm bên trái tâm thì đặt `angular.z` khoảng `0.3`; nếu nằm bên phải thì khoảng `-0.3`, rồi giữ nguyên lệnh tới chu kỳ kế tiếp.
 
-### Khung giải thích (nên đọc chậm): Tính tay khoảng cách tới một thẻ AprilTag bằng mô hình Camera Lỗ kim
+### Giải thích: Tính tay khoảng cách tới một thẻ AprilTag bằng mô hình Camera Lỗ kim
 
 Giả sử bạn đã hiệu chuẩn camera và thu được tiêu cự ngang $$f_x = 600\text{ pixel}$$, tâm ảnh $$c_x = 320\text{ pixel}$$. Bạn đặt một thẻ **AprilTag cạnh vuông thực tế $$W = 0{,}10\text{ m}$$** (10 cm) đối diện thẳng góc với camera, và đo được trên ảnh thẻ chiếm bề rộng $$w_{\text{px}} = 75\text{ pixel}$$, tâm thẻ nằm ở cột pixel $$u = 380$$:
 

@@ -15,7 +15,7 @@ Thời lượng ước tính: **~90 phút**.
 
 Ai học vi điều khiển cũng bắt đầu bằng `Serial.println(sensor_value)` để in chữ ra màn hình cho người đọc. Nhưng khi hai cỗ máy nói chuyện với nhau ở tần số 100 Hz — ví dụ ESP32 gửi vận tốc, quaternion IMU và số xung encoder lên Raspberry Pi chạy ROS 2 — việc chuyển đổi số thực sang chuỗi văn bản ASCII/JSON rồi lại phân tích ngược thành số thực ở đầu kia vừa chậm chạp, vừa tốn gấp đôi băng thông, lại dễ vỡ định dạng khi dính nhiễu. Bài học này đưa bạn vượt qua `println` sang **giao thức nhị phân đóng khung (binary framing), mã hóa COBS và kiểm lỗi CRC-16** — tiêu chuẩn thực thụ của truyền thông nhúng chuyên nghiệp.
 
-## Bản đồ kiến thức nền: Giao thức nhị phân, Byte-Stuffing (COBS) và Kiểm lỗi CRC
+## Kiến thức cần nhớ: Giao thức nhị phân, Byte-Stuffing (COBS) và Kiểm lỗi CRC
 
 ### 1. Văn bản (CSV / JSON) vs. Nhị phân đóng gói (Packed Binary Struct)
 Định dạng văn bản dễ đọc bằng mắt khi gỡ lỗi nhanh, nhưng mỗi chữ số tốn 1 byte và hàm `sscanf`/`JSON.parse` ngốn nhiều chu kỳ CPU. Định dạng **nhị phân** đóng gói trực tiếp các biến `float32` (4 byte) hoặc `int32` (4 byte) theo quy ước thứ tự byte rõ ràng (**little-endian**) giúp giảm kích thước gói từ 2–4 lần và giải mã trong vài nano-giây bằng một phép `memcpy`.
@@ -26,7 +26,7 @@ Trong gói nhị phân, giả sử bạn chọn byte `0x00` làm dấu kết th�
 ### 3. Tại sao CRC-16 vượt trội hơn Checksum cộng/XOR đơn giản?
 Checksum cộng hoặc XOR không phát hiện được lỗi hoán vị hai byte hay lỗi hai bit cùng vị trí bị lật đồng thời. **CRC-16 (Cyclic Redundancy Check)** dùng phép chia đa thức modulo 2 trong trường hữu hạn $$GF(2)$$, phát hiện được 100% lỗi đơn bit, lỗi 2 bit và mọi cụm nhiễu liên tiếp dài tới 16 bit.
 
-### Khung giải thích: Cầm tay so sánh băng thông và chi phí đóng gói giữa JSON và Nhị phân ở 100 Hz (nên đọc chậm)
+### Giải thích: Cầm tay so sánh băng thông và chi phí đóng gói giữa JSON và Nhị phân ở 100 Hz
 
 Giả sử ESP32 cần gửi đều đặn 3 giá trị số thực dấu phẩy động `(vx, vy, wz)` lên máy tính chủ ở tần số **100 Hz** trên đường UART `115200 8N1` (trần băng thông $$11\,520\text{ byte/giây}$$):
 

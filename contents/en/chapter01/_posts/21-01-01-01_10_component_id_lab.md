@@ -27,7 +27,7 @@ You will map which breadboard rows beep and which gap stays open, and you will p
 
 Lessons 02 through 05 are the background: breadboard rows, the meter, resistor codes, capacitors, diodes, and LEDs. You need continuity, ohms, and diode mode. You do not need the iron, and you do not need the TB6612 powered. If a part is missing, write the step and mark the row dry-run. Do not borrow a classmate's numbers.
 
-## Background Knowledge Map: Diode-Test Mode, Continuity Thresholds, and Lookalike Disambiguation
+## Key ideas: Diode-Test Mode, Continuity Thresholds, and Lookalike Disambiguation
 
 Three measurement principles let you identify unknown parts without guessing:
 
@@ -124,7 +124,7 @@ A third part has five bands and was first written down as if it had four, produc
 
 On the diode, the banded end is the cathode, so the anode is the other lead. Red probe on the anode, black on the band, the display shows 0.62 V. Probes swapped, the display shows OL. On the red LED, red on the long lead shows 1.85 V and a faint glow, so that long lead is the anode today. Those two voltages in one table are how you prove the parts were not swapped: about 0.6 V is the diode, about 1.8 V is the red LED.
 
-## Deep-Dive Explanation (Read Slowly): Identifying an Unknown 3-Pin Transistor in 6 Probe Touches
+## Explanation: Identifying an Unknown 3-Pin Transistor in 6 Probe Touches
 
 Suppose you pick up an unmarked `TO-92` transistor with pins labeled `1`, `2`, `3` from left to right. Walk through this systematic 4-step diode-mode test:
 

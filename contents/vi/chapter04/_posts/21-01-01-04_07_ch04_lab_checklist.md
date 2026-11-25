@@ -15,7 +15,7 @@ Thời lượng: **50–70 phút**. Đây là mốc kiểm tra hoàn thành chư
 
 Trước khi để robot tự chạy vòng kín trong phòng lab, một kỹ sư robotics kỳ cựu không bao giờ vội viết thuật toán điều hướng ngay — họ dành 15 phút để **kiểm định từng cảm biến lúc đứng yên và lúc chuyển động chậm**. Bởi nếu một dây encoder lỏng làm mất xung, một trục IMU bị đảo dấu, hay một cảm biến siêu âm nhiễu quá mức, thì bộ điều khiển thông minh nhất thế giới cũng sẽ lái robot đâm thẳng vào tường. Checklist Chương 04 đóng vai trò như "bảng kiểm trước giờ bay" giúp bạn tách biệt lỗi phần cứng/cảm biến khỏi lỗi thuật toán.
 
-## Bản đồ kiến thức nền: Kiểm định cảm biến theo quy chuẩn đo lường
+## Kiến thức cần nhớ: Kiểm định cảm biến theo quy chuẩn đo lường
 
 ### 1. Độ chính xác (Accuracy) vs. Độ chụm (Precision / Noise Floor)
 - **Độ chính xác (Accuracy):** trung bình các phép đo có nằm sát giá trị thực tế hay bị lệch hằng số (**bias**)? Bias sửa được bằng **hiệu chuẩn (calibration)**.
@@ -27,7 +27,7 @@ Trong robotics (đặc biệt khi tiến lên ROS 2 ở các chương sau), quy 
 ### 3. Đánh đổi giữa lọc nhiễu (Averaging) và độ trễ pha
 Lấy trung bình trượt $$N$$ mẫu độc lập giúp giảm độ lệch chuẩn nhiễu đi $$\sqrt{N}$$ lần, nhưng đồng thời cộng thêm độ trễ trung bình $$\frac{N-1}{2}\Delta t$$. Trong vòng điều khiển nhanh, lọc quá tay sẽ làm robot phản ứng chậm và lắc qua lại.
 
-### Khung giải thích: Cầm tay tính trung bình, độ lệch chuẩn sàn nhiễu và hiệu quả lọc trung bình 4 mẫu (nên đọc chậm)
+### Giải thích: Cầm tay tính trung bình, độ lệch chuẩn sàn nhiễu và hiệu quả lọc trung bình 4 mẫu
 
 Khi robot đứng yên cách tường phẳng đúng **$$20{,}0\text{ cm}$$**, bạn ghi lại 5 mẫu liên tiếp từ cảm biến khoảng cách (đơn vị cm):
 $$[20{,}0,\quad 20{,}4,\quad 19{,}6,\quad 20{,}2,\quad 19{,}8].$$

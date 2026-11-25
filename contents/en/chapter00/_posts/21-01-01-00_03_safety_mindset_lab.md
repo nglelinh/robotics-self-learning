@@ -27,7 +27,7 @@ You will **name** the three hazards that actually show up on this bench: stored 
 
 Lessons 00-01 and 00-02: you can say the 300 ms stop, and the journal has a Track A or Track B sentence. You do not need parts. A GPIO pin is a logic pin, not a power supply, and a wheel on the table becomes a winch the moment PWM is not zero.
 
-## Background Knowledge Map: Electrical Energy Storage, Thermal Runaway, and Mechanical Kill-Switches
+## Key ideas: Electrical Energy Storage, Thermal Runaway, and Mechanical Kill-Switches
 
 Three physical principles explain why lab safety rules are non-negotiable:
 
@@ -112,7 +112,7 @@ The same afternoon an 18650 reads 2.1 V and someone offers a TP4056 "recovery." 
 
 The echo wire in the same pile was about to land on an ESP32 GPIO. Absolute maximum on that pad is not 5 V, so the wire waits for a level shifter. Motor voltage is the same ban, only larger.
 
-## Deep-Dive Explanation (Read Slowly): Calculating Short-Circuit Power and Fuse Sizing by Hand
+## Explanation: Calculating Short-Circuit Power and Fuse Sizing by Hand
 
 Why can a harmless-looking 3.7 V lithium cell melt a jumper wire instantly? Trace the four-step calculation:
 

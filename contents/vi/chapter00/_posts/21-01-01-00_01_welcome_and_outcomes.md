@@ -25,7 +25,7 @@ Bạn chỉ cần đọc hiểu được tài liệu kỹ thuật ở tốc đ�
 
 Hãy tưởng tượng khoảnh khắc đầu tiên chiếc xe robot hai bánh bạn tự tay lắp ráp chạy thẳng đúng một mét, dừng êm ái trước vật cản rồi quay góc $$90^\circ$$ mà không cần bạn chạm vào bàn phím. Đằng sau khoảnh khắc kỳ diệu ấy không phải là phép màu lập trình, mà là sự phối hợp nhịp nhàng giữa **điện tử cơ bản**, **vi điều khiển thời gian thực**, **toán học động học–điều khiển** và **kỷ luật kiểm thử phần cứng**. Bài mở đầu này đặt ra bản đồ tư duy để bạn bước từ bàn học lý thuyết sang bàn lab cơ điện tử một cách chắc chắn nhất.
 
-## Bản đồ kiến thức nền: Kỹ thuật Robot (Robotics) là gì và nghiên cứu những gì?
+## Kiến thức cần nhớ: Kỹ thuật Robot (Robotics) là gì và nghiên cứu những gì?
 
 Với sinh viên đại học, robot học là giao điểm thực chiến của ba trụ cột kỹ thuật cốt lõi:
 
@@ -33,7 +33,7 @@ Với sinh viên đại học, robot học là giao điểm thực chiến của
 2. **Sự ràng buộc của Vật lý và Thời gian thực (Real-Time Constraints):** Khác với phần mềm web có thể chờ 200 ms không sao, một robot tự cân bằng hay xe chạy $$1\text{ m/s}$$ bị trễ 200 ms đã lao thẳng vào tường (đi thêm $$20\text{ cm}$$ mất kiểm soát!).
 3. **Kỹ thuật kiểm chứng theo tầng (Incremental Bring-Up):** Không bao giờ lắp hết mạch rồi mới cắm pin; kỹ sư robot kiểm chứng từng tầng độc lập — Nguồn → Vi điều khiển → Cảm biến → Động cơ → Điều khiển vòng kín.
 
-### Ví dụ cầm tay chỉ việc: Tính ngân sách thời gian cho vòng lặp điều khiển $$50\text{ Hz}$$
+### Ví dụ làm từng bước: Tính ngân sách thời gian cho vòng lặp điều khiển $$50\text{ Hz}$$
 
 Giả sử xe robot của bạn chạy vòng lặp điều khiển chính ở tần số $$f = 50\text{ Hz}$$. Khi đó mỗi chu kỳ điều khiển chỉ có đúng:
 
@@ -48,7 +48,7 @@ Ta cộng tay thời gian thực thi của 3 khối trong một chu kỳ trên E
 
 Tổng thời gian tính toán là $$2.5 + 0.8 + 0.7 = \mathbf{4.0\text{ ms}} \ll 20\text{ ms}$$ (chỉ chiếm $$20\%$$ CPU, còn $$16\text{ ms}$$ dự phòng!). Nhưng nếu bạn lỡ viết một lệnh `delay(50)` để chờ cảm biến siêu âm, chu kỳ lập tức vọt lên $$54\text{ ms}$$ (tần số tụt xuống $$18.5\text{ Hz}$$) và bộ điều khiển PID lập tức bị dao động!
 
-### Khung giải thích: Bốn nguyên tắc vàng để tự học Robotics không bỏ cuộc giữa chừng (nên đọc chậm)
+### Giải thích: Bốn nguyên tắc vàng để tự học Robotics không bỏ cuộc giữa chừng
 
 1. **Bước 1 — Tách biệt lỗi phần cứng với lỗi phần mềm:** Trước khi sửa 100 dòng code, luôn đo điện áp đường nguồn bằng đồng hồ vạn năng — hơn một nửa "lỗi code" ở người mới thực chất là dây cắm lỏng hoặc sụt áp pin.
 2. **Bước 2 — Ghi sổ lab bằng con số đo được:** Đừng ghi *"xe chạy tạm ổn"*; hãy ghi *"Pin 7.82 V, sai số quãng đường 1.00 m là +1.8 cm, dòng không tải 210 mA"*.

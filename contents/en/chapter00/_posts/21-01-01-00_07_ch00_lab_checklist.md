@@ -27,7 +27,7 @@ You will **audit** the bench with a written procedure, one item at a time. You w
 
 You need the journal, the track sentence, the power-up card, the Wave 1 inventory photo, and whatever `bom.csv` lesson 00-05 asked you to build. If one of those was skipped, the audit records the skip. You do not need a moving robot, ROS 2, or a soldered joint. You do need to be willing to leave a box unticked.
 
-## Background Knowledge Map: Verification, Validation, and Acceptance Testing in Robotics
+## Key ideas: Verification, Validation, and Acceptance Testing in Robotics
 
 Even at the bench-setup stage, you are practicing the same systems-engineering habits used in aerospace and industrial robotics:
 
@@ -95,7 +95,7 @@ She ticks the written plan, not a proved cable, and leaves `cable unproven` visi
 
 A second student, Khoa, has a beep, a card, and a track sentence, and also a photograph of a TP4056 wired across two cells because "the connector fit." His charger line is `open`, and the photo is evidence of a fault, not of readiness. He disconnects the module, writes that each cell will be charged alone to 4.2 V or not at all, and only then may he reconsider the tick. His `bom.csv` has no sum. He goes back to lesson 00-05 before he calls the gate passed. A messaging stack on Ubuntu would not have caught either miss.
 
-## Deep-Dive Explanation (Read Slowly): Quantifying Battery State-of-Charge & Bench Readiness
+## Explanation: Quantifying Battery State-of-Charge & Bench Readiness
 
 How do you verify a fresh 2S Li-ion pack is healthy before it ever powers your electronics? Walk through these four checks:
 

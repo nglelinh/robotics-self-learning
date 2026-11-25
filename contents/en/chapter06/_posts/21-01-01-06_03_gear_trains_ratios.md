@@ -24,7 +24,7 @@ By the end of this lesson you can compute a gear ratio from tooth counts, predic
 You can measure track width and rolling radius (Lesson 01) and you know a set screw must sit on a D-flat (Lesson 02). Tooth counts are integers. A calculator for one division is enough.
 
 
-## Background Knowledge Map: Gear Kinematics, Power Conservation, and Nonlinear Backlash
+## Key ideas: Gear Kinematics, Power Conservation, and Nonlinear Backlash
 
 Gear trains sit directly between motor electrical dynamics and robot motion control:
 
@@ -93,7 +93,7 @@ Nine times too long, or nine times too short, depending on which side of the sof
 
 A stamped TT ratio of 1:48 is the number you keep even if a planetary picture in your head suggests $$1 + N_{\text{ring}}/N_{\text{sun}}$$. The stamp already did that arithmetic for the stages you cannot see.
 
-### Deep-Dive Explanation (Read Slowly): Compound Gear Ratio, Reflected Inertia, and Backlash Error
+### Explanation: Compound Gear Ratio, Reflected Inertia, and Backlash Error
 
 Walk through a concrete 2-stage spur gearbox driving a wheel of radius $$r = 0.032\ \text{m}$$:
 

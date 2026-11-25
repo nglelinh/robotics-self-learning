@@ -22,7 +22,7 @@ You will close Chapter 02 only with evidence you can point at. You will record t
 
 Lessons 1 through 5 are the evidence this page consumes. You need the decision sentence (ESP32 dev board or a named Pico), the toolchain that matches it, the heartbeat log or an honest blank, and the pin card. A meter is required for the rail tick. The full cart remains Chapter 00 ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). Re-read the wheels-up sentence in the heartbeat sketch so this checklist does not “pass” a robot that can already roll.
 
-## Background Knowledge Map: Reproducible Firmware Baselines and Interface Contracts
+## Key ideas: Reproducible Firmware Baselines and Interface Contracts
 
 Three engineering disciplines turn a Chapter 02 bring-up into a reusable platform:
 
@@ -94,7 +94,7 @@ Open `lab-notes.md`. Create a section titled with the date and “Chapter 02 gat
 
 A chapter pass is all six ticks PASS, wheels-up sentence present, no motor connected. A dry run is toolchain, decision, and a photo-traced pin card, with the three measured ticks explicitly pending. There is no third state called “close enough.”
 
-## Deep-Dive Explanation (Read Slowly): Verifying Battery-Only Cold Boot and Telemetry Integrity
+## Explanation: Verifying Battery-Only Cold Boot and Telemetry Integrity
 
 Many students pass every bench test while tethered to USB, then watch their robot sit lifeless the first time they unplug USB and flip the battery switch. Audit these four failure modes:
 

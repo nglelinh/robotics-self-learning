@@ -15,7 +15,7 @@ Bài 02 đã chốt ý nghĩa chiều quay của giá trị dương trên từng
 
 Ở những bài tập Arduino đầu tiên, ai cũng từng dùng kiểu điều khiển đơn giản: gõ chữ `'w'` trên bàn phím để xe chạy thẳng, `'s'` để lùi, `'x'` để dừng. Cách làm đó chạy vui trên bàn học nhưng sụp đổ ngay trên robot thực thụ: không gửi được vận tốc liên tục `(v, ω)`, không phát hiện được byte bị nhiễu giữa đường, và nếu cáp USB bị nhiễu mất một ký tự thì robot chạy theo một con số rác! Thiết kế một **giao thức teleop serial** chuẩn chỉnh — có khung gói rõ ràng (framing), phân tách trường và mã kiểm tra lỗi (checksum) — là bước chuyển mình từ "đồ chơi" sang "hệ thống điều khiển tin cậy".
 
-## Bản đồ kiến thức nền: Đóng khung gói tin (Framing), Checksum và Băng thông UART
+## Kiến thức cần nhớ: Đóng khung gói tin (Framing), Checksum và Băng thông UART
 
 ### 1. Framing — làm sao bên nhận biết đâu là đầu và cuối một gói lệnh?
 Đường truyền UART là một dòng byte liên tục không có ranh giới tự nhiên. Giao thức tốt luôn quy định **ký tự bắt đầu (SOF)** và **ký tự kết thúc (EOF)** rõ ràng — ví dụ kiểu bản tin NMEA của GPS: `$V,0.50,-0.25*43\n` (bắt đầu bằng `$`, thân lệnh `V,0.50,-0.25`, dấu `*`, mã kiểm tra hex `43`, kết thúc bằng `\n`). Nhờ framing, dù bên nhận bật lên giữa chừng của một gói cũ, nó vẫn bỏ qua phần rác và đồng bộ lại ngay ở dấu `$` tiếp theo!
@@ -26,7 +26,7 @@ Nhiễu điện từ từ động cơ DC rất dễ lật 1 bit trên đường 
 ### 3. Tính toán băng thông UART 8N1
 Chuẩn UART `115200 8N1` truyền 8 bit dữ liệu kèm 1 bit start và 1 bit stop — tức tốn đúng **10 bit cho mỗi byte**. Vì vậy, tốc độ tối đa là $$115\,200 / 10 = 11\,520\text{ byte/giây}$$. Giữ lưu lượng thực tế dưới 50% trần này giúp bộ đệm UART không bao giờ bị tràn!
 
-### Khung giải thích: Cầm tay tính băng thông gói lệnh 50 Hz và tự tay tính Checksum XOR (nên đọc chậm)
+### Giải thích: Cầm tay tính băng thông gói lệnh 50 Hz và tự tay tính Checksum XOR
 
 **Phần A — Kiểm tra độ thoáng băng thông UART `115200 8N1`:**
 - Dung lượng đường truyền: $$115\,200 / 10 = 11\,520\text{ byte/giây}$$.

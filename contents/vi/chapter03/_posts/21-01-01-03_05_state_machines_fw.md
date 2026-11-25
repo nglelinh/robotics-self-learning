@@ -23,13 +23,13 @@ Bạn đã biết tính thời gian trôi qua bằng `millis()` hoặc `time.tic
 
 Hãy hình dung đoạn code robot của một người mới sau ba tuần thêm tính năng: 7 biến cờ kiểu `is_running`, `obstacle_seen`, `turning_left`, `button_held`, `low_battery` đan chéo nhau trong một rừng câu lệnh `if / else if` dài 200 dòng! Chỉ cần vừa gặp vật cản *đồng thời* pin yếu, robot rơi vào một tổ hợp trạng thái bất hợp lệ khiến nó vừa tiến vừa báo lỗi! **Máy trạng thái hữu hạn (Finite State Machine — FSM)** quét sạch mớ hỗn độn đó bằng một mô hình toán học trong sáng: tại mọi thời điểm, robot chỉ ở **đúng một trạng thái** duy nhất với các luật chuyển trạng thái tường minh.
 
-## Bản đồ kiến thức nền: Lý thuyết Máy Trạng thái Hữu hạn (FSM) trong Firmware Robot
+## Kiến thức cần nhớ: Lý thuyết Máy Trạng thái Hữu hạn (FSM) trong Firmware Robot
 
 1. **Bộ Tứ Định nghĩa FSM (States, Events, Transitions, Actions):** Gồm tập hữu hạn các *trạng thái* (ví dụ `IDLE`, `RUN`, `AVOID`, `ESTOP`), các *sự kiện* đầu vào (nhấn nút, cảm biến $$< 25\text{ cm}$$, hết thời gian quay), *hàm chuyển trạng thái* và *hành động* khi vào/đang ở/thoát trạng thái.
 2. **Đảm bảo Bất biến An toàn (Safety Invariants):** Thay vì kiểm tra `if (!estop)` ở 15 chỗ khác nhau, ta biến `ESTOP` thành một trạng thái ưu tiên cao nhất có hành động *vào trạng thái* (`on_enter`) cưỡng bức cắt PWM về 0 ngay lập tức — và chỉ thoát ra được khi người vận hành chủ động nhấn reset!
 3. **Kết hợp FSM với Vòng lặp Không chặn:** Mỗi lần chạy `loop()`, hàm `switch (state)` chỉ thực thi nhanh nhánh của trạng thái hiện tại (vài micro-giây) và kiểm tra điều kiện chuyển tiếp bằng `millis()` — tạo ra kiến trúc firmware sạch, dễ vẽ sơ đồ và dễ kiểm thử.
 
-### Ví dụ cầm tay chỉ việc: Bảng chuyển trạng thái 4 trạng thái cho xe robot tránh vật cản
+### Ví dụ làm từng bước: Bảng chuyển trạng thái 4 trạng thái cho xe robot tránh vật cản
 
 Thay vì 4 biến cờ Boolean (tạo ra tới $$2^4 = 16$$ tổ hợp, trong đó 12 tổ hợp vô nghĩa!), ta khóa chặt hành vi xe vào **đúng 4 trạng thái**:
 
@@ -42,7 +42,7 @@ Thay vì 4 biến cờ Boolean (tạo ra tới $$2^4 = 16$$ tổ hợp, trong đ
 
 Chú ý chi tiết **độ trễ trễ ngưỡng (hysteresis)** trong bảng: vào `AVOID` khi $$d < 25\text{ cm}$$ nhưng chỉ quay lại `RUN` khi $$d \ge 35\text{ cm}$$ (khoảng đệm **10 cm**) — chặn đứng hoàn toàn hiện tượng xe giật lắc qua lại liên tục ngay tại mép 25 cm!
 
-### Khung giải thích: 4 bước chuyển hóa yêu cầu robot thành FSM không lỗi (nên đọc chậm)
+### Giải thích: 4 bước chuyển hóa yêu cầu robot thành FSM không lỗi
 
 1. **Bước 1 — Vẽ sơ đồ trạng thái trên giấy *trước* khi mở trình soạn thảo:** Liệt kê mọi trạng thái có thể, mũi tên chuyển và đảm bảo mọi trạng thái đều có lối ra hợp lệ (không bị kẹt chết).
 2. **Bước 2 — Thiết lập thứ tự ưu tiên sự kiện (An toàn luôn đứng đầu):** Trong mỗi chu kỳ, luôn kiểm tra `ESTOP` và sụt áp pin *trước* mọi logic điều hướng khác.

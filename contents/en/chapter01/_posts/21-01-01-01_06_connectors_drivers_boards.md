@@ -25,7 +25,7 @@ By the end of this lesson you will be able to tell a 2.54 mm Dupont jumper, whic
 
 You can measure DC voltage in parallel, you know a GPIO is a few tens of milliamperes, and you know a stalled TT motor is not. You do not need to PWM a motor yet. This lesson stops at chip markings, pin names, and one voltage-drop calculation before the first wheel turns.
 
-## Background Knowledge Map: Contact Mechanics, Connector Ampacity, and Ground-Loop Isolation
+## Key ideas: Contact Mechanics, Connector Ampacity, and Ground-Loop Isolation
 
 Three practical engineering principles govern interconnects on a robot:
 
@@ -114,7 +114,7 @@ You should finish with two photographs and a labeled sketch, and with every moto
 
 Safety: wheels off the table even though this lab does not spin them. Pack disconnected. Do not probe a pack with your fingers on the metal of the tips. The 7.4 V arithmetic is done on paper until a later lesson measures VM with the meter on a range above 10 V.
 
-## Deep-Dive Explanation (Read Slowly): Why Shared Return Wires Cause "Ground Bounce" on Sensors
+## Explanation: Why Shared Return Wires Cause "Ground Bounce" on Sensors
 
 Have you ever wondered why an analog sensor reading jumps wildly the moment the motors turn on? Trace the 4-step ground-bounce mechanism:
 

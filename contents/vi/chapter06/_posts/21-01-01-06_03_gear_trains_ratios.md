@@ -15,7 +15,7 @@ Thời lượng ước tính: **80–100 phút**, bao gồm thời gian đếm r
 
 Một động cơ DC nhỏ thường quay tít mù ở tốc độ $$6\,000\text{ RPM}$$ nhưng lại yếu đến mức chỉ cần hai ngón tay bóp nhẹ là đứng khựng lại. Làm sao biến sự "nhanh mà yếu" đó thành chuyển động "chậm mà khỏe" đủ đẩy cả con robot leo dốc? Câu trả lời cổ điển nhất của kỹ thuật cơ khí là **hộp số bánh răng (gear train)** — bộ biến áp cơ học đánh đổi trực tiếp tốc độ góc lấy mô-men xoắn theo định luật bảo toàn công suất.
 
-## Bản đồ kiến thức nền: Các họ bánh răng, Tỉ số truyền và Độ rơ (Backlash)
+## Kiến thức cần nhớ: Các họ bánh răng, Tỉ số truyền và Độ rơ (Backlash)
 
 ### 1. Bánh răng trụ (Spur), Trục vít (Worm) và Hành tinh (Planetary)
 - **Bánh răng trụ (Spur):** dễ chế tạo, hiệu suất cao (~90%–95% mỗi cấp), nhưng ồn ở tốc độ cao và tốn diện tích khi cần tỉ số lớn.
@@ -28,7 +28,7 @@ Khi bánh chủ động có $$Z_{\text{in}}$$ răng ăn khớp với bánh bị 
 ### 3. Độ rơ bánh răng (Backlash) — kẻ thù thầm lặng của độ chính xác
 Giữa hai răng ăn khớp luôn phải có một khe hở nhỏ để bôi trơn và tránh kẹt nhiệt. Khi động cơ đảo chiều, trục ra đứng yên một khoảnh khắc nhỏ trước khi răng bên kia chạm vào — góc rơ tự do đó gọi là **backlash**. Trên cánh tay robot dài, chỉ $$1^\circ$$ backlash ở khớp vai đã tạo ra sai số vài milimet ở đầu kẹp!
 
-### Khung giải thích: Cầm tay tính hộp số 2 cấp và sai số đầu tay kẹp do Backlash (nên đọc chậm)
+### Giải thích: Cầm tay tính hộp số 2 cấp và sai số đầu tay kẹp do Backlash
 
 **Phần A — Hộp số bánh răng trụ 2 cấp:**
 - Cấp 1: bánh dẫn $$Z_1 = 12$$ răng ăn khớp bánh bị dẫn $$Z_2 = 36$$ răng $$\implies G_1 = 36/12 = 3{:}1$$.

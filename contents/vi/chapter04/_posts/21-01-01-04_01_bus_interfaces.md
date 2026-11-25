@@ -25,13 +25,13 @@ Bạn đã biết đo thông mạch và điện áp một chiều bằng đồng
 
 Một con robot hiện đại mang trên mình hàng loạt "giác quan": gia tốc kế–con quay hồi chuyển (IMU), cảm biến khoảng cách laser (ToF), màn hình OLED, bộ thu GPS, LiDAR... Nếu mỗi cảm biến đòi riêng 8 sợi dây song song thì bo vi điều khiển sẽ hết sạch chân ngay từ cảm biến thứ hai! Ba chuẩn truyền thông nối tiếp kinh điển — **I2C**, **SPI** và **UART** — ra đời để chia sẻ hàng chục thiết bị trên chỉ 2 đến 4 sợi dây mỏng, mỗi chuẩn tối ưu cho một bài toán tốc độ, khoảng cách và số lượng thiết bị khác nhau.
 
-## Bản đồ kiến thức nền: Ba Chuẩn Bus Cảm biến Cốt lõi trên Robot
+## Kiến thức cần nhớ: Ba Chuẩn Bus Cảm biến Cốt lõi trên Robot
 
 1. **I2C (Inter-Integrated Circuit — 2 dây `SDA, SCL`):** Bus đồng bộ dùng chung cho nhiều cảm biến bằng **địa chỉ 7-bit** (ví dụ IMU `0x68`, OLED `0x3C`), tốc độ chuẩn 100 kHz hoặc 400 kHz. Vì là chuẩn cực máng hở (*open-drain*), bus I2C **bắt buộc phải có điện trở kéo lên** (thường $$4.7\text{ k}\Omega$$ lên 3,3 V).
 2. **SPI (Serial Peripheral Interface — 4 dây `MOSI, MISO, SCLK, CS`):** Bus đồng bộ song công toàn phần tốc độ cực cao (1–40 MHz!), không cần địa chỉ mà chọn từng thiết bị bằng chân riêng `CS` (Chip Select) — lý tưởng cho màn hình màu, thẻ nhớ SD và IMU tốc độ lấy mẫu kHz.
 3. **UART (Universal Asynchronous Receiver/Transmitter — 2 dây chéo `TX ↔ RX`):** Truyền bất đồng bộ điểm–điểm không cần dây xung nhịp (hai bên tự thống nhất tốc độ baud như `115200 bps`) — dùng cho GPS, LiDAR 2D và giao tiếp giữa ESP32 với máy tính Raspberry Pi!
 
-### Ví dụ cầm tay chỉ việc: Tính thời gian đọc 14 byte từ IMU MPU6050 qua I2C (400 kHz) vs. SPI (4 MHz)
+### Ví dụ làm từng bước: Tính thời gian đọc 14 byte từ IMU MPU6050 qua I2C (400 kHz) vs. SPI (4 MHz)
 
 Một lần đọc đầy đủ gia tốc (6 byte) + nhiệt độ (2 byte) + vận tốc góc (6 byte) từ IMU cần truyền **14 byte** dữ liệu:
 - **Qua I2C Fast Mode ($$400\text{ kHz}$$):** mỗi byte trên I2C cần **9 xung clock** (8 bit dữ liệu + 1 bit `ACK`), cộng khoảng 3 khung mở đầu (địa chỉ ghi + thanh ghi bắt đầu + địa chỉ đọc) = $$17 \times 9 = \mathbf{153\text{ xung clock}}$$:
@@ -43,7 +43,7 @@ Một lần đọc đầy đủ gia tốc (6 byte) + nhiệt độ (2 byte) + v�
   t_{\text{SPI}} = \frac{120}{4{,}000{,}000\text{ Hz}} = \mathbf{0.030\text{ ms}} \quad (\mathbf{12.7\times\text{ nhanh hơn I2C!}}).
   $$
 
-### Khung giải thích: 4 bước đấu nối và gỡ lỗi Bus Cảm biến không bao giờ đoán mò (nên đọc chậm)
+### Giải thích: 4 bước đấu nối và gỡ lỗi Bus Cảm biến không bao giờ đoán mò
 
 1. **Bước 1 — Chạy `I2C Scanner` trước khi viết bất kỳ dòng code giải mã nào:** Nếu chương trình quét địa chỉ báo `Found 0x68` (IMU) và `Found 0x29` (ToF VL53L0X), bạn chắc chắn 100% dây `SDA/SCL`, nguồn và điện trở kéo lên đều đúng!
 2. **Bước 2 — Đổi địa chỉ khi hai cảm biến I2C trùng nhau:** Ví dụ muốn gắn 2 cảm biến MPU6050 trên cùng 1 bus I2C, kéo chân `AD0` của con thứ hai lên 3,3 V để đổi địa chỉ từ `0x68` sang `0x69`.

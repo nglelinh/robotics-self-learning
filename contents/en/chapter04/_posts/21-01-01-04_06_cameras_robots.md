@@ -27,7 +27,7 @@ You will compute uncompressed and MJPEG bandwidth for a stated width, height, an
 
 Lesson 04-02’s identification sheet already has a row for “USB plug versus flex cable versus two metal cans.” Chapter 02 is the ESP32 and the Pico, so you know which board is allowed to be the robot’s computer. You can multiply. You do not need OpenCV, a GPU, or a ROS image pipeline. If those words are new, leave them new until Chapter 11.
 
-## Background Knowledge Map: Image Bandwidth, Pinhole Projection Geometry, and Vision Latency
+## Key ideas: Image Bandwidth, Pinhole Projection Geometry, and Vision Latency
 
 Three computer-vision and systems pillars govern cameras on mobile robots:
 
@@ -125,7 +125,7 @@ The three numbers (18,432,000 bytes/s, 147 Mbit/s, ~15 Mbit/s MJPEG) and the def
 | Pi camera and an ESP32, nothing on `/dev/video` | CSI does not plug into that devkit |
 | Chapter 07 blocked on a camera shipment | This lesson’s decision was ignored |
 
-## Deep-Dive Explanation (Read Slowly): Computing Raw Video Bandwidth and Estimating Target Depth from Pixels
+## Explanation: Computing Raw Video Bandwidth and Estimating Target Depth from Pixels
 
 Before choosing a resolution and frame rate for your ROS 2 robot camera, run this 4-step bandwidth and geometry check:
 

@@ -33,7 +33,7 @@ $$
 with $$b$$ the track you measured (example $$b = 0.15~\mathrm{m}$$, $$r = 31.2~\mathrm{mm}$$). You can open a serial monitor. Lesson 04 writes the parser. You are not publishing ROS topics.
 
 
-## Background Knowledge Map: Serial Framing, Deterministic Parsing, and Fail-Safe Watchdogs
+## Key ideas: Serial Framing, Deterministic Parsing, and Fail-Safe Watchdogs
 
 Designing a clean host-to-MCU command protocol draws on three pillars of embedded communications:
 
@@ -100,7 +100,7 @@ $$
 
 the arithmetic is tidy and the physics is invented. Chapter 08 may time a measured meter and only then claim a speed. Until then, `V 80 80` means forward on the sign map, at 80 counts.
 
-### Deep-Dive Explanation (Read Slowly): Serial Bandwidth, Frame Time, and Watchdog Margin Budget
+### Explanation: Serial Bandwidth, Frame Time, and Watchdog Margin Budget
 
 Can a 115,200 baud UART comfortably carry a 50 Hz teleop loop with telemetry replies? Let us calculate the exact timing budget by hand:
 

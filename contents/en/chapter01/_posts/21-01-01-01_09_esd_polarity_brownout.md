@@ -27,7 +27,7 @@ You will handle a board by the edges after touching grounded metal, without turn
 
 Lesson 04's electrolytic stripe and lesson 07's split between VM and VCC are assumed. Ohm's law from lesson 01 is the only arithmetic. You will meter a USB rail today. You will not spin a wheel, and you will not connect a motor battery.
 
-## Background Knowledge Map: Electrostatic Discharge, Reverse-Polarity Protection, and Brownout Physics
+## Key ideas: Electrostatic Discharge, Reverse-Polarity Protection, and Brownout Physics
 
 Three electrical protection mechanisms safeguard every embedded robot controller:
 
@@ -125,7 +125,7 @@ USB is $$0.50\,\mathrm{A}$$. Headroom with the wheels in the air is about $$0.24
 
 A 0.5 A fuse "so stall cannot happen" sits on the light-running current and opens during an ordinary drive. People then bypass fuses. Choose 2 A or 3 A, and let the timeout handle stall.
 
-## Deep-Dive Explanation (Read Slowly): Predicting a Brownout Reset from Battery + Wire Impedance
+## Explanation: Predicting a Brownout Reset from Battery + Wire Impedance
 
 Why does a robot run fine on USB power yet reboot the instant both wheels command 100% forward on battery? Trace the 4-step Thévenin sag calculation:
 

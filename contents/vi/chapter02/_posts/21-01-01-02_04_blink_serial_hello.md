@@ -22,13 +22,13 @@ Nếu dùng ESP32, bạn cần đã nạp thành công chương trình từ bài
 
 Chương trình đầu tiên của mọi kỹ sư nhúng luôn là nhấp nháy đèn LED — nhưng ở cấp độ kỹ thuật robot, đèn LED không phải để "cho vui", mà là **nhịp tim chẩn đoán (heartbeat)** báo cho bạn biết vi điều khiển vẫn đang sống và vòng lặp chính không bị treo! Bí mật tách biệt code đồ chơi với firmware robot thật nằm ở đúng một khái niệm: **xóa sổ hàm `delay()` chặn CPU** và thay bằng **bộ định thời không chặn (non-blocking scheduler)**.
 
-## Bản đồ kiến thức nền: Lập lịch Không chặn và Truyền thông Serial Chẩn đoán
+## Kiến thức cần nhớ: Lập lịch Không chặn và Truyền thông Serial Chẩn đoán
 
 1. **Blocking (`delay()`) vs. Non-Blocking (`millis()` / `ticks_ms()`):** Khi gọi `delay(500)`, CPU đứng yên hoàn toàn suốt 500 ms — bỏ lỡ mọi nút nhấn khẩn cấp, xung encoder và gói tin cảm biến! Lập lịch không chặn kiểm tra `now - last_time >= interval` trong vòng lặp chính, cho phép chạy song song nhiều tác vụ ở nhiều tần số khác nhau trên cùng 1 lõi CPU.
 2. **Nhịp tim (Heartbeat LED) & Log có Cấu trúc (Structured Serial Log):** Thay vì in chữ rời rạc kiểu `ok`, `123`, hãy in định dạng bảng CSV/key-value kèm dấu thời gian (`t_ms,state,v_batt,rpm_l,rpm_r`) để có thể vẽ đồ thị và phân tích ngay bằng Python!
 3. **Ngân sách Băng thông Serial (Đừng để `Serial.print` bóp nghẹt vòng lặp):** In một dòng log dài 100 byte ở tốc độ 9.600 bps tốn tới **104 ms** — đủ làm sập hoàn toàn vòng lặp điều khiển 50 Hz (20 ms)!
 
-### Ví dụ cầm tay chỉ việc: So sánh `delay(500)` với `millis()` và Tính chi phí thời gian của một dòng `Serial.print`
+### Ví dụ làm từng bước: So sánh `delay(500)` với `millis()` và Tính chi phí thời gian của một dòng `Serial.print`
 
 **Phần A — Mất mẫu cảm biến khi dùng `delay(500)`:** Giả sử robot cần nhấp LED nhịp tim mỗi **500 ms** (2 Hz) *đồng thời* đọc cảm biến khoảng cách mỗi **20 ms** (50 Hz):
 - Nếu viết `delay(500)` sau lệnh đảo LED: trong 500 ms đó lẽ ra phải đọc $$500 / 20 = 25$$ mẫu cảm biến, nhưng CPU ngủ cứng suốt 500 ms → **bỏ lỡ 24 trên 25 mẫu (mất 96% dữ liệu!)**.
@@ -38,7 +38,7 @@ Chương trình đầu tiên của mọi kỹ sư nhúng luôn là nhấp nháy 
 - Ở baud rate **9.600 bps** ($$960\text{ byte/s}$$): $$\dfrac{80}{960} = \mathbf{83.3\text{ ms}}$$ (lớn gấp **4 lần** chu kỳ điều khiển 20 ms → làm treo vòng lặp ngay khi đầy buffer TX!).
 - Ở baud rate **115.200 bps** ($$11{,}520\text{ byte/s}$$): $$\dfrac{80}{11{,}520} \approx \mathbf{6.94\text{ ms}}$$ — và nếu chỉ in log ở tần số 10 Hz (mỗi 100 ms), băng thông chiếm chưa tới $$7\%$$!
 
-### Khung giải thích: 4 quy tắc viết vòng lặp nền tảng cho mọi firmware robot (nên đọc chậm)
+### Giải thích: 4 quy tắc viết vòng lặp nền tảng cho mọi firmware robot
 
 1. **Bước 1 — Tuyệt đối cấm `delay()` bên trong `loop()` chính:** Mọi chu kỳ thời gian đều dùng phép so sánh `now - last >= period` (kiểu `uint32_t` trên C++ để tự an toàn khi tràn sau 49,7 ngày!).
 2. **Bước 2 — Tách tần số điều khiển khỏi tần số in log:** Chạy PID/đọc cảm biến ở 50–100 Hz, nhưng chỉ in log ra Serial ở 5–10 Hz để không làm nghẽn bộ đệm UART.

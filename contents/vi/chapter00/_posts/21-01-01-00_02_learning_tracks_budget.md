@@ -25,13 +25,13 @@ Từ bài 00-01, bạn đã nắm được yêu cầu của bài teleop nhấc b
 
 Rất nhiều người mới tự học robot vội vã mua ngay một bộ kit hàng chục triệu gồm máy tính nhúng đắt tiền và cảm biến LiDAR quay vù vù — rồi chỉ sau hai tuần cả bộ kit nằm phủ bụi vì chưa biết cách cấp nguồn 5 V ổn định cho vi điều khiển! Chọn đúng **lộ trình học và ngân sách** không phải chuyện tiết kiệm đơn thuần, mà là bài toán **kiến trúc hệ thống**: chọn đúng tầng phần cứng cho đúng bài toán điều khiển bạn cần giải.
 
-## Bản đồ kiến thức nền: Kiến trúc Vi điều khiển (MCU) vs. Máy tính nhúng (SBC / ROS)
+## Kiến thức cần nhớ: Kiến trúc Vi điều khiển (MCU) vs. Máy tính nhúng (SBC / ROS)
 
 1. **Lộ trình A — Vi điều khiển thuần (MCU như ESP32 / Pico):** Chạy mã sát phần cứng (bare-metal / RTOS), tiêu thụ điện cực thấp (~$$0.5\text{–}1\text{ W}$$), định thời chính xác tới micro-giây — lý tưởng cho điều khiển động cơ, đọc encoder, PID và máy trạng thái.
 2. **Lộ trình B — Máy tính nhúng + ROS 2 (SBC như Raspberry Pi + MCU):** Chạy Linux, có RAM hàng GB để xử lý bản đồ 2D/3D (SLAM), thị giác máy tính và lập kế hoạch đường đi — nhưng vẫn *cần* một MCU cấp thấp lo vòng lặp động cơ thời gian thực!
 3. **Ngân sách năng lượng & Tải trọng (SWaP — Size, Weight, and Power):** Tăng sức mạnh tính toán luôn kéo theo tăng dòng điện, nặng pin hơn và đòi hỏi động cơ khỏe hơn — một vòng xoắn thiết kế cốt lõi trong mọi dự án robot.
 
-### Ví dụ cầm tay chỉ việc: So sánh ngân sách điện năng giữa Lộ trình A (MCU) và Lộ trình B (SBC + LiDAR)
+### Ví dụ làm từng bước: So sánh ngân sách điện năng giữa Lộ trình A (MCU) và Lộ trình B (SBC + LiDAR)
 
 Giả sử khung xe dùng chung 2 động cơ DC tiêu thụ trung bình **$$3.0\text{ W}$$** khi chạy, cấp nguồn từ bộ pin Li-ion 2S dung lượng **$$15\text{ Wh}$$** (hiệu suất mạch hạ áp $$\eta = 85\%$$):
 
@@ -44,7 +44,7 @@ Giả sử khung xe dùng chung 2 động cơ DC tiêu thụ trung bình **$$3.0
 
 Chỉ riêng việc gắn thêm máy tính Linux và LiDAR đã làm công suất tăng gần **3 lần** và cắt thời lượng pin từ **3,4 giờ** xuống còn **1,2 giờ** — chưa kể mạch hạ áp 5 V cho Pi 4 phải chịu được dòng đỉnh **3 A** thay vì 0,5 A!
 
-### Khung giải thích: Chọn lộ trình thông minh theo 4 bước (nên đọc chậm)
+### Giải thích: Chọn lộ trình thông minh theo 4 bước
 
 1. **Bước 1 — Bắt đầu từ Lộ trình A để làm chủ tầng cơ điện tử:** Mọi hệ thống ROS 2 đều đứng trên một tầng MCU bên dưới; thành thạo ESP32/Pico trước giúp bạn không bị ngợp khi lên Linux.
 2. **Bước 2 — Thiết kế khung cơ khí sẵn sàng nâng cấp:** Dùng chung một khung xe vi sai 2 bánh có khoảng trống trên tầng hai để sau này đặt thêm Raspberry Pi và LiDAR mà không phải mua lại từ đầu.

@@ -15,7 +15,7 @@ Thời lượng: **80–100 phút**. Đây là bài thực hành đo khoảng c�
 
 Dơi bay trong hang tối bằng sóng siêu âm, còn những chiếc robot tự hành hiện đại lại chiếu những xung tia hồng ngoại siêu ngắn rồi bấm đồng hồ đo thời gian ánh sáng dội ngược về — đó là hai gương mặt kinh điển của nguyên lý **Time-of-Flight (ToF)**: đo khoảng cách bằng cách đo *thời gian bay đi và về* của một làn sóng. Dù cùng dùng đúng một công thức $$d = \frac{v \cdot t}{2}$$, sự chênh lệch gần một triệu lần giữa tốc độ âm thanh ($$343\text{ m/s}$$) và tốc độ ánh sáng ($$3 \times 10^8\text{ m/s}$$) tạo ra hai thế giới cảm biến hoàn toàn khác nhau về độ rộng chùm tia, tần số lấy mẫu và dạng lỗi vật lý.
 
-## Bản đồ kiến thức nền: Vật lý truyền sóng trong đo khoảng cách robot
+## Kiến thức cần nhớ: Vật lý truyền sóng trong đo khoảng cách robot
 
 ### 1. Siêu âm (HC-SR04) — nón sóng rộng, phản xạ gương và ảnh hưởng nhiệt độ
 Cảm biến siêu âm phát chùm sóng $$40\text{ kHz}$$ mở rộng theo hình nón góc khoảng $$15^\circ\text{–}30^\circ$$. Ưu điểm là rẻ và phát hiện tốt cả kính trong suốt; nhưng nhược điểm chí mạng là **phản xạ gương (specular reflection)**: nếu sóng đập xiên góc vào tường phẳng nhẵn, sóng nảy đi nơi khác không quay về đầu thu, khiến robot tưởng phía trước trống không! Ngoài ra, tốc độ âm thanh phụ thuộc nhiệt độ không khí theo $$v(T) \approx 331{,}3 + 0{,}606\,T\;(^\circ\text{C})$$.
@@ -26,7 +26,7 @@ Cảm biến ToF hồng ngoại dùng diode phát VCSEL (940 nm) chiếu một c
 ### 3. Chu kỳ đo tối đa và lọc nhiễu ngoại lai (Median Filter)
 Với siêu âm, phải chờ tiếng vang dội xong (thường tối thiểu $$30\text{–}60\text{ ms}$$ mỗi lần bắn) để tránh thu nhầm tiếng vang của xung trước đó (*ghost echo*). Trong cả hai loại cảm biến, một **bộ lọc trung vị (median filter)** 3–5 mẫu luôn đánh bại trung bình cộng vì nó vứt sạch các cú đo lỗi đột ngột về `0` hoặc `max_range`.
 
-### Khung giải thích: Cầm tay tính khoảng cách Siêu âm vs. Quang học ToF và sai số nhiệt độ (nên đọc chậm)
+### Giải thích: Cầm tay tính khoảng cách Siêu âm vs. Quang học ToF và sai số nhiệt độ
 
 Xét một vật cản đặt cách robot đúng **$$d = 20{,}0\text{ cm} = 0{,}200\text{ m}$$**:
 

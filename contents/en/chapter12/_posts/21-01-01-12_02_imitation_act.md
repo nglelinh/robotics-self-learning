@@ -24,7 +24,7 @@ You will define behavior cloning as a map from observation to action, fitted on 
 Lesson 12-01's dataset card is in your notes: camera, $$v$$ in m/s, $$\omega$$ in rad/s, one fps. You know the firmware zeros the motors 300 ms after the last good frame. You can read an abstract. You do not need a GPU, the ALOHA hardware, or a working install of the policy. If a classmate's machine reports that it ran out of memory, that classmate started the wrong assignment.
 
 
-## Background Knowledge Map: Covariate Shift in Behavioral Cloning, Action Chunking, and CVAE Transformers
+## Key ideas: Covariate Shift in Behavioral Cloning, Action Chunking, and CVAE Transformers
 
 ACT solves three classical failure modes of imitation learning:
 
@@ -81,7 +81,7 @@ of open loop if you do not replan early. Two seconds of committed forward motion
 
 Temporal ensemble on one overlapping instant: an older chunk still says $$v = 0.25$$ at $$t = 0.20$$, and a newer chunk, queried after the person appeared, says $$v = 0.00$$. A plain average is $$0.125$$ m/s. That is not a stop. Even a weighted average that leans toward the new chunk, say three quarters of the new value and one quarter of the old, is $$0.0625$$ m/s, still forward. Ensemble reduces the command. It does not replace the zero.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Computing ACT Temporal Ensembling Across Overlapping Chunks
+### Explanation: Hand-Computing ACT Temporal Ensembling Across Overlapping Chunks
 
 Suppose an ACT policy predicts chunks of length $$k = 3$$, and at time $$t = 2$$ three overlapping chunks have each proposed a target joint angle for the current step $$t = 2$$:
 - Chunk from $$t = 0$$ (oldest, index $$i = 0$$): predicted $$a^{(0)}_2 = 1.00\ \text{rad}$$.

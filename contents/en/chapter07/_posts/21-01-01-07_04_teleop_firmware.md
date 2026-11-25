@@ -27,7 +27,7 @@ The leap from "blinking an LED with `delay()`" to real robotics firmware happens
 You need lesson 07-01's power tree, lesson 07-02's sign map, and lesson 07-03's grammar: 115200 8N1, newline-terminated text, host refresh $$200~\mathrm{ms}$$, firmware deadline $$250~\mathrm{ms}$$, clamp $$-180..180$$. On a TB6612, STBY low keeps the outputs off, and PWM 0 with STBY high is a short brake, not a high-Z coast. Chapter 06's $$b$$ and $$r$$ stay in the notes; this sketch does not read them. Positive still means that tire toward the nose. Twist, with `linear.x` and `angular.z`, comes after Chapter 08 calibrates and Chapter 09 carries topics. No ROS workspace today.
 
 
-## Background Knowledge Map: Non-Blocking Event Loops, Slew-Rate Limiting, and Embedded Safety States
+## Key ideas: Non-Blocking Event Loops, Slew-Rate Limiting, and Embedded Safety States
 
 Reliable teleop firmware combines three core concepts from real-time embedded systems:
 
@@ -188,7 +188,7 @@ port.close()
 
 A second run writes `V 60 -60\n` for one second. Left forward and right back is a right yaw on the lesson 02 map. If the flags disagree, edit that channel's IN pins, not the screws, in this session.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Tracing a Slew-Rate Limiter Over 5 Loop Ticks
+### Explanation: Hand-Tracing a Slew-Rate Limiter Over 5 Loop Ticks
 
 Suppose your firmware runs at $$f_s = 50\ \text{Hz}$$ ($$\Delta t = 20\ \text{ms}$$) with command range $$[-100, +100]$$ and a maximum slew step of $$\Delta u_{\max} = 10$$ units per tick (reaching full speed from rest in $$10 \times 20\ \text{ms} = 200\ \text{ms}$$).
 

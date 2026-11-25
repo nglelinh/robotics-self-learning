@@ -13,9 +13,9 @@ draft: false
 
 Thời lượng: **~60 phút** (10 phút xem sơ đồ định hướng, 20 phút chọn một hướng duy nhất và 30 phút lập kế hoạch thực hành một tháng mà chưa cần mua sắm thêm).
 
-Hoàn thành hành trình 12 chương từ mạch điện cầu H, PID, ROS 2 Jazzy, Gazebo, SLAM/Nav2 đến LeRobot và VLA, bạn đã sở hữu bức tranh toàn cảnh hiếm có: hiểu robot từ dòng điện chạy qua cuộn dây động cơ cho tới mô hình AI nền tảng. Bài học này đóng vai trò la bàn chỉ hướng cho chặng đường tiếp theo — dù bạn muốn đi sâu vào kỹ thuật điều khiển, SLAM thị giác, thao tác tay máy hay nghiên cứu Robot Learning.
+Hoàn thành hành trình 12 chương từ mạch điện cầu H, PID, ROS 2 Jazzy, Gazebo, SLAM/Nav2 đến LeRobot và VLA, bạn đã sở hữu tổng quan hiếm có: hiểu robot từ dòng điện chạy qua cuộn dây động cơ cho tới mô hình AI nền tảng. Bài học này đóng vai trò la bàn chỉ hướng cho chặng đường tiếp theo — dù bạn muốn đi sâu vào kỹ thuật điều khiển, SLAM thị giác, thao tác tay máy hay nghiên cứu Robot Learning.
 
-## Bản đồ kiến thức nền: Bốn nhánh Chuyên sâu sau Khóa học Robotics
+## Kiến thức cần nhớ: Bốn nhánh Chuyên sâu sau Khóa học Robotics
 
 1. **Kỹ thuật Phần mềm Robot & Hệ thống Tự hành (ROS 2 / Nav2 / C++ Real-Time)**:
    Đi sâu vào `ros2_control`, hệ điều hành thời gian thực (PREEMPT_RT), tối ưu hóa hiệu năng C++ và triển khai đội xe (fleet management).
@@ -90,7 +90,7 @@ Bản kế hoạch thứ hai chốt duy nhất một hướng, chỉ rõ phần 
 
 Khung giá tham khảo để cân nhắc cho Hướng A (chỉ mua khi xe hiện tại đã vận hành ổn định, không mua dồn trong ngày đầu): lidar 360° nhỏ khoảng 1,5–3,5 triệu đồng; Raspberry Pi 5 (nếu cần tách khỏi laptop) khởi điểm gần 2,4 triệu đồng cho bản RAM thấp tại [listing Pi 5 lắp ráp tại Anh trên Hshop](https://hshop.vn/may-tinh-raspberry-pi-5-made-in-uk) (kiểm tra lại giá biến thể thực tế); cánh tay là nhánh đắt tiền nên không ghép chung giỏ hàng với Hướng A.
 
-### Khung giải thích (nên đọc chậm): Lập kế hoạch chọn 1 dự án mở rộng 8 tuần phù hợp đúng năng lực hiện có
+### Giải thích: Lập kế hoạch chọn 1 dự án mở rộng 8 tuần phù hợp đúng năng lực hiện có
 
 | Hướng bạn thấy hứng thú nhất | Dự án 8 tuần khả thi ngay sau khóa này | Bộ công cụ lõi cần đầu tư thêm |
 | :--- | :--- | :--- |

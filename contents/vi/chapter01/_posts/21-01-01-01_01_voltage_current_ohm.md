@@ -23,13 +23,13 @@ Bạn chỉ cần nắm vững bốn phép tính số học cơ bản và giữ 
 
 Mọi sự cố cháy LED, sập nguồn vi điều khiển hay nóng rực dây dẫn trên xe robot đều có thể dự đoán trước chỉ bằng hai phương trình dài đúng ba ký tự: **định luật Ohm ($$V = I R$$)** và **công suất điện ($$P = V I$$)**. Thay vì đoán mò chọn đại một điện trở rồi "cắm thử xem có bốc khói không", bài học này giúp bạn dùng phép tính tay sơ cấp để làm chủ hoàn toàn dòng chảy năng lượng trên mọi bo mạch robot.
 
-## Bản đồ kiến thức nền: Vật lý Mạch điện Một chiều (DC) trên Robot
+## Kiến thức cần nhớ: Vật lý Mạch điện Một chiều (DC) trên Robot
 
 1. **Điện áp ($$V$$), Dòng điện ($$I$$) và Điện trở ($$R$$):** Hãy ví điện áp như *áp suất nước*, dòng điện như *lưu lượng nước chảy qua ống*, và điện trở như *độ hẹp của van*. Định luật Ohm $$I = V / R$$ khẳng định dòng điện tăng tỉ lệ thuận với hiệu điện thế và tỉ lệ nghịch với điện trở cản dòng.
 2. **Công suất Tiêu tán & Giới hạn Nhiệt ($$P = V I = I^2 R$$):** Mọi dòng điện đi qua điện trở đều biến thành nhiệt. Điện trở chân cắm thông thường chỉ chịu được **$$0.25\text{ W}$$** (1/4 W); vượt ngưỡng đó điện trở sẽ đổi màu nâu và cháy đứt!
 3. **Giới hạn Dòng Chân GPIO & Mạch Phân áp:** Chân GPIO của ESP32/Pico chỉ là chân *tín hiệu* (cấp tối đa ~$$12\text{–}20\text{ mA}$$), tuyệt đối không đủ kéo động cơ ($$500\text{–}1{,}500\text{ mA}$$). Đồng thời, hai điện trở mắc nối tiếp tạo thành **mạch phân áp** $$V_{\text{out}} = V_{\text{in}}\frac{R_2}{R_1+R_2}$$ giúp hạ tín hiệu 5 V xuống mức an toàn 3,3 V.
 
-### Ví dụ cầm tay chỉ việc: Tính điện trở hạn dòng LED (3,3 V) và Mạch phân áp 5 V → 3,3 V
+### Ví dụ làm từng bước: Tính điện trở hạn dòng LED (3,3 V) và Mạch phân áp 5 V → 3,3 V
 
 **Phần A — Chọn điện trở nối tiếp cho đèn LED đỏ trên chân GPIO 3,3 V:** biết điện áp rơi thuận của LED đỏ là $$V_f = 2.0\text{ V}$$ và ta muốn dòng sáng êm là $$I = 10\text{ mA} = 0.01\text{ A}$$:
 1. Điện áp còn lại rơi trên điện trở: $$V_R = 3.3 - 2.0 = \mathbf{1.3\text{ V}}$$.
@@ -45,7 +45,7 @@ $$
 V_{\text{out}} = 5.0 \times \frac{2{,}000}{1{,}000 + 2{,}000} = 5.0 \times \frac{2}{3} \approx \mathbf{3.33\text{ V}}!
 $$
 
-### Khung giải thích: 4 bước tính nhẩm mọi mạch DC nhỏ trước khi cắm điện (nên đọc chậm)
+### Giải thích: 4 bước tính nhẩm mọi mạch DC nhỏ trước khi cắm điện
 
 1. **Bước 1 — Đọc điện áp nguồn và điện áp rơi của tải:** Luôn trừ đi điện áp rơi của LED/diode ($$V_f \approx 2.0\text{ V}$$ cho LED đỏ, $$3.0\text{ V}$$ cho LED xanh/trắng) trước khi chia cho dòng.
 2. **Bước 2 — Kiểm tra trần dòng của nguồn cấp (GPIO vs. Pin):** Nếu tải cần $$> 15\text{ mA}$$, không nối thẳng vào GPIO mà phải lái qua MOSFET hoặc IC driver động cơ.

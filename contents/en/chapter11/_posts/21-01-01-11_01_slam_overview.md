@@ -24,7 +24,7 @@ You can draw the three-edge transform chain `slam_toolbox` expects, name the top
 You can use `ros2 topic info` and you know a transform tree is named frames, not a picture of the room. From the Capstone base, wheel encoders produce odometry, and a sign error on one motor makes a straight command look like a turn. Gazebo is only a mental picture of a simulated laser here.
 
 
-## Background Knowledge Map: Occupancy Grids, Bayesian Log-Odds Updates, and Pose-Graph Loop Closure
+## Key ideas: Occupancy Grids, Bayesian Log-Odds Updates, and Pose-Graph Loop Closure
 
 Modern 2D LiDAR SLAM (such as ROS 2 `slam_toolbox`) stands on three mathematical pillars:
 
@@ -84,7 +84,7 @@ ros2 run tf2_ros tf2_echo odom base_link
 
 `/scan` should be `sensor_msgs/msg/LaserScan` with a publisher count of at least one. `/odom` should be `nav_msgs/msg/Odometry`, `frame_id` `odom`, `child_frame_id` `base_link`. Pushing the robot forward should change translation, and rotating it should change yaw. Only then does the launch have a chance. Healthy SLAM adds `map` to `odom` (`ros2 run tf2_ros tf2_echo map odom`). That third echo is an outcome, not a transform you publish yourself.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Updating an Occupancy Grid Cell in Log-Odds Space
+### Explanation: Hand-Updating an Occupancy Grid Cell in Log-Odds Space
 
 Suppose a map cell starts completely unknown with prior probability $$p_0 = 0.50$$, so its initial log-odds is $$l_0 = \log(0.5 / 0.5) = 0.0$$. Your LiDAR sensor model says:
 - A laser *hit* inside the cell implies $$p_{\text{hit}} = 0.80 \implies l_{\text{hit}} = \ln(0.80 / 0.20) = \ln(4) = +1.386$$.

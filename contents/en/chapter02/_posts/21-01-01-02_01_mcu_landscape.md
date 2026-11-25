@@ -24,7 +24,7 @@ By the end of this lesson you can compare three honest brains for a small diff-d
 
 You can set a meter to DC volts, and you know a GPIO is a pin the chip can drive or read. A series resistor in front of an LED, from Chapter 01, is enough. You do not need to have flashed firmware. The full cart stays in the Chapter 00 shopping lesson ([BOM and shopping]({% multilang_post_url contents/chapter00/00_05_bom_and_shopping %})). This page only chooses the brain and the cable.
 
-## Background Knowledge Map: CPU Architecture, Hardware Peripherals, and Real-Time Determinism
+## Key ideas: CPU Architecture, Hardware Peripherals, and Real-Time Determinism
 
 Evaluating an MCU for Capstone A rests on three technical pillars:
 
@@ -107,7 +107,7 @@ A listing photo of a metal can with no USB socket is a module. A charge-only pho
 
 Safety: do not connect a battery, a motor, or a 5 V sensor while you are still choosing the board. The only electrical act today is reading a label.
 
-## Deep-Dive Explanation (Read Slowly): Budgeting CPU Cycles and Encoder Interrupt Load Across MCUs
+## Explanation: Budgeting CPU Cycles and Encoder Interrupt Load Across MCUs
 
 Why do two high-resolution wheel encoders overwhelm a slow 8-bit MCU while barely registering on an ESP32 or RP2040? Let's calculate the exact interrupt load step by step:
 

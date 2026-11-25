@@ -28,7 +28,7 @@ The silkscreen on a red module is part of the circuit. Before you trust a tutori
 
 You can use the DC volts range of a multimeter and you know which probe is black. Lesson 05-01's H-bridge vocabulary (forward path, reverse path, shoot-through, PWM on enable) is the map you are now matching to a physical board. You also know that motor current does not come from USB.
 
-## Background Knowledge Map: BJT vs. MOSFET H-Bridges, Voltage Dropout, and Control Pin Topologies
+## Key ideas: BJT vs. MOSFET H-Bridges, Voltage Dropout, and Control Pin Topologies
 
 Three hardware-selection criteria distinguish modern motor drivers:
 
@@ -129,7 +129,7 @@ You can name the chip, you have a pin-labeled photo, and you have two meter read
 | DRV8833 shuts down on a TT motor | Stall current is above what the small bridge can hold. Change the motor or the driver. |
 | MX1508 gets too hot to touch | The motor is too large for that board. Remove power. |
 
-## Deep-Dive Explanation (Read Slowly): Selecting the Optimal Motor Driver via Quantitative Loss & Margin Analysis
+## Explanation: Selecting the Optimal Motor Driver via Quantitative Loss & Margin Analysis
 
 Before wiring a motor driver, run this 4-step selection matrix against your battery pack and motor stall current:
 

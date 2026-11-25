@@ -15,7 +15,7 @@ Thời lượng: **~60 phút**. Sau khi bài 10-05 đã đối chiếu giữa m�
 
 Hoàn thành Chương 10 nghĩa là bạn đã dựng xong "cặp song sinh số" (Digital Twin) cho robot của mình: một phiên bản chạy trên Gazebo Harmonic và một phiên bản chạy trên phần cứng thật, cùng chia sẻ chung một giao diện ROS 2. Bảng nghiệm thu này giúp xác nhận cả hai phiên bản hoạt động đồng nhất trước khi bước vào bài toán tự hành SLAM và Nav2 ở Chương 11.
 
-## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Mô phỏng & Cầu nối (Chương 10)
+## Kiến thức cần nhớ: Ba tiêu chuẩn nghiệm thu Mô phỏng & Cầu nối (Chương 10)
 
 1. **Chạy song song sạch trên Gazebo Harmonic (`sim_bringup`)**:
    Xe sinh ra đúng tư thế trên mặt đất (không lún, không nổ), RTF ổn định ($$\ge 0{,}7$$), `/clock` hoạt động chuẩn và toàn bộ cảm biến giả lập phát đúng hệ tọa độ TF2.
@@ -48,7 +48,7 @@ Capstone B ở chương 11 sẽ sử dụng chính môi trường mô phỏng v�
 
 **Đối chiếu sim-to-real.** Điền đủ ba dòng đạt/không đạt theo bài 10-05, kèm ít nhất một số đo thực tế hoặc xác nhận loại bỏ `use_sim_time` trên tệp launch robot thật.
 
-### Khung giải thích (nên đọc chậm): Bài test "Đổi công tắc không đổi mã" (Sim/Real Parity Check)
+### Giải thích: Bài test "Đổi công tắc không đổi mã" (Sim/Real Parity Check)
 
 Để chứng minh kiến trúc Chương 10 đã đạt chuẩn, hãy thực hiện đúng bài test 3 bước với cùng một script chạy hình vuông (`square_test.py` chỉ gửi `/cmd_vel` và đọc `/odom`):
 1. Chạy `sim_bringup` → chạy `square_test.py` → xác nhận xe vẽ hình vuông trong Gazebo và quay về gần điểm xuất phát.

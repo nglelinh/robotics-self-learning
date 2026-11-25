@@ -25,7 +25,7 @@ By the end of this lesson you will be able to read a four-band resistor as digit
 
 You need Ohm's law from the first lesson, especially $I = V/R$ and the reason a status LED uses about 180 Ω rather than whatever cylinder was nearest the iron. You need the meter's ohms habit from the previous lesson: unpowered part, red lead in the voltage/ohms jack, not the current jack. No SMD soldering is required. If your kit is all through-hole, the SMD section is still worth reading, because the same codes are printed on the small parts already soldered to an ESP32 board and a TB6612 module.
 
-## Background Knowledge Map: Scientific Notation Encoding, E-Series Values, and Tolerance Propagation
+## Key ideas: Scientific Notation Encoding, E-Series Values, and Tolerance Propagation
 
 Behind resistor markings lies an elegant engineering numbering system:
 
@@ -125,7 +125,7 @@ You should see meter readings inside the tolerance window for intact, correctly 
 
 Safety: never measure ohms on a powered rail, a battery, or the VM pin of a motor driver. A 2S pack is not a resistor. Keep the red lead out of the current jack so a later voltage check on the 3.3 V pin is not a short.
 
-## Deep-Dive Explanation (Read Slowly): Decoding Both Color Bands and SMD Codes — Plus Worst-Case Divider Drift
+## Explanation: Decoding Both Color Bands and SMD Codes — Plus Worst-Case Divider Drift
 
 Follow this 4-step decoding habit (and always confirm with your multimeter when bands look ambiguous):
 

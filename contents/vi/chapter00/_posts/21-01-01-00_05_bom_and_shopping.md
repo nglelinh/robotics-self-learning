@@ -25,13 +25,13 @@ Bạn chỉ cần chuẩn bị sẵn công cụ ghi chép và quyết định ch
 
 Đi mua linh kiện robot lần đầu mà không có bảng vật tư (**BOM — Bill of Materials**) rất giống việc đi siêu thị khi đang đói mà không có danh sách: bạn mang về một túi đầy bo mạch và cảm biến lẻ tẻ, nhưng khi ngồi lắp mới phát hiện mạch lái động cơ làm tụt mất 2 volt của pin, còn đầu nối pin lại không khớp với công tắc! Đọc hiểu BOM bằng con mắt kỹ sư giúp bạn chọn đúng từng cụm linh kiện tương thích điện áp, dòng điện và cơ khí ngay từ đầu.
 
-## Bản đồ kiến thức nền: Tư duy Hệ thống đằng sau một Bảng BOM Robot
+## Kiến thức cần nhớ: Tư duy Hệ thống đằng sau một Bảng BOM Robot
 
 1. **Chuỗi Năng lượng (Pin → Cầu chì → Công tắc → Buck 5 V → Vi điều khiển & Driver):** Mọi linh kiện trên xe phải cùng nằm trong một "ngân sách điện áp và dòng điện" khép kín — điện áp pin phải lớn hơn điện áp định mức động cơ cộng sụt áp driver, nhưng nhỏ hơn giới hạn tối đa của mạch hạ áp.
 2. **Hiệu suất Mạch lái Động cơ (BJT L298N vs. MOSFET TB6612FNG):** Không phải cầu H nào cũng giống nhau! Mạch dùng transistor lưỡng cực cũ (L298N) sụt áp tới $$2\text{ V}$$ và tỏa nhiệt dữ dội, trong khi mạch dùng MOSFET hiện đại (TB6612FNG / DRV8833) có điện trở mở $$R_{\text{DS(on)}}$$ cực nhỏ, giữ pin bền hơn và xe khỏe hơn hẳn.
 3. **Quản lý Rủi ro Mua sắm theo Đợt:** Tách BOM thành các đợt tương ứng với từng chương học giúp bạn kiểm chứng từng khối hoạt động trước khi chi tiền nâng cấp lên SBC và LiDAR.
 
-### Ví dụ cầm tay chỉ việc: So sánh tổn hao nhiệt L298N vs. TB6612FNG và Tính thời lượng pin 2S
+### Ví dụ làm từng bước: So sánh tổn hao nhiệt L298N vs. TB6612FNG và Tính thời lượng pin 2S
 
 **Phần A — Tổn hao công suất trên mạch lái khi kéo dòng $$I = 1.0\text{ A}$$ (2 động cơ chạy cùng lúc):**
 - **L298N (cầu H BJT, sụt áp $$V_{\text{drop}} \approx 2.0\text{ V}$$):**
@@ -51,7 +51,7 @@ $$
 t_{\text{chạy}} = \frac{2.2\text{ Ah} \times 0.85}{0.8\text{ A}} \approx \mathbf{2.34\text{ giờ}}.
 $$
 
-### Khung giải thích: 4 bước rà soát bảng BOM trước khi nhấn nút đặt hàng (nên đọc chậm)
+### Giải thích: 4 bước rà soát bảng BOM trước khi nhấn nút đặt hàng
 
 1. **Bước 1 — Khớp mức logic giữa MCU và ngoại vi:** ESP32/Pico dùng logic **3,3 V**; nếu mua cảm biến xuất 5 V (như HC-SR04 bản cũ), bắt buộc phải có sẵn điện trở chia áp hoặc mạch chuyển mức trong BOM.
 2. **Bước 2 — Kiểm tra dòng hãm trục (stall current) của động cơ:** Driver động cơ và cầu chì phải chịu được dòng khởi động/kẹt bánh, không chỉ dòng không tải.

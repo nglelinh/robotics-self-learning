@@ -15,7 +15,7 @@ Thời lượng: **~70 phút**. Mục kiểm tra cuối chương này yêu cầu
 
 Kết thúc Chương 09, bạn đã chuyển từ lập trình đơn lẻ trên MCU sang vận hành trọn vẹn một ngăn xếp phần mềm **ROS 2 Jazzy** trên Linux: có workspace sạch, có launch file tham số hóa, có cây hệ tọa độ TF2 và mô hình URDF hiển thị trực tiếp trên RViz2. Danh sách nghiệm thu này đảm bảo mọi mảnh ghép đã khớp nhau chặt chẽ trước khi bước sang mô phỏng Gazebo và cầu nối phần cứng ở Chương 10.
 
-## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Ngăn xếp ROS 2 (Chương 09)
+## Kiến thức cần nhớ: Ba tiêu chuẩn nghiệm thu Ngăn xếp ROS 2 (Chương 09)
 
 1. **Tính tự động & Tái lập bằng một lệnh Launch**:
    Toàn bộ hệ thống (driver/mô phỏng, `robot_state_publisher`, RViz2) khởi chạy sạch sẽ từ một tệp launch duy nhất kèm cấu hình YAML.
@@ -50,7 +50,7 @@ Gazebo Harmonic ở chương 10 sẽ khởi chạy trực tiếp trên đồ th�
 
 **Cây tọa độ TF.** Lệnh `ros2 run tf2_ros tf2_echo base_link <frame>` phải in ra phép tịnh tiến theo đơn vị mét. Nếu xuất hiện hai publisher trên cùng một cạnh thì chưa đạt. Nếu bạn chủ động xoay góc yaw $90^\circ$, giá trị quaternion in ra phải xấp xỉ $(0,\ 0,\ 0{,}707,\ 0{,}707)$.
 
-### Khung giải thích (nên đọc chậm): Bộ 4 lệnh kiểm tra nhanh "Sức khỏe ROS 2" trong 60 giây
+### Giải thích: Bộ 4 lệnh kiểm tra nhanh "Sức khỏe ROS 2" trong 60 giây
 
 Trước khi ký duyệt Chương 09, chạy đúng 4 lệnh sau và đối chiếu kỳ vọng:
 

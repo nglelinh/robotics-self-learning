@@ -15,7 +15,7 @@ Thời lượng: **~150 phút** cho phần mô phỏng, cộng thêm một buổ
 
 Mọi mảnh ghép từ Chương 08 đến Bài 11-01 hội tụ tại đây: lần đầu tiên chiếc xe Capstone của bạn tự chạy quanh một không gian chưa biết (trong Gazebo hoặc phòng lab thật), quét LiDAR liên tục và **tự dựng nên tấm bản đồ 2D hoàn chỉnh** bằng `slam_toolbox`. Đây là bài kiểm chứng khắt khe nhất cho chất lượng odometry, cây TF2 và cách lái thu thập dữ liệu của bạn.
 
-## Bản đồ kiến thức nền: Ba trụ cột Thực chiến Dựng bản đồ SLAM (Capstone B)
+## Kiến thức cần nhớ: Ba trụ cột Thực chiến Dựng bản đồ SLAM (Capstone B)
 
 1. **Chuỗi Dữ liệu Đầu vào Sạch (`/scan` + `/odom` + `/tf`)**:
    `slam_toolbox` yêu cầu tia `/scan` gắn đúng khung `laser_frame` đã nối vào `base_link`, odometry không bị ngược dấu $$\omega$$ và đồng bộ thời gian chuẩn (`use_sim_time`).
@@ -91,7 +91,7 @@ Kiểm tra ảnh hướng trục quét (`rplidar-frame.png`) trong kho mã ngu�
 
 Kiểm tra dữ liệu quét bằng `ros2 topic echo /scan --once`: message hợp lệ phải có `angle_min`, `angle_increment` và mảng `ranges`. Việc xuất hiện một số giá trị `inf` là bình thường (tia vượt quá tầm đo tối đa); ngược lại, nếu toàn bộ mảng là `inf` hoặc toàn `0` thì cần kiểm tra lại cáp, tốc độ baud hoặc xem cửa sổ quét có bị che chắn không.
 
-### Khung giải thích (nên đọc chậm): Đọc nhanh tệp `map.yaml` và kiểm tra sai số tỉ lệ bản đồ bằng tay
+### Giải thích: Đọc nhanh tệp `map.yaml` và kiểm tra sai số tỉ lệ bản đồ bằng tay
 
 Sau khi lưu bản đồ bằng `map_saver_cli`, bạn nhận được `lab_map.pgm` (kích thước `400 × 300 pixel`) và `lab_map.yaml` với `resolution: 0.05` (mỗi pixel = `5 cm`):
 - Chiều rộng vật lý của vùng bản đồ: $$400 \times 0{,}05 = \mathbf{20{,}0\text{ m}}$$.

@@ -25,7 +25,7 @@ By the end of this lesson you will be able to name voltage, current, resistance,
 
 Arithmetic is enough if every number keeps its unit. A bare 0.008 might be 8 mA or a slipped decimal. The numbers can be finished on paper. A meter and a red LED, if you already have them, are for the lab. The next lesson names holes and jacks.
 
-## Background Knowledge Map: Ohm's Law, Kirchhoff's Laws, and Power Dissipation in Robot Circuits
+## Key ideas: Ohm's Law, Kirchhoff's Laws, and Power Dissipation in Robot Circuits
 
 Every DC circuit on your mobile robot obeys three compact physical laws:
 
@@ -163,7 +163,7 @@ You should see a clearly visible red glow, not a dazzling one. The voltage acros
 
 Safety: keep any chassis wheels off the table, do not connect a motor supply, and do not land VM or USB 5 V on a GPIO. One LED at a few milliamps is the whole experiment.
 
-## Deep-Dive Explanation (Read Slowly): Designing a 5 V → 3.3 V Sensor Divider and Checking Resistor Wattage
+## Explanation: Designing a 5 V → 3.3 V Sensor Divider and Checking Resistor Wattage
 
 Suppose you need to connect a 5 V sensor output (such as an HC-SR04 `ECHO` pin) to a 3.3 V ESP32 GPIO input without frying the pin. Walk through the four-step KVL/Ohm's law design:
 

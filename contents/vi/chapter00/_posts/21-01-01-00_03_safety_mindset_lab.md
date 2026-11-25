@@ -25,13 +25,13 @@ Từ bài 00-01 và 00-02, bạn đã nắm rõ quy tắc dừng PWM sau 300 ms 
 
 Một viên pin Li-ion 18650 nhỏ gọn nằm lọt trong lòng bàn tay trông có vẻ vô hại — cho đến khi hai sợi dây đỏ và đen vô tình chạm nhau trên mặt bàn lộn xộn vụn thiếc hàn. Trong chưa đầy một giây, dòng điện vọt qua ngưỡng hàng chục ampe, lớp vỏ nhựa bốc khói và mạch vi điều khiển cháy rụi! **Tư duy an toàn phòng lab** không phải là danh sách nội quy nhàm chán; đó là kỹ năng phòng thủ bằng vật lý giúp bạn bảo vệ đôi mắt, bàn tay và chính ví tiền của mình.
 
-## Bản đồ kiến thức nền: Vật lý của Sự cố Điện và An toàn Pin Lithium
+## Kiến thức cần nhớ: Vật lý của Sự cố Điện và An toàn Pin Lithium
 
 1. **Ngắn mạch & Công suất nhiệt Joule ($$P = I^2 R = V^2 / R$$):** Khi hai cực nguồn chạm trực tiếp, điện trở mạch giảm xuống chỉ còn nội trở pin $$r$$ (vài chục mili-ohm), đẩy dòng điện và nhiệt lượng tăng vọt theo bình phương dòng điện!
 2. **An toàn Hóa học Pin Lithium (Li-ion / LiPo):** Pin lithium có mật độ năng lượng rất cao và chất điện phân dễ cháy. Xả sâu dưới $$3.0\text{ V/cell}$$, sạc quá $$4.2\text{ V/cell}$$ hoặc ngắn mạch đều có thể gây phồng pin và thoát nhiệt mất kiểm soát (*thermal runaway*).
 3. **Trình tự cấp nguồn phân tầng (Power-On Sequence):** Luôn kiểm tra thông mạch nguồn–GND ở trạng thái tắt pin, cấp nguồn qua cổng USB giới hạn dòng 500 mA trước, rồi mới đóng cầu chì và bật công tắc pin động cơ.
 
-### Ví dụ cầm tay chỉ việc: Tính dòng ngắn mạch của bộ pin 2S 18650
+### Ví dụ làm từng bước: Tính dòng ngắn mạch của bộ pin 2S 18650
 
 Xét một bộ pin 2S Li-ion sạc đầy có điện áp $$V = 2 \times 4.2\text{ V} = \mathbf{8.4\text{ V}}$$ và tổng nội trở (2 cell + dây dẫn ngắn) chỉ khoảng $$r = 0.08\ \Omega$$. Nếu hai đầu dây nguồn vô tình chập nhau không qua cầu chì:
 
@@ -45,7 +45,7 @@ $$
 
 Gần **900 watt** nhiệt tỏa ra ngay trong hai viên pin và sợi dây đồng mảnh — tương đương một chiếc bàn ủi điện dồn vào một điểm tiếp xúc 2 mm! Giờ lắp nối tiếp một **cầu chì 5 A** sát cực dương pin: ngay khi dòng vượt 10 A, dây chì chảy đứt trong vài mili-giây, ngắt hoàn toàn mạch trước khi pin kịp nóng lên!
 
-### Khung giải thích: Quy trình 4 bước cấp nguồn an toàn không bao giờ bỏ qua (nên đọc chậm)
+### Giải thích: Quy trình 4 bước cấp nguồn an toàn không bao giờ bỏ qua
 
 1. **Bước 1 — Dọn sạch mặt bàn kim loại trước khi mở công tắc:** Vụn chân linh kiện, tua-vít hay kẹp kim loại nằm dưới gầm bo mạch là nguyên nhân số 1 gây chập mạch bất ngờ.
 2. **Bước 2 — Đo thông mạch `VCC–GND` khi chưa có điện:** Dùng thang đo thông mạch/Ohm của đồng hồ vạn năng; nếu kêu bíp liên tục ($$R < 5\ \Omega$$), tuyệt đối *không* cấp nguồn cho đến khi tìm ra điểm chạm!

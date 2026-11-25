@@ -15,7 +15,7 @@ Thời lượng ước tính: **70–90 phút**, bao gồm thời gian đo trự
 
 Nhìn thoáng qua, khung xe robot vi sai hai bánh trông chỉ như một tấm nhựa phẳng gắn hai động cơ và một bánh đa hướng (caster). Nhưng chỉ cần bạn đặt cục pin nặng lệch về phía sau vài centimet, robot bỗng mất bám đường, bánh chủ động quay tít tại chỗ khi tăng tốc, hoặc chúi mũi xuống sàn mỗi khi phanh gấp! **Giải phẫu khung robot** chính là bài toán cân bằng cơ học giữa vị trí trọng tâm (CoM), khoảng sáng gầm, độ cứng vững và cách bố trí không gian cho điện tử – cảm biến.
 
-## Bản đồ kiến thức nền: Trọng tâm, Phân bổ tải trọng và Hình học khung vi sai
+## Kiến thức cần nhớ: Trọng tâm, Phân bổ tải trọng và Hình học khung vi sai
 
 ### 1. Phân bổ trọng lượng giữa trục bánh chủ động và bánh caster
 Trên khung 3 điểm tựa (2 bánh chủ động + 1 bánh caster), tải trọng đè lên trục chủ động quyết định trực tiếp **lực ma sát bám tối đa** $$F_{\max} = \mu N_{\text{drive}}$$. Nếu đặt trọng tâm quá gần bánh caster, bánh chủ động bị nhẹ hẫng và trượt quay; ngược lại nếu đặt quá sát (hoặc vượt qua) trục bánh chủ động, robot dễ bị bốc đầu/chúi mũi khi tăng giảm tốc đột ngột. Vị trí lý tưởng thường đặt trọng tâm nằm trong vùng **60%–75% tải trọng dồn lên trục chủ động**.
@@ -26,7 +26,7 @@ Khung robot tốt chia rõ các tầng chức năng: tầng đáy nặng nhất 
 ### 3. Trụ đồng (Standoff), độ đồng phẳng và khoảng sáng gầm
 Khung bị vặn xoắn dù chỉ $$2\text{ mm}$$ sẽ làm một bánh chủ động nhấc nhẹ khỏi sàn khi qua gờ gạch, phá hỏng hoàn toàn odometry. Giữ trục hai bánh đồng trục, chọn khoảng sáng gầm phù hợp mặt sàn (thường $$10\text{–}20\text{ mm}$$ trong nhà) và dùng trụ đồng liên kết cứng là tiêu chuẩn cơ khí cơ bản.
 
-### Khung giải thích: Cầm tay tính phân bổ tải trọng bánh chủ động và gia tốc tối đa trước khi trượt bánh (nên đọc chậm)
+### Giải thích: Cầm tay tính phân bổ tải trọng bánh chủ động và gia tốc tối đa trước khi trượt bánh
 
 Xét khung robot vi sai nặng **$$M = 2{,}0\text{ kg}$$** (trọng lượng $$W = 2{,}0 \times 9{,}81 = 19{,}62\text{ N}$$), khoảng cách từ trục bánh chủ động phía trước tới bánh caster phía sau là **$$L = 16\text{ cm}$$**. Bạn bố trí pin sao cho trọng tâm (CoM) nằm cách trục bánh chủ động **$$a = 4\text{ cm}$$** về phía caster (cách caster $$b = 12\text{ cm}$$):
 

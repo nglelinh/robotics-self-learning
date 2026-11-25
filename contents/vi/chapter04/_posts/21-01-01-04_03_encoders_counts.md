@@ -15,7 +15,7 @@ Thời lượng: **75–90 phút**. Phần lớn thời gian dành cho việc t�
 
 Nếu bạn nhắm mắt bước đi trong phòng tối, làm sao bạn biết mình đã đi được bao xa? Bạn đếm số bước chân của chính mình! Với robot di động, **encoder** gắn sau đuôi trục động cơ chính là "bộ đếm bước chân" cơ điện tử đó: mỗi khi bánh xe quay thêm một góc nhỏ li ti, encoder phát ra một xung điện để vi điều khiển cộng dồn thành quãng đường và vận tốc (**odometry**). Tuy nhiên, giống như việc đi trên sàn trơn khiến số bước chân không còn khớp với quãng đường thực, hiểu sâu về encoder nghĩa là nắm cả độ phân giải xung lẫn nguyên nhân khiến sai số odometry tích lũy dần theo thời gian.
 
-## Bản đồ kiến thức nền: Từ xung vuông cầu phương đến odometry bánh xe
+## Kiến thức cần nhớ: Từ xung vuông cầu phương đến odometry bánh xe
 
 ### 1. Giải mã cầu phương (Quadrature Decoding 4×) và chiều quay
 Một encoder quang học hoặc từ tính (Hall) chuẩn có hai kênh **A** và **B** lệch pha nhau đúng $$90^\circ$$ (một phần tư chu kỳ). Nếu chỉ đếm cạnh lên của kênh A, bạn không biết bánh đang tiến hay lùi. Khi kết hợp cả hai kênh A và B: kênh A đi trước B báo hiệu quay thuận, B đi trước A báo hiệu quay nghịch. Đếm cả cạnh lên lẫn cạnh xuống trên cả A và B (**chế độ 4×**) giúp tăng độ phân giải góc lên gấp **4 lần** so với chỉ số PPR gốc trên trục động cơ.
@@ -26,7 +26,7 @@ Một encoder quang học hoặc từ tính (Hall) chuẩn có hai kênh **A** v
 ### 3. Bản chất tích phân của Odometry và sai số trôi tích lũy
 Từ số xung $$\Delta N$$, ta tính quãng đường bánh xe $$\Delta s = \frac{\Delta N}{N_{\text{rev}}} \pi D$$. Vì vị trí $$(x, y, \theta)$$ là tổng tích phân của hàng nghìn bước nhỏ liên tiếp, chỉ cần sai số đường kính bánh xe $$1\%$$ hay một cú trượt bánh thoáng qua cũng khiến sai số vị trí lệch hàng chục centimet sau vài mét — lý do odometry luôn cần kết hợp thêm IMU hoặc LiDAR/camera.
 
-### Khung giải thích: Cầm tay tính độ phân giải odometry và vận tốc bánh xe từ số xung thực (nên đọc chậm)
+### Giải thích: Cầm tay tính độ phân giải odometry và vận tốc bánh xe từ số xung thực
 
 Giả sử robot dùng động cơ DC có encoder **11 PPR** gắn ở trục sau động cơ, qua hộp số giảm tốc tỉ số **$$G = 30{:}1$$**, chạy giải mã cầu phương **4×**, lắp bánh xe đường kính **$$D = 65\text{ mm}$$**:
 

@@ -27,7 +27,7 @@ You will **say** what each Wave 1 tool is for, and **state** the observation tha
 
 The power-up card from lesson 00-03 exists, at least on paper. You know motor VM is not the 3.3 V pin, and you know an iron needs a stand and eye protection before it needs a plug. Chapter 01 is where probing becomes a measured lab. Today you are learning which tool answers which question, so that lab is not a walk to the shop in the middle of an exercise.
 
-## Background Knowledge Map: Metrology, Measurement Loading, and Mechanical Precision
+## Key ideas: Metrology, Measurement Loading, and Mechanical Precision
 
 Three foundational measurement concepts govern every tool on your bench:
 
@@ -121,7 +121,7 @@ $$
 
 đồng. With the UT33D+ the empty-drawer total is 494000 ₫. Quân writes both figures, dated 23 Sep 2026, and does not order a scope.
 
-## Deep-Dive Explanation (Read Slowly): How a 1 mm Caliper Error Propagates into Odometry Drift
+## Explanation: How a 1 mm Caliper Error Propagates into Odometry Drift
 
 Why do we bother owning vernier calipers instead of eyeballing a wheel with a plastic ruler? Let's trace the error propagation step by step:
 

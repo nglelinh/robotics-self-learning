@@ -24,7 +24,7 @@ You will define a vision-language-action model as a map from an image plus a tex
 You can read a project page. Lessons 12-01 through 12-03 gave you dataset keys, a chunk, and a reason not to average two demonstrations. Chapter 09's `cmd_vel` is still `linear.x` in m/s and `angular.z` in rad/s. Chapter 11's camera, if you have one, is a sensor on your base, not a wrist camera on a parallel gripper. A GPU-less laptop is the expected machine.
 
 
-## Background Knowledge Map: Pretrained VLM Backbones, Action Tokenization, and Hierarchical System 1/2 Control
+## Key ideas: Pretrained VLM Backbones, Action Tokenization, and Hierarchical System 1/2 Control
 
 Understanding modern VLAs (such as RT-2, OpenVLA, and $$\pi_0$$) connects three architectural ideas:
 
@@ -69,7 +69,7 @@ One number makes the embodiment concrete. Your bridge accepts two floats per tic
 
 RT-2's laptop cell, so the expected answer is visible before you copy it: training RT-2 at home is no. Co-fine-tuning the vision-language backbones those papers start from is not a classroom machine. Reading [arXiv:2307.15818](https://arxiv.org/abs/2307.15818) is the whole assignment if you pick that column.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Calculating Action-Token Quantization Error in a VLA
+### Explanation: Hand-Calculating Action-Token Quantization Error in a VLA
 
 Many autoregressive VLAs (like OpenVLA) discretize each continuous action dimension (e.g., end-effector delta $$\Delta x \in [-0.05,\ +0.05]\ \text{m}$$) into $$B = 256$$ uniform bins mapped onto the vocabulary's least-used tokens. Let us check the exact spatial precision and bandwidth:
 

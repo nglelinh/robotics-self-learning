@@ -25,13 +25,13 @@ Bạn chỉ cần biết tạo thư mục và cập nhật nội dung vào `note
 
 Trong tuần đầu làm dự án robot, bạn chỉ có một file `blink.ino` duy nhất nên lưu ở đâu cũng thấy gọn. Nhưng đến tuần thứ tám — khi đã có firmware đọc encoder, mã PID, file cấu hình chân, sơ đồ nối dây và nhật ký thử nghiệm — một thư mục lộn xộn kiểu `code_final_v3_fix2` sẽ khiến bạn nạp nhầm bản cũ làm xe chạy giật lùi mà không hiểu vì sao! Thiết lập **không gian làm việc (workspace) và chuỗi công cụ (toolchain)** bài bản ngay từ Chương 00 giúp mã nguồn của bạn tái lập được sau nhiều tháng.
 
-## Bản đồ kiến thức nền: Chuỗi công cụ (Toolchain) Biên dịch Nhúng hoạt động ra sao?
+## Kiến thức cần nhớ: Chuỗi công cụ (Toolchain) Biên dịch Nhúng hoạt động ra sao?
 
 1. **Biên dịch chéo (Cross-Compilation):** Máy tính của bạn dùng CPU x86_64/ARM64, còn robot dùng vi điều khiển kiến trúc Xtensa/RISC-V (ESP32) hoặc ARM Cortex-M0+ (RP2040). Toolchain (PlatformIO / `arm-none-eabi-gcc` / `xtensa-esp32-elf-gcc`) biên dịch mã C++ trên PC thành tệp nhị phân `.bin` chạy được trên chip nhỏ.
 2. **Giao tiếp Nạp & Gỡ lỗi (USB-to-UART & Bootloader):** Khi bấm `Upload`, PC kéo chân `BOOT`/`EN` đưa chip vào chế độ Bootloader, bơm từng gói nhị phân qua cổng nối tiếp UART ở tốc độ baud cao rồi khởi động lại MCU.
 3. **Quản lý Phiên bản & Cây thư mục Chuẩn hóa:** Tách bạch rõ `firmware/`, `docs/` (sơ đồ chân, sổ lab), `cad/` và `ros2_ws/` giúp bạn đối chiếu ngay mã nguồn nào đã tạo ra kết quả đo nào.
 
-### Ví dụ cầm tay chỉ việc: Tính thời gian nạp Firmware qua cổng USB-UART
+### Ví dụ làm từng bước: Tính thời gian nạp Firmware qua cổng USB-UART
 
 Giả sử dự án ESP32 của bạn biên dịch ra tệp nhị phân `firmware.bin` có dung lượng **$$650\text{ KB}$$** ($$650 \times 1{,}024 = 665{,}600\text{ byte}$$). Giao thức UART chuẩn `8N1` cần **10 bit** cho mỗi byte (1 bit start + 8 bit dữ liệu + 1 bit stop):
 - Nếu nạp ở tốc độ mặc định chậm **115.200 bps** ($$11{,}520\text{ byte/s}$$):
@@ -43,7 +43,7 @@ Giả sử dự án ESP32 của bạn biên dịch ra tệp nhị phân `firmwar
   t_{\text{nạp}} = \frac{665{,}600}{46{,}080} \approx \mathbf{14.4\text{ giây}} \quad (\text{nhanh gấp }\mathbf{4\times}\text{!}).
   $$
 
-### Khung giải thích: 4 bước dựng Workspace bền vững cho cả khóa học (nên đọc chậm)
+### Giải thích: 4 bước dựng Workspace bền vững cho cả khóa học
 
 1. **Bước 1 — Dùng một thư mục gốc cố định không dấu, không khoảng trắng:** Ví dụ `robotics_lab/` thay vì `Đồ án Robot (mới)/` — nhiều công cụ CMake/PlatformIO và ROS 2 bị lỗi đường dẫn khi gặp khoảng trắng hoặc ký tự tiếng Việt có dấu.
 2. **Bước 2 — Khóa phiên bản thư viện trong `platformio.ini`:** Ghi rõ phiên bản thư viện cảm biến để 3 tháng sau mở lại dự án vẫn biên dịch ra đúng tệp nhị phân ban đầu.

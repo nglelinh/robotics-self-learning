@@ -24,7 +24,7 @@ By the end of this lesson you can separate M2, M3, and M4 screws by measuring th
 You can use a caliper or, failing that, a known nut as a gauge (Chapter 01 measuring habits). You know the chassis from Lesson 01 has wheels on motor shafts, and that those shafts will be asked to report honest rotation to an encoder later.
 
 
-## Background Knowledge Map: Machine Elements, Preload Mechanics, and Shaft Power Transmission
+## Key ideas: Machine Elements, Preload Mechanics, and Shaft Power Transmission
 
 Mechanical joints are the physical boundary conditions of every robotics equation:
 
@@ -65,7 +65,7 @@ $$
 
 that the robot never traveled. One missed flat, one phantom 20 cm, every time the torque reverses and the hub clicks.
 
-### Deep-Dive Explanation (Read Slowly): Hand-Checking Set-Screw Torque Transmission on a D-Shaft
+### Explanation: Hand-Checking Set-Screw Torque Transmission on a D-Shaft
 
 Why does seating a set screw squarely onto the D-flat matter so much more than tightening it onto a round shaft? Let us compare the two mechanics quantitatively.
 

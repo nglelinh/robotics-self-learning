@@ -23,19 +23,19 @@ Danh sách này kiểm chứng kết quả từ bài 1 đến bài 5: vòng lặ
 
 Chương 03 là bước ngoặt biến bo mạch thụ động thành một "bộ não nhúng" thực thụ biết đọc nút nhấn chống dội, phát xung PWM không rít, đếm xung ngắt tốc độ cao và chuyển trạng thái có kỷ luật. **Checklist Chương 03** giúp bạn kiểm chứng độ mượt thời gian thực (*jitter*, tốc độ đáp ứng) của toàn bộ tầng firmware trước khi nối các cảm biến bus số I2C/SPI/UART ở Chương 04.
 
-## Bản đồ kiến thức nền: Kiểm chứng Tính Thời gian thực của Firmware (Firmware Verification)
+## Kiến thức cần nhớ: Kiểm chứng Tính Thời gian thực của Firmware (Firmware Verification)
 
 1. **Đo Độ giật Chu kỳ (Loop Jitter):** Một vòng lặp thiết kế ở 50 Hz ($$20\text{ ms}$$) chỉ đạt chuẩn khi khoảng cách giữa các lần thực thi thực tế tập trung chặt quanh $$20\text{ ms}$$ (sai lệch $$< 5\text{–}10\%$$) mà không có gai vọt bất thường.
 2. **Kiểm chứng Xung & Ngắt Bằng Con số:** Kiểm tra tỷ lệ mất xung encoder khi quay tay đúng 1 vòng bánh xe (so sánh số xung đếm được với số khe đĩa lý thuyết).
 3. **Kiểm thử Chuyển Trạng thái & Dừng Khẩn cấp (E-Stop):** Xác minh mọi mũi tên trong bảng FSM hoạt động đúng như thiết kế và trạng thái `ESTOP` luôn thắng mọi trạng thái khác.
 
-### Ví dụ cầm tay chỉ việc: Soi nhật ký Serial để phát hiện lỗi độ giật (Jitter) trong vòng lặp 50 Hz
+### Ví dụ làm từng bước: Soi nhật ký Serial để phát hiện lỗi độ giật (Jitter) trong vòng lặp 50 Hz
 
 Xét hai đoạn nhật ký dấu thời gian `t_ms` in ra từ hai bản firmware cùng đặt chu kỳ mục tiêu $$20\text{ ms}$$:
 - **Firmware ĐẠT:** `t_ms = [1000, 1020, 1041, 1060, 1080]` → các khoảng chu kỳ $$\Delta t = [20,\ 21,\ 19,\ 20]\text{ ms}$$. Trung bình $$20.0\text{ ms}$$, độ giật cực đại chỉ **$$\pm 1\text{ ms}$$ (5%)**!
 - **Firmware CHƯA ĐẠT:** `t_ms = [1000, 1020, 1185, 1205, 1225]` → xuất hiện một gai **$$\Delta t = 165\text{ ms}$$** (vọt gấp **8,25 lần** chu kỳ chuẩn!). Nguyên nhân thường là một hàm đọc cảm biến bị treo chờ timeout, một lần in Serial dài làm đầy bộ đệm, hoặc một câu lệnh `delay()` bị bỏ quên trong nhánh phụ!
 
-### Khung giải thích: 4 bước nghiệm thu sạch tầng Firmware Chương 03 (nên đọc chậm)
+### Giải thích: 4 bước nghiệm thu sạch tầng Firmware Chương 03
 
 1. **Bước 1 — Chạy kiểm thử xoay bánh xe 1 vòng thủ công:** Đánh dấu 1 vạch bút trắng trên bánh xe, xoay tay đúng 1 vòng $$360^\circ$$ và kiểm tra biến `ticks` khớp số xung lý thuyết (ví dụ 20 hoặc 80 xung) với sai số $$\le 1$$ xung.
 2. **Bước 2 — Kiểm tra chống dội bằng 10 lần bấm nhanh liên tiếp:** Đếm trên Serial phải tăng đúng từ 0 lên 10, không nhảy cóc thành 13 hay 17.

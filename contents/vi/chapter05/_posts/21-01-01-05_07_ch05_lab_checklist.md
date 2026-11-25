@@ -15,7 +15,7 @@ Bài này là mốc kiểm tra hoàn thành Chương 05 trước khi chuyển sa
 
 Trong phòng lab robotics, khoảnh khắc căng thẳng nhất luôn là lúc cấp nguồn lần đầu cho tầng cơ cấu chấp hành: chỉ một sợi dây nguồn cắm ngược cực hay một mức PWM khởi động sai cũng đủ làm robot phóng thẳng khỏi mặt bàn hoặc bốc khói mạch driver. Checklist Chương 05 đóng vai trò là quy trình **nghiệm thu tầng truyền động** bài bản — từ kiểm tra ngân sách dòng đỉnh, đo vùng chết ma sát tĩnh (deadband), cho đến bài test "kê bánh trên không" (wheels-off-ground) trước khi đặt robot xuống sàn.
 
-## Bản đồ kiến thức nền: Nghiệm thu hệ thống truyền động an toàn
+## Kiến thức cần nhớ: Nghiệm thu hệ thống truyền động an toàn
 
 ### 1. Ngân sách dòng đỉnh (Peak Current Budget) và tách nhánh nguồn
 Động cơ và servo tiêu thụ dòng xung lớn hơn nhiều so với dòng trung bình khi khởi động hoặc đổi chiều đột ngột. Tính tổng dòng đỉnh của toàn hệ thống (động cơ + servo + vi điều khiển + cảm biến) và cộng thêm biên an toàn $$30\%$$ là bước bắt buộc để chọn đúng pin, cầu chì và mạch hạ áp (buck converter).
@@ -26,7 +26,7 @@ Trong phòng lab robotics, khoảnh khắc căng thẳng nhất luôn là lúc c
 ### 3. Quy trình kê bánh (Wheels-Off-Ground) và kiểm tra chiều quay chuẩn
 Luôn kê gầm robot lên khối gỗ hoặc hộp giấy sao cho bánh quay tự do trên không khi chạy thử code lần đầu. Xác nhận: lệnh tiến làm *cả hai bánh* quay về phía trước và encoder *cả hai bên* cùng tăng giá trị dương!
 
-### Khung giải thích: Cầm tay lập ngân sách dòng đỉnh và bù vùng chết PWM cho xe lab 2 bánh (nên đọc chậm)
+### Giải thích: Cầm tay lập ngân sách dòng đỉnh và bù vùng chết PWM cho xe lab 2 bánh
 
 **Phần A — Cộng ngân sách dòng đỉnh của robot trước khi chọn nguồn:**
 - 2 động cơ DC truyền động (dòng tải nặng mỗi bên $$1{,}2\text{ A}$$): $$2 \times 1{,}2 = 2{,}4\text{ A}$$.

@@ -25,7 +25,7 @@ You will judge your own Chapter 04 notes against pass/fail measurements: an I2C 
 
 Lessons 04-01 through 04-06 are the work being signed. You need your `lab-notes.md`, the ID sheet from Lesson 04-02, and the numbers those lessons already computed: $$N$$ and $$r = 0.0325~\mathrm{m}$$ if you used the teaching wheel, the complementary step that lands on 9.889 degrees, the echo of 5.8 ms that is 99.5 cm, the divider at 3.33 V, and the 147 Mbit/s camera budget. Chapter 05 starts motors and H-bridges. It assumes this page is already honest, because a 5 V echo on a GPIO will still be a 5 V echo after a motor driver is wired beside it.
 
-## Background Knowledge Map: Right-Handed Coordinate Frames (REP-103), Calibration, and Multi-Sensor Synchronization
+## Key ideas: Right-Handed Coordinate Frames (REP-103), Calibration, and Multi-Sensor Synchronization
 
 Three robotics standards make Chapter 04 sensor data seamlessly compatible with both Capstone A and ROS 2:
 
@@ -144,7 +144,7 @@ A classmate finds an address, an $$N$$, a g-vector or a waiver, a range table or
 | Dry-run with no 3.33 V | The divider was skipped on paper too |
 | Camera sentence with no bit rate | The row fails |
 
-## Deep-Dive Explanation (Read Slowly): Calibrating Wheel Radius and Track Width with a 1-Meter Tape Measure
+## Explanation: Calibrating Wheel Radius and Track Width with a 1-Meter Tape Measure
 
 Even caliper-measured wheel diameters differ slightly from effective rolling diameters under chassis weight and tire compression. Calibrate your robot's true kinematic constants in four exact steps:
 

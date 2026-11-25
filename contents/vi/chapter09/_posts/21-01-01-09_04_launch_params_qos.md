@@ -15,7 +15,7 @@ Thời lượng: **~90 phút**.
 
 Một robot tự hành thực thụ thường có từ 8 đến 20 node chạy song song. Bạn không thể mở 15 cửa sổ terminal để gõ tay từng lệnh `ros2 run` kèm chục tham số mỗi lần khởi động! **Launch files** (viết bằng Python/YAML), hệ thống **Parameters** động và chính sách chất lượng dịch vụ **QoS (Quality of Service)** chính là bộ ba công cụ biến các node rời rạc thành một hệ thống robot vận hành tin cậy chỉ bằng một lệnh duy nhất.
 
-## Bản đồ kiến thức nền: Ba trụ cột Vận hành Hệ thống ROS 2
+## Kiến thức cần nhớ: Ba trụ cột Vận hành Hệ thống ROS 2
 
 1. **Launch System (Khởi chạy đồng bộ & Remapping)**:
    Khởi chạy nhiều node, nạp tệp cấu hình YAML chung và đổi tên topic (*remapping*) mà không phải sửa lại mã nguồn C++/Python.
@@ -155,7 +155,7 @@ ros2 topic echo /chatter --qos-reliability best_effort
 
 **Kết quả mong đợi:** chuỗi `data: hi` lập tức xuất hiện. Hãy ghi lại cặp lệnh này vào `lab-notes.md` để làm mẫu chẩn đoán cho tình huống "RViz không hiển thị dữ liệu quét laser" về sau.
 
-### Khung giải thích (nên đọc chậm): Ma trận tương thích QoS — Vì sao hai node cùng tên Topic nhưng KHÔNG nhận được tin?
+### Giải thích: Ma trận tương thích QoS — Vì sao hai node cùng tên Topic nhưng KHÔNG nhận được tin?
 
 Một lỗi "tàng hình" rất hay gặp trong ROS 2 là Publisher và Subscriber trùng tên topic 100%, không báo lỗi biên dịch, nhưng hoàn toàn không truyền tin cho nhau do **xung đột QoS Reliability**:
 

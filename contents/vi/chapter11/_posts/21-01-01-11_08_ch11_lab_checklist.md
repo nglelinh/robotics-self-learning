@@ -15,7 +15,7 @@ Thời lượng: **~50 phút**. Sau hai bài lab Capstone B, mục kiểm tra n�
 
 Chương 11 là cột mốc lớn đánh dấu chiếc robot của bạn đã chính thức đạt năng lực **tự hành hoàn chỉnh**: tự lập bản đồ bằng SLAM, tự định vị trên bản đồ bằng AMCL và tự hoạch định lộ trình tránh vật cản bằng Nav2. Danh sách kiểm tra này tổng hợp các tiêu chí định lượng để nghiệm thu Capstone B trước khi bước sang kỷ nguyên học robot hiện đại ở Chương 12.
 
-## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Hệ thống Tự hành (Chương 11)
+## Kiến thức cần nhớ: Ba tiêu chuẩn nghiệm thu Hệ thống Tự hành (Chương 11)
 
 1. **Chất lượng Bản đồ SLAM**:
    Bản đồ lưu ra có tường sắc nét, không bị nhân đôi (double walls), đóng vòng lặp chuẩn và sai số đo kích thước dưới 3–5%.
@@ -48,7 +48,7 @@ Chương 12 sẽ chuyển sang các chính sách học máy (policy), nhưng pol
 
 **An toàn.** Ghi nhận rõ có người túc trực ở công tắc nguồn pin trong lần đầu hạ bánh chạy tự hành; nếu đã hạ bánh mà thiếu xác nhận này thì tiêu chí Nav2 thực tế chưa đạt.
 
-### Khung giải thích (nên đọc chậm): Phiếu chấm điểm định lượng cho 3 vòng chạy tự hành Capstone B
+### Giải thích: Phiếu chấm điểm định lượng cho 3 vòng chạy tự hành Capstone B
 
 | Chỉ tiêu kiểm chứng | Ngưỡng ĐẠT | Cách đo trực tiếp |
 | :--- | :---: | :--- |

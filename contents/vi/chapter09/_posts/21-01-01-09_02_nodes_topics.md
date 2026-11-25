@@ -15,7 +15,7 @@ Thời lượng: **~75 phút**.
 
 Nếu bạn viết toàn bộ mã đọc LiDAR, chạy SLAM, tính đường đi và điều khiển động cơ vào một tệp `main.py` khổng lồ, chỉ cần camera bị treo một nhịp là cả động cơ cũng đứng hình theo. **ROS 2** giải quyết triệt để vấn đề đó bằng kiến trúc đồ thị tính toán phân tán: chia robot thành hàng chục tiến trình nhỏ độc lập gọi là **Node**, nói chuyện với nhau qua các kênh dữ liệu có kiểu định nghĩa chặt chẽ gọi là **Topic**.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Node và Topic trong ROS 2
+## Kiến thức cần nhớ: Ba trụ cột của Node và Topic trong ROS 2
 
 1. **Tách rời hoàn toàn (Decoupling) bằng Publish / Subscribe**:
    Node phát (`Publisher`) chỉ gửi thông điệp lên tên topic (ví dụ `/scan`) mà không cần biết có bao nhiêu node đang nghe; node nhận (`Subscriber`) đăng ký topic đó mà không phụ thuộc ngôn ngữ lập trình của bên phát (C++ nói chuyện tự nhiên với Python).
@@ -81,7 +81,7 @@ ros2 topic hz /cmd_vel
 
 **Kết quả mong đợi:** tần số xấp xỉ 5 Hz và robot không di chuyển vì chưa có node điều khiển động cơ nào đăng ký nghe topic này. Để chạy khoảng mười giây rồi nhấn Ctrl-C để dừng và ghi lại tần số đo được. Cầu nối ở chương 10 sẽ quy ước dừng xe nếu không nhận được message nào trong 300 ms. Ở tần số 5 Hz, chu kỳ giữa hai message là 200 ms — nằm gọn trong ngưỡng an toàn; ngược lại, ở 1 Hz chu kỳ lên tới 1000 ms khiến watchdog liên tục ngắt lệnh làm xe chạy giật cục. Đây là bài toán về thời gian và động học mà bạn hoàn toàn có thể kiểm chứng trước khi đặt robot xuống sàn.
 
-### Khung giải thích (nên đọc chậm): Tính tay ngân sách băng thông mạng Wi-Fi cho đồ thị 3 Topic của robot
+### Giải thích: Tính tay ngân sách băng thông mạng Wi-Fi cho đồ thị 3 Topic của robot
 
 Giả sử robot phát đồng thời 3 topic về laptop giám sát qua Wi-Fi:
 

@@ -27,7 +27,7 @@ Never test a motor driver for the first time with the robot sitting on the floor
 Lesson 07-01 left you a common ground, a fuse in the battery positive lead, and a buck at 5.0 V measured before the ESP32 was attached. Chapter 05 is the truth table: an H-bridge has a forward pair and a reverse pair, and both switches in one leg are a short. You can identify a TB6612 (STBY, PWMA, PWMB, AIN, BIN) or an L298N (ENA, ENB, INx, heatsink, 5 V jumper). Chapter 06 gave you $$b$$ and $$r$$, and it defined forward as the nose direction. A positive yaw in that chapter is the right wheel faster than the left, so the sign you discover today is the sign Chapter 08's PID and Chapter 09's topics will inherit. No ROS node is part of this lab.
 
 
-## Background Knowledge Map: PWM Average Voltage, Deadband Friction, and H-Bridge Control Logic
+## Key ideas: PWM Average Voltage, Deadband Friction, and H-Bridge Control Logic
 
 Driver bring-up translates digital GPIO pins into controlled mechanical motion through three core concepts:
 
@@ -66,7 +66,7 @@ With one tire in the air at PWM 70, a yellow TT motor often draws on the order o
 
 If you need a stall point, pinch the tire for one second, read the meter, and release. A seller stall of $$1.2~\mathrm{A}$$ at $$6~\mathrm{V}$$ is the order of magnitude, not a value to hold. At PWM 70 the stall current is lower than the full-voltage stall, and it still heats the winding and the tab. If the package smells, or you cannot touch the L298N tab or the TB6612, open the switch. The sentence for the next lesson: with your IN map, positive PWM rolls both tires forward, negative reverses them, and PWM 0 stops. That is the sign map.
 
-### Deep-Dive Explanation (Read Slowly): Predicting Motor Speed vs. PWM Duty and Deadband Voltage
+### Explanation: Predicting Motor Speed vs. PWM Duty and Deadband Voltage
 
 Suppose your 2S battery measures $$V_{\text{bat}} = 7.6\ \text{V}$$, your motor has armature resistance $$R_a = 4.5\ \Omega$$, torque/back-EMF constant $$K_e = K_t = 0.008\ \text{V}\cdot\text{s/rad}$$, and gearbox static friction torque reflected to the motor shaft is $$\tau_f = 0.0024\ \text{N}\cdot\text{m}$$.
 

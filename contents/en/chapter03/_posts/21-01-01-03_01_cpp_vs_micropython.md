@@ -25,7 +25,7 @@ By the end of this lesson you can keep one heartbeat alive in both C++ and Micro
 
 You already have a board that prints a climbing millisecond stamp and toggles an LED, from the Chapter 02 heartbeat. ESP32 students did that from PlatformIO; Pico students did it from the MicroPython REPL. You can change a pin number when the listing does not match the silk. You do not need PWM, interrupts, or a motor driver yet. What you are retiring is the habit at the bottom of that heartbeat: `delay(500)` or `time.sleep` for half a second was acceptable only while the sketch had nothing else to notice.
 
-## Background Knowledge Map: Compiled Native Code, Deterministic Latency, and Fixed-Point / Float Performance
+## Key ideas: Compiled Native Code, Deterministic Latency, and Fixed-Point / Float Performance
 
 Three computer-systems principles explain the real-world gap between C++ and MicroPython on microcontrollers:
 
@@ -142,7 +142,7 @@ Stay on the LED from Chapter 02. Do not add a motor, and do not wire a TB6612 in
 3. Insert `delay(200)` or `time.sleep(0.2)` once per pass. Watch the LED and the counter. The cooperative rate collapses, and a 300 ms silence can only be noticed on the 200 ms grid from the worked example.
 4. Remove the 200 ms call before you leave the bench. The file you keep is the non-blocking heartbeat. In your notes, record language, pin, iterations per second, and the sentence "a 200 ms sleep stops the robot at 400 ms."
 
-## Deep-Dive Explanation (Read Slowly): Quantifying Phase Lag Caused by Execution Latency & Jitter
+## Explanation: Quantifying Phase Lag Caused by Execution Latency & Jitter
 
 Why do robotics engineers obsess over 2 ms vs. 0.05 ms of loop latency? Because in feedback control, **pure time delay $$T_d$$ adds phase lag** that erodes stability margin! Trace the exact 4-step calculation:
 

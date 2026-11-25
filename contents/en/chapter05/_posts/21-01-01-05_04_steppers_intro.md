@@ -30,7 +30,7 @@ A stepper motor moves in counted angles. You tell it how many steps to take, and
 
 You can measure a small DC voltage, down near half a volt, with the meter black lead on ground. Ohm's law and the stall-current idea from the DC motor lesson transfer directly to "current in a coil." You do not need a stepper on the desk. A photo of an A4988 or DRV8825, plus the calculation, completes the lab. If you do have a bare NEMA17, you can count one revolution.
 
-## Background Knowledge Map: Electromagnetic Detents, Sinusoidal Microstepping, and Pull-Out Torque Curves
+## Key ideas: Electromagnetic Detents, Sinusoidal Microstepping, and Pull-Out Torque Curves
 
 Three physical ideas explain both the magic and the limits of stepper motors:
 
@@ -136,7 +136,7 @@ A written $$V_{ref}$$ target for 1.0 A with the resistor value you assumed, and 
 | Position drifts only when loaded | Missed steps. Lower the speed, raise current only up to the motor rating, or add an encoder. |
 | Meter shows VM on the pot | The red probe is on the wrong contact. Move to the wiper and measure to GND. |
 
-## Deep-Dive Explanation (Read Slowly): Computing Step Rate, Linear Resolution, and Microstepping Phase Currents
+## Explanation: Computing Step Rate, Linear Resolution, and Microstepping Phase Currents
 
 Let's calculate the exact step frequency and phase currents for a 1/16 microstepping NEMA-17 actuator in four steps:
 

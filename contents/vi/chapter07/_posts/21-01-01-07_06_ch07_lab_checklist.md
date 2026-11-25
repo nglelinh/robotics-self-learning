@@ -15,7 +15,7 @@ draft: false
 
 Capstone Chương 07 là cột mốc chuyển giao quan trọng nhất của nửa đầu khóa học: lần đầu tiên bạn sở hữu một con robot vật lý hoàn chỉnh có thể chạy ổn định, nhận lệnh có kiểm soát và tự dừng an toàn khi có sự cố — sẵn sàng để ở Chương 08–10 ta lắp thêm toán học TF2, điều khiển PID và hệ điều hành ROS 2 lên trên. Checklist Capstone giúp bạn nghiệm thu toàn diện cả 4 mặt: **an toàn điện, cơ khí, truyền thông teleop và hồ sơ log**.
 
-## Bản đồ kiến thức nền: Đánh giá độ tin cậy hệ thống tích hợp (System Integration)
+## Kiến thức cần nhớ: Đánh giá độ tin cậy hệ thống tích hợp (System Integration)
 
 ### 1. Thống kê độ tin cậy kênh truyền thông (Packet Delivery Ratio & Jitter)
 Trong hệ thống điều khiển không dây hoặc qua cáp USB gần động cơ DC, tỷ lệ mất gói trung bình (PDR) chưa kể hết câu chuyện — thứ gây kích hoạt Watchdog giả là **độ trễ biến thiên (jitter)** và số gói mất *liên tiếp* tối đa. Theo dõi cả PDR lẫn khoảng trống tối đa giữa hai gói (`max_gap_ms`) cho bức tranh sức khỏe kênh truyền đầy đủ.
@@ -26,7 +26,7 @@ Một robot Capstone đạt chuẩn luôn vượt qua đồng thời hai bài th
 ### 3. Tính tái lập (Reproducibility) và tài liệu bàn giao
 Một hệ thống chỉ thực sự "xong" khi người khác (hoặc chính bạn sau 1 tháng) đọc sơ đồ nối dây, bảng phân chân GPIO và tệp cấu hình là có thể bật lên chạy lại y hệt trong 5 phút.
 
-### Khung giải thích: Cầm tay kiểm tra chỉ số chất lượng kênh Teleop từ tệp log 10 giây (nên đọc chậm)
+### Giải thích: Cầm tay kiểm tra chỉ số chất lượng kênh Teleop từ tệp log 10 giây
 
 Trong bài chạy nghiệm thu kéo dài **10 giây**, máy tính gửi lệnh ở tần số **20 Hz** (chu kỳ danh định $$50\text{ ms}$$, tổng cộng **200 gói** đã gửi). Firmware đặt ngưỡng Watchdog **$$T_{\text{wd}} = 300\text{ ms}$$** và ghi nhận từ tệp log:
 - Tổng số gói hợp lệ (đúng checksum) nhận được: **198 gói** (mất 2 gói riêng lẻ không liên tiếp).

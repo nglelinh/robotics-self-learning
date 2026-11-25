@@ -25,7 +25,7 @@ By the end of this lesson you can separate a contact's mechanical bounce from a 
 
 The GPIO lab already wired a button from the pin to ground with the pull-up enabled, and it already rejected a change that had not been stable for 20 ms. That version polled. This lesson moves the "something happened" event into an interrupt and leaves the stability test in the loop you built in Lesson 1, the same non-blocking clock that replaced the [Chapter 02 `delay(500)` heartbeat]({% multilang_post_url contents/chapter02/02_04_blink_serial_hello %}). You need the button you already have. You do not need a new part, and you still do not connect a motor.
 
-## Background Knowledge Map: Hardware Interrupts, Contact Bounce Physics, and Atomic Concurrency
+## Key ideas: Hardware Interrupts, Contact Bounce Physics, and Atomic Concurrency
 
 Three low-level systems concepts keep interrupt-driven robot firmware rock-solid:
 
@@ -179,7 +179,7 @@ Use the button wiring from the GPIO lesson. USB only. No motor terminal on the p
 3. Do not "fix" the burst by putting `delay(20)` in `onFall`. Read the bad listing in the core section again and write one sentence in your notes: the wait belongs next to `millis()` or `ticks_diff`, not in the ISR.
 4. Optional: move the trigger to `CHANGE` and confirm that a sloppy stability test now also reacts to the release burst. The count should still grow by one per press if you only increment on stable LOW.
 
-## Deep-Dive Explanation (Read Slowly): Designing a Crash-Proof Encoder ISR and Software Debouncer
+## Explanation: Designing a Crash-Proof Encoder ISR and Software Debouncer
 
 Follow these four ironclad rules whenever you write an ISR in robotics firmware:
 

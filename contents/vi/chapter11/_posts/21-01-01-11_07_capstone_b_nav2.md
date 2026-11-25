@@ -15,7 +15,7 @@ Thời lượng: **~120 phút** cho phần mô phỏng, thêm một buổi trên
 
 Tấm bản đồ `lab_map.yaml` bạn vừa lưu giờ trở thành trí nhớ dài hạn cho robot. Trong bài Capstone B phần 2 này, bạn nạp bản đồ vào **Nav2**, cung cấp tư thế khởi đầu cho **AMCL**, rồi chỉ bằng một cú nhấp chuột đặt mũi tên `2D Goal Pose` trên RViz2 — chiếc xe tự tính đường đi, né vật cản phát sinh và tiến gọn vào vị trí đích.
 
-## Bản đồ kiến thức nền: Ba trụ cột Triển khai Điều hướng Tự hành Nav2 (Capstone B)
+## Kiến thức cần nhớ: Ba trụ cột Triển khai Điều hướng Tự hành Nav2 (Capstone B)
 
 1. **Tải Bản đồ & Khởi tạo AMCL (`map_server` + `amcl`)**:
    Đặt `2D Pose Estimate` gần đúng vị trí xe, sau đó lái nhích nhẹ để đám mây hạt AMCL co cụm chặt quanh đúng vị trí và hướng mũi xe trên bản đồ.
@@ -67,7 +67,7 @@ Tệp `.yaml` sinh ra sẽ trỏ tới ảnh `.pgm` tương ứng; trường `re
 
 Lưu ý rằng footprint mặc định của Nav2 không khớp chính xác kích thước khung xe Capstone, nên các mục tiêu sát cửa hẹp có thể bị từ chối. Chỉ nên tinh chỉnh tệp tham số sau khi đã chạy thành công một mục tiêu cơ bản ở khu vực trống.
 
-### Khung giải thích (nên đọc chậm): Tính nhanh khoảng cách phanh tối thiểu để đặt ngưỡng an toàn trong `nav2_params.yaml`
+### Giải thích: Tính nhanh khoảng cách phanh tối thiểu để đặt ngưỡng an toàn trong `nav2_params.yaml`
 
 Giả sử trong `nav2_params.yaml`, bạn đặt vận tốc tối đa $$v_{\max} = 0{,}40\text{ m/s}$$ và gia tốc hãm tối đa $$a_{\text{decel}} = 0{,}50\text{ m/s}^2$$, với độ trễ vòng điều khiển tổng $$t_{\text{trễ}} = 0{,}10\text{ s}$$:
 - Quãng đường xe đi thêm trong lúc chờ phản ứng trễ: $$s_{\text{trễ}} = v_{\max} \cdot t_{\text{trễ}} = 0{,}40 \times 0{,}10 = \mathbf{0{,}04\text{ m}}.$$

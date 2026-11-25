@@ -15,7 +15,7 @@ Thời lượng: **~40 phút**. Bất kỳ tệp checkpoint nào tải về cũn
 
 Danh sách nghiệm thu cuối cùng của khóa học tổng kết toàn bộ quy trình thực hành **Robot Learning** ở Chương 12 — từ việc kiểm tra vòng teleoperation ổn định, xuất bản bộ dữ liệu chuẩn `LeRobotDataset`, huấn luyện thành công chính sách bắt chước (ACT hoặc Diffusion Policy) cho tới đánh giá định lượng tỷ lệ thành công trên các lần thử nghiệm độc lập.
 
-## Bản đồ kiến thức nền: Ba tiêu chuẩn nghiệm thu Robot Learning (Chương 12)
+## Kiến thức cần nhớ: Ba tiêu chuẩn nghiệm thu Robot Learning (Chương 12)
 
 1. **Dữ liệu Chuẩn hóa & Tái lập được**:
    Dataset ghi đủ số lượt trình diễn yêu cầu, tần số khung hình ổn định, không lệch đồng bộ giữa camera và góc khớp, và đọc lại sạch bằng trình xem của `LeRobot`.
@@ -48,7 +48,7 @@ Hoàn thành các bài từ 12-01 đến 12-06. Xe Capstone vẫn giữ cặp h�
 
 **Thực hành tay SO-101.** Theo bài 12-06: có log cổng kết nối cùng một lần hiệu chỉnh/teleop, hoặc có ghi chú hoãn ghi rõ ngày (do chưa có phần cứng) đi kèm dataset card trên giấy. Việc mua tay máy không phải điều kiện bắt buộc để đạt.
 
-### Khung giải thích (nên đọc chậm): Cách báo cáo kết quả đánh giá chính sách Robot Learning đúng chuẩn khoa học
+### Giải thích: Cách báo cáo kết quả đánh giá chính sách Robot Learning đúng chuẩn khoa học
 
 Giả sử bạn đánh giá chính sách ACT vừa huấn luyện trên **10 lượt thử liên tiếp** (đặt khối vật thể ở 5 vị trí trong tập huấn luyện và 5 vị trí dịch lệch mới):
 

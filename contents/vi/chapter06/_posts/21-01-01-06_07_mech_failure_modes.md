@@ -15,7 +15,7 @@ Thời lượng ước tính: **60–80 phút**, bao gồm một lần kiểm tr
 
 Trong các cuộc thi robotics sinh viên, tỷ lệ robot dừng cuộc chơi vì *lỗi thuật toán* thực ra thấp hơn nhiều so với tỷ lệ dừng vì *lỗi cơ – điện cơ bản*: một đầu dây nguồn bị đứt ngầm sát mối hàn sau 50 lần gập mở, một bánh xe tự văng ra vì thiếu keo khóa ren, hay một dây tín hiệu bị kéo căng làm tuột giắc cắm giữa chừng. Nhận diện sớm các **chế độ hỏng hóc cơ khí (failure modes)** và thiết kế **chống kéo dây (strain relief)** giúp robot của bạn sống sót qua hàng trăm giờ chạy thử thay vì hỏng đúng hôm chấm đồ án.
 
-## Bản đồ kiến thức nền: Mỏi kim loại, Sụt áp dây dẫn và Quản lý bó dây (Harnessing)
+## Kiến thức cần nhớ: Mỏi kim loại, Sụt áp dây dẫn và Quản lý bó dây (Harnessing)
 
 ### 1. Đứt ngầm do mỏi uốn (Fatigue Fracture) và Chống kéo dây (Strain Relief)
 Đồng mềm chịu kéo thẳng khá tốt, nhưng nếu bị uốn đi uốn lại ngay tại đúng ranh giới cứng của **mối hàn thiếc** hoặc đầu chân giắc cắm, dây sẽ đứt gãy do mỏi chỉ sau vài chục chu kỳ. **Strain relief** (dùng dây rút cố định bó dây vào khung *trước* khi đi vào bo mạch, dùng ống co nhiệt bọc chân mối hàn, và giữ bán kính uốn tối thiểu $$R_{\min} \approx 8\text{–}10 \times D_{\text{dây}}$$) chuyển lực giật cơ học vào khung xe thay vì vào mối hàn mỏng manh.
@@ -26,7 +26,7 @@ Các vết nứt trên tấm mica hay chi tiết in 3D gần như luôn bắt đ
 ### 3. Chọn sai tiết diện dây (AWG) — nguyên nhân ngầm gây sụt áp và reset vi điều khiển
 Dây jumper breadboard (26–28 AWG) có điện trở rất lớn, chỉ chịu được vài trăm mA. Dùng dây jumper mảnh để cấp dòng $$3\text{ A}$$ cho động cơ không chỉ gây nóng chảy vỏ nhựa mà còn làm sụt áp mạnh trên đường dây khiến mạch điều khiển reset bất thường!
 
-### Khung giải thích: Cầm tay tính sụt áp dây nguồn 24 AWG vs. 18 AWG và bán kính uốn bó dây (nên đọc chậm)
+### Giải thích: Cầm tay tính sụt áp dây nguồn 24 AWG vs. 18 AWG và bán kính uốn bó dây
 
 **Phần A — So sánh sụt áp trên dây nguồn tổng dài $$0{,}5\text{ m}$$ (tổng khứ hồi dây dương + dây mass $$L = 1{,}0\text{ m}$$) khi robot kéo dòng $$I = 3{,}0\text{ A}$$:**
 - **Dùng dây mảnh 24 AWG** (điện trở $$r \approx 0{,}084\,\Omega/\text{m}$$):

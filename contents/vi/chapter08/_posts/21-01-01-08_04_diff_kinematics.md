@@ -15,7 +15,7 @@ Thời lượng ước tính: **~75 phút**.
 
 Một robot hai bánh không hề hiểu "rẽ trái với bán kính 0,5 m" là gì — hai động cơ DC bên dưới chỉ biết quay ở vận tốc bao nhiêu vòng/phút. Cầu nối toán học biến ý định chuyển động của thân xe $$(v, \omega)$$ thành lệnh cho từng bánh xe $$(v_L, v_R)$$, và ngược lại biến số xung encoder thành vị trí $$(x, y, \theta)$$ trên sàn, chính là **động học dẫn động vi sai (differential-drive kinematics)**.
 
-## Bản đồ kiến thức nền: Ba trụ cột của Động học Robot Vi sai
+## Kiến thức cần nhớ: Ba trụ cột của Động học Robot Vi sai
 
 1. **Hệ tọa độ thân robot chuẩn REP-103**:
    Trục $$+x$$ hướng về mũi xe, $$+y$$ sang trái, $$+z$$ hướng lên trên; quy tắc bàn tay phải cho $$\omega > 0$$ là quay ngược chiều kim đồng hồ (rẽ trái, tức bánh phải chạy nhanh hơn bánh trái).
@@ -208,7 +208,7 @@ Kết quả in ra phải xấp xỉ `1.0 0.5 1.5708`. Nếu giá trị $y$ bị 
 
 Hàm trên chính là phần lõi tạo nên thông điệp `nav_msgs/Odometry` sau này: $x, y$ và góc yaw (chuyển sang quaternion theo Bài 08-00) điền vào trường tư thế, còn $\Delta s / \Delta t$ và $\Delta\psi / \Delta t$ điền vào trường vận tốc — tuyệt đối không ghi trực tiếp số xung thô vào `linear.x`.
 
-### Khung giải thích (nên đọc chậm): Tính tay quỹ đạo Odometry sau 2 bước thời gian $$\Delta t = 0{,}5\text{ s}$$
+### Giải thích: Tính tay quỹ đạo Odometry sau 2 bước thời gian $$\Delta t = 0{,}5\text{ s}$$
 
 Giả sử robot có khổ vết $$L = 0{,}20\text{ m}$$, xuất phát tại gốc $$(x_0, y_0, \theta_0) = (0, 0, 0)$$. Trong mỗi nhịp $$\Delta t = 0{,}5\text{ s}$$, bộ mã hóa đo được vận tốc vành bánh $$v_L = 0{,}20\text{ m/s}$$ và $$v_R = 0{,}30\text{ m/s}$$:
 

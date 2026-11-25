@@ -25,7 +25,7 @@ By the end of this lesson you can choose I2C, SPI, or UART for a sensor from its
 
 You can use a multimeter for continuity and DC voltage (Chapter 01), you know which pins on your ESP32 or Pico are 3.3 V GPIO (Chapter 02), and you can blink an LED from firmware (Chapter 03). You do not need ROS installed for this lesson.
 
-## Background Knowledge Map: Synchronous vs. Asynchronous Buses, Open-Drain Pull-Ups, and Bus Bandwidth
+## Key ideas: Synchronous vs. Asynchronous Buses, Open-Drain Pull-Ups, and Bus Bandwidth
 
 Three digital-communications pillars govern sensor integration in robotics:
 
@@ -120,7 +120,7 @@ One module: a single stable address (`0x68` for a typical GY-521 with AD0 ground
 | Works at 100 kHz, fails at 400 kHz | Long wires or missing pull-ups |
 | Library says “device not found” but scan works | Library uses a different address or different pins |
 
-## Deep-Dive Explanation (Read Slowly): Computing I2C Bus Read Time and Pull-Up RC Rise Time
+## Explanation: Computing I2C Bus Read Time and Pull-Up RC Rise Time
 
 Can your 100 Hz control loop read a 14-byte IMU burst over I2C without eating half your CPU budget? Calculate the exact bus time in four steps:
 

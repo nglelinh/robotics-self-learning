@@ -15,7 +15,7 @@ Trước khi làm theo bất kỳ sơ đồ đấu nối nào trên mạng, bạ
 
 Nếu bạn từng mua bộ kit xe robot sinh viên và thấy trên mạch có một con chip to đùng gắn miếng tản nhiệt nhôm khổng lồ màu đen mang tên **L298N**, hẳn bạn từng tự hỏi: *tại sao cùng kéo 2 động cơ bánh xe nhỏ xíu mà mạch L298N lại to nặng và nóng ran, còn mạch TB6612FNG hay DRV8833 lại nhỏ bằng đầu ngón tay cái và mát rượi?* Câu trả lời nằm ngay ở công nghệ bán dẫn bên trong cầu H: thế hệ transistor **BJT Darlington** từ thập niên 1980 so với **MOSFET** hiện đại — một khác biệt nhỏ trong datasheet nhưng quyết định trực tiếp việc xe bạn chạy được 20 phút hay 1 giờ trên cùng một cục pin!
 
-## Bản đồ kiến thức nền: So sánh công nghệ bán dẫn trong Driver động cơ
+## Kiến thức cần nhớ: So sánh công nghệ bán dẫn trong Driver động cơ
 
 ### 1. BJT Darlington (L298N) — sụt áp cố định lớn và tổn hao nhiệt tuyến tính
 Mạch L298N dùng các cặp transistor lưỡng cực (BJT) mắc Darlington. Nhược điểm cố hữu của BJT là dù dòng nhỏ hay lớn, mỗi cầu H luôn bị **sụt áp bão hòa $$V_{\text{CE(sat)}} \approx 1{,}8\text{–}3{,}2\text{ V}$$**. Điện áp sụt này không biến mất mà biến thành nhiệt tỏa ra trên miếng nhôm tản nhiệt theo $$P_{\text{tổn hao}} = V_{\text{drop}} \cdot I$$, đồng thời "ăn mất" phần lớn điện áp pin nếu bạn dùng pin 2S (7,4 V) hoặc pin AA (6 V).
@@ -26,7 +26,7 @@ Các driver thế hệ mới dùng công tắc **MOSFET** hoạt động như m�
 ### 3. Mức logic điều khiển (3,3 V vs. 5 V) và các chân bảo vệ
 Khi chọn driver cho ESP32/Raspberry Pi (logic 3,3 V) hay Arduino (5 V), cần kiểm tra 4 thông số vàng trên datasheet: dải điện áp động cơ ($$V_M$$), dòng liên tục/đỉnh ($$I_{\text{rms}} / I_{\text{peak}}$$), ngưỡng logic đầu vào ($$V_{\text{IH}}$$), và tính năng bảo vệ quá nhiệt/quá dòng (như chân `STBY` trên TB6612 hoặc giới hạn dòng `AISEN/BISEN` trên DRV8833).
 
-### Khung giải thích: Cầm tay so sánh sụt áp và nhiệt tỏa ra giữa L298N và TB6612FNG trên pin LiPo 2S (nên đọc chậm)
+### Giải thích: Cầm tay so sánh sụt áp và nhiệt tỏa ra giữa L298N và TB6612FNG trên pin LiPo 2S
 
 Giả sử robot dùng pin LiPo 2S (**$$V_{\text{bat}} = 7{,}4\text{ V}$$**) kéo **2 động cơ**, mỗi động cơ ăn dòng liên tục **$$I = 1{,}0\text{ A}$$** (tổng công suất cấp từ pin $$P_{\text{pin}} = 7{,}4 \times 2{,}0 = 14{,}8\text{ W}$$):
 

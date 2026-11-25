@@ -23,13 +23,13 @@ Từ bài [nhịp tim chương 02]({% multilang_post_url contents/chapter02/02_0
 
 Nghe tưởng chừng quá đơn giản: nối một chiếc nút nhấn vào chân GPIO rồi đọc `digitalRead()` xem là `0` hay `1`! Thế nhưng ngay lần đầu thử trên breadboard, rất nhiều người sửng sốt thấy màn hình Serial tự động nhảy `0, 1, 1, 0, 1` điên cuồng dù ngón tay **chưa hề chạm vào nút nhấn**! Hiện tượng ma quái đó gọi là **chân thả nổi (floating input)** — và cách khắc phục nó chỉ cần đúng một điện trở kéo lên (`INPUT_PULLUP`) và tư duy *logic tích cực mức thấp (active-low)*.
 
-## Bản đồ kiến thức nền: Trạng thái Điện của Chân GPIO (Push-Pull, Floating và Pull-Up)
+## Kiến thức cần nhớ: Trạng thái Điện của Chân GPIO (Push-Pull, Floating và Pull-Up)
 
 1. **Chân Thả nổi (Floating Input):** Một chân GPIO ở chế độ `INPUT` có trở kháng đầu vào cực lớn (~hàng chục mega-ohm); khi nút nhấn nhả ra, sợi dây cắm hoạt động y hệt một chiếc **ăng-ten** thu nhiễu điện từ 50 Hz từ lưới điện phòng học, làm điện áp dao động lung tung giữa 0 V và 3,3 V!
 2. **Điện trở Kéo lên Nội bộ (`INPUT_PULLUP`) & Logic Active-Low:** Kéo chân GPIO lên 3,3 V qua một điện trở nội bộ ($$R_{\text{pull}} \approx 45\text{ k}\Omega$$ trên ESP32, ~$$50\text{ k}\Omega$$ trên Pico) và nối nút nhấn xuống `GND`. Khi **nhả nút**, chân ổn định ở `HIGH (1)`; khi **nhấn nút**, chân nối thẳng xuống `GND` đọc `LOW (0)` (*active-low*) — loại bỏ hoàn toàn nhiễu thả nổi mà không cần thêm điện trở ngoài!
 3. **Ngõ ra Đẩy–Kéo (Push-Pull) & Ranh giới Dòng Cấp/Hút (Source/Sink):** Chân `OUTPUT` dùng cặp MOSFET đẩy lên 3,3 V (`HIGH`) hoặc kéo xuống 0 V (`LOW`); tổng dòng qua tất cả các chân GPIO cùng lúc không được vượt quá giới hạn của cả chip.
 
-### Ví dụ cầm tay chỉ việc: Tính dòng rò qua điện trở kéo lên nội bộ (`INPUT_PULLUP`)
+### Ví dụ làm từng bước: Tính dòng rò qua điện trở kéo lên nội bộ (`INPUT_PULLUP`)
 
 Giả sử bạn dùng chân GPIO 3,3 V của ESP32 với điện trở kéo lên nội bộ $$R_{\text{pull}} = 45\text{ k}\Omega$$ nối tới một nút nhấn khẩn cấp (đầu kia nối `GND`):
 - **Khi nhả nút:** mạch hở, dòng tiêu thụ $$I = \mathbf{0\ \mu\text{A}}$$, điện áp tại chân GPIO là $$3.3\text{ V}$$ (`HIGH`).
@@ -40,7 +40,7 @@ Giả sử bạn dùng chân GPIO 3,3 V của ESP32 với điện trở kéo lê
   công suất tiêu tán chỉ $$3.3 \times 73.3\ \mu\text{A} \approx \mathbf{0.24\text{ mW}}$$ — vừa chống nhiễu tuyệt đối, vừa gần như không tốn pin!
 - **Bẫy sai lầm phổ biến:** nếu bạn nối nút nhấn trực tiếp giữa `3V3` và `GND` mà quên đặt qua điện trở, bấm nút là gây **ngắn mạch trực tiếp** làm sập nguồn toàn bộ bo mạch!
 
-### Khung giải thích: 4 mẫu thiết kế GPIO sạch cho firmware robot (nên đọc chậm)
+### Giải thích: 4 mẫu thiết kế GPIO sạch cho firmware robot
 
 1. **Bước 1 — Luôn dùng `INPUT_PULLUP` cho nút nhấn và công tắc hành trình:** Vừa gọn dây (chỉ cần kéo dây nút nhấn về `GND`, không cần kéo đường nguồn `3V3` ra vỏ khung kim loại dễ chập), vừa chống nhiễu thả nổi triệt để.
 2. **Bước 2 — Đọc trạng thái bằng hàm bọc có tên rõ nghĩa:** Viết `bool is_button_pressed() { return digitalRead(PIN_BTN) == LOW; }` để không bao giờ bị loạn đầu giữa mức điện `LOW` và ý nghĩa logic "đang nhấn".

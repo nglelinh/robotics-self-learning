@@ -15,7 +15,7 @@ Thời lượng ước tính: **~60 phút**. Đây là bài tổng kết nghiệ
 
 Trong kỹ thuật robot, sự khác biệt giữa "chạy thử trên bàn thấy quay" và "nền tảng sẵn sàng cho ROS 2" nằm ở **kiểm thử có định lượng**. Trước khi bàn giao khung xe cấp thấp lên tầng phần mềm ROS 2 ở Chương 09, bạn cần một danh sách kiểm tra nghiêm ngặt xác nhận từng mắt xích: giao tiếp serial, encoder, PID, động học vi sai và cơ chế watchdog.
 
-## Bản đồ kiến thức nền: Ba trụ cột nghiệm thu Nền tảng Cấp thấp (Chương 08)
+## Kiến thức cần nhớ: Ba trụ cột nghiệm thu Nền tảng Cấp thấp (Chương 08)
 
 1. **Hợp đồng giao tiếp & An toàn phần cứng**:
    Mọi gói tin vận tốc giữa MCU và máy tính chủ phải có định dạng rõ ràng, kiểm tra checksum/biên giá trị và kích hoạt Watchdog dừng động cơ khi mất tín hiệu.
@@ -58,7 +58,7 @@ Quaternion: z = 1 cho góc vuông, cho dễ nhớ.
 
 Cả ba dòng trên đều trượt: “quay ổn” không phải bằng chứng đo đạc; nhập $16$ vào công thức đơn vị mét tương đương khổ vết $16$ m; và $z = 1$ (với $w = 0$) là góc quay $180^\circ$ chứ không phải $90^\circ$.
 
-### Khung giải thích (nên đọc chậm): Bài kiểm tra hiệu chuẩn $$r$$ và $$L$$ bằng đúng 2 phép đo thước dây
+### Giải thích: Bài kiểm tra hiệu chuẩn $$r$$ và $$L$$ bằng đúng 2 phép đo thước dây
 
 1. **Hiệu chuẩn bán kính bánh $$r$$ (chạy thẳng 1,00 m):** Ra lệnh xe chạy thẳng đúng `1,000 m` theo odometry, rồi dùng thước đo quãng đường thực tế trên sàn. Nếu xe thực đi được `0,960 m` (hụt 4%), ta chỉnh bán kính hiệu dụng:
    $$r_{\text{mới}} = r_{\text{cũ}} \times \frac{0{,}960}{1{,}000} = 0{,}96 \cdot r_{\text{cũ}}.$$

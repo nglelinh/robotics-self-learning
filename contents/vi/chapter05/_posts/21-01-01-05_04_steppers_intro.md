@@ -15,7 +15,7 @@ draft: false
 
 Nếu bạn từng đứng ngắm một chiếc máy in 3D vẽ từng đường nhựa mảnh như sợi tóc lặp đi lặp lại chính xác đến phần trăm milimet mà *không hề có một cái encoder nào trên trục động cơ*, bạn đã chứng kiến sức mạnh của **động cơ bước (stepper motor)**. Thay vì quay liên tục như động cơ DC, động cơ bước chia một vòng quay thành hàng trăm nấc từ trường rời rạc; mỗi khi bộ điều khiển gửi một xung `STEP`, roto nhảy chính xác thêm đúng một bước góc — biến chuyển động cơ khí thành một bài toán đếm xung số hóa thuần túy!
 
-## Bản đồ kiến thức nền: Từ trường bước rời rạc, Vi bước (Microstepping) và Đường cong mô-men
+## Kiến thức cần nhớ: Từ trường bước rời rạc, Vi bước (Microstepping) và Đường cong mô-men
 
 ### 1. Cấu trúc cực từ và bước góc cơ bản (Full-Step)
 Động cơ bước lưỡng cực phổ biến nhất (NEMA 17) có góc bước cơ bản **$$1{,}8^\circ$$**, tương đương **$$360^\circ / 1{,}8^\circ = 200\text{ bước/vòng}$$**. Nhờ điều khiển hở vòng (open-loop) theo xung `STEP` và chân hướng `DIR`, ta biết chính xác vị trí góc mà không cần cảm biến phản hồi — với điều kiện tuyệt đối là tải không bao giờ vượt quá mô-men giữ làm **trượt bước (missed steps)**.
@@ -26,7 +26,7 @@ Chạy bước đủ (full-step) gây rung và cộng hưởng cơ khí mạnh. 
 ### 3. Giới hạn tần số xung và sụt giảm mô-men ở tốc độ cao
 Khi động cơ bước quay nhanh, sức phản điện động và độ tự cảm cuộn dây $$L$$ cản trở dòng điện tăng kịp trong thời gian một bước quá ngắn, khiến mô-men giảm mạnh ở RPM cao. Đó là lý do mọi máy CNC/máy in 3D đều cần **hồ sơ tăng tốc hình thang hoặc đường cong chữ S (acceleration ramp)** thay vì nhảy vọt ngay từ 0 lên tốc độ tối đa.
 
-### Khung giải thích: Cầm tay tính tần số xung vi bước 1/16 và độ sụt mô-men gia tăng (nên đọc chậm)
+### Giải thích: Cầm tay tính tần số xung vi bước 1/16 và độ sụt mô-men gia tăng
 
 Xét động cơ NEMA 17 chuẩn (**$$1{,}8^\circ/\text{bước}$$**, tức **200 bước/vòng**) chạy ở chế độ vi bước **1/16** với mục tiêu quay đều ở tốc độ **$$120\text{ RPM}$$**:
 
